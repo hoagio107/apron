@@ -1,0 +1,14 @@
+{
+  "name": "@apron/eslint-config",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-react": "^7.34.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-sonarjs": "^0.25.1",
+    "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "@typescript-eslint/parser": "^7.8.0",
+    "eslint-plugin-local-rules": "^2.0.1"
+  }
+}

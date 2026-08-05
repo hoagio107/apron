@@ -1,0 +1,18 @@
+Tôi đang muốn phát triển một dự án "cookbook" dành cho cá nhân và gia đình.
+
+Xác định cấu trúc thư mục để phát triển dự án theo tauri + react cho desktop, capacitor + react cho android với UI dùng chung component nhưng khác layout.
+
+Kiến trúc **BYOS (Bring Your Own Storage)** thiết kế theo tư duy **Local-First**, loại bỏ hoàn toàn sự phụ thuộc vào máy chủ trung gian (như Firebase hay Backend riêng). Toàn bộ quyền sở hữu dữ liệu thuộc về người dùng.
+
+1. **Lưu trữ dạng File-System Native:**
+   - Dữ liệu (được lưu trực tiếp thành các file vật lý (JSON, PNG, v.v.) trên ổ cứng.
+   - Ứng dụng Desktop (qua Tauri Rust Backend) tiến hành đọc/ghi trực tiếp vào ổ cứng với tốc độ tức thời mà không phải chờ đợi network (độ trễ bằng 0).
+
+2. **Cơ chế Đồng bộ (Sync):**
+   - Ứng dụng **không tự đồng bộ**. Thay vào đó, ứng dụng giao phó hoàn toàn việc này cho các "sync client" ở tầng Hệ điều hành (OS-level) như **Google Drive for Desktop**, **OneDrive**, **Dropbox**, hoặc **Syncthing**.
+   - Người dùng chỉ cần trỏ thư mục data của app vào bên trong thư mục quản lý của Google Drive.
+   - Mỗi khi ứng dụng ghi file xuống đĩa, Google Drive sẽ tự bắt sự kiện file thay đổi (file watcher) và âm thầm đẩy (push) lên cloud.
+
+Ui sử dụng HeroUI.
+
+Hãy lên kế hoạch cài đặt dependencies + một số công cụ cần thiết ban đầu + cấu trúc thư mục. Copy-paste eslint rules từ dự án NotoPlus sang đây rồi sửa lại những điểm chưa phù hợp với HeroUI.

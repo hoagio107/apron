@@ -1,0 +1,22 @@
+{
+  "placeholderImages": [
+    {
+      "id": "recipe-default",
+      "description": "Hình ảnh mặc định cho công thức nấu ăn",
+      "imageUrl": "https://picsum.photos/seed/recipe1/600/400",
+      "imageHint": "food cooking"
+    },
+    {
+      "id": "course-default",
+      "description": "Hình ảnh mặc định cho khóa học",
+      "imageUrl": "https://picsum.photos/seed/course1/800/600",
+      "imageHint": "culinary school"
+    },
+    {
+      "id": "menu-default",
+      "description": "Hình ảnh mặc định cho nhóm thực đơn",
+      "imageUrl": "https://picsum.photos/seed/menu1/800/500",
+      "imageHint": "restaurant menu"
+    }
+  ]
+}

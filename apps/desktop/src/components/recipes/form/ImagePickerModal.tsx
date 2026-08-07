@@ -251,7 +251,7 @@ export function ImagePickerModal({ isOpen, onOpenChange, onSelectMedia }: ImageP
                                 )}
                               </div>
                               {u.status === 'processing' && (
-                                <Progress size="sm" value={u.progress} color="primary" className="mt-2" />
+                                <Progress aria-label="Tiến trình tải lên" size="sm" value={u.progress} color="primary" className="mt-2" />
                               )}
                             </div>
                             

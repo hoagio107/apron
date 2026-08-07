@@ -74,7 +74,7 @@ export function StepsSection() {
 function StepGroup({ sectionIndex, onRemove, onOpenImageModal }: { sectionIndex: number, onRemove: () => void, onOpenImageModal: (stepIndex: number) => void }) {
   const { control, getValues, setValue } = useFormContext<FormValues>();
   
-  const { fields: steps, append, remove } = useFieldArray({
+  const { fields: steps, append, remove, move } = useFieldArray({
     control,
     name: `stepSections.${sectionIndex}.steps`
   });
@@ -88,6 +88,7 @@ function StepGroup({ sectionIndex, onRemove, onOpenImageModal }: { sectionIndex:
           render={({ field, fieldState }) => (
             <Input
               {...field}
+              value={field.value || ''}
               variant="underlined"
               placeholder="Tên giai đoạn (VD: Sơ chế, Chế biến...)"
               className="max-w-xs"
@@ -126,6 +127,7 @@ function StepGroup({ sectionIndex, onRemove, onOpenImageModal }: { sectionIndex:
                 render={({ field, fieldState }) => (
                   <Textarea
                     {...field}
+                    value={field.value || ''}
                     placeholder={`Bước ${index + 1}...`}
                     variant="flat"
                     minRows={2}

@@ -1,11 +1,41 @@
+import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { getStorageProvider } from '@apron/core';
 import { Button } from '@apron/ui';
 import { MainSidebar } from './components/layout/MainSidebar';
 import { Titlebar } from './components/layout/Titlebar';
 import { NewRecipePage } from './pages/recipes/NewRecipePage';
+import { RecipeListPage } from './pages/recipes/RecipeListPage';
+import { RecipeDetailPage } from './pages/recipes/RecipeDetailPage';
 import { DesignSystemPage } from './pages/DesignSystemPage';
+import { OnboardingScreen } from './components/onboarding/OnboardingScreen';
 
 function App() {
+  const [isStorageReady, setIsStorageReady] = useState(false);
+
+  useEffect(() => {
+    const initStorage = async () => {
+      try {
+        const storage = getStorageProvider();
+        const success = await storage.initialize();
+        if (success) {
+          setIsStorageReady(true);
+        }
+      } catch (e) {
+        console.error('Failed to init storage', e);
+      }
+    };
+    initStorage();
+  }, []);
+
+  const handleOnboardingComplete = () => {
+    setIsStorageReady(true);
+  };
+
+  if (!isStorageReady) {
+    return <OnboardingScreen onComplete={handleOnboardingComplete} />;
+  }
+
   return (
     <Router>
       <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
@@ -15,7 +45,7 @@ function App() {
           <MainSidebar />
           
           {/* Main Content Area */}
-          <main className="flex-1 flex flex-col md:pl-64 overflow-hidden bg-background">
+          <main className="flex-1 flex flex-col md:pl-20 overflow-hidden bg-background">
             <div className="flex-1 overflow-y-auto p-8 m-2 bg-default-50 rounded-2xl border border-default-200 shadow-sm">
             <Routes>
               <Route path="/" element={
@@ -28,7 +58,9 @@ function App() {
                 </div>
               } />
               
+              <Route path="/recipes" element={<RecipeListPage />} />
               <Route path="/recipes/new" element={<NewRecipePage />} />
+              <Route path="/recipes/:id" element={<RecipeDetailPage />} />
               <Route path="/design-system" element={<DesignSystemPage />} />
               
               <Route path="*" element={

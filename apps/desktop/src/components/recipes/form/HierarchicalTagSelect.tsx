@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button, Popover, PopoverTrigger, PopoverContent, Checkbox, Chip, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@apron/ui';
 import { FolderTree, ChevronRight, ChevronDown, Plus, Trash2, Edit2, MoreVertical, Search } from 'lucide-react';
 import { DEFAULT_TAGS, type Tag } from '@apron/core';
@@ -8,14 +8,26 @@ interface HierarchicalTagSelectProps {
   selectedIds: string[];
   onChange: (ids: string[]) => void;
   error?: string;
+  dynamicTags?: Tag[];
 }
 
-export function HierarchicalTagSelect({ selectedIds, onChange, error }: HierarchicalTagSelectProps) {
+export function HierarchicalTagSelect({ selectedIds, onChange, error, dynamicTags }: HierarchicalTagSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   
   // Local state for all tags (mocking a database)
   const [allTags, setAllTags] = useState<Tag[]>(DEFAULT_TAGS);
+
+  useEffect(() => {
+    if (dynamicTags && dynamicTags.length > 0) {
+      setAllTags(prev => {
+        const existingIds = new Set(prev.map(t => t.id));
+        const newItems = dynamicTags.filter(t => !existingIds.has(t.id));
+        if (newItems.length === 0) return prev;
+        return [...prev, ...newItems];
+      });
+    }
+  }, [dynamicTags]);
   
   // State for creating a new tag
   const [isAdding, setIsAdding] = useState(false);
@@ -29,9 +41,10 @@ export function HierarchicalTagSelect({ selectedIds, onChange, error }: Hierarch
   const [searchQuery, setSearchQuery] = useState('');
 
   // Build a tree from flat allTags
+  type TreeNode = Tag & { children: TreeNode[] };
   const categoryTree = useMemo(() => {
-    const rootNodes: (Tag & { children: Tag[] })[] = [];
-    const map = new Map<string, Tag & { children: Tag[] }>();
+    const rootNodes: TreeNode[] = [];
+    const map = new Map<string, TreeNode>();
     
     allTags.forEach(cat => {
       map.set(cat.id, { ...cat, children: [] });
@@ -59,14 +72,14 @@ export function HierarchicalTagSelect({ selectedIds, onChange, error }: Hierarch
     
     const query = searchQuery.toLowerCase();
     
-    const filterNode = (node: Tag & { children: Tag[] }): any => {
+    const filterNode = (node: TreeNode): TreeNode | null => {
       const matches = node.name.toLowerCase().includes(query);
       if (matches) {
         // If this node matches, we keep it and all its children
         return node;
       }
       
-      const filteredChildren = node.children.map(filterNode).filter(Boolean);
+      const filteredChildren = node.children.map(filterNode).filter(Boolean) as TreeNode[];
       if (filteredChildren.length > 0) {
         return { ...node, children: filteredChildren };
       }
@@ -74,7 +87,7 @@ export function HierarchicalTagSelect({ selectedIds, onChange, error }: Hierarch
       return null;
     };
     
-    return rootNodes.map(filterNode).filter(Boolean);
+    return rootNodes.map(filterNode).filter(Boolean) as TreeNode[];
   }, [allTags, searchQuery]);
 
   const toggleExpand = (id: string) => {
@@ -102,6 +115,7 @@ export function HierarchicalTagSelect({ selectedIds, onChange, error }: Hierarch
     const newTag: Tag = {
       id: newId,
       name: newTagName.trim(),
+      slug: newTagName.trim().toLowerCase().replace(/\s+/g, '-'),
       parent_id: newTagParent || undefined
     };
     setAllTags(prev => [...prev, newTag]);
@@ -129,9 +143,10 @@ export function HierarchicalTagSelect({ selectedIds, onChange, error }: Hierarch
 
   const handleQuickAdd = (name: string) => {
     const newId = `tag-${Date.now()}`;
-    const newTag: RecipeCategory = {
+    const newTag: Tag = {
       id: newId,
       name: name,
+      slug: name.toLowerCase().replace(/\s+/g, '-'),
       parent_id: undefined
     };
     setAllTags(prev => [...prev, newTag]);
@@ -143,7 +158,7 @@ export function HierarchicalTagSelect({ selectedIds, onChange, error }: Hierarch
     return allTags.some(t => t.name.toLowerCase() === searchQuery.trim().toLowerCase());
   }, [allTags, searchQuery]);
 
-  const renderNode = (node: Tag & { children: Tag[] }, depth: number = 0) => {
+  const renderNode = (node: TreeNode, depth: number = 0) => {
     const hasChildren = node.children.length > 0;
     // Always expand if there's a search query, otherwise respect expandedIds
     const isExpanded = !!searchQuery.trim() || expandedIds.has(node.id);

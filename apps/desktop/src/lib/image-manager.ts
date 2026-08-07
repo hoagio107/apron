@@ -4,11 +4,20 @@ import { convertFileSrc } from '@tauri-apps/api/core';
 import { convertUrlToWebPDataUrl } from './image-utils';
 
 export class ImageManager {
+  static async getBaseDir() {
+    // Ưu tiên thư mục BYOS của người dùng
+    const byosDir = localStorage.getItem('byos_base_dir');
+    if (byosDir) return byosDir;
+    
+    // Fallback về appDataDir
+    return await appDataDir();
+  }
+
   static async initDirs() {
     try {
-      const appData = await appDataDir();
-      const tempDir = await join(appData, 'temp');
-      const imagesDir = await join(appData, 'images');
+      const baseDir = await this.getBaseDir();
+      const tempDir = await join(baseDir, 'temp');
+      const imagesDir = await join(baseDir, 'images');
 
       if (!(await exists(tempDir))) await mkdir(tempDir, { recursive: true });
       if (!(await exists(imagesDir))) await mkdir(imagesDir, { recursive: true });
@@ -21,8 +30,8 @@ export class ImageManager {
     await this.initDirs();
     const ext = file.name.split('.').pop() || 'tmp';
     const filename = `${crypto.randomUUID()}.${ext}`;
-    const appData = await appDataDir();
-    const filePath = await join(appData, 'temp', filename);
+    const baseDir = await this.getBaseDir();
+    const filePath = await join(baseDir, 'temp', filename);
 
     const buffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(buffer);
@@ -40,16 +49,29 @@ export class ImageManager {
     }
     
     // Check if it's already in the images directory (not temp)
-    const appData = await appDataDir();
-    const imagesDir = await join(appData, 'images');
+    const baseDir = await this.getBaseDir();
+    const imagesDir = await join(baseDir, 'images');
     if (tempPath.includes(imagesDir)) {
       return tempPath;
     }
 
     try {
       await this.initDirs();
+      
+      // Kiểm tra nếu file temp không tồn tại thì skip
+      if (!(await exists(tempPath))) {
+        return tempPath;
+      }
+      
       const bytes = await readFile(tempPath);
-      const blob = new Blob([bytes]);
+      
+      let mimeType = 'image/jpeg';
+      const ext = tempPath.split('.').pop()?.toLowerCase();
+      if (ext === 'png') mimeType = 'image/png';
+      else if (ext === 'webp') mimeType = 'image/webp';
+      else if (ext === 'gif') mimeType = 'image/gif';
+      
+      const blob = new Blob([bytes], { type: mimeType });
       const url = URL.createObjectURL(blob);
 
       const webpDataUrl = await convertUrlToWebPDataUrl(url);
@@ -58,7 +80,7 @@ export class ImageManager {
       const webpBytes = new Uint8Array(webpBuffer);
 
       const filename = `${crypto.randomUUID()}.webp`;
-      const outPath = await join(appData, 'images', filename);
+      const outPath = await join(baseDir, 'images', filename);
       await writeFile(outPath, webpBytes);
 
       try {
@@ -91,7 +113,7 @@ export class ImageManager {
 
   static getAssetUrl(path: string): string {
     if (!path) return '';
-    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:') || path.startsWith('blob:')) {
       return path;
     }
     return convertFileSrc(path);

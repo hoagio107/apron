@@ -31,6 +31,14 @@ export interface Tag {
   description?: string;
 }
 
+export interface CookingHistory {
+  id: string;
+  date: string;
+  rating: number;
+  notes?: string;
+  recipe_snapshot?: Omit<Recipe, 'cooking_history'>;
+}
+
 export interface Recipe {
   id: string;
   title: string;
@@ -55,7 +63,9 @@ export interface Recipe {
   tags?: string[];
   notes?: string;
   video_url?: string;
+  images?: string[];
   related_recipes?: RelatedRecipeRef[];
+  cooking_history?: CookingHistory[];
   created_at?: string;
   updated_at?: string;
   is_favorite?: boolean;
@@ -279,6 +289,9 @@ export const DEFAULT_TAGS: Tag[] = [
   { id: 'diet-keto', name: 'Keto / Low-carb', slug: 'keto', parent_id: 'root-diet' },
   { id: 'diet-vegan', name: 'Thuần chay', slug: 'thuan-chay', parent_id: 'root-diet' },
   { id: 'diet-weight', name: 'Giảm cân', slug: 'giam-can', parent_id: 'root-diet' },
+
+  // Nhóm Thời gian & Độ khó
+  { id: 'root-time-difficulty', name: 'Thời gian & Độ khó', slug: 'thoi-gian-do-kho', parent_id: null },
 ];
 
 export interface MenuGroup {

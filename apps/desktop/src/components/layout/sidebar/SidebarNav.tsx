@@ -38,11 +38,13 @@ export function SidebarNav({ items }: SidebarNavProps) {
             >
               <item.icon 
                 className={cn(
-                  "h-5 w-5 flex-shrink-0 group-hover:scale-110 transition-transform", 
-                  isActive ? "text-primary" : "text-gray-400"
+                  "h-5 w-5 flex-shrink-0 transition-transform", 
+                  isActive ? "text-primary" : "text-gray-400 group-hover:scale-110 group-hover/sidebar:scale-100"
                 )} 
               />
-              <span className="ml-3">{item.name}</span>
+              <span className="ml-3 whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 pointer-events-none group-hover/sidebar:pointer-events-auto">
+                {item.name}
+              </span>
             </Link>
           </li>
         );

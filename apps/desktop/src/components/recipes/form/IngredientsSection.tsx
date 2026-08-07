@@ -24,27 +24,27 @@ export function IngredientsSection() {
             name="servings"
             control={control}
             render={({ field, fieldState }) => (
-              <Input
-                {...field}
-                type="number"
-                variant="flat"
-                size="sm"
-                className="w-28"
-                classNames={{
-                  inputWrapper: "bg-transparent data-[hover=true]:bg-transparent data-[focus=true]:bg-transparent shadow-none !pr-0",
-                  input: "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                }}
-                startContent={
-                  <div className="flex items-center gap-1 text-xs text-default-500 mr-2 whitespace-nowrap">
-                    <Users className="w-4 h-4" /> Khẩu phần:
-                  </div>
-                }
-                min={1}
-                value={field.value?.toString() || ''}
-                onChange={(e: any) => field.onChange(parseInt(e.target.value) || 1)}
-                isInvalid={!!fieldState.error}
-                errorMessage={fieldState.error?.message}
-              />
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 text-sm text-default-500 whitespace-nowrap font-medium">
+                  <Users className="w-4 h-4" /> Khẩu phần:
+                </div>
+                <Input
+                  {...field}
+                  type="number"
+                  variant="flat"
+                  size="sm"
+                  className="w-10"
+                  classNames={{
+                    input: "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-center font-bold"
+                  }}
+                  min={0.1}
+                  step={0.1}
+                  value={field.value?.toString() || ''}
+                  onChange={(e: any) => field.onChange(e.target.value)}
+                  isInvalid={!!fieldState.error}
+                  errorMessage={fieldState.error?.message}
+                />
+              </div>
             )}
           />
         }
@@ -82,7 +82,7 @@ export function IngredientsSection() {
 function IngredientGroup({ sectionIndex, onRemove }: { sectionIndex: number, onRemove: () => void }) {
   const { control } = useFormContext<FormValues>();
   
-  const { fields: ingredients, append, remove } = useFieldArray({
+  const { fields: ingredients, append, remove, move } = useFieldArray({
     control,
     name: `ingredientSections.${sectionIndex}.ingredients`
   });
@@ -98,6 +98,7 @@ function IngredientGroup({ sectionIndex, onRemove }: { sectionIndex: number, onR
           render={({ field, fieldState }) => (
             <Input
               {...field}
+              value={field.value || ''}
               variant="underlined"
               placeholder="Tên nhóm nguyên liệu (VD: Phần sốt, Phần bánh...)"
               className="max-w-xs"
@@ -141,6 +142,8 @@ function IngredientGroup({ sectionIndex, onRemove }: { sectionIndex: number, onR
                       inputWrapper: "bg-default-100 hover:bg-default-200 border-none shadow-none"
                     }}
                     isInvalid={!!fieldState.error}
+                    errorMessage={fieldState.error?.message}
+                    value={field.value || ''}
                   />
               )}
             />
@@ -157,6 +160,7 @@ function IngredientGroup({ sectionIndex, onRemove }: { sectionIndex: number, onR
                       inputWrapper: "bg-default-100 hover:bg-default-200 border-none shadow-none"
                     }}
                     isInvalid={!!fieldState.error}
+                    errorMessage={fieldState.error?.message}
                     value={field.value?.toString() || ''}
                   />
               )}
@@ -164,15 +168,18 @@ function IngredientGroup({ sectionIndex, onRemove }: { sectionIndex: number, onR
             <Controller
               name={`ingredientSections.${sectionIndex}.ingredients.${index}.unit`}
               control={control}
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                   <Autocomplete
                     {...field}
+                    aria-label="Chọn đơn vị"
                     onSelectionChange={(val) => field.onChange(val)}
                     selectedKey={field.value}
                     placeholder="Đơn vị"
                     variant="flat"
                     isClearable={false}
                     className="w-48 shrink-0"
+                    isInvalid={!!fieldState.error}
+                    errorMessage={fieldState.error?.message}
                     classNames={{
                       base: "bg-default-100 hover:bg-default-200 border-none shadow-none rounded-medium"
                     }}

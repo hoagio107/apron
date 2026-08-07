@@ -1,5 +1,4 @@
 import { readTextFile, writeTextFile, readDir, mkdir, exists, remove } from '@tauri-apps/plugin-fs';
-import { open } from '@tauri-apps/plugin-dialog';
 import type { StorageProvider, FileInfo } from './types';
 
 // Lưu trữ thư mục gốc tạm thời vào biến hoặc localStorage
@@ -20,20 +19,14 @@ export class TauriStorageProvider implements StorageProvider {
   }
 
   async initialize(): Promise<boolean> {
-    if (this.baseDir) return true;
-    
-    const selected = await open({
-      directory: true,
-      multiple: false,
-      title: 'Chọn thư mục đồng bộ Google Drive / OneDrive của bạn'
-    });
-    
-    if (selected && typeof selected === 'string') {
-      this.baseDir = selected;
-      localStorage.setItem(STORAGE_KEY, selected);
-      return true;
-    }
-    return false;
+    // Chỉ trả về true nếu đã có thư mục
+    return !!this.baseDir;
+  }
+  
+  // Hàm này sẽ được OnboardingScreen gọi
+  async setBaseDir(path: string): Promise<void> {
+    this.baseDir = path;
+    localStorage.setItem(STORAGE_KEY, path);
   }
 
   async readTextFile(path: string): Promise<string> {

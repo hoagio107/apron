@@ -1,24 +1,48 @@
 import { RecipeForm } from '../../components/recipes/form';
-import type { FormValues } from '../../components/recipes/form';
-// Removed unused import
-
-import { MOCK_SAVE_DELAY_MS } from '../../constants';
+import type { Recipe } from '@apron/core';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useRecipeStore } from '../../store/useRecipeStore';
+import { useEffect, useState } from 'react';
 
 export function NewRecipePage() {
-  // Removed unused navigate
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const editId = searchParams.get('edit');
+  const { addRecipe, addBulkRecipes, updateRecipe, recipes } = useRecipeStore();
+  
+  const [editRecipe, setEditRecipe] = useState<Recipe | undefined>();
 
-  const handleSubmit = async (_data: FormValues) => {
-    // TODO: implement local saving logic
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, MOCK_SAVE_DELAY_MS));
-    
-    // navigate('/recipes'); // Navigate to recipe list after saving
+  useEffect(() => {
+    if (editId) {
+      const existing = recipes.find(r => r.id === editId);
+      if (existing) {
+        setEditRecipe(existing);
+      }
+    }
+  }, [editId, recipes]);
+
+  const handleSubmit = async (data: any) => {
+    if (Array.isArray(data)) {
+      await addBulkRecipes(data);
+    } else {
+      if (editId && editRecipe) {
+        await updateRecipe({ ...editRecipe, ...data, id: editId });
+      } else {
+        await addRecipe(data);
+      }
+    }
+
+    navigate('/recipes');
   };
+
+  // Nếu đang edit mà chưa load xong recipe (ví dụ reload trang), có thể render loading
+  if (editId && !editRecipe && recipes.length > 0) {
+    return null; // Hoặc loading spinner
+  }
 
   return (
     <div className="h-full">
-      <RecipeForm onSubmit={handleSubmit} />
+      <RecipeForm initialData={editRecipe} onSubmit={handleSubmit} />
     </div>
   );
 }

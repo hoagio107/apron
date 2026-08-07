@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface PageHeaderProps {
   title: React.ReactNode;
+  description?: React.ReactNode;
   showBackButton?: boolean;
   onBack?: () => void;
   actions?: React.ReactNode;
@@ -13,6 +14,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ 
   title, 
+  description,
   showBackButton = true, 
   onBack, 
   actions,
@@ -29,22 +31,26 @@ export function PageHeader({
   };
 
   return (
-    <div className={`sticky -top-8 -mx-8 px-8 pt-4 pb-4 z-50 flex items-center justify-between bg-default-50 ${className}`}>
-      <div className="flex items-center gap-4">
+    <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${className}`}>
+      <div className="flex items-start sm:items-center gap-4">
         {showBackButton && (
           <Button 
             isIconOnly
-            variant="light" 
+            variant="flat" 
             onPress={handleBack}
             aria-label="Back"
+            className="mt-1 sm:mt-0 shrink-0"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
         )}
-        <h1 className="text-xl font-bold">{title}</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">{title}</h1>
+          {description && <p className="text-default-500 mt-1">{description}</p>}
+        </div>
       </div>
       {actions && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           {actions}
         </div>
       )}

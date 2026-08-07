@@ -1,7 +1,7 @@
 import { Controller, useFormContext } from 'react-hook-form';
 import { useState } from 'react';
 import { Input, Textarea, Select, SelectItem } from '@apron/ui';
-import { Type, AlignLeft, Gauge, Flame, Clock, Timer, Utensils, Globe, ChefHat, Carrot, CalendarDays, Leaf } from 'lucide-react';
+import { Type, AlignLeft, Gauge, Flame, Clock, Timer, Info } from 'lucide-react';
 import type { FormValues } from './schema';
 import { FormField } from '../../shared/form';
 
@@ -98,7 +98,6 @@ export function InfoSection() {
                 aria-label="Độ khó"
                 placeholder="Chọn..."
                 variant="flat"
-                disableSelectorIcon
                 classNames={{ 
                   trigger: "bg-transparent shadow-none border-none min-h-8 h-8 px-0 data-[hover=true]:bg-default-100 transition-colors",
                   value: "text-center font-semibold text-default-700 !text-default-700",
@@ -189,10 +188,10 @@ export function InfoSection() {
         name="notes"
         control={control}
         render={({ field, fieldState }) => (
-          <FormField label="Mô tả món ăn" icon={AlignLeft} error={fieldState.error?.message}>
+          <FormField label="Ghi chú & Mẹo" icon={Info} error={fieldState.error?.message}>
             <Textarea
               {...field}
-              placeholder="Viết vài dòng giới thiệu về món ăn, cảm hứng hoặc câu chuyện đằng sau món ăn..."
+              placeholder="Ghi chú thêm về công thức, mẹo nấu nướng, hoặc lưu ý..."
               variant="flat"
               minRows={4}
               classNames={{

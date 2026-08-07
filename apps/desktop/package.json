@@ -20,8 +20,12 @@
     "@tauri-apps/api": "^2.11.1",
     "@tauri-apps/plugin-dialog": "^2.7.2",
     "@tauri-apps/plugin-fs": "^2.5.1",
+    "@tauri-apps/plugin-http": "^2.5.9",
+    "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
+    "html2canvas": "^1.4.1",
     "i18next": "^26.3.6",
+    "jspdf": "^4.2.1",
     "lucide-react": "^0.370.0",
     "next-themes": "^0.4.6",
     "react": "^19.2.8",
@@ -30,12 +34,14 @@
     "react-i18next": "^17.0.11",
     "react-router-dom": "^7.18.2",
     "tailwind-merge": "^2.6.1",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@heroui/theme": "^2.4.26",
     "@tailwindcss/vite": "^4.3.3",
     "@tauri-apps/cli": "^2.11.4",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",

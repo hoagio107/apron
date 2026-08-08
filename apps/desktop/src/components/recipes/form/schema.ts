@@ -14,6 +14,7 @@ export const recipeSchema = z.object({
   tags: z.array(z.string()).optional(),
   notes: z.string().optional(),
   video_url: z.string().optional(),
+  source: z.string().optional(),
   parent_id: z.string().nullable().optional(),
   related_recipes: z.array(z.object({
     id: z.string(),

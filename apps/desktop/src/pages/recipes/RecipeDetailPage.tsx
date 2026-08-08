@@ -1,12 +1,10 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Checkbox, Select, SelectItem, Input, Modal, ModalContent, ModalBody, useDisclosure, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@apron/ui';
-import { ArrowLeft, Edit, Clock, Target, Star, Flame, Play, Info, ExternalLink, ChevronRight, Share, Check, Send, Search, Image as ImageIcon, Sparkles, Wand2, Plus, Gauge, Timer, Minus, Carrot, ChefHat, Link as LinkIcon, Video, Tag, Bot, X, RefreshCw, Calendar, ShoppingCart, Printer, Download, ImageDown, ChevronLeft } from 'lucide-react';
+import { Button, Modal, ModalContent, ModalBody, useDisclosure, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tabs, Tab } from '@apron/ui';
+import { ArrowLeft, Edit, Clock, Star, Flame, Play, Info, Share, Check, Image as ImageIcon, Plus, Gauge, Timer, Minus, Carrot, ChefHat, Link as LinkIcon, Video, Tag, X, Calendar, ShoppingCart, Printer, Download, ImageDown, ChevronDown, ChevronUp } from 'lucide-react';
 import { useRecipeStore } from '../../store/useRecipeStore';
 import { ImageManager } from '../../lib/image-manager';
 import { DEFAULT_TAGS } from '@apron/core';
-import { askGemini } from '../../lib/geminiChat';
-import { GEMINI_MODELS } from '../../lib/gemini';
 import { exportToPdf, exportToPng } from '../../lib/exportUtils';
 import { CookingModeModal } from '../../components/recipes/CookingModeModal';
 import { CookingRatingModal } from '../../components/recipes/CookingRatingModal';
@@ -29,10 +27,11 @@ export function RecipeDetailPage() {
   const [isCookingModeOpen, setIsCookingModeOpen] = useState(false);
   const [isRatingModeOpen, setIsRatingModeOpen] = useState(false);
   const [snapshotData, setSnapshotData] = useState<{snapshot: any, date: string, rating?: number, notes?: string} | null>(null);
+  const [isRelatedExpanded, setIsRelatedExpanded] = useState(true);
 
   const handleCookingComplete = async (rating: number, notes: string, action: 'done' | 'edit') => {
     if (!recipe) return;
-    const { cooking_history, ...recipeSnapshot } = recipe;
+    const { cooking_history: _cooking_history, ...recipeSnapshot } = recipe;
     
     const newHistory = {
       id: crypto.randomUUID(),
@@ -44,7 +43,7 @@ export function RecipeDetailPage() {
     
     const updatedRecipe = {
       ...recipe,
-      cooking_history: [...(recipe.cooking_history || []), newHistory]
+      cooking_history: [...(recipe.cooking_history || []), newHistory].slice(-10)
     };
     
     await updateRecipe(updatedRecipe);
@@ -131,6 +130,19 @@ export function RecipeDetailPage() {
     return groups;
   }, [recipe?.steps]);
 
+  const variants = useMemo(() => {
+    if (!recipe) return [];
+    if (recipe.parent_id) {
+      const parent = recipes.find(r => r.id === recipe.parent_id);
+      const siblings = recipes.filter(r => r.parent_id === recipe.parent_id);
+      return [parent, ...siblings].filter(Boolean) as typeof recipes;
+    } else {
+      const children = recipes.filter(r => r.parent_id === recipe.id);
+      if (children.length === 0) return [];
+      return [recipe, ...children];
+    }
+  }, [recipe, recipes]);
+
   if (!recipe) {
     return (
       <div className="flex flex-col items-center justify-center h-full">
@@ -142,19 +154,44 @@ export function RecipeDetailPage() {
 
   const categoryId = recipe.tags && recipe.tags.length > 0 ? recipe.tags[0] : null;
   const categoryObj = categoryId ? DEFAULT_TAGS.find(t => t.id === categoryId) : null;
-  const category = categoryObj ? categoryObj.name : 'Chung';
+  const _category = categoryObj ? categoryObj.name : 'Chung';
 
   const allSteps = recipe.steps || [];
 
   return (
     <div className="flex flex-col w-full pb-12 animate-in fade-in duration-300 gap-8" id="recipe-content">
+      {variants.length > 0 && (
+        <div className="w-full flex justify-center mb-[-1rem]">
+          <Tabs 
+            aria-label="Biến thể công thức"
+            selectedKey={recipe.id}
+            onSelectionChange={(key) => navigate(`/recipes/${key}`)}
+            color="primary"
+            variant="underlined"
+            classNames={{
+              tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
+              cursor: "w-full bg-primary",
+              tab: "max-w-fit px-0 h-12",
+              tabContent: "group-data-[selected=true]:text-primary font-medium"
+            }}
+          >
+            {variants.map(v => (
+              <Tab 
+                key={v.id!} 
+                title={!v.parent_id ? "Bản gốc" : v.title}
+              />
+            ))}
+          </Tabs>
+        </div>
+      )}
+
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         
         {/* Left Column (Hero + Content) */}
         <div className="flex-1 flex flex-col gap-10 min-w-0 w-full">
           
           {/* Intro Section (Split Image / Details) */}
-          <div className="flex flex-col xl:flex-row gap-8 w-full">
+          <div className="flex flex-col xl:flex-row gap-8 w-full bg-white p-6 rounded-3xl border border-default-100">
             {/* Image */}
             <div className="w-full xl:w-2/5 shrink-0">
               <div className="flex gap-3 items-start">
@@ -295,6 +332,26 @@ export function RecipeDetailPage() {
                    })}
                  </div>
                )}
+
+               {/* Source */}
+               {recipe.source && (
+                 <div className="flex flex-wrap items-center gap-2 mt-1">
+                   <div className="flex items-center gap-1.5 text-sm font-semibold text-default-500 mr-1">
+                     <LinkIcon className="w-4 h-4" /> Nguồn:
+                   </div>
+                   <span className="text-sm font-medium text-primary hover:underline cursor-pointer" onClick={() => {
+                     try {
+                       if (recipe.source?.startsWith('http')) {
+                         window.open(recipe.source, '_blank');
+                       } else {
+                         window.open(`https://www.google.com/search?q=${encodeURIComponent(recipe.source!)}`, '_blank');
+                       }
+                     } catch (e) {}
+                   }}>
+                     {recipe.source}
+                   </span>
+                 </div>
+               )}
             </div>
           </div>
 
@@ -393,9 +450,10 @@ export function RecipeDetailPage() {
                              {i < steps.length - 1 && <div className="w-px flex-1 bg-default-200 my-2" />}
                            </div>
                            <div className="flex flex-col gap-3 pb-6 pt-1">
-                             <p className="text-default-700 leading-relaxed whitespace-pre-wrap">
-                               {step.instruction}
-                             </p>
+                             <div 
+                               className="text-default-700 leading-relaxed prose prose-sm prose-primary max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1"
+                               dangerouslySetInnerHTML={{ __html: step.instruction }}
+                             />
                              
                              {/* Render Images if available */}
                              {((step.images && step.images.length > 0) || step.image_url) && (
@@ -440,129 +498,156 @@ export function RecipeDetailPage() {
         </div>
 
         {/* Right Column (Sidebar) */}
-        <div className="w-full lg:w-[280px] xl:w-[320px] shrink-0 flex flex-col gap-6">
-          
-          {/* Video */}
-          {recipe.video_url && (
-             <div className="bg-white rounded-3xl border border-default-100 shadow-none p-3 flex flex-col gap-4">
-                <h3 className="font-bold text-base flex items-center gap-2"><Video className="w-5 h-5 text-primary" /> Video Hướng Dẫn</h3>
-                <div 
-                  className="w-full aspect-video bg-default-100 rounded-2xl flex items-center justify-center overflow-hidden relative cursor-pointer group"
-                  onClick={() => handleOpenLightbox('video', recipe.video_url!)}
-                >
-                   {currentDisplayImage && (
-                     <img src={ImageManager.getAssetUrl(currentDisplayImage)} className="w-full h-full object-cover blur-sm opacity-50 group-hover:opacity-40 transition-opacity" />
-                   )}
-                   <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                        <Play className="w-6 h-6 ml-1 fill-current" />
-                      </div>
-                   </div>
-                </div>
-             </div>
-          )}
-
-          {/* Notes */}
-          {recipe.notes && (
-            <div className="bg-warning-50 text-warning-900 rounded-3xl p-3 border border-warning-200 shadow-none flex flex-col gap-3">
-               <h3 className="font-bold text-base flex items-center gap-2"><Info className="w-5 h-5 text-warning-600" /> Ghi chú</h3>
-               <p className="text-sm leading-relaxed">{recipe.notes}</p>
-            </div>
-          )}
-
-
-
-          {/* Related Recipes */}
-          {recipe.related_recipes && recipe.related_recipes.length > 0 && (
-             <div className="bg-white rounded-3xl border border-default-100 shadow-none p-3 flex flex-col gap-4">
-                <h3 className="font-bold text-base flex items-center gap-2"><LinkIcon className="w-5 h-5 text-primary" /> Công thức liên kết</h3>
-                <div className="flex flex-col gap-3">
-                  {recipe.related_recipes.map(rel => {
-                     const extra = recipes.find(r => r.id === rel.id);
-                     return (
-                     <div 
-                       key={rel.id} 
-                       className="flex items-center gap-3 p-2 -mx-2 rounded-xl hover:bg-default-100 cursor-pointer transition-colors"
-                       onClick={() => navigate(`/recipes/${rel.id}`)}
-                     >
-                        <div className="w-12 h-12 rounded-lg bg-default-200 overflow-hidden shrink-0">
-                           {rel.image_url && <img src={ImageManager.getAssetUrl(rel.image_url)} className="w-full h-full object-cover" />}
-                        </div>
-                        <div className="flex flex-col min-w-0 flex-1 gap-0.5">
-                          <span className="font-medium text-sm line-clamp-2 leading-tight">{rel.title}</span>
-                          <div className="flex items-center gap-2 text-[10px] text-default-500 mt-1">
-                            {extra?.taste_score ? (
-                              <span className="flex items-center gap-0.5" title="Đánh giá"><Star className="w-3 h-3 text-warning" />{extra.taste_score}</span>
-                            ) : null}
-                            {extra?.calories ? (
-                              <span className="flex items-center gap-0.5" title="Calories"><Flame className="w-3 h-3 text-danger" />{extra.calories}</span>
-                            ) : null}
-                            {extra?.difficulty ? (
-                              <span className="flex items-center gap-0.5" title="Độ khó"><ChefHat className="w-3 h-3 text-primary" />{extra.difficulty}</span>
-                            ) : null}
-                          </div>
+        <div className="w-full lg:w-[280px] xl:w-[320px] shrink-0 flex flex-col">
+          <div className="bg-white rounded-3xl border border-default-100 p-4 flex flex-col w-full">
+            <Tabs aria-label="Recipe Sidebar Tabs" color="primary" variant="underlined" fullWidth classNames={{ cursor: "w-full bg-primary", tabList: "w-full relative rounded-none p-0 border-b border-default-200", tab: "px-0 h-12" }}>
+              
+              <Tab key="overview" title={<span className="text-base font-medium">Tổng quan</span>}>
+                <div className="flex flex-col divide-y divide-default-100 mt-2">
+                  {/* Video */}
+                  {recipe.video_url && (
+                     <div className="py-5 first:pt-2 last:pb-0 flex flex-col gap-4">
+                        <h3 className="font-bold text-base flex items-center gap-2"><Video className="w-5 h-5 text-primary" /> Video Hướng Dẫn</h3>
+                        <div 
+                          className="w-full aspect-video bg-default-100 rounded-2xl flex items-center justify-center overflow-hidden relative cursor-pointer group"
+                          onClick={() => handleOpenLightbox('video', recipe.video_url!)}
+                        >
+                           {currentDisplayImage && (
+                             <img src={ImageManager.getAssetUrl(currentDisplayImage)} className="w-full h-full object-cover blur-sm opacity-50 group-hover:opacity-40 transition-opacity" />
+                           )}
+                           <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                <Play className="w-6 h-6 ml-1 fill-current" />
+                              </div>
+                           </div>
                         </div>
                      </div>
-                     );
-                  })}
-                </div>
-             </div>
-          )}
+                  )}
 
-          {/* Cooking History */}
-          <div className="bg-white rounded-3xl border border-default-100 shadow-none p-6 flex flex-col gap-4 mt-6">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-primary" />
-              Lịch sử nấu món
-            </h2>
-            {recipe.cooking_history && recipe.cooking_history.length > 0 ? (
-              <div className="flex flex-col gap-3">
-                {recipe.cooking_history.slice().reverse().map((history) => (
-                  <div key={history.id} className="p-4 rounded-2xl bg-default-50 border border-default-100 flex flex-col gap-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-default-500 font-medium">
-                        {new Date(history.date).toLocaleDateString('vi-VN', { 
-                          day: '2-digit', month: '2-digit', year: 'numeric',
-                          hour: '2-digit', minute: '2-digit'
-                        })}
-                      </span>
-                      <div className="flex gap-1 text-warning-400">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className={`w-3 h-3 ${i < history.rating ? 'fill-current text-warning-400' : 'text-default-300'}`} />
-                        ))}
-                      </div>
-                    </div>
-                    {history.notes && (
-                      <p className="text-default-700 text-sm whitespace-pre-wrap">{history.notes}</p>
-                    )}
-                    {history.recipe_snapshot && (
-                      <div className="mt-2 flex justify-start">
-                        <Button 
-                          size="sm" 
-                          variant="flat" 
-                          color="primary"
-                          onPress={() => setSnapshotData({ 
-                            snapshot: history.recipe_snapshot, 
-                            date: history.date,
-                            rating: history.rating,
-                            notes: history.notes
-                          })}
+                  {/* Related Recipes */}
+                  {recipe.related_recipes && recipe.related_recipes.length > 0 && (
+                     <div className="py-5 first:pt-2 last:pb-0 flex flex-col gap-4">
+                        <div 
+                          className="flex justify-between items-center cursor-pointer group"
+                          onClick={() => setIsRelatedExpanded(!isRelatedExpanded)}
                         >
-                          Xem công thức đã nấu
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center p-6 bg-default-50 rounded-2xl border border-dashed border-default-200">
-                <p className="text-default-500">Bạn chưa ghi nhận lần nấu nào cho món này.</p>
-                <p className="text-default-400 text-sm mt-1">Hãy bấm "Bắt đầu nấu" và hoàn thành để lưu lại đánh giá nhé!</p>
-              </div>
-            )}
+                          <h3 className="font-bold text-base flex items-center gap-2">
+                            <LinkIcon className="w-5 h-5 text-primary" /> Công thức liên kết
+                          </h3>
+                          <div className="p-1 rounded-full hover:bg-default-100 transition-colors">
+                            {isRelatedExpanded ? (
+                              <ChevronUp className="w-5 h-5 text-default-400 group-hover:text-default-600" />
+                            ) : (
+                              <ChevronDown className="w-5 h-5 text-default-400 group-hover:text-default-600" />
+                            )}
+                          </div>
+                        </div>
+                        {isRelatedExpanded && (
+                          <div className="flex flex-col gap-2">
+                            {recipe.related_recipes.map(rel => {
+                               const extra = recipes.find(r => r.id === rel.id);
+                               return (
+                               <div 
+                                 key={rel.id} 
+                                 className="flex items-center gap-3 p-2 -mx-2 rounded-xl hover:bg-default-100 cursor-pointer transition-colors"
+                                 onClick={() => navigate(`/recipes/${rel.id}`)}
+                               >
+                                  <div className="w-12 h-12 rounded-lg bg-default-200 overflow-hidden shrink-0">
+                                     {rel.image_url && <img src={ImageManager.getAssetUrl(rel.image_url)} className="w-full h-full object-cover" />}
+                                  </div>
+                                  <div className="flex flex-col min-w-0 flex-1 gap-0.5">
+                                    <span className="font-medium text-sm line-clamp-2 leading-tight">{rel.title}</span>
+                                    <div className="flex items-center gap-2 text-[10px] text-default-500 mt-1">
+                                      {extra?.taste_score ? (
+                                        <span className="flex items-center gap-0.5" title="Đánh giá"><Star className="w-3 h-3 text-warning" />{extra.taste_score}</span>
+                                      ) : null}
+                                      {extra?.calories ? (
+                                        <span className="flex items-center gap-0.5" title="Calories"><Flame className="w-3 h-3 text-danger" />{extra.calories}</span>
+                                      ) : null}
+                                      {extra?.difficulty ? (
+                                        <span className="flex items-center gap-0.5" title="Độ khó"><ChefHat className="w-3 h-3 text-primary" />{extra.difficulty}</span>
+                                      ) : null}
+                                    </div>
+                                  </div>
+                               </div>
+                               );
+                            })}
+                          </div>
+                        )}
+                     </div>
+                  )}
+
+                  {/* Notes */}
+                  {recipe.notes && (
+                    <div className="py-5 first:pt-2 last:pb-0 flex flex-col gap-3">
+                       <h3 className="font-bold text-base flex items-center gap-2"><Info className="w-5 h-5 text-warning-500" /> Ghi chú</h3>
+                       <div 
+                         className="text-sm leading-relaxed text-default-700 bg-warning-50 p-4 rounded-2xl border border-warning-100 prose prose-sm prose-warning max-w-none prose-p:my-1 prose-ul:my-1"
+                         dangerouslySetInnerHTML={{ __html: recipe.notes }}
+                       />
+                    </div>
+                  )}
+                </div>
+              </Tab>
+
+              <Tab key="history" title={
+                <div className="flex items-center gap-2">
+                  <span className="text-base font-medium">Lịch sử nấu</span>
+                  {recipe.cooking_history && recipe.cooking_history.length > 0 && (
+                    <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs font-bold">
+                      {recipe.cooking_history.length}
+                    </span>
+                  )}
+                </div>
+              }>
+                <div className="flex flex-col mt-2">
+                  {recipe.cooking_history && recipe.cooking_history.length > 0 ? (
+                    <div className="flex flex-col gap-1">
+                      {recipe.cooking_history.slice().reverse().map((history) => (
+                        <div 
+                          key={history.id} 
+                          className={`p-3 -mx-3 flex flex-col gap-2 rounded-xl transition-colors ${history.recipe_snapshot ? 'cursor-pointer hover:bg-default-100' : ''}`}
+                          onClick={() => {
+                            if (history.recipe_snapshot) {
+                              setSnapshotData({ 
+                                snapshot: history.recipe_snapshot, 
+                                date: history.date,
+                                rating: history.rating,
+                                notes: history.notes
+                              });
+                            }
+                          }}
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-default-500 font-medium">
+                              {new Date(history.date).toLocaleDateString('vi-VN', { 
+                                day: '2-digit', month: '2-digit', year: 'numeric',
+                                hour: '2-digit', minute: '2-digit'
+                              })}
+                            </span>
+                            <div className="flex gap-1 text-warning-400">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className={`w-3 h-3 ${i < history.rating ? 'fill-current text-warning-400' : 'text-default-300'}`} />
+                              ))}
+                            </div>
+                          </div>
+                          {history.notes && (
+                            <p className="text-default-700 text-sm whitespace-pre-wrap">{history.notes}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-default-500">Bạn chưa ghi nhận lần nấu nào cho món này.</p>
+                      <p className="text-default-400 text-sm mt-1">Hãy bấm "Bắt đầu nấu" và hoàn thành để lưu lại đánh giá nhé!</p>
+                    </div>
+                  )}
+                </div>
+              </Tab>
+
+            </Tabs>
           </div>
-          
         </div>
       </div>
 

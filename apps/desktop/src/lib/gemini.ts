@@ -20,6 +20,7 @@ export interface ParseRecipeResult {
   cook_time_minutes?: number;
   servings?: number;
   calories?: number;
+  notes?: string;
   tags?: {
     name: string;
     is_new: boolean;
@@ -46,7 +47,7 @@ function isValidHttpUrl(string: string) {
   let url;
   try {
     url = new URL(string);
-  } catch (_) {
+  } catch {
     return false;
   }
   return url.protocol === "http:" || url.protocol === "https:";
@@ -98,6 +99,7 @@ Hãy trả về DUY NHẤT một đối tượng JSON với cấu trúc chính x
       "cook_time_minutes": 30, // Thời gian nấu (số)
       "servings": 4, // Số người ăn (số)
       "calories": 500, // Lượng calo ước tính (số). Hãy tự tính toán và ước lượng tổng calo hoặc calo/khẩu phần nếu bài không đề cập.
+      "notes": "<p>Ghi chú thêm, mẹo vặt, lưu ý (SỬ DỤNG ĐỊNH DẠNG HTML CƠ BẢN NHƯ &lt;p&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;strong&gt;, &lt;em&gt;)</p>",
       "tags": [
         { "name": "Bữa sáng", "is_new": false },
         { "name": "Giải nhiệt mùa hè", "is_new": true, "category_id": "root-meal" }
@@ -114,7 +116,7 @@ Hãy trả về DUY NHẤT một đối tượng JSON với cấu trúc chính x
         {
           "name": "Tên giai đoạn (ví dụ: Sơ chế, Chế biến, hoặc Thực hiện nếu không chia nhóm)",
           "steps": [
-            { "content": "Nội dung hướng dẫn chi tiết của bước này (PHẢI VIẾT HOA CHỮ CÁI ĐẦU TIÊN)" }
+            { "content": "<p>Nội dung hướng dẫn chi tiết của bước này (SỬ DỤNG ĐỊNH DẠNG HTML CƠ BẢN NHƯ &lt;p&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;strong&gt;)</p>" }
           ]
         }
       ]

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface FormFieldProps {
-  label: string;
+  label: ReactNode;
   icon?: LucideIcon;
   children: ReactNode;
   error?: string;

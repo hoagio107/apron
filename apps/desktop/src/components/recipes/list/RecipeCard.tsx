@@ -1,9 +1,9 @@
 import type { Recipe } from '@apron/core';
-import { Clock, Star, Flame, Target } from 'lucide-react';
+import { Clock, Star, Flame, Target, Image as ImageIcon } from 'lucide-react';
 import { Checkbox } from '@apron/ui';
 import { ImageManager } from '../../../lib/image-manager';
 
-export type RecipeViewType = 'grid-portrait' | 'grid-square' | 'list';
+export type RecipeViewType = 'grid-portrait' | 'grid-square';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -12,6 +12,7 @@ interface RecipeCardProps {
   isSelected?: boolean;
   onSelectChange?: (selected: boolean) => void;
   onClick?: () => void;
+  variantCount?: number;
 }
 
 export function RecipeCard({ 
@@ -20,7 +21,8 @@ export function RecipeCard({
   selectable = false, 
   isSelected = false,
   onSelectChange,
-  onClick
+  onClick,
+  variantCount = 0
 }: RecipeCardProps) {
   
   const handleSelectClick = (e: React.MouseEvent) => {
@@ -47,52 +49,6 @@ export function RecipeCard({
   
   const averageRating = getAverageRating();
 
-  if (viewType === 'list') {
-    return (
-      <div 
-        onClick={onClick}
-        className="group flex gap-4 p-3 rounded-xl hover:bg-default-100 transition-colors cursor-pointer border border-transparent hover:border-default-200 relative"
-      >
-        {selectable && (
-          <div className="absolute top-4 left-4 z-10" onClick={handleSelectClick}>
-            <Checkbox isSelected={isSelected} onValueChange={(val) => onSelectChange?.(val)} />
-          </div>
-        )}
-        <div className="relative w-28 h-28 shrink-0 rounded-lg overflow-hidden bg-default-100">
-          <img 
-            src={ImageManager.getAssetUrl(recipe.image_url || '')} 
-            alt={recipe.title} 
-            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-          />
-        </div>
-        <div className="flex flex-col justify-center py-1">
-          <h3 className="font-semibold text-base line-clamp-2 mb-2 group-hover:text-primary transition-colors">{recipe.title}</h3>
-          
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-default-500">
-            <div className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5" />
-              <span>{formatTime(totalTime)}</span>
-            </div>
-            
-            <div className="flex items-center gap-1.5">
-              <Target className="w-3.5 h-3.5" />
-              <span>{recipe.difficulty}</span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <Star className="w-3.5 h-3.5 text-warning" fill="currentColor" />
-              <span>{averageRating > 0 ? averageRating : '0'}</span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <Flame className="w-3.5 h-3.5 text-danger" />
-              <span>{recipe.calories} kcal</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // Grid views
   const isPortrait = viewType === 'grid-portrait';
@@ -102,17 +58,28 @@ export function RecipeCard({
       onClick={onClick}
       className="group flex flex-col gap-3 cursor-pointer relative"
     >
-      <div className={`relative w-full rounded-xl overflow-hidden bg-default-100 ${isPortrait ? 'aspect-[3/4]' : 'aspect-square'}`}>
+      <div className={`relative w-full rounded-xl overflow-hidden bg-primary-50 ${isPortrait ? 'aspect-[3/4]' : 'aspect-square'}`}>
         {selectable && (
           <div className="absolute top-3 left-3 z-10" onClick={handleSelectClick}>
             <Checkbox isSelected={isSelected} onValueChange={(val) => onSelectChange?.(val)} />
           </div>
         )}
-        <img 
-          src={ImageManager.getAssetUrl(recipe.image_url || '')} 
-          alt={recipe.title} 
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-        />
+        {variantCount > 0 && (
+          <div className="absolute top-3 right-3 z-10 bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
+            +{variantCount} biến thể
+          </div>
+        )}
+        {recipe.image_url ? (
+          <img 
+            src={ImageManager.getAssetUrl(recipe.image_url)} 
+            alt={recipe.title} 
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+            <ImageIcon className="w-12 h-12 text-primary opacity-60" />
+          </div>
+        )}
         {/* Lớp overlay mỏng khi hover */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors pointer-events-none" />
       </div>

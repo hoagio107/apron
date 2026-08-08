@@ -159,9 +159,10 @@ export function CookingModeModal({
                        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-primary/10 text-primary text-xl md:text-2xl font-bold flex items-center justify-center shrink-0 mt-1">
                          {currentCookingStep + 1}
                        </div>
-                       <p className="text-xl md:text-3xl font-medium text-foreground leading-relaxed flex-1">
-                         {allSteps[currentCookingStep].instruction}
-                       </p>
+                       <div 
+                         className="text-xl md:text-3xl font-medium text-foreground leading-relaxed flex-1 whitespace-pre-wrap prose prose-lg prose-primary max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-p:leading-relaxed"
+                         dangerouslySetInnerHTML={{ __html: allSteps[currentCookingStep].instruction }}
+                       />
                      </div>
                    </div>
                   </div>

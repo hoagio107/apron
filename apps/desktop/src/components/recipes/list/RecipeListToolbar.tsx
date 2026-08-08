@@ -1,5 +1,5 @@
 import { Input, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@apron/ui';
-import { Search, LayoutGrid, LayoutList, Filter, ArrowUpDown, Grip } from 'lucide-react';
+import { Search, LayoutGrid, Filter, ArrowUpDown, Grip, CheckSquare } from 'lucide-react';
 import type { RecipeViewType } from './RecipeCard';
 
 interface RecipeListToolbarProps {
@@ -11,6 +11,7 @@ interface RecipeListToolbarProps {
   onSortOptionChange: (option: string) => void;
   filterCount: number;
   onOpenFilter: () => void;
+  onToggleSelectMode: () => void;
 }
 
 export function RecipeListToolbar({
@@ -21,23 +22,24 @@ export function RecipeListToolbar({
   sortOption,
   onSortOptionChange,
   filterCount,
-  onOpenFilter
+  onOpenFilter,
+  onToggleSelectMode
 }: RecipeListToolbarProps) {
   return (
-    <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-content1 p-4 rounded-2xl shadow-sm border border-default-100">
-      <div className="w-full sm:max-w-xs">
-        <Input
-          placeholder="Tìm kiếm công thức..."
-          value={searchQuery}
-          onValueChange={onSearchChange}
-          startContent={<Search className="w-4 h-4 text-default-400" />}
-          classNames={{
-            inputWrapper: "bg-default-100/50 hover:bg-default-100 focus-within:!bg-default-100"
-          }}
-        />
-      </div>
-
+    <div className="flex flex-col sm:flex-row gap-4 items-center justify-end py-2">
       <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+        <div className="w-full sm:w-64 shrink-0 mr-2">
+          <Input
+            placeholder="Tìm kiếm công thức..."
+            value={searchQuery}
+            onValueChange={onSearchChange}
+            startContent={<Search className="w-4 h-4 text-default-400" />}
+            classNames={{
+              inputWrapper: "bg-default-100/50 hover:bg-default-100 focus-within:!bg-default-100"
+            }}
+          />
+        </div>
+
         {/* Filters */}
         <Button 
           variant="flat" 
@@ -70,6 +72,18 @@ export function RecipeListToolbar({
 
         <div className="w-px h-6 bg-default-200 mx-1 shrink-0" />
 
+        {/* Multi Select Toggle */}
+        <Button 
+          variant="flat" 
+          color="default"
+          startContent={<CheckSquare className="w-4 h-4 text-default-500" />}
+          onPress={onToggleSelectMode}
+        >
+          Chọn nhiều
+        </Button>
+
+        <div className="w-px h-6 bg-default-200 mx-1 shrink-0" />
+
         {/* View toggles */}
         <div className="flex items-center bg-default-100 rounded-lg p-1 shrink-0">
           <Button
@@ -91,16 +105,6 @@ export function RecipeListToolbar({
             className={viewType === 'grid-square' ? 'shadow-sm' : ''}
           >
             <Grip className="w-4 h-4" />
-          </Button>
-          <Button
-            isIconOnly
-            size="sm"
-            variant={viewType === 'list' ? 'solid' : 'light'}
-            color={viewType === 'list' ? 'primary' : 'default'}
-            onPress={() => onViewTypeChange('list')}
-            className={viewType === 'list' ? 'shadow-sm' : ''}
-          >
-            <LayoutList className="w-4 h-4" />
           </Button>
         </div>
       </div>

@@ -5,7 +5,6 @@ import { Plus, Trash2, CalendarDays, Tags, Search } from 'lucide-react';
 import type { RecipeViewType } from '../../components/recipes/list/RecipeCard';
 import { RecipeCard } from '../../components/recipes/list/RecipeCard';
 import { RecipeListToolbar } from '../../components/recipes/list/RecipeListToolbar';
-import { PageHeader } from '../../components/layout/PageHeader';
 import { useRecipeStore } from '../../store/useRecipeStore';
 import { useEffect } from 'react';
 
@@ -28,6 +27,9 @@ export function RecipeListPage() {
   const filteredAndSortedRecipes = useMemo(() => {
     let result = [...recipes];
     
+    // Filter out children (variants)
+    result = result.filter(r => !r.parent_id);
+
     // Search
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -96,64 +98,69 @@ export function RecipeListPage() {
 
   return (
     <div className="flex flex-col h-full gap-6 w-full pb-8">
-      {/* Header */}
-      <PageHeader
-        title="Sổ tay Công thức"
-        description={`${recipes.length} công thức đã lưu`}
-        showBackButton={false}
-        actions={
-          <>
-            <Button 
-              variant="flat" 
-              color={isSelectMode ? "primary" : "default"} 
-              onPress={toggleSelectMode}
-              className="flex-1 sm:flex-none"
-            >
-              {isSelectMode ? "Hủy chọn" : "Chọn nhiều"}
-            </Button>
-            <Button 
-              color="primary" 
-              startContent={<Plus className="w-5 h-5" />}
-              onPress={() => navigate('/recipes/new')}
-              className="flex-1 sm:flex-none"
-            >
-              Thêm mới
-            </Button>
-          </>
-        }
-      />
+      {/* Header & Toolbar */}
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+        {/* Left side: Add New + Title */}
+        <div className="flex items-center gap-4 shrink-0">
+          <Button 
+            isIconOnly
+            color="primary" 
+            className="w-14 h-14 rounded-2xl shadow-sm shrink-0"
+            onPress={() => navigate('/recipes/new')}
+          >
+            <Plus className="w-6 h-6" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-foreground leading-tight">Sổ tay Công thức</h1>
+            <p className="text-default-500">{recipes.length} công thức đã lưu</p>
+          </div>
+        </div>
 
-      <RecipeListToolbar 
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        viewType={viewType}
-        onViewTypeChange={setViewType}
-        sortOption={sortOption}
-        onSortOptionChange={setSortOption}
-        filterCount={0}
-        onOpenFilter={() => console.log('open filter')}
-      />
+        {/* Right side: Toolbar */}
+        <div className="flex-1 w-full xl:w-auto flex justify-end">
+          <RecipeListToolbar 
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            viewType={viewType}
+            onViewTypeChange={setViewType}
+            sortOption={sortOption}
+            onSortOptionChange={setSortOption}
+            filterCount={0}
+            onOpenFilter={() => console.log('open filter')}
+            onToggleSelectMode={toggleSelectMode}
+          />
+        </div>
+      </div>
 
-      {/* Action bar for Multi-select */}
-      {isSelectMode && selectedIds.size > 0 && (
-        <div className="flex items-center justify-between bg-primary-50 border border-primary-100 p-3 rounded-xl sticky top-0 z-20 shadow-sm animate-in fade-in slide-in-from-top-4">
+      {/* Floating Selection Action Bar */}
+      {isSelectMode && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 px-6 py-3 bg-content1 shadow-2xl border border-default-200 rounded-full animate-in slide-in-from-bottom-8 fade-in duration-300">
           <div className="flex items-center gap-3">
-            <Button size="sm" variant="flat" onPress={selectAll}>
+            <Button variant="flat" onPress={selectAll}>
               {selectedIds.size === filteredAndSortedRecipes.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
             </Button>
-            <span className="text-sm font-medium text-primary-700">
-              Đã chọn {selectedIds.size} công thức
+            <span className="font-medium text-primary-700 min-w-[100px] text-center">
+              Đã chọn {selectedIds.size}
             </span>
           </div>
+          
+          <div className="w-px h-8 bg-default-200 mx-1 shrink-0" />
+          
           <div className="flex items-center gap-2">
-            <Button size="sm" color="primary" variant="flat" startContent={<CalendarDays className="w-4 h-4" />}>
+            <Button color="primary" variant="flat" startContent={<CalendarDays className="w-4 h-4" />}>
               Thêm vào thực đơn
             </Button>
-            <Button size="sm" color="secondary" variant="flat" startContent={<Tags className="w-4 h-4" />}>
+            <Button color="secondary" variant="flat" startContent={<Tags className="w-4 h-4" />}>
               Gắn thẻ
             </Button>
-            <Button size="sm" color="danger" variant="flat" startContent={<Trash2 className="w-4 h-4" />} onPress={handleBulkDelete}>
+            <Button color="danger" variant="flat" startContent={<Trash2 className="w-4 h-4" />} onPress={handleBulkDelete}>
               Xóa
+            </Button>
+            
+            <div className="w-px h-8 bg-default-200 mx-1 shrink-0" />
+            
+            <Button variant="light" onPress={toggleSelectMode}>
+              Hủy
             </Button>
           </div>
         </div>
@@ -174,19 +181,22 @@ export function RecipeListPage() {
         <div className={`
           ${viewType === 'grid-portrait' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6' : ''}
           ${viewType === 'grid-square' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6' : ''}
-          ${viewType === 'list' ? 'flex flex-col gap-2' : ''}
         `}>
-          {filteredAndSortedRecipes.map(recipe => (
-            <RecipeCard 
-              key={recipe.id}
-              recipe={recipe}
-              viewType={viewType}
-              selectable={isSelectMode}
-              isSelected={selectedIds.has(recipe.id)}
-              onSelectChange={() => toggleSelect(recipe.id)}
-              onClick={() => handleCardClick(recipe.id)}
-            />
-          ))}
+          {filteredAndSortedRecipes.map(r => {
+            const variantCount = recipes.filter(child => child.parent_id === r.id).length;
+            return (
+              <RecipeCard 
+                key={r.id!} 
+                recipe={r} 
+                viewType={viewType}
+                selectable={isSelectMode}
+                isSelected={selectedIds.has(r.id!)}
+                onSelectChange={() => toggleSelect(r.id!)}
+                onClick={() => handleCardClick(r.id!)}
+                variantCount={variantCount}
+              />
+            );
+          })}
         </div>
       )}
     </div>

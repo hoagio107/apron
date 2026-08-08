@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, Button } from '@apron/ui';
-import { X, Carrot, ChefHat, Timer, Flame, Star, Tag, MessageSquare, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Modal, ModalContent, ModalHeader, ModalBody } from '@apron/ui';
+import { Carrot, ChefHat, Timer, Flame, Star, MessageSquare, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ImageManager } from '../../lib/image-manager';
 
 interface RecipeSnapshotModalProps {
@@ -178,7 +178,10 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
                           {idx + 1}
                         </div>
                         <div className="flex flex-col gap-3 flex-1 pt-2 min-w-0">
-                          <p className="text-foreground leading-relaxed break-words">{step.instruction}</p>
+                          <div 
+                            className="text-foreground leading-relaxed break-words whitespace-pre-wrap prose prose-sm prose-primary max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1"
+                            dangerouslySetInnerHTML={{ __html: step.instruction }}
+                          />
                           
                           <StepImageCarousel step={step} />
                         </div>
@@ -186,6 +189,20 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
                     ))}
                   </div>
                 </div>
+
+                {/* Recipe Notes */}
+                {snapshot.notes && (
+                  <div className="bg-warning-50 p-6 rounded-2xl border border-warning-100">
+                    <h3 className="text-xl font-bold flex items-center gap-2 mb-4 text-warning-600">
+                      <MessageSquare className="w-6 h-6" />
+                      Ghi chú món ăn
+                    </h3>
+                    <div 
+                      className="text-default-700 leading-relaxed whitespace-pre-wrap prose prose-sm prose-warning max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1"
+                      dangerouslySetInnerHTML={{ __html: snapshot.notes }}
+                    />
+                  </div>
+                )}
 
               </div>
             </ModalBody>

@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useFormContext, useFieldArray, Controller } from 'react-hook-form';
-import { Button, Card, CardBody, Input, Textarea } from '@apron/ui';
+import { Button, Card, CardBody, Input } from '@apron/ui';
 import { Plus, Trash2, GripVertical, ListOrdered, X } from 'lucide-react';
 import type { FormValues } from './schema';
 import { SectionHeader } from '../../shared/SectionHeader';
 import { SortableList, SortableItem } from './SortableList';
 import { ImagePickerModal } from './ImagePickerModal';
 import { ImageManager } from '../../../lib/image-manager';
+import { RichTextEditor } from './RichTextEditor';
 
 export function StepsSection() {
   const { control, setValue, getValues } = useFormContext<FormValues>();
@@ -125,15 +126,10 @@ function StepGroup({ sectionIndex, onRemove, onOpenImageModal }: { sectionIndex:
                 name={`stepSections.${sectionIndex}.steps.${index}.instruction`}
                 control={control}
                 render={({ field, fieldState }) => (
-                  <Textarea
-                    {...field}
+                  <RichTextEditor
                     value={field.value || ''}
+                    onChange={field.onChange}
                     placeholder={`Bước ${index + 1}...`}
-                    variant="flat"
-                    minRows={2}
-                    classNames={{
-                      inputWrapper: "bg-default-100 hover:bg-default-200 border-none shadow-none"
-                    }}
                     isInvalid={!!fieldState.error}
                     errorMessage={fieldState.error?.message}
                   />

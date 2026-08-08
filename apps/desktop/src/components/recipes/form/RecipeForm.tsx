@@ -73,7 +73,8 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
         deleted_images: [],
         notes: initialData.notes || '',
         video_url: initialData.video_url || '',
-        parent_id: initialData.parent_id,
+        source: initialData.source || '',
+        parent_id: initialData.parent_id || null,
         ingredientSections: parsedIngredients.length > 0 ? parsedIngredients : [{ name: 'Nguyên liệu chính', ingredients: [{ id: crypto.randomUUID(), name: '', quantity: 1, unit: 'g' }] }],
         stepSections: parsedSteps.length > 0 ? parsedSteps : [{ name: 'Thực hiện', steps: [{ id: crypto.randomUUID(), instruction: '', images: [] }] }],
         related_recipes: initialData.related_recipes || []
@@ -94,6 +95,9 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
       images: [],
       deleted_images: [],
       tags: [],
+      video_url: '',
+      source: '',
+      parent_id: null,
       ingredientSections: [{ name: 'Nguyên liệu chính', ingredients: [{ id: crypto.randomUUID(), name: '', quantity: 1, unit: 'g' }] }],
       stepSections: [{ name: 'Thực hiện', steps: [{ id: crypto.randomUUID(), instruction: '', images: [] }] }],
       related_recipes: []
@@ -114,7 +118,11 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
   const mapAiDataToFormValues = (data: ParseRecipeResult, currentValues: FormValues): FormValues => {
     const newValues = { ...currentValues };
     if (data.title) newValues.title = data.title;
-    if (data.description) newValues.notes = data.description;
+    if (data.notes) {
+      newValues.notes = data.notes;
+    } else if (data.description && !newValues.notes) {
+      newValues.notes = data.description;
+    }
     if (data.difficulty) newValues.difficulty = data.difficulty;
     if (data.prep_time_minutes) newValues.prep_time = data.prep_time_minutes;
     if (data.cook_time_minutes) newValues.cook_time = data.cook_time_minutes;
@@ -304,17 +312,15 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
                 AI hỗ trợ nhập liệu
               </Button>
 
-              {(!initialData || methods.formState.isDirty) && (
-                <Button 
-                  type="submit"
-                  color="primary" 
-                  variant="solid"
-                  isLoading={isSaving}
-                  startContent={!isSaving && <Save className="w-4 h-4" />}
-                >
-                  {bulkRecipes ? `Lưu ${bulkRecipes.length} Công Thức` : 'Lưu Công Thức'}
-                </Button>
-              )}
+              <Button 
+                type="submit"
+                color="primary" 
+                variant="solid"
+                isLoading={isSaving}
+                startContent={!isSaving && <Save className="w-4 h-4" />}
+              >
+                {bulkRecipes ? `Lưu ${bulkRecipes.length} Công Thức` : 'Lưu Công Thức'}
+              </Button>
             </>
           }
         />
@@ -351,8 +357,8 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
           {/* Row 1 */}
           <div className="rounded-xl p-6 bg-content1 shadow-none grid grid-cols-1 lg:grid-cols-3 gap-8">
             <ImageSection />
-            <InfoSection />
-            <MetaSection dynamicTags={dynamicTags} />
+            <InfoSection currentRecipeId={initialData?.id} />
+            <MetaSection dynamicTags={dynamicTags} currentRecipeId={initialData?.id} />
           </div>
 
           {/* Row 2 */}

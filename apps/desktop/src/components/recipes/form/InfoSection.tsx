@@ -1,9 +1,11 @@
 import { Controller, useFormContext } from 'react-hook-form';
 import { useState } from 'react';
-import { Input, Textarea, Select, SelectItem } from '@apron/ui';
-import { Type, AlignLeft, Gauge, Flame, Clock, Timer, Info } from 'lucide-react';
+import { Input, Select, SelectItem } from '@apron/ui';
+import { Type, Gauge, Flame, Clock, Timer, Info } from 'lucide-react';
 import type { FormValues } from './schema';
 import { FormField } from '../../shared/form';
+import { RichTextEditor } from './RichTextEditor';
+import { useRecipeStore } from '../../../store/useRecipeStore';
 
 function EditableMetric({ 
   value, 
@@ -58,8 +60,11 @@ function EditableMetric({
   );
 }
 
-export function InfoSection() {
-  const { control } = useFormContext<FormValues>();
+export function InfoSection({ currentRecipeId }: { currentRecipeId?: string }) {
+  const { control, watch } = useFormContext<FormValues>();
+  const recipes = useRecipeStore(state => state.recipes);
+  const parentId = watch('parent_id');
+  const parentOptions = recipes.filter(r => r.id !== currentRecipeId && !r.parent_id);
 
   return (
     <div className="flex flex-col gap-6">
@@ -83,6 +88,8 @@ export function InfoSection() {
           </FormField>
         )}
       />
+
+
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Controller
@@ -189,22 +196,15 @@ export function InfoSection() {
         control={control}
         render={({ field, fieldState }) => (
           <FormField label="Ghi chú & Mẹo" icon={Info} error={fieldState.error?.message}>
-            <Textarea
-              {...field}
+            <RichTextEditor
+              value={field.value || ''}
+              onChange={field.onChange}
               placeholder="Ghi chú thêm về công thức, mẹo nấu nướng, hoặc lưu ý..."
-              variant="flat"
-              minRows={4}
-              classNames={{
-                inputWrapper: "bg-default-100 hover:bg-default-200 border-none shadow-none"
-              }}
               isInvalid={!!fieldState.error}
             />
           </FormField>
         )}
       />
-
-
-
     </div>
   );
 }

@@ -54,6 +54,7 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
       setActiveTabIndex(0);
       setError('');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const isConfigured = !!apiKey;
@@ -315,6 +316,9 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
                           <div>
                             <h5 className="font-bold text-base mb-1">{parsedData[activeTabIndex].title || <span className="italic text-default-400">Không có tên</span>}</h5>
                             {parsedData[activeTabIndex].description && <p className="text-default-600 mb-2">{parsedData[activeTabIndex].description}</p>}
+                            {parsedData[activeTabIndex].notes && (
+                              <div className="mt-2 text-default-600 prose prose-sm max-w-none prose-p:my-1" dangerouslySetInnerHTML={{ __html: parsedData[activeTabIndex].notes }} />
+                            )}
                             
                             <div className="flex flex-wrap gap-3 mt-2 text-xs text-default-600">
                               {parsedData[activeTabIndex].difficulty && <span className="flex items-center gap-1"><ChefHat className="w-3.5 h-3.5" /> {parsedData[activeTabIndex].difficulty}</span>}
@@ -377,7 +381,12 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
                                     {section.name && <h6 className="font-semibold text-sm mb-1">{section.name}</h6>}
                                     <ol className="list-decimal list-inside space-y-1 ml-1">
                                       {section.steps.map((step, i) => (
-                                        <li key={i} className="pl-1"><span className="ml-1">{step.content}</span></li>
+                                        <li key={i} className="pl-1">
+                                          <div 
+                                            className="inline-block prose prose-sm max-w-none prose-p:my-0 prose-p:inline" 
+                                            dangerouslySetInnerHTML={{ __html: step.content }} 
+                                          />
+                                        </li>
                                       ))}
                                     </ol>
                                   </div>

@@ -57,6 +57,7 @@ export interface Recipe {
   cuisine?: string;
   occasions?: string[];
   dietary?: string[];
+  source?: string;
   ingredients: Ingredient[];
   steps: Step[];
   author_id: string;
@@ -85,22 +86,28 @@ export interface ShoppingList {
 }
 
 // Meal Plan Types
-export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
+export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | string;
+
+export interface MealSlotConfig {
+  id: string; // usually same as meal_type, e.g., 'breakfast' or custom uuid
+  name: string; // display name, e.g., 'Bữa sáng'
+}
 
 export interface MealPlanEntry {
   id: string;
   recipe_id: string;
-  meal_type: MealType;
+  meal_type: MealType; // references MealSlotConfig.id
   notes?: string;
 }
 
 export interface MealPlan {
   id: string;
   date: string; // YYYY-MM-DD
+  slots: MealSlotConfig[]; // Ordered list of slots for the day
   meals: MealPlanEntry[];
 }
 
-export const MEAL_TYPE_LABELS: Record<MealType, { label: string, color: string }> = {
+export const MEAL_TYPE_LABELS: Record<string, { label: string, color: string }> = {
   breakfast: { label: 'Bữa sáng', color: 'bg-blue-100 text-blue-600' },
   lunch: { label: 'Bữa trưa', color: 'bg-orange-100 text-orange-600' },
   dinner: { label: 'Bữa tối', color: 'bg-purple-100 text-purple-600' },

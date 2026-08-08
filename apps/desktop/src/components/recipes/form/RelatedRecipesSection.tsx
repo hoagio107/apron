@@ -27,7 +27,8 @@ export function RelatedRecipesSection() {
         ...item,
         isSelected: relatedRecipes.some(r => r.id === item.id)
       }));
-  }, [recipes, searchValue, relatedRecipes, editId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recipes, searchValue, editId]);
 
   const handleSelect = (key: React.Key | null) => {
     if (!key) return;

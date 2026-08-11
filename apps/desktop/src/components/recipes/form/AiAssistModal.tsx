@@ -12,6 +12,8 @@ import {
 import { Settings, Sparkles, Check, Clock, Users, Flame, ChefHat, AlertTriangle, ImagePlus, X } from 'lucide-react';
 import { GEMINI_MODELS, type ParseRecipeResult, parseRecipeWithGemini } from '../../../lib/gemini';
 import { convertToWebP, validateMediaFile } from '../../../lib/image-utils';
+import { useIngredientCatalogStore } from '../../../store/useIngredientCatalogStore';
+import { useTipStore } from '../../../store/useTipStore';
 
 interface AiAssistModalProps {
   isOpen: boolean;
@@ -37,6 +39,13 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
   
   const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const catalog = useIngredientCatalogStore(state => state.catalog);
+  const { tips, addTip, fetchTips } = useTipStore();
+
+  useEffect(() => {
+    fetchTips();
+  }, [fetchTips]);
 
   useEffect(() => {
     if (isOpen) {
@@ -140,7 +149,10 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
         }
       }
       
-      const result = await parseRecipeWithGemini(selectedModel, inputText, apiKey.trim(), base64Images);
+      const existingIngredients = Object.values(catalog).map(ing => ing.name);
+      const existingTips = tips.map(t => ({ id: t.id, title: t.title }));
+      
+      const result = await parseRecipeWithGemini(selectedModel, inputText, apiKey.trim(), base64Images, existingIngredients, existingTips);
       setParsedData(result);
       setActiveTabIndex(0);
     } catch (err: any) {
@@ -159,6 +171,29 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
       setInputText('');
       setParsedData(null);
       setActiveTabIndex(0);
+    }
+  };
+
+  const handleExportTip = async (idx: number, suggested: { title: string, content: string }) => {
+    try {
+      const newTip = {
+        id: crypto.randomUUID(),
+        title: suggested.title,
+        content: suggested.content,
+        category_id: 'cooking'
+      };
+      await addTip(newTip);
+      
+      setParsedData(prev => {
+        if (!prev) return prev;
+        const newData = [...prev];
+        newData[idx] = { ...newData[idx] };
+        newData[idx].linked_tips = [...(newData[idx].linked_tips || []), newTip.id];
+        delete newData[idx].suggested_tip;
+        return newData;
+      });
+    } catch (err: any) {
+      setError(err.message || 'Lỗi khi xuất mẹo');
     }
   };
 
@@ -340,6 +375,42 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
                                   </span>
                                 ))}
                               </div>
+                            </div>
+                          )}
+
+                          {/* Linked & Suggested Tips */}
+                          {((parsedData[activeTabIndex].linked_tips && parsedData[activeTabIndex].linked_tips.length > 0) || parsedData[activeTabIndex].suggested_tip) && (
+                            <div className="bg-primary-50 p-3 rounded-lg border border-primary-100">
+                              <span className="font-semibold text-xs uppercase tracking-wider text-primary-700 block mb-2 flex items-center gap-1">
+                                <Sparkles className="w-3.5 h-3.5" /> Mẹo Nhà Bếp
+                              </span>
+                              
+                              {parsedData[activeTabIndex].linked_tips && parsedData[activeTabIndex].linked_tips.length > 0 && (
+                                <div className="mb-2">
+                                  <span className="text-xs text-primary-600 block mb-1">Mẹo đã liên kết:</span>
+                                  <ul className="list-disc list-inside text-xs text-primary-800 ml-1">
+                                    {parsedData[activeTabIndex].linked_tips.map(id => {
+                                      const t = tips.find(tip => tip.id === id);
+                                      return t ? <li key={id}>{t.title}</li> : null;
+                                    })}
+                                  </ul>
+                                </div>
+                              )}
+
+                              {parsedData[activeTabIndex].suggested_tip && (
+                                <div className="mt-2 bg-white/60 p-2 rounded border border-primary-100">
+                                  <span className="text-xs font-semibold text-primary-600 block mb-1">Gợi ý mẹo mới: {parsedData[activeTabIndex].suggested_tip.title}</span>
+                                  <div className="text-xs text-default-600 mb-2 prose prose-sm prose-p:my-0 max-w-none" dangerouslySetInnerHTML={{ __html: parsedData[activeTabIndex].suggested_tip.content }} />
+                                  <Button 
+                                    size="sm" 
+                                    color="primary" 
+                                    variant="flat" 
+                                    onPress={() => handleExportTip(activeTabIndex, parsedData[activeTabIndex].suggested_tip!)}
+                                  >
+                                    Xuất sang Mẹo nhà bếp
+                                  </Button>
+                                </div>
+                              )}
                             </div>
                           )}
 

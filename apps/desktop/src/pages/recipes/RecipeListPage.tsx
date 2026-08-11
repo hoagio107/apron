@@ -1,12 +1,22 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@apron/ui';
-import { Plus, Trash2, CalendarDays, Tags, Search } from 'lucide-react';
+import { Plus, Search, Trash2, CalendarDays, Tags } from 'lucide-react';
+import { EmptyState } from '../../components/shared/EmptyState';
 import type { RecipeViewType } from '../../components/recipes/list/RecipeCard';
 import { RecipeCard } from '../../components/recipes/list/RecipeCard';
 import { RecipeListToolbar } from '../../components/recipes/list/RecipeListToolbar';
+import { RecipeFilterDrawer, defaultFilterState } from '../../components/recipes/list/RecipeFilterDrawer';
+import type { RecipeFilterState } from '../../components/recipes/list/RecipeFilterDrawer';
 import { useRecipeStore } from '../../store/useRecipeStore';
+import type { Recipe } from '@apron/core';
 import { useEffect } from 'react';
+import { MealPlannerSelectModal } from './components/MealPlannerSelectModal';
+import { TagSelectModal } from './components/TagSelectModal';
+import { ParentRecipeSelectModal } from './components/ParentRecipeSelectModal';
+import { ImagePickerModal } from '../../components/recipes/form/ImagePickerModal';
+import { useMealPlanStore } from '../../store/useMealPlanStore';
+import { Link as LinkIcon, Image as ImageIcon } from 'lucide-react';
 
 export function RecipeListPage() {
   const navigate = useNavigate();
@@ -17,12 +27,38 @@ export function RecipeListPage() {
   // Selection
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  
+  // Filter
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filters, setFilters] = useState<RecipeFilterState>(defaultFilterState);
 
-  const { recipes, fetchRecipes, deleteBulkRecipes } = useRecipeStore();
+  const { recipes, fetchRecipes, deleteBulkRecipes, updateRecipe, deleteRecipe } = useRecipeStore();
+  const { addMealPlanEntry } = useMealPlanStore();
+
+  const [isMealPlannerModalOpen, setIsMealPlannerModalOpen] = useState(false);
+  const [isTagModalOpen, setIsTagModalOpen] = useState(false);
+  const [isParentModalOpen, setIsParentModalOpen] = useState(false);
+  const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
 
   useEffect(() => {
     fetchRecipes();
   }, [fetchRecipes]);
+
+  const availableTags = useMemo(() => {
+    const tags = new Set<string>();
+    recipes.forEach(r => {
+      if (!r.parent_id && r.tags) {
+        r.tags.forEach(t => tags.add(t));
+      }
+    });
+    return Array.from(tags).sort();
+  }, [recipes]);
+
+  const activeFilterCount = (filters.difficulties.length > 0 ? 1 : 0) + 
+    (filters.maxTime !== null ? 1 : 0) + 
+    ((filters.tags?.length || 0) > 0 ? 1 : 0) + 
+    (filters.cookedStatus && filters.cookedStatus !== 'all' ? 1 : 0) + 
+    (filters.minRating ? 1 : 0);
 
   const filteredAndSortedRecipes = useMemo(() => {
     let result = [...recipes];
@@ -34,6 +70,35 @@ export function RecipeListPage() {
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(r => r.title.toLowerCase().includes(q));
+    }
+    
+    // Filters
+    if (filters.difficulties.length > 0) {
+      result = result.filter(r => filters.difficulties.includes(r.difficulty));
+    }
+    
+    if (filters.maxTime !== null) {
+      result = result.filter(r => (r.prep_time + r.cook_time) <= filters.maxTime!);
+    }
+
+    if (filters.tags && filters.tags.length > 0) {
+      result = result.filter(r => r.tags && filters.tags.some(t => r.tags!.includes(t)));
+    }
+
+    if (filters.cookedStatus && filters.cookedStatus !== 'all') {
+      result = result.filter(r => {
+        const isCooked = r.cooking_history && r.cooking_history.length > 0;
+        return filters.cookedStatus === 'cooked' ? isCooked : !isCooked;
+      });
+    }
+
+    if (filters.minRating && filters.minRating > 0) {
+      result = result.filter(r => {
+        if (!r.cooking_history || r.cooking_history.length === 0) return false;
+        const sum = r.cooking_history.reduce((acc: number, curr: any) => acc + curr.rating, 0);
+        const avg = sum / r.cooking_history.length;
+        return avg >= filters.minRating!;
+      });
     }
     
     // Sort
@@ -53,7 +118,7 @@ export function RecipeListPage() {
     });
     
     return result;
-  }, [recipes, searchQuery, sortOption]);
+  }, [recipes, searchQuery, sortOption, filters]);
 
   const toggleSelect = (id: string) => {
     const newSelected = new Set(selectedIds);
@@ -88,6 +153,25 @@ export function RecipeListPage() {
     }
   };
 
+  const handleRecipeAction = async (action: string, recipe: Recipe) => {
+    switch (action) {
+      case 'favorite':
+        await updateRecipe({ ...recipe, is_favorite: !recipe.is_favorite });
+        break;
+      case 'edit':
+        navigate(`/recipes/${recipe.id}/edit`); // Hoặc trang sửa nếu có
+        break;
+      case 'delete':
+        if (window.confirm(`Bạn có chắc muốn xoá công thức "${recipe.title}"?`)) {
+          await deleteRecipe(recipe.id!);
+        }
+        break;
+      case 'meal_plan':
+        navigate('/meal-planner');
+        break;
+    }
+  };
+
   const handleBulkDelete = async () => {
     if (window.confirm(`Bạn có chắc chắn muốn xóa ${selectedIds.size} công thức này không?`)) {
       await deleteBulkRecipes(Array.from(selectedIds));
@@ -96,8 +180,79 @@ export function RecipeListPage() {
     }
   };
 
+  const handleBulkAddToMealPlan = async (date: string, slotId: string) => {
+    try {
+      for (const id of Array.from(selectedIds)) {
+        await addMealPlanEntry(date, { recipe_id: id, meal_type: slotId });
+      }
+      alert(`Đã thêm ${selectedIds.size} công thức vào thực đơn!`);
+      toggleSelectMode();
+    } catch (e) {
+      console.error(e);
+      alert('Có lỗi xảy ra.');
+    }
+  };
+
+  const handleBulkAddTags = async (tags: string[]) => {
+    try {
+      for (const id of Array.from(selectedIds)) {
+        const recipe = recipes.find(r => r.id === id);
+        if (recipe) {
+          const currentTags = recipe.tags || [];
+          const newTags = Array.from(new Set([...currentTags, ...tags]));
+          await updateRecipe({ ...recipe, tags: newTags });
+        }
+      }
+      alert(`Đã gắn thẻ cho ${selectedIds.size} công thức!`);
+      toggleSelectMode();
+    } catch (e) {
+      console.error(e);
+      alert('Có lỗi xảy ra.');
+    }
+  };
+
+  const handleBulkSetParent = async (parentId: string) => {
+    try {
+      for (const id of Array.from(selectedIds)) {
+        if (id !== parentId) {
+          const recipe = recipes.find(r => r.id === id);
+          if (recipe) {
+            await updateRecipe({ ...recipe, parent_id: parentId });
+          }
+        }
+      }
+      alert(`Đã gán cha cho ${selectedIds.size} công thức!`);
+      toggleSelectMode();
+    } catch (e) {
+      console.error(e);
+      alert('Có lỗi xảy ra.');
+    }
+  };
+
+  const handleBulkAddImages = async (images: string[], _videos: string[]) => {
+    try {
+      for (const id of Array.from(selectedIds)) {
+        const recipe = recipes.find(r => r.id === id);
+        if (recipe) {
+          const currentImages = recipe.images || (recipe.image_url ? [recipe.image_url] : []);
+          const newImages = [...currentImages, ...images];
+          const updates: Partial<Recipe> = { images: newImages };
+          if (!recipe.image_url && newImages.length > 0) {
+            updates.image_url = newImages[0];
+          }
+          await updateRecipe({ ...recipe, ...updates });
+        }
+      }
+      alert(`Đã thêm ảnh vào ${selectedIds.size} công thức!`);
+      toggleSelectMode();
+    } catch (e) {
+      console.error(e);
+      alert('Có lỗi xảy ra.');
+    }
+  };
+
   return (
-    <div className="flex flex-col h-full gap-6 w-full pb-8">
+    <div className="flex flex-col h-full gap-6 w-full pt-6 pb-8">
       {/* Header & Toolbar */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         {/* Left side: Add New + Title */}
@@ -125,12 +280,20 @@ export function RecipeListPage() {
             onViewTypeChange={setViewType}
             sortOption={sortOption}
             onSortOptionChange={setSortOption}
-            filterCount={0}
-            onOpenFilter={() => console.log('open filter')}
+            filterCount={activeFilterCount}
+            onOpenFilter={() => setIsFilterOpen(true)}
             onToggleSelectMode={toggleSelectMode}
           />
         </div>
       </div>
+
+      <RecipeFilterDrawer 
+        isOpen={isFilterOpen}
+        onOpenChange={setIsFilterOpen}
+        filters={filters}
+        onFilterChange={setFilters}
+        availableTags={availableTags}
+      />
 
       {/* Floating Selection Action Bar */}
       {isSelectMode && (
@@ -147,11 +310,17 @@ export function RecipeListPage() {
           <div className="w-px h-8 bg-default-200 mx-1 shrink-0" />
           
           <div className="flex items-center gap-2">
-            <Button color="primary" variant="flat" startContent={<CalendarDays className="w-4 h-4" />}>
+            <Button color="primary" variant="flat" startContent={<CalendarDays className="w-4 h-4" />} onPress={() => setIsMealPlannerModalOpen(true)}>
               Thêm vào thực đơn
             </Button>
-            <Button color="secondary" variant="flat" startContent={<Tags className="w-4 h-4" />}>
+            <Button color="secondary" variant="flat" startContent={<Tags className="w-4 h-4" />} onPress={() => setIsTagModalOpen(true)}>
               Gắn thẻ
+            </Button>
+            <Button color="warning" variant="flat" startContent={<ImageIcon className="w-4 h-4" />} onPress={() => setIsImagePickerOpen(true)}>
+              Thêm ảnh
+            </Button>
+            <Button color="default" variant="flat" startContent={<LinkIcon className="w-4 h-4" />} onPress={() => setIsParentModalOpen(true)}>
+              Gán cha
             </Button>
             <Button color="danger" variant="flat" startContent={<Trash2 className="w-4 h-4" />} onPress={handleBulkDelete}>
               Xóa
@@ -168,15 +337,11 @@ export function RecipeListPage() {
 
       {/* Grid / List */}
       {filteredAndSortedRecipes.length === 0 ? (
-        <div className="flex flex-col items-center justify-center flex-1 py-12 text-center">
-          <div className="w-24 h-24 bg-default-100 rounded-full flex items-center justify-center mb-4">
-            <Search className="w-10 h-10 text-default-300" />
-          </div>
-          <h3 className="text-xl font-semibold mb-2">Không tìm thấy công thức</h3>
-          <p className="text-default-500 max-w-md">
-            Thử thay đổi từ khóa tìm kiếm hoặc xóa bớt bộ lọc để xem các công thức khác.
-          </p>
-        </div>
+        <EmptyState
+          icon={<Search className="w-10 h-10 text-default-300" />}
+          title="Không tìm thấy công thức"
+          description="Thử thay đổi từ khóa tìm kiếm hoặc xóa bớt bộ lọc để xem các công thức khác."
+        />
       ) : (
         <div className={`
           ${viewType === 'grid-portrait' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6' : ''}
@@ -193,12 +358,40 @@ export function RecipeListPage() {
                 isSelected={selectedIds.has(r.id!)}
                 onSelectChange={() => toggleSelect(r.id!)}
                 onClick={() => handleCardClick(r.id!)}
+                onAction={handleRecipeAction}
                 variantCount={variantCount}
               />
             );
           })}
         </div>
       )}
+
+      {/* Modals */}
+      <MealPlannerSelectModal 
+        isOpen={isMealPlannerModalOpen} 
+        onOpenChange={setIsMealPlannerModalOpen} 
+        onConfirm={handleBulkAddToMealPlan}
+        recipeCount={selectedIds.size}
+      />
+      <TagSelectModal
+        isOpen={isTagModalOpen}
+        onOpenChange={setIsTagModalOpen}
+        availableTags={availableTags}
+        onConfirm={handleBulkAddTags}
+        recipeCount={selectedIds.size}
+      />
+      <ParentRecipeSelectModal
+        isOpen={isParentModalOpen}
+        onOpenChange={setIsParentModalOpen}
+        recipes={recipes}
+        onConfirm={handleBulkSetParent}
+        recipeCount={selectedIds.size}
+      />
+      <ImagePickerModal
+        isOpen={isImagePickerOpen}
+        onOpenChange={setIsImagePickerOpen}
+        onSelectMedia={handleBulkAddImages}
+      />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button, Input, ScrollShadow } from '@apron/ui';
 import { MessageSquare, X, Send, Sparkles, Loader2 } from 'lucide-react';
 import { askGemini } from '../../lib/geminiChat';

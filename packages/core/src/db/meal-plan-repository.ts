@@ -98,7 +98,7 @@ export class MealPlanRepository {
     try {
       const path = `${MEAL_PLANS_DIR}/${date}.json`;
       if (await storage.exists(path)) {
-        await storage.removeFile(path);
+        await storage.deleteFile(path);
       }
     } catch (e) {
       console.error(`Failed to delete meal plan for ${date}`, e);

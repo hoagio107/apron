@@ -5,7 +5,7 @@ import { Type, Gauge, Flame, Clock, Timer, Info } from 'lucide-react';
 import type { FormValues } from './schema';
 import { FormField } from '../../shared/form';
 import { RichTextEditor } from './RichTextEditor';
-import { useRecipeStore } from '../../../store/useRecipeStore';
+
 
 function EditableMetric({ 
   value, 
@@ -60,11 +60,8 @@ function EditableMetric({
   );
 }
 
-export function InfoSection({ currentRecipeId }: { currentRecipeId?: string }) {
-  const { control, watch } = useFormContext<FormValues>();
-  const recipes = useRecipeStore(state => state.recipes);
-  const parentId = watch('parent_id');
-  const parentOptions = recipes.filter(r => r.id !== currentRecipeId && !r.parent_id);
+export function InfoSection({ currentRecipeId: _currentRecipeId }: { currentRecipeId?: string }) {
+  const { control } = useFormContext<FormValues>();
 
   return (
     <div className="flex flex-col gap-6">

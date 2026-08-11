@@ -2,17 +2,20 @@ import { useState, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import { Autocomplete, AutocompleteItem, Button, Avatar } from '@apron/ui';
-import { Link, Star, Flame, ChefHat, X, Search, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Link, Star, Flame, ChefHat, X, Search, Check, ChevronDown, ChevronUp, Lightbulb } from 'lucide-react';
 import { FormField } from '../../shared/form';
 import type { FormValues } from './schema';
 import { ImageManager } from '../../../lib/image-manager';
 
 import { useRecipeStore } from '../../../store/useRecipeStore';
+import { useTipStore } from '../../../store/useTipStore';
 
 export function RelatedRecipesSection() {
   const { watch, setValue } = useFormContext<FormValues>();
   const { recipes } = useRecipeStore();
+  const { tips } = useTipStore();
   const relatedRecipes = watch('related_recipes') || [];
+  const linkedTips = watch('linked_tips') || [];
 
   const [searchValue, setSearchValue] = useState("");
   const [isListExpanded, setIsListExpanded] = useState(true);
@@ -21,32 +24,54 @@ export function RelatedRecipesSection() {
   const editId = searchParams.get('edit');
 
   const filteredItems = useMemo(() => {
-    return recipes
+    const matchedRecipes = recipes
       .filter(item => item.id !== editId && item.title.toLowerCase().includes(searchValue.toLowerCase()))
       .map(item => ({
         ...item,
+        is_tip: false,
         isSelected: relatedRecipes.some(r => r.id === item.id)
       }));
+
+    const matchedTips = tips
+      .filter(item => item.title.toLowerCase().includes(searchValue.toLowerCase()))
+      .map(item => ({
+        id: item.id,
+        title: item.title,
+        image_url: item.image_url,
+        is_tip: true,
+        isSelected: linkedTips.some(tid => tid === item.id)
+      }));
+
+    return [...matchedRecipes, ...matchedTips];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recipes, searchValue, editId]);
+  }, [recipes, tips, searchValue, editId, relatedRecipes, linkedTips]);
 
   const handleSelect = (key: React.Key | null) => {
     if (!key) return;
-    const id = key.toString();
-    const item = recipes.find(r => r.id === id);
-    if (!item) return;
+    const keyStr = key.toString();
+    const isTip = keyStr.startsWith('tip:');
+    const id = keyStr.replace(/^(recipe:|tip:)/, '');
     
-    // Check if already exists
-    if (!relatedRecipes.some(r => r.id === item.id)) {
-      setValue('related_recipes', [...relatedRecipes, {
-        id: item.id,
-        title: item.title,
-        slug: item.slug,
-        image_url: item.image_url
-      }]);
+    if (isTip) {
+      const item = tips.find(t => t.id === id);
+      if (!item) return;
+      if (!linkedTips.some(tid => tid === item.id)) {
+        setValue('linked_tips', [...linkedTips, item.id]);
+      }
+    } else {
+      const item = recipes.find(r => r.id === id);
+      if (!item) return;
+      if (!relatedRecipes.some(r => r.id === item.id)) {
+        setValue('related_recipes', [...relatedRecipes, {
+          id: item.id,
+          title: item.title,
+          slug: item.slug,
+          image_url: item.image_url
+        }]);
+      }
     }
     
-    // Reset search (we need a slight delay for Autocomplete to process the selection before resetting)
+    // Reset search
     setTimeout(() => {
       setSearchValue("");
     }, 0);
@@ -57,7 +82,7 @@ export function RelatedRecipesSection() {
   };
 
   return (
-    <FormField label="Công thức liên kết" icon={Link}>
+    <FormField label="Công thức và mẹo liên kết" icon={Link}>
       <div className="flex flex-col gap-4">
         <Autocomplete
           aria-label="Tìm kiếm công thức liên kết"
@@ -89,34 +114,49 @@ export function RelatedRecipesSection() {
             ) : undefined
           }
         >
-          {(item) => (
+          {(item) => {
+            const key = item.is_tip ? `tip:${item.id}` : `recipe:${item.id}`;
+            return (
               <AutocompleteItem 
-                key={item.id} 
+                key={key} 
                 textValue={item.title}
                 className="data-[hover=true]:bg-default-100 data-[hover=true]:text-default-foreground transition-colors"
               >
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-3 min-w-0">
-                    <Avatar src={ImageManager.getAssetUrl(item.image_url || '')} radius="sm" className="w-8 h-8 shrink-0 text-tiny" fallback={item.title.charAt(0)} />
+                    {item.is_tip ? (
+                      <div className="w-8 h-8 rounded-md bg-warning/20 flex items-center justify-center shrink-0">
+                        <Lightbulb className="w-4 h-4 text-warning" />
+                      </div>
+                    ) : (
+                      <Avatar src={ImageManager.getAssetUrl(item.image_url || '')} radius="sm" className="w-8 h-8 shrink-0 text-tiny" fallback={item.title.charAt(0)} />
+                    )}
                     <div className="flex flex-col min-w-0 flex-1">
-                      <span className="font-medium text-sm">{item.title}</span>
-                      <div className="flex items-center gap-3 text-xs text-default-400 mt-0.5">
-                        {item.taste_score ? (
-                          <span className="flex items-center gap-1"><Star className="w-3 h-3 text-warning" />{item.taste_score}</span>
-                        ) : null}
-                        {item.calories ? (
-                          <span className="flex items-center gap-1"><Flame className="w-3 h-3 text-danger" />{item.calories}</span>
-                        ) : null}
-                        {item.difficulty ? (
-                          <span className="flex items-center gap-1"><ChefHat className="w-3 h-3 text-primary" />{item.difficulty}</span>
-                        ) : null}
+                      <span className="font-medium text-sm line-clamp-1">{item.title}</span>
+                      <div className="flex items-center gap-3 text-[10px] text-default-400 mt-0.5">
+                        {item.is_tip ? (
+                          <span className="text-warning-600">Mẹo nhà bếp</span>
+                        ) : (
+                          <>
+                            {(item as any).taste_score ? (
+                              <span className="flex items-center gap-1"><Star className="w-3 h-3 text-warning" />{(item as any).taste_score}</span>
+                            ) : null}
+                            {(item as any).calories ? (
+                              <span className="flex items-center gap-1"><Flame className="w-3 h-3 text-danger" />{(item as any).calories}</span>
+                            ) : null}
+                            {(item as any).difficulty ? (
+                              <span className="flex items-center gap-1"><ChefHat className="w-3 h-3 text-primary" />{(item as any).difficulty}</span>
+                            ) : null}
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
                   {item.isSelected && <Check className="w-4 h-4 text-success shrink-0 ml-2" />}
                 </div>
               </AutocompleteItem>
-          )}
+            );
+          }}
         </Autocomplete>
 
         {relatedRecipes.length > 0 && isListExpanded && (

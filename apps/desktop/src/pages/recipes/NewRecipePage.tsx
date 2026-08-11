@@ -41,7 +41,7 @@ export function NewRecipePage() {
   }
 
   return (
-    <div className="h-full">
+    <div className="h-full pt-6">
       <RecipeForm initialData={editRecipe} onSubmit={handleSubmit} />
     </div>
   );

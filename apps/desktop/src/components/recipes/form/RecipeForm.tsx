@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { recipeSchema } from './schema';
@@ -11,11 +11,13 @@ import { InfoSection } from './InfoSection';
 import { MetaSection } from './MetaSection';
 import { IngredientsSection } from './IngredientsSection';
 import { StepsSection } from './StepsSection';
+import { LinkedTipsSection } from './LinkedTipsSection';
 import { AiAssistModal } from './AiAssistModal';
 import { ImageManager } from '../../../lib/image-manager';
 import type { Recipe, Tag } from '@apron/core';
 import { DEFAULT_TAGS } from '@apron/core';
 import type { ParseRecipeResult } from '../../../lib/gemini';
+import { useIngredientCatalogStore } from '../../../store/useIngredientCatalogStore';
 
 interface RecipeFormProps {
   initialData?: Recipe;
@@ -25,6 +27,7 @@ interface RecipeFormProps {
 export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const { addIngredientMeta, getIngredientMetaByName } = useIngredientCatalogStore();
 
   const defaultValues: FormValues = useMemo(() => {
     if (initialData) {
@@ -32,6 +35,7 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
         const group = acc.find((g: any) => g.name === (ing.group || 'Chung'));
         const newIng = { 
           id: crypto.randomUUID(), 
+          ingredient_id: ing.ingredient_id,
           name: ing.name || '', 
           quantity: typeof ing.quantity === 'number' || typeof ing.quantity === 'string' ? ing.quantity : 0, 
           unit: ing.unit || '' 
@@ -77,7 +81,8 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
         parent_id: initialData.parent_id || null,
         ingredientSections: parsedIngredients.length > 0 ? parsedIngredients : [{ name: 'Nguyên liệu chính', ingredients: [{ id: crypto.randomUUID(), name: '', quantity: 1, unit: 'g' }] }],
         stepSections: parsedSteps.length > 0 ? parsedSteps : [{ name: 'Thực hiện', steps: [{ id: crypto.randomUUID(), instruction: '', images: [] }] }],
-        related_recipes: initialData.related_recipes || []
+        related_recipes: initialData.related_recipes || [],
+        linked_tips: initialData.linked_tips || []
       };
     }
 
@@ -100,15 +105,36 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
       parent_id: null,
       ingredientSections: [{ name: 'Nguyên liệu chính', ingredients: [{ id: crypto.randomUUID(), name: '', quantity: 1, unit: 'g' }] }],
       stepSections: [{ name: 'Thực hiện', steps: [{ id: crypto.randomUUID(), instruction: '', images: [] }] }],
-      related_recipes: []
+      related_recipes: [],
+      linked_tips: []
     };
   }, [initialData]);
 
   const methods = useForm<FormValues>({
     resolver: zodResolver(recipeSchema) as any,
-    defaultValues,
+    defaultValues: () => {
+      if (initialData) return Promise.resolve(defaultValues);
+      
+      const draft = localStorage.getItem('recipe_form_draft');
+      if (draft) {
+        try {
+          return Promise.resolve(JSON.parse(draft));
+        } catch (e) {
+          console.error("Failed to parse recipe draft", e);
+        }
+      }
+      return Promise.resolve(defaultValues);
+    },
     values: initialData ? defaultValues : undefined
   });
+
+  useEffect(() => {
+    if (initialData) return;
+    const subscription = methods.watch((value) => {
+      localStorage.setItem('recipe_form_draft', JSON.stringify(value));
+    });
+    return () => subscription.unsubscribe();
+  }, [methods, initialData]);
 
   const [dynamicTags, setDynamicTags] = useState<Tag[]>([]);
 
@@ -128,6 +154,7 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
     if (data.cook_time_minutes) newValues.cook_time = data.cook_time_minutes;
     if (data.servings) newValues.servings = data.servings;
     if (data.calories) newValues.calories = data.calories;
+    if (data.linked_tips) newValues.linked_tips = Array.from(new Set([...(currentValues.linked_tips || []), ...data.linked_tips]));
     
     if (data.tags && data.tags.length > 0) {
       const tagIds: string[] = [];
@@ -168,12 +195,16 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
     if (data.ingredientSections && data.ingredientSections.length > 0) {
       newValues.ingredientSections = data.ingredientSections.map(section => ({
         name: section.name || 'Nguyên liệu',
-        ingredients: section.ingredients.map(ing => ({
-          id: crypto.randomUUID(),
-          name: ing.name,
-          quantity: ing.amount ? Number(ing.amount) || ing.amount : 0,
-          unit: ing.unit || ''
-        }))
+        ingredients: section.ingredients.map(ing => {
+          const matchedMeta = getIngredientMetaByName(ing.name);
+          return {
+            id: crypto.randomUUID(),
+            ingredient_id: matchedMeta?.id,
+            name: matchedMeta ? matchedMeta.name : ing.name,
+            quantity: ing.amount ? Number(ing.amount) || ing.amount : 0,
+            unit: ing.unit || matchedMeta?.default_unit || ''
+          };
+        })
       }));
     }
 
@@ -214,12 +245,26 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
 
     // Chuyển đổi dạng cha-con về mảng phẳng cho backend giống bản NextJS
     const flattenedIngredients = data.ingredientSections.flatMap(section => 
-      section.ingredients.map(ing => ({
-        name: ing.name,
-        quantity: ing.quantity,
-        unit: ing.unit || '',
-        group: section.name
-      }))
+      section.ingredients.map(ing => {
+        let finalIngredientId = (ing as any).ingredient_id;
+        const nameTrimmed = ing.name.trim();
+        if (nameTrimmed && !finalIngredientId) {
+          const existing = getIngredientMetaByName(nameTrimmed);
+          if (existing) {
+            finalIngredientId = existing.id;
+          } else {
+            const added = addIngredientMeta(nameTrimmed, { default_unit: ing.unit || undefined });
+            finalIngredientId = added.id;
+          }
+        }
+        return {
+          ingredient_id: finalIngredientId,
+          name: nameTrimmed,
+          quantity: ing.quantity,
+          unit: ing.unit || '',
+          group: section.name
+        };
+      })
     );
     
     const flattenedStepsPromises = data.stepSections.flatMap(section => 
@@ -256,6 +301,9 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
       console.error('Error saving recipe', error);
     } finally {
       setIsSaving(false);
+    }
+    if (!initialData) {
+      localStorage.removeItem('recipe_form_draft');
     }
   };
 
@@ -355,10 +403,13 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
 
         <div className="flex flex-col gap-8 w-full">
           {/* Row 1 */}
-          <div className="rounded-xl p-6 bg-content1 shadow-none grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="bg-white rounded-2xl border border-default-100 shadow-none p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
             <ImageSection />
             <InfoSection currentRecipeId={initialData?.id} />
-            <MetaSection dynamicTags={dynamicTags} currentRecipeId={initialData?.id} />
+            <div className="flex flex-col gap-4">
+              <MetaSection dynamicTags={dynamicTags} currentRecipeId={initialData?.id} />
+              <LinkedTipsSection />
+            </div>
           </div>
 
           {/* Row 2 */}

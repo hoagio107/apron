@@ -22,10 +22,12 @@ export const recipeSchema = z.object({
     slug: z.string().nullable().optional(),
     image_url: z.string().nullable().optional()
   })).optional(),
+  linked_tips: z.array(z.string()).optional(),
   ingredientSections: z.array(z.object({
     name: z.string().min(1, "Tên nhóm"),
     ingredients: z.array(z.object({
       id: z.string(), 
+      ingredient_id: z.string().optional(),
       name: z.string().min(1, "Nhập tên"),
       quantity: z.preprocess((val) => (val === '' ? 0 : val), z.union([z.string(), z.number()])),
       unit: z.string().optional().or(z.string().length(0))

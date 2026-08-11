@@ -31,12 +31,10 @@ export function RecipeListToolbar({
         <div className="w-full sm:w-64 shrink-0 mr-2">
           <Input
             placeholder="Tìm kiếm công thức..."
+            variant="faded"
             value={searchQuery}
             onValueChange={onSearchChange}
             startContent={<Search className="w-4 h-4 text-default-400" />}
-            classNames={{
-              inputWrapper: "bg-default-100/50 hover:bg-default-100 focus-within:!bg-default-100"
-            }}
           />
         </div>
 

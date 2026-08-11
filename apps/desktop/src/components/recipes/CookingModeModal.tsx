@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal, ModalContent, Button, Checkbox } from '@apron/ui';
 import { X, Carrot, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { ImageManager } from '../../lib/image-manager';

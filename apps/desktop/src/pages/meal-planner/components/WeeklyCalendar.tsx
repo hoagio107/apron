@@ -1,12 +1,10 @@
 import { useState, useRef } from 'react';
-import { useDroppable } from '@dnd-kit/core';
 import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { ChefHat, X, ChevronLeft, ChevronRight, ShoppingCart, Plus, BookOpen, Clock, Flame, Check, GripVertical } from 'lucide-react';
+import { ChefHat, X, ChevronLeft, ChevronRight, ShoppingCart, Plus, BookOpen, Clock, Flame, Check } from 'lucide-react';
 import { Button } from '@apron/ui';
 import { ImageManager } from '../../../lib/image-manager';
-import type { MealType, MealPlan, MealPlanEntry, Recipe, MealSlotConfig } from '@apron/core';
-import { MEAL_TYPE_LABELS } from '@apron/core';
+import type { MealPlan, MealPlanEntry } from '@apron/core';
 import { useRecipeStore } from '../../../store/useRecipeStore';
 import { useMealPlanStore } from '../../../store/useMealPlanStore';
 import { useSettingsStore } from '../../../store/useSettingsStore';
@@ -45,8 +43,8 @@ function MealSlot({ date, mealType, label, entries, onRemoveEntry, viewMode = 'l
     <div 
       ref={setNodeRef}
       style={style}
-      className={`group/slot min-h-[100px] py-2 px-2 relative flex flex-col gap-2 rounded-xl transition-colors ${
-        isOver ? 'bg-primary-50 ring-2 ring-primary border-transparent' : 'bg-content1'
+      className={`group/slot min-h-[100px] py-2 px-2 relative flex flex-col gap-2 rounded-2xl border transition-colors ${
+        isOver ? 'bg-primary-50 ring-2 ring-primary border-primary' : 'bg-white border-default-100 shadow-none'
       }`}
     >
       {/* Drag handle */}
@@ -180,12 +178,7 @@ export function WeeklyCalendar({ days, mealPlans, onRemoveEntry, viewMode = 'lis
     scrollRef.current?.scrollBy({ left: 400, behavior: 'smooth' });
   };
   
-  const DEFAULT_SLOTS: MealSlotConfig[] = [
-    { id: 'breakfast', name: 'Bữa sáng' },
-    { id: 'lunch', name: 'Bữa trưa' },
-    { id: 'dinner', name: 'Bữa tối' },
-    { id: 'snack', name: 'Ăn nhẹ' },
-  ];
+
   
   const formatDateString = (d: Date) => d.toISOString().split('T')[0];
 
@@ -237,7 +230,7 @@ export function WeeklyCalendar({ days, mealPlans, onRemoveEntry, viewMode = 'lis
                 return recipe?.difficulty;
               }).filter(Boolean);
               if (difficulties?.includes('Khó')) maxDifficulty = 'Khó';
-              else if (difficulties?.includes('Trung bình')) maxDifficulty = 'Trung bình';
+              else if (difficulties?.includes('Vừa')) maxDifficulty = 'Vừa';
               else if (difficulties?.length) maxDifficulty = difficulties[0] as string;
             }
 

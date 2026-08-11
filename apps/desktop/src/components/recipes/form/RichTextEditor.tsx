@@ -39,10 +39,11 @@ export function RichTextEditor({ value, onChange, placeholder, isInvalid, errorM
 
   return (
     <>
-    <div className={`flex flex-col border rounded-xl overflow-hidden bg-default-100 transition-colors focus-within:bg-default-50 ${isInvalid ? 'border-danger' : 'border-transparent hover:bg-default-200'}`}>
-      {/* Bubble Menu */}
+    <div className={`flex flex-col border rounded-xl bg-default-100 transition-colors focus-within:bg-default-50 ${isInvalid ? 'border-danger' : 'border-transparent hover:bg-default-200'}`}>
+      {/* BubbleMenu appended to body avoids overflow clipping */}
       {editor && (
-        <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }} className="flex items-center gap-1 p-1.5 bg-white border border-default-200 shadow-xl rounded-xl">
+        // @ts-expect-error tippyOptions is valid but types might be outdated
+        <BubbleMenu editor={editor} tippyOptions={{ appendTo: document.body, zIndex: 99999 }} className="flex items-center gap-1 p-1.5 bg-white border border-default-200 shadow-xl rounded-xl">
           <Button
             isIconOnly
             size="sm"

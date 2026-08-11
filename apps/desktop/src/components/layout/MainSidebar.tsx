@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { 
   Home, Heart, GraduationCap, 
   Lightbulb, PlusCircle, ShoppingCart, Scale, 
-  Refrigerator, CalendarDays, Palette, ChefHat
+  Refrigerator, CalendarDays, Palette, ChefHat, NotebookTabs
 } from 'lucide-react';
 import { Button } from '@apron/ui';
 import { useTranslation } from 'react-i18next';
@@ -33,6 +33,7 @@ export function MainSidebar({ isExpanded }: MainSidebarProps) {
     { name: t('Shopping List'), icon: ShoppingCart, path: '/shopping-list' },
     { name: t('Courses'), icon: GraduationCap, path: '/courses' },
     { name: t('Smart Fridge'), icon: Refrigerator, path: '/smart-fridge' },
+    { name: 'Từ điển nguyên liệu', icon: NotebookTabs, path: '/catalog' },
     { name: t('Meal Planner'), icon: CalendarDays, path: '/meal-planner' },
     { name: t('Tips'), icon: Lightbulb, path: '/tips' },
     { name: t('Units'), icon: Scale, path: '/units' },

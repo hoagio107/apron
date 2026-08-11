@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Modal, ModalContent, ModalBody, useDisclosure, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tabs, Tab } from '@apron/ui';
 import { ArrowLeft, Edit, Clock, Star, Flame, Play, Info, Share, Check, Image as ImageIcon, Plus, Gauge, Timer, Minus, Carrot, ChefHat, Link as LinkIcon, Video, Tag, X, Calendar, ShoppingCart, Printer, Download, ImageDown, ChevronDown, ChevronUp } from 'lucide-react';
 import { useRecipeStore } from '../../store/useRecipeStore';
+import { useShoppingListStore } from '../../store/useShoppingListStore';
+import { useMealPlanStore } from '../../store/useMealPlanStore';
 import { ImageManager } from '../../lib/image-manager';
 import { DEFAULT_TAGS } from '@apron/core';
 import { exportToPdf, exportToPng } from '../../lib/exportUtils';
@@ -10,6 +12,7 @@ import { CookingModeModal } from '../../components/recipes/CookingModeModal';
 import { CookingRatingModal } from '../../components/recipes/CookingRatingModal';
 import { RecipeSnapshotModal } from '../../components/recipes/RecipeSnapshotModal';
 import { RecipeFloatingChat } from '../../components/recipes/RecipeFloatingChat';
+import { MealPlannerSelectModal } from './components/MealPlannerSelectModal';
 
 export function RecipeDetailPage() {
   const { id } = useParams();
@@ -28,6 +31,65 @@ export function RecipeDetailPage() {
   const [isRatingModeOpen, setIsRatingModeOpen] = useState(false);
   const [snapshotData, setSnapshotData] = useState<{snapshot: any, date: string, rating?: number, notes?: string} | null>(null);
   const [isRelatedExpanded, setIsRelatedExpanded] = useState(true);
+
+  const { addItems } = useShoppingListStore();
+  const { addMealPlanEntry } = useMealPlanStore();
+  const [isMealPlannerModalOpen, setIsMealPlannerModalOpen] = useState(false);
+
+  const handleAddToShoppingList = async () => {
+    if (!recipe || !recipe.ingredients) return;
+    const items = recipe.ingredients.map(ing => ({
+      name: ing.name,
+      quantity: scaleQuantity(ing.quantity) || undefined,
+      unit: ing.unit || undefined
+    }));
+    try {
+      await addItems(items);
+      alert('Đã thêm nguyên liệu vào giỏ đi chợ!');
+    } catch (e) {
+      console.error(e);
+      alert('Có lỗi xảy ra khi thêm vào giỏ đi chợ.');
+    }
+  };
+
+  const handleShare = async () => {
+    if (!recipe) return;
+    let text = `🍳 ${recipe.title}\n\n`;
+    if (recipe.ingredients && recipe.ingredients.length > 0) {
+      text += `🛒 Nguyên liệu:\n`;
+      recipe.ingredients.forEach(ing => {
+        text += `- ${scaleQuantity(ing.quantity) || ''} ${ing.unit || ''} ${ing.name}\n`;
+      });
+      text += `\n`;
+    }
+    if (recipe.steps && recipe.steps.length > 0) {
+      text += `📝 Cách làm:\n`;
+      recipe.steps.forEach((step, idx) => {
+        text += `${idx + 1}. ${step.instruction}\n`;
+      });
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('Đã sao chép công thức vào khay nhớ tạm!');
+    } catch (e) {
+      console.error(e);
+      alert('Không thể sao chép.');
+    }
+  };
+
+  const handleAddToMealPlan = async (date: string, slotId: string) => {
+    if (!recipe) return;
+    try {
+      await addMealPlanEntry(date, {
+        recipe_id: recipe.id!,
+        meal_type: slotId,
+      });
+      alert('Đã thêm vào thực đơn!');
+    } catch (e) {
+      console.error(e);
+      alert('Có lỗi xảy ra khi thêm vào thực đơn.');
+    }
+  };
 
   const handleCookingComplete = async (rating: number, notes: string, action: 'done' | 'edit') => {
     if (!recipe) return;
@@ -152,14 +214,12 @@ export function RecipeDetailPage() {
     );
   }
 
-  const categoryId = recipe.tags && recipe.tags.length > 0 ? recipe.tags[0] : null;
-  const categoryObj = categoryId ? DEFAULT_TAGS.find(t => t.id === categoryId) : null;
-  const _category = categoryObj ? categoryObj.name : 'Chung';
+
 
   const allSteps = recipe.steps || [];
 
   return (
-    <div className="flex flex-col w-full pb-12 animate-in fade-in duration-300 gap-8" id="recipe-content">
+    <div className="flex flex-col w-full pt-6 pb-12 animate-in fade-in duration-300 gap-8" id="recipe-content">
       {variants.length > 0 && (
         <div className="w-full flex justify-center mb-[-1rem]">
           <Tabs 
@@ -191,7 +251,7 @@ export function RecipeDetailPage() {
         <div className="flex-1 flex flex-col gap-10 min-w-0 w-full">
           
           {/* Intro Section (Split Image / Details) */}
-          <div className="flex flex-col xl:flex-row gap-8 w-full bg-white p-6 rounded-3xl border border-default-100">
+          <div className="flex flex-col xl:flex-row gap-8 w-full bg-white p-6 rounded-2xl border border-default-100 shadow-none">
             {/* Image */}
             <div className="w-full xl:w-2/5 shrink-0">
               <div className="flex gap-3 items-start">
@@ -260,10 +320,10 @@ export function RecipeDetailPage() {
                  <Button color="primary" variant="solid" className="font-semibold px-6" startContent={<Play className="w-4 h-4"/>} onPress={() => setIsCookingModeOpen(true)}>
                    Bắt đầu nấu
                  </Button>
-                 <Button variant="flat" className="font-semibold border border-default-200" startContent={<Calendar className="w-4 h-4"/>}>
+                 <Button variant="flat" className="font-semibold border border-default-200" startContent={<Calendar className="w-4 h-4"/>} onPress={() => setIsMealPlannerModalOpen(true)}>
                    Kế hoạch
                  </Button>
-                 <Button variant="flat" className="font-semibold border border-default-200" startContent={<ShoppingCart className="w-4 h-4 text-success"/>}>
+                 <Button variant="flat" className="font-semibold border border-default-200" startContent={<ShoppingCart className="w-4 h-4 text-success"/>} onPress={handleAddToShoppingList}>
                    Đi chợ
                  </Button>
                  
@@ -274,6 +334,7 @@ export function RecipeDetailPage() {
                      </Button>
                    </DropdownTrigger>
                    <DropdownMenu aria-label="Export Actions">
+                     <DropdownItem key="copy" startContent={<Share className="w-4 h-4"/>} onPress={handleShare}>Copy công thức</DropdownItem>
                      <DropdownItem key="png" startContent={<ImageDown className="w-4 h-4"/>} onPress={() => exportToPng('recipe-content', `${recipe.title}.png`)}>Lưu ảnh (PNG)</DropdownItem>
                      <DropdownItem key="pdf" startContent={<Download className="w-4 h-4"/>} onPress={() => exportToPdf('recipe-content', `${recipe.title}.pdf`)}>Xuất PDF</DropdownItem>
                      <DropdownItem key="print" startContent={<Printer className="w-4 h-4"/>} onPress={() => window.print()}>In ấn</DropdownItem>
@@ -359,7 +420,7 @@ export function RecipeDetailPage() {
           <div className="flex-1 min-w-0 w-full grid grid-cols-1 xl:grid-cols-5 gap-8">
             
             {/* Ingredients */}
-            <div className="xl:col-span-2 flex flex-col gap-6 bg-white rounded-3xl border border-default-100 shadow-none p-6 h-fit">
+            <div className="xl:col-span-2 flex flex-col gap-6 bg-white rounded-2xl border border-default-100 shadow-none p-6 h-fit">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold flex items-center gap-2">
                   <Carrot className="w-6 h-6 text-success" />
@@ -429,7 +490,7 @@ export function RecipeDetailPage() {
             </div>
 
             {/* Cooking Instructions (Timeline format) */}
-            <div className="xl:col-span-3 flex flex-col gap-6 bg-white rounded-3xl border border-default-100 shadow-none p-6">
+            <div className="xl:col-span-3 flex flex-col gap-6 bg-white rounded-2xl border border-default-100 shadow-none p-6">
                <h2 className="text-2xl font-bold flex items-center gap-2">
                  <ChefHat className="w-6 h-6 text-success" />
                  Cách làm
@@ -499,7 +560,7 @@ export function RecipeDetailPage() {
 
         {/* Right Column (Sidebar) */}
         <div className="w-full lg:w-[280px] xl:w-[320px] shrink-0 flex flex-col">
-          <div className="bg-white rounded-3xl border border-default-100 p-4 flex flex-col w-full">
+          <div className="bg-white rounded-2xl border border-default-100 shadow-none p-4 flex flex-col w-full">
             <Tabs aria-label="Recipe Sidebar Tabs" color="primary" variant="underlined" fullWidth classNames={{ cursor: "w-full bg-primary", tabList: "w-full relative rounded-none p-0 border-b border-default-200", tab: "px-0 h-12" }}>
               
               <Tab key="overview" title={<span className="text-base font-medium">Tổng quan</span>}>
@@ -727,6 +788,11 @@ export function RecipeDetailPage() {
       
       {/* Floating AI Chat */}
       <RecipeFloatingChat recipe={recipe} />
+      <MealPlannerSelectModal 
+        isOpen={isMealPlannerModalOpen} 
+        onOpenChange={setIsMealPlannerModalOpen} 
+        onConfirm={handleAddToMealPlan} 
+      />
     </div>
   );
 }

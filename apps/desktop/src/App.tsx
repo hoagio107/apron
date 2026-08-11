@@ -5,12 +5,25 @@ import { Button } from '@apron/ui';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { MainSidebar } from './components/layout/MainSidebar';
 import { Titlebar } from './components/layout/Titlebar';
+import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import { NewRecipePage } from './pages/recipes/NewRecipePage';
 import { RecipeListPage } from './pages/recipes/RecipeListPage';
 import { RecipeDetailPage } from './pages/recipes/RecipeDetailPage';
 import { DesignSystemPage } from './pages/DesignSystemPage';
 import { MealPlannerPage } from './pages/meal-planner/MealPlannerPage';
+import { ShoppingListPage } from './pages/shopping-list/ShoppingListPage';
+import { SmartFridgePage } from './pages/smart-fridge/SmartFridgePage';
+import { UnitsPage } from './pages/units/UnitsPage';
+import { IngredientCatalogPage } from './pages/catalog/IngredientCatalogPage';
+import { SavedRecipesPage } from './pages/recipes/SavedRecipesPage';
+import { TipListPage } from './pages/tips/TipListPage';
+import { TipDetailPage } from './pages/tips/TipDetailPage';
+import { CoursesPage } from './pages/courses/CoursesPage';
+import { CourseFormPage } from './pages/courses/CourseFormPage';
+import { CourseDetailPage } from './pages/courses/CourseDetailPage';
 import { OnboardingScreen } from './components/onboarding/OnboardingScreen';
+
+import { DashboardPage } from './pages/DashboardPage';
 
 function App() {
   const [isStorageReady, setIsStorageReady] = useState(false);
@@ -50,29 +63,33 @@ function App() {
           {/* Toggle Sidebar Button */}
           <button 
             onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
-            className={`hidden md:flex absolute z-40 top-[40px] -translate-y-1/2 -translate-x-1/2 ml-2 items-center justify-center w-8 h-8 bg-white dark:bg-gray-800 border-[1px] border-gray-200 dark:border-gray-700 rounded-full shadow-sm text-gray-500 dark:text-gray-400 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-700 opacity-0 hover:opacity-100 transition-all duration-300 ${isSidebarExpanded ? 'left-64' : 'left-20'}`}
+            className={`hidden md:flex absolute z-40 top-[40px] -translate-y-1/2 -translate-x-1/2 ml-2 items-center justify-center w-5 h-5 bg-white dark:bg-gray-800 border-[1px] border-gray-200 dark:border-gray-700 rounded-full shadow-sm text-gray-500 dark:text-gray-400 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-700 opacity-0 hover:opacity-100 transition-all duration-300 ${isSidebarExpanded ? 'left-64' : 'left-20'}`}
           >
-            {isSidebarExpanded ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            {isSidebarExpanded ? <ChevronLeft className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
           </button>
           
           {/* Main Content Area */}
           <main className={`flex-1 flex flex-col overflow-hidden bg-background transition-[padding] duration-300 ${isSidebarExpanded ? 'md:pl-64' : 'md:pl-20'}`}>
-            <div className="flex-1 overflow-y-auto p-8 m-2 bg-default-50 rounded-2xl border border-default-200 shadow-sm">
+            <div className="flex-1 overflow-y-auto px-8 pb-8 pt-0 m-2 bg-default-50 rounded-2xl border border-default-200 shadow-sm">
+            <ErrorBoundary>
             <Routes>
-              <Route path="/" element={
-                <div className="max-w-4xl mx-auto">
-                  <h1 className="text-4xl font-bold mb-8 text-primary">Trang chủ Cookbook</h1>
-                  <p className="mb-4">Sidebar đã được tích hợp thành công!</p>
-                  <Button color="primary" variant="solid">
-                    Test Button
-                  </Button>
-                </div>
-              } />
+              <Route path="/" element={<DashboardPage />} />
               
               <Route path="/recipes" element={<RecipeListPage />} />
               <Route path="/recipes/new" element={<NewRecipePage />} />
               <Route path="/recipes/:id" element={<RecipeDetailPage />} />
+              <Route path="/saved" element={<SavedRecipesPage />} />
               <Route path="/meal-planner" element={<MealPlannerPage />} />
+              <Route path="/shopping-list" element={<ShoppingListPage />} />
+              <Route path="/smart-fridge" element={<SmartFridgePage />} />
+              <Route path="/catalog" element={<IngredientCatalogPage />} />
+              <Route path="/tips" element={<TipListPage />} />
+              <Route path="/tips/:id" element={<TipDetailPage />} />
+              <Route path="/courses" element={<CoursesPage />} />
+              <Route path="/courses/:id" element={<CourseDetailPage />} />
+              <Route path="/courses/add" element={<CourseFormPage />} />
+              <Route path="/courses/edit/:id" element={<CourseFormPage />} />
+              <Route path="/units" element={<UnitsPage />} />
               <Route path="/design-system" element={<DesignSystemPage />} />
               
               <Route path="*" element={
@@ -81,6 +98,7 @@ function App() {
                 </div>
               } />
             </Routes>
+            </ErrorBoundary>
           </div>
         </main>
         </div>

@@ -12,6 +12,9 @@ interface PageHeaderProps {
   className?: string;
 }
 
+import { twMerge } from 'tailwind-merge';
+import { clsx } from 'clsx';
+
 export function PageHeader({ 
   title, 
   description,
@@ -30,8 +33,10 @@ export function PageHeader({
     }
   };
 
+  const rootClass = twMerge(clsx('flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-12 pb-4', className));
+
   return (
-    <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${className}`}>
+    <div className={rootClass}>
       <div className="flex items-start sm:items-center gap-4">
         {showBackButton && (
           <Button 

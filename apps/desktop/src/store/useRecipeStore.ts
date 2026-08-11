@@ -13,6 +13,11 @@ interface RecipeState {
   deleteRecipe: (id: string) => Promise<void>;
   addBulkRecipes: (recipes: Recipe[]) => Promise<void>;
   deleteBulkRecipes: (ids: string[]) => Promise<void>;
+  
+  // Ingredient cascades
+  updateIngredientInRecipes: (ingredientId: string, newName: string) => Promise<void>;
+  removeIngredientFromRecipes: (ingredientId: string) => Promise<void>;
+  detachIngredientFromRecipes: (ingredientId: string) => Promise<void>;
 }
 
 export const useRecipeStore = create<RecipeState>((set, get) => ({
@@ -119,6 +124,78 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
       }));
     } catch (e: any) {
       set({ error: e.message || 'Failed to bulk delete recipes' });
+    }
+  },
+
+  updateIngredientInRecipes: async (ingredientId: string, newName: string) => {
+    try {
+      const currentRecipes = get().recipes;
+      const toUpdate = currentRecipes.filter(r => r.ingredients && r.ingredients.some(i => i.ingredient_id === ingredientId));
+      if (toUpdate.length === 0) return;
+      
+      const updated = toUpdate.map(r => ({
+        ...r,
+        ingredients: r.ingredients.map(i => i.ingredient_id === ingredientId ? { ...i, name: newName } : i)
+      }));
+      
+      await RecipeRepository.saveBulk(updated);
+      set((state) => {
+        const ids = updated.map(u => u.id);
+        return { recipes: state.recipes.map(r => ids.includes(r.id!) ? updated.find(u => u.id === r.id)! : r) };
+      });
+    } catch (e: any) {
+      set({ error: e.message });
+      throw e;
+    }
+  },
+
+  removeIngredientFromRecipes: async (ingredientId: string) => {
+    try {
+      const currentRecipes = get().recipes;
+      const toUpdate = currentRecipes.filter(r => r.ingredients && r.ingredients.some(i => i.ingredient_id === ingredientId));
+      if (toUpdate.length === 0) return;
+      
+      const updated = toUpdate.map(r => ({
+        ...r,
+        ingredients: r.ingredients.filter(i => i.ingredient_id !== ingredientId)
+      }));
+      
+      await RecipeRepository.saveBulk(updated);
+      set((state) => {
+        const ids = updated.map(u => u.id);
+        return { recipes: state.recipes.map(r => ids.includes(r.id!) ? updated.find(u => u.id === r.id)! : r) };
+      });
+    } catch (e: any) {
+      set({ error: e.message });
+      throw e;
+    }
+  },
+
+  detachIngredientFromRecipes: async (ingredientId: string) => {
+    try {
+      const currentRecipes = get().recipes;
+      const toUpdate = currentRecipes.filter(r => r.ingredients && r.ingredients.some(i => i.ingredient_id === ingredientId));
+      if (toUpdate.length === 0) return;
+      
+      const updated = toUpdate.map(r => ({
+        ...r,
+        ingredients: r.ingredients.map(i => {
+          if (i.ingredient_id === ingredientId) {
+            const newI = { ...i };
+            delete newI.ingredient_id;
+            return newI;
+          }
+          return i;
+        })
+      }));
+      
+      await RecipeRepository.saveBulk(updated);
+      set((state) => {
+        const ids = updated.map(u => u.id);
+        return { recipes: state.recipes.map(r => ids.includes(r.id!) ? updated.find(u => u.id === r.id)! : r) };
+      });
+    } catch (e: any) {
+      set({ error: e.message });
       throw e;
     }
   },

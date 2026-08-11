@@ -9,7 +9,7 @@ import {
 import { arrayMove } from '@dnd-kit/sortable';
 import { ChevronLeft, ChevronRight, CalendarDays, ChefHat, Settings, LayoutList, LayoutGrid, Calculator, X, Plus } from 'lucide-react';
 import { Button } from '@apron/ui';
-import type { Recipe, MealType, MealSlotConfig } from '@apron/core';
+import type { Recipe, MealType } from '@apron/core';
 
 import { useMealPlanStore } from '../../store/useMealPlanStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
@@ -119,7 +119,7 @@ export function MealPlannerPage() {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex flex-col h-full gap-6 w-full pb-8 min-w-0">
+      <div className="flex flex-col h-full gap-6 w-full pt-6 pb-8 min-w-0">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
           <div className="flex items-center gap-4 shrink-0">
@@ -252,7 +252,7 @@ export function MealPlannerPage() {
           />
           
           {/* Sidebar */}
-          <div className="hidden lg:block w-80 shrink-0 bg-content1 rounded-2xl overflow-hidden">
+          <div className="hidden lg:block w-80 shrink-0 bg-white rounded-2xl border border-default-100 shadow-none overflow-hidden">
             <RecipeSidebar />
           </div>
         </div>

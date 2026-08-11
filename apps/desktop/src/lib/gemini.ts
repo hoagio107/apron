@@ -40,6 +40,11 @@ export interface ParseRecipeResult {
       content: string;
     }[];
   }[];
+  linked_tips?: string[];
+  suggested_tip?: {
+    title: string;
+    content: string;
+  };
 }
 
 // Hàm hỗ trợ kiểm tra URL hợp lệ
@@ -53,7 +58,14 @@ function isValidHttpUrl(string: string) {
   return url.protocol === "http:" || url.protocol === "https:";
 }
 
-export async function parseRecipeWithGemini(model: string, text: string, apiKey: string, images: string[] = []): Promise<ParseRecipeResult[]> {
+export async function parseRecipeWithGemini(
+  model: string, 
+  text: string, 
+  apiKey: string, 
+  images: string[] = [], 
+  existingIngredients: string[] = [],
+  existingTips: {id: string, title: string}[] = []
+): Promise<ParseRecipeResult[]> {
   if (!apiKey) {
     throw new Error('Vui lòng nhập Gemini API Key.');
   }
@@ -84,6 +96,7 @@ export async function parseRecipeWithGemini(model: string, text: string, apiKey:
   }
   
   const tagNames = DEFAULT_TAGS.filter(t => t.parent_id !== null).map(t => t.name).join(', ');
+  const ingredientNames = existingIngredients.length > 0 ? existingIngredients.join(', ') : 'Không có';
 
   const prompt = `
 Bạn là một chuyên gia ẩm thực và một trợ lý ảo phân tích dữ liệu xuất sắc. Nhiệm vụ của bạn là trích xuất và tính toán thông tin công thức nấu ăn từ đoạn văn bản (hoặc trang web, hoặc hình ảnh) dưới đây. 
@@ -136,9 +149,16 @@ QUY TẮC QUAN TRỌNG:
      + "root-cooking": Dành cho Phương pháp chế biến
      + "root-ingredient": Dành cho Nguyên liệu chính
      + "root-cuisine": Dành cho Ẩm thực vùng miền và quốc gia
-     + "root-diet": Dành cho Chế độ ăn uống và sức khỏe
+      + "root-diet": Dành cho Chế độ ăn uống và sức khỏe
      + "root-time-difficulty": Dành cho Thời gian và độ khó
-5. TUYỆT ĐỐI không thêm bất kỳ văn bản giải thích nào bên ngoài khối JSON. Phải đảm bảo chuẩn định dạng JSON hợp lệ để máy có thể đọc được.
+5. QUY TẮC SINH NGUYÊN LIỆU:
+   - Tại trường "ingredients", ƯU TIÊN TUYỆT ĐỐI sử dụng tên nguyên liệu đã có trong danh sách từ điển sau: ${ingredientNames}.
+   - Bạn PHẢI tự động hiểu từ đồng nghĩa để map đúng tên nguyên liệu trong từ điển. Ví dụ: Nếu bài viết ghi "Đường kính trắng" nhưng từ điển có "Đường", BẠN PHẢI TRẢ VỀ "Đường".
+6. QUY TẮC MẸO NHÀ BẾP:
+   - Dò tìm trong danh sách Mẹo có sẵn sau đây: ${existingTips.length > 0 ? existingTips.map(t => '[' + t.id + '] ' + t.title).join(', ') : 'Không có'}.
+   - Nếu có bất kỳ mẹo nào trong danh sách trên RẤT CÓ ÍCH cho công thức này, hãy trả về mảng \`linked_tips\` chứa ID của chúng.
+   - Nếu chưa có mẹo nào liên quan nhưng bạn có 1 mẹo thực sự hữu ích (ví dụ: mẹo sơ chế, cách chữa cháy nếu làm hỏng), hãy trả về \`suggested_tip: { "title": "Tiêu đề mẹo", "content": "Nội dung mẹo chi tiết" }\`.
+7. TUYỆT ĐỐI không thêm bất kỳ văn bản giải thích nào bên ngoài khối JSON. Phải đảm bảo chuẩn định dạng JSON hợp lệ để máy có thể đọc được.
 
 Văn bản đầu vào:
 ${contentToProcess || '(Không có văn bản, hãy phân tích dựa trên hình ảnh)'}
@@ -251,3 +271,101 @@ ${contentToProcess || '(Không có văn bản, hãy phân tích dựa trên hìn
     throw error;
   }
 }
+
+export interface SuggestedRecipe {
+  title: string;
+  description: string;
+  difficulty: 'Dễ' | 'Vừa' | 'Khó';
+  prep_time_minutes: number;
+  cook_time_minutes: number;
+  missing_ingredients: string[];
+  ingredients: {
+    name: string;
+    amount: string;
+    unit: string;
+  }[];
+  steps: {
+    content: string;
+  }[];
+  cookbook_recipe_id?: string | null;
+}
+
+export async function suggestRecipesFromPantry(model: string, apiKey: string, pantryItemsStr: string, cookbookStr?: string): Promise<SuggestedRecipe[]> {
+  if (!apiKey) {
+    throw new Error('Vui lòng nhập Gemini API Key trong phần Cài đặt.');
+  }
+
+  const prompt = `
+Bạn là một đầu bếp tài ba. Dưới đây là danh sách các nguyên liệu đang có sẵn trong tủ lạnh của người dùng:
+${pantryItemsStr}
+
+${cookbookStr ? `Người dùng cũng đã cung cấp danh sách "Sổ tay công thức" của họ:\n${cookbookStr}\n\nHãy ưu tiên ĐỐI CHIẾU và TÌM RA 2-3 món từ chính "Sổ tay công thức" này mà phù hợp nhất với nguyên liệu đang có. Nếu sổ tay không có món nào hợp lý, bạn có thể tự sáng tạo thêm món mới.` : `Dựa vào những nguyên liệu này, hãy gợi ý 3 món ăn ngon nhất có thể làm.`}
+
+Không nhất thiết phải sử dụng TOÀN BỘ nguyên liệu, nhưng cố gắng tận dụng tối đa những gì đang có (ưu tiên nguyên liệu sắp hết hạn).
+Nếu cần thêm một vài nguyên liệu phụ (hành lá, gia vị cơ bản, v.v.) thì cũng không sao, hãy liệt kê chúng vào "missing_ingredients".
+
+Trả về DUY NHẤT một đối tượng JSON theo định dạng sau:
+{
+  "recipes": [
+    {
+      "title": "Tên món ăn",
+      "cookbook_recipe_id": "ID_cua_mon_an", 
+      "description": "Mô tả hấp dẫn về món ăn",
+      "difficulty": "Dễ", 
+      "prep_time_minutes": 15,
+      "cook_time_minutes": 20,
+      "missing_ingredients": ["Hành lá", "Tiêu"],
+      "ingredients": [
+        { "name": "Tên nguyên liệu", "amount": "Số lượng", "unit": "Đơn vị" }
+      ],
+      "steps": [
+        { "content": "Bước 1..." },
+        { "content": "Bước 2..." }
+      ]
+    }
+  ]
+}
+
+Lưu ý: "cookbook_recipe_id" CHỈ ĐIỀN nếu bạn lấy công thức từ Sổ tay (ID cung cấp trong danh sách). Nếu là món mới do bạn tự nghĩ ra, hãy để null.
+`;
+
+  try {
+    const response = await tauriFetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: prompt }]
+        }],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          maxOutputTokens: 8192,
+        }
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `Gemini API failed: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (resultText) {
+      let cleanResultText = resultText.trim();
+      if (cleanResultText.startsWith('```json')) cleanResultText = cleanResultText.replace(/^```json\n?/, '');
+      if (cleanResultText.endsWith('```')) cleanResultText = cleanResultText.replace(/```$/, '');
+      
+      const parsedJSON = JSON.parse(cleanResultText.trim());
+      return parsedJSON.recipes || [];
+    }
+    throw new Error('No response content from Gemini');
+  } catch (error) {
+    console.error('Error suggesting recipes with Gemini:', error);
+    throw error;
+  }
+}
+

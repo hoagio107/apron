@@ -1,6 +1,6 @@
 import type { Recipe } from '@apron/core';
 import { Clock, Star, Flame, Target, Image as ImageIcon, MoreVertical, Heart, Trash2, CalendarDays, Edit2 } from 'lucide-react';
-import { Checkbox, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from '@apron/ui';
+import { Checkbox, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from '@/ui';
 import { ImageManager } from '../../../lib/image-manager';
 
 export type RecipeViewType = 'grid-portrait' | 'grid-square' | 'grid-landscape';
@@ -124,16 +124,18 @@ export function RecipeCard({
         ></div>
 
         {/* Top Actions */}
-        {selectable && (
-          <div className="absolute top-3 left-3 z-10" onClick={handleSelectClick}>
-            <Checkbox isSelected={isSelected} onValueChange={(val) => onSelectChange?.(val)} />
-          </div>
-        )}
-        {variantCount > 0 && (
-          <div className="absolute top-3 right-3 z-10 bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
-            +{variantCount} biến thể
-          </div>
-        )}
+        <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
+          {selectable && (
+            <div onClick={handleSelectClick}>
+              <Checkbox isSelected={isSelected} onValueChange={(val) => onSelectChange?.(val)} />
+            </div>
+          )}
+          {variantCount > 0 && (
+            <div className="bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
+              +{variantCount} biến thể
+            </div>
+          )}
+        </div>
         
         <div className="absolute top-3 right-3 z-20">
           {!hideMenu ? (
@@ -156,7 +158,7 @@ export function RecipeCard({
 
         {/* Content Area */}
         <div className="relative z-10 flex flex-col justify-end h-full p-4 text-white">
-          <h3 className="font-bold text-lg line-clamp-2 leading-tight mb-2 drop-shadow-md">
+          <h3 className="font-bold text-base line-clamp-2 leading-tight mb-2 drop-shadow-md">
             {recipe.title}
           </h3>
           
@@ -195,16 +197,18 @@ export function RecipeCard({
       className={`group flex flex-col cursor-pointer relative ${size === 'sm' ? 'gap-1.5' : 'gap-3'}`}
     >
       <div className={`relative rounded-xl overflow-hidden bg-primary-50 ${viewType === 'grid-landscape' ? 'w-full aspect-[4/3]' : 'w-full aspect-square'}`}>
-        {selectable && (
-          <div className="absolute top-3 left-3 z-10" onClick={handleSelectClick}>
-            <Checkbox isSelected={isSelected} onValueChange={(val) => onSelectChange?.(val)} />
-          </div>
-        )}
-        {variantCount > 0 && (
-          <div className="absolute top-3 right-3 z-10 bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
-            +{variantCount} biến thể
-          </div>
-        )}
+        <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
+          {selectable && (
+            <div onClick={handleSelectClick}>
+              <Checkbox isSelected={isSelected} onValueChange={(val) => onSelectChange?.(val)} />
+            </div>
+          )}
+          {variantCount > 0 && (
+            <div className="bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
+              +{variantCount} biến thể
+            </div>
+          )}
+        </div>
         
         {/* Context Menu or Custom Action */}
         <div className="absolute top-2 right-2 z-20">

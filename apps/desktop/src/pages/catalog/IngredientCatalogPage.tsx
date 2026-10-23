@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { useIngredientCatalogStore } from '../../store/useIngredientCatalogStore';
-import { Button, Avatar, Input, Select, SelectItem, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@apron/ui';
+import { Button, Avatar, Input, Select, SelectItem, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@/ui';
 import { Trash2, Plus, ImagePlus, BookOpen } from 'lucide-react';
 import { CATEGORIES } from '@apron/core';
 import { useUnitStore } from '../../store/useUnitStore';

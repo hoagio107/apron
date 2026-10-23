@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Button } from '@apron/ui';
+import { Button } from '@/ui';
 import { ImagePlus, Star, ChevronLeft, ChevronRight, Trash2, PlayCircle } from 'lucide-react';
 import type { FormValues } from './schema';
 import { ImagePickerModal } from './ImagePickerModal';
@@ -18,30 +18,22 @@ export function ImageSection() {
   const thumbnailsRef = useRef<HTMLDivElement>(null);
   
   const mainImage = watch('image_url');
-  
-  useEffect(() => {
-    if (thumbnailsRef.current) {
-      const container = thumbnailsRef.current;
-      const activeElement = container.children[selectedIndex] as HTMLElement;
-      if (activeElement) {
-        const scrollLeft = activeElement.offsetLeft - container.offsetWidth / 2 + activeElement.offsetWidth / 2;
-        container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
-      }
-    }
-  }, [selectedIndex]);
-
-  const scrollThumbnails = (direction: 'left' | 'right') => {
-    if (thumbnailsRef.current) {
-      const container = thumbnailsRef.current;
-      const scrollAmount = container.offsetWidth * 0.8;
-      container.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
-    }
-  };
   const otherImages = watch('images') || [];
   const videos = watch('videos') || [];
   
   // All media combined for display
   const allMedia = [...(mainImage ? [mainImage] : []), ...otherImages, ...videos];
+
+  useEffect(() => {
+    if (thumbnailsRef.current) {
+      const container = thumbnailsRef.current;
+      const activeElement = container.children[selectedIndex] as HTMLElement;
+      if (activeElement) {
+        const scrollTop = activeElement.offsetTop - container.offsetTop - container.offsetHeight / 2 + activeElement.offsetHeight / 2;
+        container.scrollTo({ top: scrollTop, behavior: 'smooth' });
+      }
+    }
+  }, [selectedIndex]);
 
   const handleSelectMedia = (newImages: string[], newVideos: string[]) => {
     if (newImages.length === 0 && newVideos.length === 0) return;
@@ -144,29 +136,50 @@ export function ImageSection() {
   };
 
   return (
-    <div className="flex flex-col h-full min-h-[400px]">
-      {allMedia.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center">
+    <div className="flex flex-col gap-2 w-full h-full">
+      {/* Header Info */}
+      <div className="flex items-center justify-between px-0.5">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-foreground">Ảnh đại diện & Thư viện ảnh</span>
+          {allMedia.length > 0 && (
+            <span className="text-xs text-default-500 font-medium">({allMedia.length} ảnh)</span>
+          )}
+        </div>
+        {allMedia.length > 0 && (
+          <Button
+            size="sm"
+            variant="flat"
+            color="primary"
+            onPress={() => setIsModalOpen(true)}
+            startContent={<ImagePlus className="w-3.5 h-3.5" />}
+            className="font-medium text-xs h-7 px-2.5 rounded-lg"
+          >
+            Thêm ảnh
+          </Button>
+        )}
+      </div>
+
+      {/* Main Container: Left Large Preview (1:1) + Right Multi-Avatar Column */}
+      <div className="flex items-stretch gap-3 w-full">
+        {/* Left Side: Main Preview or Dropzone strictly 1:1 */}
+        {allMedia.length === 0 ? (
           <div 
             onClick={() => setIsModalOpen(true)}
-            className="w-full h-full border-2 border-dashed border-primary/50 rounded-2xl flex flex-col items-center justify-center bg-primary-50/50 text-primary-600 hover:bg-primary-50 hover:border-primary transition-all cursor-pointer group"
+            className="flex-1 aspect-square min-w-0 border-2 border-dashed border-primary/40 rounded-2xl flex flex-col items-center justify-center bg-primary-50/40 dark:bg-primary-950/20 text-primary-600 hover:bg-primary-50/60 hover:border-primary transition-all cursor-pointer p-4 group"
           >
-            <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <ImagePlus className="w-8 h-8 text-primary" />
+            <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/40 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <ImagePlus className="w-7 h-7 text-primary" />
             </div>
-            <p className="font-bold text-xl mb-1">Tải lên hoặc chọn ảnh/video</p>
-            <p className="text-sm text-primary-500/80 text-center px-4">Kéo thả file hoặc nhập URL</p>
+            <p className="font-bold text-base mb-1 text-center text-foreground">Tải ảnh đại diện</p>
+            <p className="text-xs text-default-500 text-center">Kéo thả file hoặc bấm để chọn ảnh/video</p>
           </div>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {/* Main Preview */}
-          <div className="h-[400px] md:h-[500px] w-full bg-default-100 rounded-2xl relative group overflow-hidden flex items-center justify-center shadow-inner border border-default-200">
+        ) : (
+          <div className="flex-1 aspect-square min-w-0 bg-default-100 dark:bg-default-50/40 rounded-2xl relative group overflow-hidden flex items-center justify-center shadow-inner border border-divider/60">
             {allMedia[selectedIndex] && (
               isVideo(allMedia[selectedIndex]) ? (
                 <video 
                   src={allMedia[selectedIndex]} 
-                  className="max-w-full max-h-full object-contain"
+                  className="w-full h-full object-cover"
                   autoPlay
                   loop
                   muted
@@ -175,55 +188,64 @@ export function ImageSection() {
               ) : (
                 <img 
                   src={ImageManager.getAssetUrl(allMedia[selectedIndex])} 
-                  alt="Main preview" 
-                  className="max-w-full max-h-full object-contain"
+                  alt="Ảnh đang chọn" 
+                  className="w-full h-full object-cover"
                 />
               )
             )}
-            
+
             {/* Nav Arrows */}
             {selectedIndex > 0 && (
               <Button 
                 isIconOnly 
                 variant="flat" 
-                className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/70 backdrop-blur-md shadow-sm z-10 opacity-0 group-hover:opacity-100 transition-opacity" 
+                size="sm"
+                className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 backdrop-blur-md shadow-sm z-10 h-8 w-8 text-foreground" 
                 onPress={() => setSelectedIndex(selectedIndex - 1)}
+                aria-label="Ảnh trước"
               >
-                <ChevronLeft className="w-5 h-5 text-default-700" />
+                <ChevronLeft className="w-4 h-4" />
               </Button>
             )}
             {selectedIndex < allMedia.length - 1 && (
               <Button 
                 isIconOnly 
                 variant="flat" 
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/70 backdrop-blur-md shadow-sm z-10 opacity-0 group-hover:opacity-100 transition-opacity" 
+                size="sm"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 backdrop-blur-md shadow-sm z-10 h-8 w-8 text-foreground" 
                 onPress={() => setSelectedIndex(selectedIndex + 1)}
+                aria-label="Ảnh sau"
               >
-                <ChevronRight className="w-5 h-5 text-default-700" />
+                <ChevronRight className="w-4 h-4" />
               </Button>
             )}
 
-            {/* Badges & Actions */}
-            <div className="absolute top-3 left-3 z-10">
-              {selectedIndex === 0 && (
-                <div className="bg-primary text-white text-xs px-2.5 py-1.5 rounded-lg font-medium shadow-md flex items-center gap-1.5">
-                  <Star className="w-3.5 h-3.5 fill-current" /> Nội dung chính
+            {/* Top-Left Badge */}
+            <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1">
+              {selectedIndex === 0 ? (
+                <div className="bg-primary text-white text-xs px-2.5 py-1 rounded-lg font-semibold shadow-sm flex items-center gap-1.5 backdrop-blur-sm">
+                  <Star className="w-3.5 h-3.5 fill-current" /> Ảnh đại diện chính
+                </div>
+              ) : (
+                <div className="bg-black/60 text-white text-xs px-2 py-1 rounded-lg font-medium shadow-sm backdrop-blur-sm">
+                  Ảnh phụ ({selectedIndex + 1}/{allMedia.length})
                 </div>
               )}
             </div>
 
-            <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            {/* Top-Right Actions */}
+            <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-10">
               {selectedIndex !== 0 && (
                 <Button 
                   size="sm" 
-                  isIconOnly
                   color="primary" 
                   variant="flat" 
-                  className="bg-white/90 backdrop-blur-md shadow-sm" 
+                  className="bg-background/90 backdrop-blur-md shadow-sm text-xs font-semibold h-8 px-2.5 rounded-lg" 
                   onPress={() => handleSetMain(selectedIndex)}
-                  title="Set as recipe avatar"
+                  startContent={<Star className="w-3.5 h-3.5" />}
+                  title="Đặt làm ảnh đại diện chính"
                 >
-                  <Star className="w-4 h-4" />
+                  Đặt làm chính
                 </Button>
               )}
               <Button 
@@ -231,86 +253,134 @@ export function ImageSection() {
                 isIconOnly 
                 color="danger" 
                 variant="flat" 
-                className="bg-white/90 backdrop-blur-md shadow-sm" 
+                className="bg-background/90 backdrop-blur-md shadow-sm h-8 w-8 rounded-lg" 
                 onPress={() => handleRemoveMedia(selectedIndex)}
-                title="Xóa file"
+                title="Xóa ảnh này"
+                aria-label="Xóa ảnh"
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>
           </div>
+        )}
 
-          {/* Thumbnails Row */}
-          <div className="relative group/thumbs flex items-center">
-            {allMedia.length > 4 && (
-              <Button 
-                isIconOnly 
-                variant="flat" 
-                size="sm"
-                className="absolute left-1 z-10 opacity-0 group-hover/thumbs:opacity-100 transition-opacity bg-white/90 backdrop-blur-md shadow-sm rounded-full"
-                onPress={() => scrollThumbnails('left')}
-              >
-                <ChevronLeft className="w-4 h-4 text-default-700" />
-              </Button>
-            )}
-            
-            <div ref={thumbnailsRef} className="flex gap-3 w-full overflow-x-auto pb-2 px-1 [&::-webkit-scrollbar]:hidden scroll-smooth items-center">
-            {allMedia.map((mediaUrl, i) => (
-              <div 
-                key={`${mediaUrl}-${i}`}
-                onClick={() => setSelectedIndex(i)}
-                className={`
-                  relative cursor-pointer rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 aspect-square w-20 bg-default-100
-                  ${i === selectedIndex ? 'border-primary ring-2 ring-primary/20' : 'border-transparent opacity-60 hover:opacity-100'}
-                `}
-              >
-                {isVideo(mediaUrl) ? (
-                  <>
-                    <video src={mediaUrl} className="w-full h-full object-cover" muted />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                      <PlayCircle className="w-6 h-6 text-white opacity-80" />
+        {/* Right Side: Multi-Avatar Column (Cột thể hiện nhiều ảnh đại diện) */}
+        <div className="w-20 sm:w-24 md:w-28 flex flex-col shrink-0 min-h-0">
+          <div 
+            ref={thumbnailsRef}
+            className="flex-1 min-h-0 w-full flex flex-col gap-2 overflow-y-auto pr-0.5 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-default-300 [&::-webkit-scrollbar-thumb]:rounded-full scroll-smooth"
+          >
+            {allMedia.map((mediaUrl, i) => {
+              const isMain = i === 0;
+              const isSelected = i === selectedIndex;
+              return (
+                <div 
+                  key={`${mediaUrl}-${i}`}
+                  data-index={i}
+                  data-testid="media-thumbnail"
+                  onClick={() => setSelectedIndex(i)}
+                  className={`
+                    relative cursor-pointer rounded-xl overflow-hidden border-2 transition-all shrink-0 aspect-square w-full bg-default-100 group
+                    ${isSelected ? 'border-primary ring-2 ring-primary/30 shadow-sm' : 'border-divider/60 opacity-70 hover:opacity-100'}
+                  `}
+                  title={isMain ? "Ảnh đại diện chính" : `Ảnh ${i + 1}`}
+                >
+                  {isVideo(mediaUrl) ? (
+                    <>
+                      <video src={mediaUrl} className="w-full h-full object-cover" muted />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                        <PlayCircle className="w-5 h-5 text-white opacity-90" />
+                      </div>
+                    </>
+                  ) : (
+                    <img 
+                      src={ImageManager.getAssetUrl(mediaUrl)} 
+                      alt={`Ảnh ${i + 1}`} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" 
+                    />
+                  )}
+                  
+                  {/* Primary avatar star indicator */}
+                  {isMain && (
+                    <div 
+                      className="absolute top-1 left-1 bg-primary text-white p-1 rounded-md shadow-xs z-10 flex items-center justify-center"
+                      title="Ảnh đại diện chính"
+                    >
+                      <Star className="w-3 h-3 fill-current" />
                     </div>
-                  </>
-                ) : (
-                  <img 
-                    src={ImageManager.getAssetUrl(mediaUrl)} 
-                    alt={`Thumbnail ${i}`} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
-                  />
-                )}
-                
-                {i === 0 && (
-                  <div className="absolute bottom-1 right-1 bg-primary text-white p-0.5 rounded-sm shadow-sm z-10">
-                    <Star className="w-3 h-3 fill-current" />
-                  </div>
-                )}
-              </div>
-            ))}
-            
-            {/* Add New Media Box */}
-            <div 
-              onClick={() => setIsModalOpen(true)}
-              className="cursor-pointer rounded-xl border-2 border-dashed border-default-300 bg-default-50 text-default-400 hover:text-primary hover:border-primary hover:bg-primary-50 transition-all flex items-center justify-center flex-shrink-0 aspect-square w-20"
-              title="Thêm ảnh/video mới"
-            >
-              <ImagePlus className="w-6 h-6" />
-            </div>
-          </div>
-          
-            {allMedia.length > 4 && (
-              <Button 
-                isIconOnly 
-                variant="flat" 
-                size="sm"
-                className="absolute right-1 z-10 opacity-0 group-hover/thumbs:opacity-100 transition-opacity bg-white/90 backdrop-blur-md shadow-sm rounded-full"
-                onPress={() => scrollThumbnails('right')}
-              >
-                <ChevronRight className="w-4 h-4 text-default-700" />
-              </Button>
+                  )}
+
+                  {/* Set main quick button */}
+                  {!isMain && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSetMain(i);
+                      }}
+                      className="absolute top-1 left-1 bg-black/60 hover:bg-primary text-white p-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                      title="Đặt làm ảnh chính"
+                      aria-label="Đặt làm ảnh chính"
+                    >
+                      <Star className="w-3 h-3" />
+                    </button>
+                  )}
+
+                  {/* Quick delete button */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveMedia(i);
+                    }}
+                    className="absolute top-1 right-1 bg-black/60 hover:bg-danger text-white p-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                    title="Xóa ảnh"
+                    aria-label="Xóa ảnh"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              );
+            })}
+
+            {/* Empty placeholder slots when no media */}
+            {allMedia.length === 0 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(true)}
+                  className="aspect-square w-full rounded-xl border-2 border-dashed border-default-300 dark:border-default-200/50 bg-default-50/50 dark:bg-default-100/30 text-default-400 hover:text-primary hover:border-primary hover:bg-primary-50/30 transition-all flex items-center justify-center cursor-pointer group shrink-0"
+                  title="Thêm ảnh"
+                  aria-label="Thêm ảnh"
+                >
+                  <ImagePlus className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(true)}
+                  className="aspect-square w-full rounded-xl border-2 border-dashed border-default-200 dark:border-default-200/30 bg-default-50/30 dark:bg-default-100/20 text-default-400 hover:text-primary hover:border-primary hover:bg-primary-50/30 transition-all flex items-center justify-center cursor-pointer group shrink-0"
+                  title="Thêm ảnh"
+                  aria-label="Thêm ảnh"
+                >
+                  <ImagePlus className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                </button>
+              </>
             )}
+            
+            {/* Add More slot button in the right column */}
+            <button 
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              className="cursor-pointer rounded-xl border-2 border-dashed border-default-300 dark:border-default-200/50 bg-default-50/50 dark:bg-default-100/30 text-default-500 hover:text-primary hover:border-primary hover:bg-primary-50/30 transition-all flex flex-col items-center justify-center shrink-0 aspect-square w-full group py-2"
+              title="Thêm ảnh mới"
+              aria-label="Thêm ảnh mới"
+            >
+              <ImagePlus className="w-5 h-5 group-hover:scale-110 transition-transform mb-0.5 text-default-400 group-hover:text-primary" />
+              <span className="text-xs font-semibold text-default-500 group-hover:text-primary">Thêm</span>
+            </button>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Modal Picker */}
       <ImagePickerModal 

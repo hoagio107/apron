@@ -23,7 +23,7 @@ export function SmartSearch() {
   return (
     <div 
       className={`
-        relative flex items-center h-8 bg-default-100 rounded-lg transition-all duration-300 ease-in-out pointer-events-auto cursor-pointer
+        relative flex items-center h-10 bg-default-100 rounded-lg transition-all duration-300 ease-in-out pointer-events-auto cursor-pointer
         ${isSearchActive ? 'w-full max-w-md ring-2 ring-primary/20 bg-default-100/80' : 'w-64 hover:bg-default-200'}
       `}
       onClick={() => {

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { 
   Card, CardBody, Button, Accordion, AccordionItem, Divider, Avatar,
   Tabs, Tab, Checkbox, Textarea, Tooltip, Progress
-} from '@apron/ui';
+} from '@/ui';
 import { BookOpen, ChevronLeft, Clock, PlayCircle, Star, FileText, ChevronRight, Plus, Trash2, ChevronDown, ChevronUp, ChefHat, StickyNote, Flame, BarChart, Edit, Paperclip } from 'lucide-react';
 import { useCourseStore } from '../../store/useCourseStore';
 import { useRecipeStore } from '../../store/useRecipeStore';

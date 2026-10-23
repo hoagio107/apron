@@ -2,6 +2,7 @@ import { Capacitor } from '@capacitor/core';
 import type { StorageProvider } from './types';
 import { TauriStorageProvider } from './tauri';
 import { CapacitorStorageProvider } from './capacitor';
+import { BrowserStorageProvider } from './browser';
 
 export * from './types';
 
@@ -21,9 +22,8 @@ export function getStorageProvider(): StorageProvider {
     cachedProvider = new CapacitorStorageProvider();
   } else {
     // Fallback khi code chạy thử trên web browser (dev)
-    console.warn('Đang chạy ở môi trường Web thuần, Storage sẽ tạm dùng TauriStorageProvider (hoặc có thể viết thêm IndexedDB Provider)');
-    // Tạm gọi Tauri, ở chế độ web dev Tauri có plugin mock hoặc tự throw lỗi nếu không setup.
-    cachedProvider = new TauriStorageProvider();
+    console.warn('Đang chạy ở môi trường Web thuần, Storage sẽ tạm dùng BrowserStorageProvider (localStorage)');
+    cachedProvider = new BrowserStorageProvider();
   }
 
   return cachedProvider;

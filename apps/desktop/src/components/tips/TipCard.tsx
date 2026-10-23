@@ -1,5 +1,5 @@
-import { Card, Button } from '@apron/ui';
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@apron/ui';
+import { Card, Button } from '@/ui';
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
 import { Lightbulb, Edit, Trash2, MoreVertical } from 'lucide-react';
 import type { Tip } from '@apron/core';
 import { TIP_CATEGORIES } from '@apron/core';

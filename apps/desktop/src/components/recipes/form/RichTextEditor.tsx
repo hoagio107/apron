@@ -3,7 +3,7 @@ import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Bold, Italic, Strikethrough, List, ListOrdered, Indent, Outdent } from 'lucide-react';
-import { Button } from '@apron/ui';
+import { Button } from '@/ui';
 
 interface RichTextEditorProps {
   value: string;

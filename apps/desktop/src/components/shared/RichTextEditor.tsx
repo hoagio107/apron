@@ -4,7 +4,7 @@ import Placeholder from '@tiptap/extension-placeholder';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Youtube from '@tiptap/extension-youtube';
-import { Button } from '@apron/ui';
+import { Button } from '@/ui';
 import { Bold, Italic, Strikethrough, List, ListOrdered, Heading1, Heading2, Quote, ImageIcon, Link as LinkIcon, Youtube as YoutubeIcon } from 'lucide-react';
 import { useEffect } from 'react';
 

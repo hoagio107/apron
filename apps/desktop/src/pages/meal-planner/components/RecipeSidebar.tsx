@@ -4,6 +4,7 @@ import type { Recipe } from '@apron/core';
 import { useRecipeStore } from '../../../store/useRecipeStore';
 import { useEffect, useState } from 'react';
 import { ImageManager } from '../../../lib/image-manager';
+import { Input } from '@/ui';
 
 import { DraggableRecipe } from './DraggableRecipe';
 import { RecipeGroup } from './RecipeGroup';
@@ -50,13 +51,14 @@ export function RecipeSidebar() {
           </div>
         </div>
         <div className="relative">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-default-400" />
-          <input 
+          <Input 
             type="text"
             placeholder="Tìm kiếm..."
+            variant="flat"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-default-100 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary outline-none"
+            onValueChange={setSearch}
+            startContent={<Search className="w-4 h-4 text-default-400" />}
+            className="w-full"
           />
         </div>
       </div>

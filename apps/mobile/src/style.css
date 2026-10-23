@@ -1,0 +1,288 @@
+/* ==========================================================================
+   APRON DESIGN SYSTEM - style.css
+   Chuẩn hoá màu sắc, tokens, components dùng chung cho toàn bộ ứng dụng
+   ========================================================================== */
+
+/* 1. Theme Color Tokens (Semantic Design Tokens) */
+:root {
+  /* Surface & Typography tokens */
+  --app-bg: hsl(var(--heroui-background));
+  --app-fg: hsl(var(--heroui-foreground));
+  --app-card-bg: hsl(var(--heroui-content1));
+  --app-card-fg: hsl(var(--heroui-content1-foreground, var(--heroui-foreground)));
+  --app-card-border: hsl(var(--heroui-divider) / var(--heroui-divider-opacity, 0.15));
+  --app-muted: hsl(var(--heroui-default-500));
+  --heroui-hover-opacity: 1;
+  
+  /* Gray palette fallbacks */
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+}
+
+.dark {
+  --app-bg: hsl(var(--heroui-background));
+  --app-fg: hsl(var(--heroui-foreground));
+  --app-card-bg: hsl(var(--heroui-content1));
+  --app-card-fg: hsl(var(--heroui-content1-foreground, var(--heroui-foreground)));
+  --app-card-border: hsl(var(--heroui-divider) / var(--heroui-divider-opacity, 0.15));
+  --app-muted: hsl(var(--heroui-default-500));
+  --heroui-hover-opacity: 1;
+  
+  --color-gray-50: #18181b;
+  --color-gray-100: #27272a;
+  --color-gray-200: #3f3f46;
+  --color-gray-300: #52525b;
+  --color-gray-400: #71717a;
+  --color-gray-500: #a1a1aa;
+  --color-gray-600: #d4d4d8;
+  --color-gray-700: #e4e4e7;
+  --color-gray-800: #f4f4f5;
+  --color-gray-900: #fafafa;
+}
+
+/* 2. Base Resets & Border Standardization (Loại bỏ triệt để lỗi viền đen) */
+@layer base {
+  *, ::before, ::after {
+    /* Mọi border mặc định đều dùng divider tinh tế 15% opacity, không bao giờ dùng đen đặc */
+    border-color: hsl(var(--heroui-divider) / var(--heroui-divider-opacity, 0.15));
+  }
+
+  html, body {
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    background-color: hsl(var(--heroui-background));
+    color: hsl(var(--heroui-foreground));
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* 3. Component Classes (Chuẩn hoá UI component, không viết CSS ad-hoc tại nơi hiển thị) */
+@layer components {
+  /* Layout Page chuẩn */
+  .app-page {
+    width: 100%;
+    min-height: 100vh;
+    background-color: hsl(var(--heroui-background));
+    color: hsl(var(--heroui-foreground));
+  }
+
+  /* Thẻ Card chuẩn */
+  .app-card {
+    background-color: hsl(var(--heroui-content1));
+    color: hsl(var(--heroui-foreground));
+    border-radius: 1rem; /* 16px - rounded-2xl */
+    border: none;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .dark .app-card {
+    box-shadow: none;
+  }
+
+  /* Thẻ Card dạng đứt nét cho empty state / upload */
+  .app-card-dashed {
+    background-color: hsl(var(--heroui-content1) / 0.5);
+    color: hsl(var(--heroui-foreground));
+    border-radius: 1rem;
+    border-width: 1px;
+    border-style: dashed;
+    border-color: hsl(var(--heroui-default-300) / 0.6);
+    box-shadow: none;
+  }
+
+  /* Thẻ Card tương tác (chuẩn cảm ứng chạm mobile - không dùng hover dính) */
+  .app-card-interactive {
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .app-card-interactive:active {
+    transform: scale(0.98);
+    opacity: 0.92;
+  }
+
+  /* Bề mặt nổi chuẩn */
+  .app-surface {
+    background-color: hsl(var(--heroui-content1));
+    color: hsl(var(--heroui-foreground));
+  }
+
+  .app-surface-secondary {
+    background-color: hsl(var(--heroui-content2));
+    color: hsl(var(--heroui-foreground));
+  }
+
+  /* Header thanh công cụ */
+  .app-header {
+    background-color: hsl(var(--heroui-background) / 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid hsl(var(--heroui-divider) / var(--heroui-divider-opacity, 0.15));
+    color: hsl(var(--heroui-foreground));
+  }
+
+  /* Thẻ số liệu thống kê (Stat Card) */
+  .app-stat-card {
+    background-color: hsl(var(--heroui-content1));
+    color: hsl(var(--heroui-foreground));
+    border-radius: 1rem;
+    border: none;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  /* Thẻ số liệu thống kê dạng cột (Vertical Stat Card gọn gàng cho 4 cột full-width) */
+  .app-stat-card-vertical {
+    background-color: hsl(var(--heroui-content1));
+    color: hsl(var(--heroui-foreground));
+    border-radius: 1rem;
+    border: none;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .dark .app-stat-card,
+  .dark .app-stat-card-vertical {
+    box-shadow: none;
+  }
+
+  .app-stat-value {
+    font-size: 1.5rem; /* 24px - text-2xl */
+    line-height: 2rem;
+    font-weight: 700;
+    color: hsl(var(--heroui-foreground));
+  }
+
+  .app-stat-label {
+    font-size: 0.875rem; /* 14px - text-sm */
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: hsl(var(--heroui-default-500));
+  }
+
+  /* Badge icon hình tròn */
+  .app-icon-badge {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* Đường ngăn chia chuẩn */
+  .app-divider {
+    border-color: hsl(var(--heroui-divider) / var(--heroui-divider-opacity, 0.15));
+  }
+
+  /* 4. Standardized Typography Hierarchy (Chuẩn hoá cấp độ font chữ toàn hệ thống) */
+  /* Level 1: Tiêu đề trang chính */
+  .app-page-title {
+    font-size: 1.75rem; /* 28px */
+    line-height: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: hsl(var(--heroui-foreground));
+  }
+
+  .app-page-subtitle {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.25rem;
+    color: hsl(var(--heroui-default-500));
+  }
+
+  /* Level 2: Tiêu đề phân mục chính (Section Header) - Đồng nhất cho mọi phân mục cùng cấp */
+  .app-section-title {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.75rem;
+    font-weight: 700;
+    color: hsl(var(--heroui-foreground));
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Level 3: Tiêu đề thẻ card con / Tiêu đề bài viết */
+  .app-card-title {
+    font-size: 1rem; /* 16px */
+    line-height: 1.5rem;
+    font-weight: 600;
+    color: hsl(var(--heroui-foreground));
+  }
+
+  .app-card-subtitle {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.25rem;
+    color: hsl(var(--heroui-default-500));
+  }
+
+  /* Level 4: Nội dung văn bản thông thường */
+  .app-body-text {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.5rem;
+    color: hsl(var(--heroui-default-600));
+  }
+
+  /* Level 5: Nhãn nhỏ / Ghi chú / Thời gian */
+  .app-caption {
+    font-size: 0.75rem; /* 12px */
+    line-height: 1rem;
+    color: hsl(var(--heroui-default-400));
+  }
+}
+
+/* ==========================================================================
+   5. Mobile Button & Touch Optimization (Loại bỏ triệt để hover trên button)
+   Mobile ưu tiên cảm ứng chạm (active/pressed feedback) thay vì hover của desktop.
+   Ngăn chặn hoàn toàn tình trạng "sticky hover", đổi màu hay mờ nhạt nút khi lướt chạm.
+   ========================================================================== */
+button,
+[role="button"],
+[data-slot="button"] {
+  -webkit-tap-highlight-color: transparent;
+  --heroui-hover-opacity: 1;
+  font-weight: 600;
+}
+
+/* Vô hiệu hoá triệt để mọi biến đổi về opacity và filter khi hover */
+button:hover:not(:active):not([data-pressed="true"]),
+[role="button"]:hover:not(:active):not([data-pressed="true"]),
+button[data-hover="true"]:not([data-pressed="true"]):not(:active),
+[data-slot="button"][data-hover="true"]:not([data-pressed="true"]):not(:active),
+[data-slot="trigger"][data-hover="true"]:not([data-pressed="true"]):not(:active) {
+  opacity: 1 !important;
+  filter: none !important;
+  transform: none;
+}
+
+/* Vô hiệu hoá biến đổi màu nền cho HeroUI button variant light / ghost khi hover */
+button.bg-transparent:hover:not(:active):not([data-pressed="true"]),
+button.bg-transparent[data-hover="true"]:not([data-pressed="true"]):not(:active),
+button[data-slot="button"].bg-transparent:hover:not(:active):not([data-pressed="true"]),
+button[data-slot="button"].bg-transparent[data-hover="true"]:not([data-pressed="true"]):not(:active) {
+  background-color: transparent !important;
+}
+
+/* Đảm bảo chữ trên button ghost không đổi màu khi chỉ hover */
+button.border-medium.bg-transparent[data-hover="true"]:not([data-pressed="true"]):not(:active) {
+  background-color: transparent !important;
+}
+

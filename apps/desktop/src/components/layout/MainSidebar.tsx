@@ -5,7 +5,7 @@ import {
   Lightbulb, PlusCircle, ShoppingCart, Scale, 
   Refrigerator, CalendarDays, Palette, ChefHat, NotebookTabs
 } from 'lucide-react';
-import { Button } from '@apron/ui';
+import { Button } from '@/ui';
 import { useTranslation } from 'react-i18next';
 import { SettingsModal } from '../settings/SettingsModal';
 import { SidebarNav, type NavItem } from './sidebar/SidebarNav';
@@ -42,7 +42,7 @@ export function MainSidebar({ isExpanded }: MainSidebarProps) {
 
   return (
     <>
-      <aside className={`hidden md:flex flex-col absolute inset-y-0 left-0 bg-white dark:bg-gray-800 z-30 transition-[width] duration-300 ease-in-out overflow-hidden shadow-none group/sidebar ${isExpanded ? 'w-64 is-expanded' : 'w-20'}`}>
+      <aside className={`hidden md:flex flex-col absolute inset-y-0 left-0 bg-content1 border-r border-divider text-foreground z-30 transition-[width] duration-300 ease-in-out overflow-hidden shadow-none group/sidebar ${isExpanded ? 'w-64 is-expanded' : 'w-20'}`}>
         <nav className="flex-grow pl-4 pr-2 py-4 pt-4 group-[.is-expanded]/sidebar:pr-4 space-y-4 overflow-y-auto custom-scrollbar">
           <Button 
             as={Link} 

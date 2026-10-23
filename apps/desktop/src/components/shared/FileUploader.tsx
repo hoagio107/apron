@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { Button } from '@apron/ui';
+import { Button } from '@/ui';
 import { CloudUpload, X, File as FileIcon, Loader2 } from 'lucide-react';
 import { FileManager } from '../../lib/file-manager';
 

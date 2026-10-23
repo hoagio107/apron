@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody } from '@apron/ui';
+import { Modal, ModalContent, ModalHeader, ModalBody } from '@/ui';
 import { Carrot, ChefHat, Timer, Flame, Star, MessageSquare, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ImageManager } from '../../lib/image-manager';
 

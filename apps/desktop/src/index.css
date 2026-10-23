@@ -1,14 +1,6 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
-
-@layer base {
-  *, ::before, ::after {
-    border-color: var(--color-gray-200);
-  }
-  .dark *, .dark ::before, .dark ::after {
-    border-color: var(--color-gray-700);
-  }
-}
+@import "./style.css";
 
 @layer base {
   /* Thanh cuộn (Scrollbar) toàn cục kiểu macOS/Overlay */
@@ -30,18 +22,10 @@
 
   /* Chỉ hiển thị dạng viên thuốc khi cuộn hoặc hover */
   *:hover::-webkit-scrollbar-thumb {
-    background-color: var(--color-gray-300);
+    background-color: hsl(var(--heroui-default-300) / 0.5);
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background-color: var(--color-gray-400) !important;
-  }
-
-  .dark *:hover::-webkit-scrollbar-thumb {
-    background-color: var(--color-gray-600);
-  }
-
-  .dark ::-webkit-scrollbar-thumb:hover {
-    background-color: var(--color-gray-500) !important;
+    background-color: hsl(var(--heroui-default-400) / 0.8) !important;
   }
 }

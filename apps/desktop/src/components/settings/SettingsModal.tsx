@@ -12,7 +12,7 @@ import {
   Select,
   SelectItem,
   Input
-} from "@apron/ui";
+} from "@/ui";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";

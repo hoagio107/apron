@@ -8,7 +8,7 @@ import {
 } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { ChevronLeft, ChevronRight, CalendarDays, ChefHat, Settings, LayoutList, LayoutGrid, Calculator, X, Plus } from 'lucide-react';
-import { Button } from '@apron/ui';
+import { Button } from '@/ui';
 import type { Recipe, MealType } from '@apron/core';
 
 import { useMealPlanStore } from '../../store/useMealPlanStore';

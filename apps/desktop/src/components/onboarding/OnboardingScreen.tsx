@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Input } from '@apron/ui';
+import { Button, Input } from '@/ui';
 import { Folder, ArrowRight, User, Plus } from 'lucide-react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { getStorageProvider } from '@apron/core';

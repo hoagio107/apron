@@ -1,4 +1,4 @@
-import { Button } from '@apron/ui';
+import { Button } from '@/ui';
 import { Plus, Sparkles } from 'lucide-react';
 import { useShoppingListStore } from '../../../store/useShoppingListStore';
 import { CATEGORIES } from '@apron/core';

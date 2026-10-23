@@ -1,5 +1,5 @@
 import { useFormContext } from 'react-hook-form';
-import { Chip } from '@apron/ui';
+import { Chip } from '@/ui';
 import { Lightbulb, X } from 'lucide-react';
 import type { FormValues } from './schema';
 import { useTipStore } from '../../../store/useTipStore';

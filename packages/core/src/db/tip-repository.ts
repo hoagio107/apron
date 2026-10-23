@@ -124,4 +124,13 @@ export class TipRepository {
       throw e;
     }
   }
+
+  /**
+   * Lưu nhiều tip cùng lúc
+   */
+  static async saveBulk(tips: Tip[]): Promise<void> {
+    for (const t of tips) {
+      await this.save(t);
+    }
+  }
 }

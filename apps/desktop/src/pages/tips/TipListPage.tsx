@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 
-import { Button, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@apron/ui';
+import { Button, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
 import { Plus, Trash2, Search, Filter, CheckCircle2 } from 'lucide-react';
 import { useTipStore } from '../../store/useTipStore';
 import { EmptyState } from '../../components/shared/EmptyState';
@@ -109,13 +109,12 @@ export function TipListPage() {
 
         <div className="flex-1 w-full xl:w-auto flex justify-end gap-2">
           <Input
-            variant="faded"
+            variant="flat"
             classNames={{
               base: "max-w-[300px]",
               input: "text-small",
             }}
             placeholder="Tìm kiếm mẹo..."
-            size="sm"
             startContent={<Search className="w-4 h-4" />}
             value={searchQuery}
             onValueChange={setSearchQuery}

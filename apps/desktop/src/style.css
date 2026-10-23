@@ -1,0 +1,207 @@
+/* ==========================================================================
+   APRON DESIGN SYSTEM - style.css (Desktop)
+   Chuẩn hoá màu sắc, tokens, components dùng chung cho toàn bộ ứng dụng
+   ========================================================================== */
+
+:root {
+  --app-bg: hsl(var(--heroui-background));
+  --app-fg: hsl(var(--heroui-foreground));
+  --app-card-bg: hsl(var(--heroui-content1));
+  --app-card-fg: hsl(var(--heroui-content1-foreground, var(--heroui-foreground)));
+  --app-card-border: hsl(var(--heroui-divider) / var(--heroui-divider-opacity, 0.15));
+  --app-muted: hsl(var(--heroui-default-500));
+  
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+}
+
+.dark {
+  --app-bg: hsl(var(--heroui-background));
+  --app-fg: hsl(var(--heroui-foreground));
+  --app-card-bg: hsl(var(--heroui-content1));
+  --app-card-fg: hsl(var(--heroui-content1-foreground, var(--heroui-foreground)));
+  --app-card-border: hsl(var(--heroui-divider) / var(--heroui-divider-opacity, 0.15));
+  --app-muted: hsl(var(--heroui-default-500));
+  
+  --color-gray-50: #18181b;
+  --color-gray-100: #27272a;
+  --color-gray-200: #3f3f46;
+  --color-gray-300: #52525b;
+  --color-gray-400: #71717a;
+  --color-gray-500: #a1a1aa;
+  --color-gray-600: #d4d4d8;
+  --color-gray-700: #e4e4e7;
+  --color-gray-800: #f4f4f5;
+  --color-gray-900: #fafafa;
+}
+
+@layer base {
+  *, ::before, ::after {
+    border-color: hsl(var(--heroui-divider) / var(--heroui-divider-opacity, 0.15));
+  }
+
+  body {
+    background-color: hsl(var(--heroui-background));
+    color: hsl(var(--heroui-foreground));
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  .app-page {
+    width: 100%;
+    min-height: 100vh;
+    background-color: hsl(var(--heroui-background));
+    color: hsl(var(--heroui-foreground));
+  }
+
+  .app-card {
+    background-color: hsl(var(--heroui-content1));
+    color: hsl(var(--heroui-foreground));
+    border-radius: 1rem;
+    border-width: 1px;
+    border-style: solid;
+    border-color: hsl(var(--heroui-divider) / var(--heroui-divider-opacity, 0.15));
+    box-shadow: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .app-card-dashed {
+    background-color: hsl(var(--heroui-content1) / 0.5);
+    color: hsl(var(--heroui-foreground));
+    border-radius: 1rem;
+    border-width: 1px;
+    border-style: dashed;
+    border-color: hsl(var(--heroui-default-300) / 0.6);
+    box-shadow: none;
+  }
+
+  .app-card-interactive {
+    cursor: pointer;
+    user-select: none;
+  }
+  .app-card-interactive:hover {
+    background-color: hsl(var(--heroui-content2));
+    border-color: hsl(var(--heroui-default-300) / 0.5);
+  }
+  .app-card-interactive:active {
+    transform: scale(0.99);
+  }
+
+  .app-surface {
+    background-color: hsl(var(--heroui-content1));
+    color: hsl(var(--heroui-foreground));
+  }
+
+  .app-surface-secondary {
+    background-color: hsl(var(--heroui-content2));
+    color: hsl(var(--heroui-foreground));
+  }
+
+  .app-stat-card {
+    background-color: hsl(var(--heroui-content1));
+    color: hsl(var(--heroui-foreground));
+    border-radius: 1rem;
+    border: 1px solid hsl(var(--heroui-divider) / var(--heroui-divider-opacity, 0.15));
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .app-stat-value {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 700;
+    color: hsl(var(--heroui-foreground));
+  }
+
+  .app-stat-label {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: hsl(var(--heroui-default-500));
+  }
+
+  .app-icon-badge {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* Thẻ số liệu thống kê dạng cột (Vertical Stat Card) */
+  .app-stat-card-vertical {
+    background-color: hsl(var(--heroui-content1));
+    color: hsl(var(--heroui-foreground));
+    border-radius: 1rem;
+    border: 1px solid hsl(var(--heroui-divider) / var(--heroui-divider-opacity, 0.15));
+    box-shadow: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+
+  /* 4. Standardized Typography Hierarchy */
+  .app-page-title {
+    font-size: 1.875rem; /* 30px */
+    line-height: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: hsl(var(--heroui-foreground));
+  }
+
+  .app-page-subtitle {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.25rem;
+    color: hsl(var(--heroui-default-500));
+  }
+
+  .app-section-title {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.75rem;
+    font-weight: 700;
+    color: hsl(var(--heroui-foreground));
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .app-card-title {
+    font-size: 1rem; /* 16px */
+    line-height: 1.5rem;
+    font-weight: 600;
+    color: hsl(var(--heroui-foreground));
+  }
+
+  .app-card-subtitle {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.25rem;
+    color: hsl(var(--heroui-default-500));
+  }
+
+  .app-body-text {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.5rem;
+    color: hsl(var(--heroui-default-600));
+  }
+
+  .app-caption {
+    font-size: 0.75rem; /* 12px */
+    line-height: 1rem;
+    color: hsl(var(--heroui-default-400));
+  }
+}

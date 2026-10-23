@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
-import { Autocomplete, AutocompleteItem, Button, Avatar } from '@apron/ui';
+import { Autocomplete, AutocompleteItem, Button, Avatar } from '@/ui';
 import { Link, Star, Flame, ChefHat, X, Search, Check, ChevronDown, ChevronUp, Lightbulb } from 'lucide-react';
 import { FormField } from '../../shared/form';
 import type { FormValues } from './schema';

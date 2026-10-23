@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Button, Popover, PopoverTrigger, PopoverContent, Checkbox, Chip, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@apron/ui';
+import { Button, Popover, PopoverTrigger, PopoverContent, Checkbox, Chip, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
 import { FolderTree, ChevronRight, ChevronDown, Plus, Trash2, Edit2, MoreVertical, Search } from 'lucide-react';
 import { DEFAULT_TAGS, type Tag } from '@apron/core';
 import { FormField } from '../../shared/form';

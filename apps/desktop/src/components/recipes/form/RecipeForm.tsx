@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { recipeSchema } from './schema';
 import type { FormValues } from './schema';
 import { PageHeader } from '../../layout/PageHeader';
-import { Button } from '@apron/ui';
+import { Button } from '@/ui';
 import { Save, Sparkles } from 'lucide-react';
 import { ImageSection } from './ImageSection';
 import { InfoSection } from './InfoSection';
@@ -403,7 +403,7 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
 
         <div className="flex flex-col gap-8 w-full">
           {/* Row 1 */}
-          <div className="bg-white rounded-2xl border border-default-100 shadow-none p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="bg-content1 rounded-2xl border border-divider shadow-none p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
             <ImageSection />
             <InfoSection currentRecipeId={initialData?.id} />
             <div className="flex flex-col gap-4">

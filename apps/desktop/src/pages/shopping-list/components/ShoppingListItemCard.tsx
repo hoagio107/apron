@@ -1,9 +1,9 @@
-import { Checkbox, Button, Autocomplete, AutocompleteItem } from '@apron/ui';
+import { Checkbox, Button, Autocomplete, AutocompleteItem } from '@/ui';
 import { Minus, Plus, MoreVertical, Trash2 } from 'lucide-react';
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@apron/ui';
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
 import { useIngredientCatalogStore } from '../../../store/useIngredientCatalogStore';
 import { CATEGORIES } from '@apron/core';
-import { Avatar } from '@apron/ui';
+import { Avatar } from '@/ui';
 import { ImageManager } from '../../../lib/image-manager';
 import { getCategoryTheme } from '../../../lib/categoryTheme';
 import { useUnitStore } from '../../../store/useUnitStore';

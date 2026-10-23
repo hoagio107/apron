@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '@apron/ui';
+import { Button } from '@/ui';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -50,8 +50,8 @@ export function PageHeader({
           </Button>
         )}
         <div>
-          <h1 className="text-3xl font-bold text-foreground">{title}</h1>
-          {description && <p className="text-default-500 mt-1">{description}</p>}
+          <h1 className="app-page-title">{title}</h1>
+          {description && <p className="app-page-subtitle mt-1">{description}</p>}
         </div>
       </div>
       {actions && (

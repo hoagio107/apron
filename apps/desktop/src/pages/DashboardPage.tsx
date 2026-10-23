@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardBody, Button, Chip, CardHeader } from '@apron/ui';
+import { Button, AppCard, StatCard, SectionTitle, EmptyState } from '@/ui';
 import { 
   ChefHat, Calendar, BookOpen, 
   Lightbulb, TrendingUp, Plus, 
@@ -13,7 +13,6 @@ import {
 } from '@apron/core';
 import { ImageManager } from '../lib/image-manager';
 import { RecipeCard } from '../components/recipes/list/RecipeCard';
-import { SectionTitle } from '../components/shared/SectionTitle';
 
 export function DashboardPage() {
   const navigate = useNavigate();
@@ -84,10 +83,10 @@ export function DashboardPage() {
       {/* 1. Welcome Banner */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-1">
+          <h1 className="app-page-title mb-1">
             {getGreeting()}, Chef! 👨‍🍳
           </h1>
-          <p className="text-default-500">
+          <p className="app-page-subtitle">
             Hôm nay bạn muốn nấu món gì? Hãy khám phá tủ lạnh hoặc lên thực đơn nhé.
           </p>
         </div>
@@ -113,55 +112,33 @@ export function DashboardPage() {
 
       {/* 2. Overview Statistics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-white rounded-2xl border border-default-100 shadow-none">
-          <CardBody className="flex flex-row items-center gap-4 p-4">
-            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-              <ChefHat className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-default-500">Công thức của bạn</p>
-              <h3 className="text-2xl font-bold text-foreground">{recipes.length}</h3>
-            </div>
-          </CardBody>
-        </Card>
+        <StatCard
+          icon={<ChefHat className="w-6 h-6" />}
+          label="Công thức của bạn"
+          value={recipes.length}
+          color="primary"
+        />
         
-        <Card className="bg-white rounded-2xl border border-default-100 shadow-none">
-          <CardBody className="flex flex-row items-center gap-4 p-4">
-            <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center text-secondary">
-              <Calendar className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-default-500">Thực đơn hôm nay</p>
-              <h3 className="text-2xl font-bold text-foreground">
-                {todayMealPlan ? todayMealPlan.meals.length : 0} món
-              </h3>
-            </div>
-          </CardBody>
-        </Card>
+        <StatCard
+          icon={<Calendar className="w-6 h-6" />}
+          label="Thực đơn hôm nay"
+          value={`${todayMealPlan ? todayMealPlan.meals.length : 0} món`}
+          color="secondary"
+        />
 
-        <Card className="bg-white rounded-2xl border border-default-100 shadow-none">
-          <CardBody className="flex flex-row items-center gap-4 p-4">
-            <div className="w-12 h-12 rounded-full bg-warning/20 flex items-center justify-center text-warning">
-              <Lightbulb className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-default-500">Mẹo vặt nhà bếp</p>
-              <h3 className="text-2xl font-bold text-foreground">{dailyTip ? 'Có sẵn' : 'Chưa có'}</h3>
-            </div>
-          </CardBody>
-        </Card>
+        <StatCard
+          icon={<Lightbulb className="w-6 h-6" />}
+          label="Mẹo vặt nhà bếp"
+          value={dailyTip ? 'Có sẵn' : 'Chưa có'}
+          color="warning"
+        />
 
-        <Card className="bg-white rounded-2xl border border-default-100 shadow-none">
-          <CardBody className="flex flex-row items-center gap-4 p-4">
-            <div className="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center text-success">
-              <BookOpen className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-default-500">Khóa học</p>
-              <h3 className="text-2xl font-bold text-foreground">{courses.length}</h3>
-            </div>
-          </CardBody>
-        </Card>
+        <StatCard
+          icon={<BookOpen className="w-6 h-6" />}
+          label="Khóa học của bạn"
+          value={courses.length}
+          color="success"
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -190,22 +167,22 @@ export function DashboardPage() {
                 ))}
               </div>
             ) : (
-              <Card className="bg-white rounded-2xl border border-dashed border-default-200 shadow-none">
-                <CardBody className="py-8 flex flex-col items-center justify-center text-center gap-2">
-                  <ChefHat className="w-10 h-10 text-default-300" />
-                  <p className="text-default-500">Chưa có công thức nào.</p>
-                  <Button size="sm" color="primary" variant="flat" onPress={() => navigate('/recipes/new')} className="mt-2">
-                    Thêm công thức đầu tiên
-                  </Button>
-                </CardBody>
-              </Card>
+              <AppCard>
+                <EmptyState
+                  compact
+                  icon={<ChefHat className="w-6 h-6" />}
+                  description="Chưa có công thức nào."
+                  actionLabel="Thêm công thức đầu tiên"
+                  onAction={() => navigate('/recipes/new')}
+                />
+              </AppCard>
             )}
           </div>
 
           {/* Active Courses */}
           <div className="flex flex-col gap-4">
             <SectionTitle
-              title="Khóa học nổi bật"
+              title="Khóa học của bạn"
               icon={<BookOpen className="w-5 h-5 text-primary" />}
               actionLabel="Tất cả khóa học"
               onAction={() => navigate('/courses')}
@@ -214,12 +191,10 @@ export function DashboardPage() {
             {activeCourses.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {activeCourses.map(course => (
-                  <Card 
+                  <div 
                     key={course.id} 
-                    isPressable
-                    onPress={() => navigate(`/courses/${course.id}`)}
-                    radius="lg"
-                    className="group w-full aspect-[4/3] relative overflow-hidden transition-all duration-300 shadow-lg border-none hover:scale-[1.02]"
+                    onClick={() => navigate(`/courses/${course.id}`)}
+                    className="group w-full aspect-[4/3] relative overflow-hidden rounded-xl transition-all duration-300 shadow-lg border-none hover:scale-[1.02] cursor-pointer"
                   >
                     {/* Background Image */}
                     {course.thumbnail_url ? (
@@ -229,7 +204,7 @@ export function DashboardPage() {
                         className="absolute inset-0 w-full h-full object-cover z-0" 
                       />
                     ) : (
-                      <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-white text-default-400 z-0">
+                      <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-default-100 text-default-400 z-0">
                         <BookOpen className="w-12 h-12" />
                       </div>
                     )}
@@ -242,16 +217,16 @@ export function DashboardPage() {
                         WebkitMaskImage: 'linear-gradient(to top, black 0%, black 30%, transparent 60%)', 
                         maskImage: 'linear-gradient(to top, black 0%, black 30%, transparent 60%)' 
                       }}
-                    ></div>
+                    />
                     {/* Additional dark gradient for text readability */}
                     <div 
                       className="absolute inset-0 z-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"
                       style={{ borderRadius: 'inherit' }}
-                    ></div>
+                    />
 
                     {/* Content Area */}
                     <div className="relative z-10 flex flex-col justify-end h-full p-4 text-white text-left w-full">
-                      <h3 className="font-bold text-lg line-clamp-2 leading-tight mb-3 drop-shadow-md">{course.title}</h3>
+                      <h3 className="font-bold text-base sm:text-lg line-clamp-2 leading-tight mb-3 drop-shadow-md">{course.title}</h3>
                       
                       {/* Badges */}
                       <div className="flex flex-wrap items-center gap-2">
@@ -270,37 +245,36 @@ export function DashboardPage() {
                         </span>
                       </div>
                     </div>
-                  </Card>
+                  </div>
                 ))}
               </div>
             ) : (
-              <Card className="bg-white rounded-2xl border border-dashed border-default-200 shadow-none">
-                <CardBody className="py-6 flex flex-col items-center justify-center text-center gap-2">
-                  <p className="text-sm text-default-500">Chưa có khóa học nào.</p>
-                </CardBody>
-              </Card>
+              <AppCard>
+                <EmptyState
+                  compact
+                  icon={<BookOpen className="w-6 h-6" />}
+                  description="Chưa có khóa học nào."
+                  actionLabel="Khám phá khóa học"
+                  onAction={() => navigate('/courses')}
+                />
+              </AppCard>
             )}
           </div>
           
         </div>
 
-        {/* Right Column: Daily Tip & Today's Plan */}
+        {/* Right Column: Today's Plan & Daily Tip */}
         <div className="flex flex-col gap-6">
           
           {/* Today's Plan */}
-          <Card className="bg-white rounded-2xl border border-default-100 shadow-none overflow-visible relative">
-            <CardHeader className="pt-5 pb-2 px-5 flex justify-between items-center">
-              <h2 className="text-lg font-bold flex items-center gap-2">
-                <Utensils className="w-5 h-5 text-primary" />
-                Thực đơn hôm nay
-              </h2>
-              {todayMealPlan && (
-                <Button variant="light" color="primary" size="sm" endContent={<ArrowRight className="w-4 h-4" />} onPress={() => navigate('/meal-planner')}>
-                  Chỉnh sửa
-                </Button>
-              )}
-            </CardHeader>
-            <CardBody className="px-5 pb-5 pt-2 flex flex-col gap-4">
+          <div className="flex flex-col gap-4">
+            <SectionTitle
+              title="Thực đơn hôm nay"
+              icon={<Utensils className="w-5 h-5 text-primary" />}
+              actionLabel={todayMealPlan ? "Chỉnh sửa" : "Lên thực đơn"}
+              onAction={() => navigate('/meal-planner')}
+            />
+            <AppCard className="p-4 sm:p-5 flex flex-col gap-4">
               {todayMealPlan ? (
                 <>
                   <div className="flex flex-col gap-2">
@@ -356,34 +330,36 @@ export function DashboardPage() {
                   </div>
                 </>
               ) : (
-                <div className="py-6 flex flex-col items-center text-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-default-100 flex items-center justify-center">
-                    <Calendar className="w-6 h-6 text-default-400" />
-                  </div>
-                  <p className="text-sm text-default-500">Bạn chưa lên thực đơn cho hôm nay.</p>
-                  <Button size="sm" color="primary" onPress={() => navigate('/meal-planner')}>
-                    Lên thực đơn ngay
-                  </Button>
-                </div>
+                <EmptyState
+                  compact
+                  icon={<Calendar className="w-6 h-6" />}
+                  description="Bạn chưa lên thực đơn cho hôm nay."
+                  actionLabel="Lên thực đơn ngay"
+                  onAction={() => navigate('/meal-planner')}
+                />
               )}
-            </CardBody>
-          </Card>
+            </AppCard>
+          </div>
 
           {/* Daily Tip */}
           {dailyTip && (
-            <Card className="bg-white rounded-2xl border border-default-100 shadow-none">
-              <CardBody className="p-5 flex flex-col gap-3">
-                <div className="flex items-center gap-2 text-warning">
-                  <Lightbulb className="w-5 h-5 fill-warning" />
-                  <h3 className="font-bold">Mẹo hay cho bạn</h3>
+            <div className="flex flex-col gap-4">
+              <SectionTitle
+                title="Mẹo hay cho bạn"
+                icon={<Lightbulb className="w-5 h-5 text-warning" />}
+                actionLabel="Tất cả mẹo hay"
+                onAction={() => navigate('/tips')}
+              />
+              <AppCard className="p-4 sm:p-5 flex flex-col gap-3">
+                <h4 className="app-card-title text-foreground line-clamp-1">{dailyTip.title}</h4>
+                <p className="app-body-text text-default-600 line-clamp-3">{dailyTip.content.replace(/<[^>]*>?/gm, '')}</p>
+                <div className="pt-1">
+                  <Button size="sm" variant="flat" color="warning" onPress={() => navigate(`/tips/${dailyTip.id}`)}>
+                    Đọc mẹo này
+                  </Button>
                 </div>
-                <h4 className="font-semibold text-foreground text-sm">{dailyTip.title}</h4>
-                <p className="text-sm text-default-600 line-clamp-3">{dailyTip.content.replace(/<[^>]*>?/gm, '')}</p>
-                <Button size="sm" variant="light" color="warning" className="w-fit -ml-2 mt-1" onPress={() => navigate(`/tips/${dailyTip.id}`)}>
-                  Đọc thêm
-                </Button>
-              </CardBody>
-            </Card>
+              </AppCard>
+            </div>
           )}
 
         </div>

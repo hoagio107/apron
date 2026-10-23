@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { ChefHat, X, ChevronLeft, ChevronRight, ShoppingCart, Plus, BookOpen, Clock, Flame, Check } from 'lucide-react';
-import { Button } from '@apron/ui';
+import { Button } from '@/ui';
 import { ImageManager } from '../../../lib/image-manager';
 import type { MealPlan, MealPlanEntry } from '@apron/core';
 import { useRecipeStore } from '../../../store/useRecipeStore';

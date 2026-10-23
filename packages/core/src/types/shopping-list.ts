@@ -1,6 +1,8 @@
 export interface ShoppingListItem {
   id: string;
   name: string;
+  title?: string;
+  ingredient_name?: string;
   quantity?: number | string;
   unit?: string;
   checked: boolean;

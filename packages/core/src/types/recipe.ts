@@ -59,6 +59,9 @@ export interface Recipe {
   occasions?: string[];
   dietary?: string[];
   source?: string;
+  description?: string;
+  thumbnail_url?: string;
+  total_time_minutes?: number;
   ingredients: Ingredient[];
   steps: Step[];
   author_id: string;

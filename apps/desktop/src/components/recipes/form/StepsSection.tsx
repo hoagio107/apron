@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useFormContext, useFieldArray, Controller } from 'react-hook-form';
-import { Button, Card, CardBody, Input } from '@apron/ui';
+import { Button, Card, CardBody, Input } from '@/ui';
 import { Plus, Trash2, GripVertical, ListOrdered, X } from 'lucide-react';
 import type { FormValues } from './schema';
 import { SectionHeader } from '../../shared/SectionHeader';

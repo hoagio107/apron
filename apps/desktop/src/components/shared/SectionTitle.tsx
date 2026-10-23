@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Button } from '@apron/ui';
+import { Button } from '@/ui';
 import { ArrowRight } from 'lucide-react';
 
 interface SectionTitleProps {

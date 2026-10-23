@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import type { Key } from 'react';
-import { Autocomplete, AutocompleteItem, AutocompleteSection, Tabs, Tab, Avatar } from '@apron/ui';
+import { Autocomplete, AutocompleteItem, AutocompleteSection, Tabs, Tab, Avatar } from '@/ui';
 import { Search, Plus, ListTodo, BookOpen } from 'lucide-react';
 import { useShoppingListStore } from '../../../store/useShoppingListStore';
 import { useIngredientCatalogStore } from '../../../store/useIngredientCatalogStore';

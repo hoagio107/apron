@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, Input, Textarea, Divider, Select, SelectItem, Checkbox, Switch, Chip, Tabs, Tab } from '@apron/ui';
+import { Button, Card, CardBody, Input, Textarea, Divider, Select, SelectItem, Checkbox, Switch, Chip, Tabs, Tab } from '@/ui';
 import { PageHeader } from '../components/layout/PageHeader';
 import { Search, Plus, Trash2 } from 'lucide-react';
 

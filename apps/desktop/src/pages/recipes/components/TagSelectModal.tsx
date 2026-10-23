@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input } from '@apron/ui';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input } from '@/ui';
 import { Tags, Plus, Check } from 'lucide-react';
 
 interface TagSelectModalProps {
@@ -68,6 +68,7 @@ export function TagSelectModal({ isOpen, onOpenChange, availableTags, onConfirm,
                 <div className="flex gap-2 items-center">
                   <Input 
                     placeholder="Thêm thẻ mới..."
+                    variant="flat"
                     value={newTagInput}
                     onChange={(e) => setNewTagInput(e.target.value)}
                     onKeyDown={(e) => {

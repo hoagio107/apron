@@ -1,5 +1,5 @@
 import React from 'react';
-import { CardHeader, Divider } from '@apron/ui';
+import { CardHeader, Divider } from '@/ui';
 import type { LucideIcon } from 'lucide-react';
 
 interface SectionHeaderProps {

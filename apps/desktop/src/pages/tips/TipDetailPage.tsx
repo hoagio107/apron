@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button } from '@apron/ui';
+import { Button } from '@/ui';
 import { ArrowLeft, Edit, Trash2, Calendar, Lightbulb } from 'lucide-react';
 import { useTipStore } from '../../store/useTipStore';
 import { TIP_CATEGORIES, type Tip, TipRepository } from '@apron/core';

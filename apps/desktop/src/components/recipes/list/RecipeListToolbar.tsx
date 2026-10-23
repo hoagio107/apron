@@ -1,4 +1,4 @@
-import { Input, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@apron/ui';
+import { Input, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
 import { Search, LayoutGrid, Filter, ArrowUpDown, Grip, CheckSquare } from 'lucide-react';
 import type { RecipeViewType } from './RecipeCard';
 
@@ -31,7 +31,7 @@ export function RecipeListToolbar({
         <div className="w-full sm:w-64 shrink-0 mr-2">
           <Input
             placeholder="Tìm kiếm công thức..."
-            variant="faded"
+            variant="flat"
             value={searchQuery}
             onValueChange={onSearchChange}
             startContent={<Search className="w-4 h-4 text-default-400" />}

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Button, Input, Autocomplete, AutocompleteItem, Avatar, Chip } from '@apron/ui';
+import { Button, Input, Autocomplete, AutocompleteItem, Avatar, Chip, EmptyState } from '@/ui';
 import { Plus, Search, Sparkles, AlertTriangle, Layers, Calendar } from 'lucide-react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { usePantryStore } from '../../store/usePantryStore';
@@ -221,13 +221,11 @@ export function SmartFridgePage() {
 
           <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-6 bg-default-50/50">
             {filteredItems.length === 0 ? (
-               <div className="flex flex-col items-center justify-center h-full text-center py-12">
-                  <div className="w-24 h-24 rounded-3xl bg-default-100 flex items-center justify-center mb-5 text-4xl">
-                    🔍
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-1">Không tìm thấy nguyên liệu</h3>
-                  <p className="text-sm text-default-400 max-w-xs mb-5">Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc.</p>
-               </div>
+              <EmptyState
+                icon={<Search className="w-10 h-10 text-default-400" />}
+                title="Không tìm thấy nguyên liệu"
+                description="Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc."
+              />
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 {filteredItems.map(item => (

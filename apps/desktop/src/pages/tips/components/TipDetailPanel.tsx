@@ -1,4 +1,4 @@
-import { Drawer, DrawerContent, DrawerHeader, DrawerBody, Button } from '@apron/ui';
+import { Drawer, DrawerContent, DrawerHeader, DrawerBody, Button } from '@/ui';
 import { Calendar, Edit, Trash2 } from 'lucide-react';
 import type { Tip } from '@apron/core';
 import { TIP_CATEGORIES } from '@apron/core';

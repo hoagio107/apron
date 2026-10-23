@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { getStorageProvider } from '@apron/core';
-import { Button } from '@apron/ui';
+import { Button } from '@/ui';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { MainSidebar } from './components/layout/MainSidebar';
 import { Titlebar } from './components/layout/Titlebar';
@@ -63,7 +63,7 @@ function App() {
           {/* Toggle Sidebar Button */}
           <button 
             onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
-            className={`hidden md:flex absolute z-40 top-[40px] -translate-y-1/2 -translate-x-1/2 ml-2 items-center justify-center w-5 h-5 bg-white dark:bg-gray-800 border-[1px] border-gray-200 dark:border-gray-700 rounded-full shadow-sm text-gray-500 dark:text-gray-400 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-700 opacity-0 hover:opacity-100 transition-all duration-300 ${isSidebarExpanded ? 'left-64' : 'left-20'}`}
+            className={`hidden md:flex absolute z-40 top-[40px] -translate-y-1/2 -translate-x-1/2 ml-2 items-center justify-center w-5 h-5 bg-content1 border border-divider rounded-full shadow-sm text-default-500 hover:text-primary hover:bg-content2 opacity-0 hover:opacity-100 transition-all duration-300 ${isSidebarExpanded ? 'left-64' : 'left-20'}`}
           >
             {isSidebarExpanded ? <ChevronLeft className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
           </button>

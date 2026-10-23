@@ -4,7 +4,7 @@ import {
   Card, CardBody, CardHeader, Input, Button, Select, SelectItem,
   Accordion, AccordionItem, Divider, Autocomplete, AutocompleteItem, Avatar,
   Modal, ModalContent, ModalHeader, ModalBody, ModalFooter
-} from '@apron/ui';
+} from '@/ui';
 import { Save, Plus, Trash2, BookOpen, ListOrdered, ImagePlus, Type, Info, Gauge, Link as LinkIcon, User, Star, ChevronRight, Video, FileText, Link2, X, Search, Utensils, Flame, Settings, Clock, Paperclip, StickyNote, BarChart } from 'lucide-react';
 import { useCourseStore } from '../../store/useCourseStore';
 import type { Course, Lesson } from '@apron/core';

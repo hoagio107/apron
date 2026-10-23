@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Button, Input, Select, SelectItem, useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@apron/ui';
+import { Button, Input, Select, SelectItem, useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@/ui';
 import { Save, Loader2, ImagePlus } from 'lucide-react';
 import { useTipStore } from '../../../store/useTipStore';
 import { TIP_CATEGORIES, type Tip } from '@apron/core';

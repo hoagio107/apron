@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Input, Tabs, Tab } from '@apron/ui';
-import { Plus, Search, ArrowDownUp, Share2, ListTodo } from 'lucide-react';
+import { Button, Input, Tabs, Tab, EmptyState } from '@/ui';
+import { Plus, Search, ArrowDownUp, Share2, ListTodo, ShoppingCart } from 'lucide-react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { useShoppingListStore } from '../../store/useShoppingListStore';
 import { CATEGORIES } from '@apron/core';
@@ -128,12 +128,11 @@ export function ShoppingListPage() {
           {/* List Content */}
           <div className="flex-1 overflow-y-auto px-2 pb-8 custom-scrollbar">
             {items.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center pb-12">
-                <h3 className="text-xl font-semibold mb-2">Danh sách trống</h3>
-                <p className="text-default-500 max-w-sm">
-                  Bạn chưa có nguyên liệu nào cần mua. Hãy thêm vào danh sách để chuẩn bị cho bữa ăn của mình nhé.
-                </p>
-              </div>
+              <EmptyState
+                icon={<ShoppingCart className="w-10 h-10" />}
+                title="Danh sách trống"
+                description="Bạn chưa có nguyên liệu nào cần mua. Hãy thêm vào danh sách để chuẩn bị cho bữa ăn của mình nhé."
+              />
             ) : (
               <div className="flex flex-col gap-3">
                 {/* Active Items */}

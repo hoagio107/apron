@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input } from '@apron/ui';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input } from '@/ui';
 import { Search, Link as LinkIcon } from 'lucide-react';
 import type { Recipe } from '@apron/core';
 import { ImageManager } from '../../../lib/image-manager';
@@ -57,6 +57,7 @@ export function ParentRecipeSelectModal({ isOpen, onOpenChange, recipes, onConfi
             <ModalBody>
               <Input
                 placeholder="Tìm công thức..."
+                variant="flat"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 startContent={<Search className="w-4 h-4 text-default-400" />}

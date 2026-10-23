@@ -1,4 +1,4 @@
-import { Drawer, DrawerContent, DrawerHeader, DrawerBody, Button, CheckboxGroup, Checkbox, RadioGroup, Radio } from '@apron/ui';
+import { Drawer, DrawerContent, DrawerHeader, DrawerBody, Button, CheckboxGroup, Checkbox, RadioGroup, Radio } from '@/ui';
 import { Filter, Check } from 'lucide-react';
 
 export interface RecipeFilterState {

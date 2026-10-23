@@ -1,6 +1,6 @@
 import { Controller, useFormContext } from 'react-hook-form';
 import { useState } from 'react';
-import { Input, Select, SelectItem } from '@apron/ui';
+import { Input, Select, SelectItem } from '@/ui';
 import { Type, Gauge, Flame, Clock, Timer, Info } from 'lucide-react';
 import type { FormValues } from './schema';
 import { FormField } from '../../shared/form';

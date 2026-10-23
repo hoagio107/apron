@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Button, Card, CardBody, Input } from '@apron/ui';
-import { Plus, Trash2, Edit2, Check, X } from 'lucide-react';
+import { Button, AppCard, Input, EmptyState } from '@/ui';
+import { Plus, Trash2, Edit2, Check, X, Scale } from 'lucide-react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { useUnitStore } from '../../store/useUnitStore';
 import type { Unit } from '@apron/core';
@@ -58,8 +58,8 @@ export function UnitsPage() {
       <div className="flex-1 overflow-y-auto mt-4 pb-12">
         <div className="max-w-2xl mx-auto flex flex-col gap-4">
           {isAdding && (
-            <Card shadow="none" className="bg-white rounded-2xl border border-default-100">
-              <CardBody className="flex flex-row items-center gap-2">
+            <AppCard className="p-4">
+              <div className="flex flex-row items-center gap-2">
                 <Input
                   autoFocus
                   placeholder="Nhập tên đơn vị mới..."
@@ -74,13 +74,13 @@ export function UnitsPage() {
                 <Button color="danger" isIconOnly variant="flat" onClick={() => setIsAdding(false)}>
                   <X className="w-4 h-4" />
                 </Button>
-              </CardBody>
-            </Card>
+              </div>
+            </AppCard>
           )}
 
           {units.map((unit) => (
-            <Card key={unit.id} shadow="none" className="bg-white rounded-2xl border border-default-100">
-              <CardBody className="flex flex-row items-center gap-4 py-3">
+            <AppCard key={unit.id} className="p-4">
+              <div className="flex flex-row items-center gap-4">
                 {editingId === unit.id ? (
                   <>
                     <Input
@@ -99,7 +99,7 @@ export function UnitsPage() {
                   </>
                 ) : (
                   <>
-                    <span className="flex-1 text-base font-medium">{unit.name}</span>
+                    <span className="flex-1 text-base font-medium text-foreground">{unit.name}</span>
                     <div className="flex items-center gap-0">
                       <Button isIconOnly variant="light" onClick={() => startEdit(unit)}>
                         <Edit2 className="w-4 h-4 text-default-500" />
@@ -110,14 +110,18 @@ export function UnitsPage() {
                     </div>
                   </>
                 )}
-              </CardBody>
-            </Card>
+              </div>
+            </AppCard>
           ))}
           
           {units.length === 0 && !isAdding && (
-            <div className="text-center py-8 text-default-500">
-              Chưa có đơn vị tính nào. Hãy thêm đơn vị mới!
-            </div>
+            <EmptyState
+              icon={<Scale className="w-10 h-10 text-default-400" />}
+              title="Chưa có đơn vị tính nào"
+              description="Hãy thêm các đơn vị tính như gam, kg, ml, thìa... để sử dụng cho công thức nấu ăn."
+              actionLabel="Thêm đơn vị mới"
+              onAction={() => setIsAdding(true)}
+            />
           )}
         </div>
       </div>

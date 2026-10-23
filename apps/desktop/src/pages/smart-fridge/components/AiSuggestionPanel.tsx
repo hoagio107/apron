@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Card, CardBody, Chip, Checkbox } from '@apron/ui';
+import { Button, Card, CardBody, Chip, Checkbox } from '@/ui';
 import { Sparkles, Save, Clock, ChefHat, CheckCircle2, AlertCircle, ShoppingCart, BookOpen } from 'lucide-react';
 import { suggestRecipesFromPantry, type SuggestedRecipe, GEMINI_MODELS } from '../../../lib/gemini';
 import type { PantryItem, Recipe } from '@apron/core';

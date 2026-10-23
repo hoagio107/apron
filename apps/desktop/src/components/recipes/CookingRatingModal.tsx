@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Modal, ModalContent, Button, Textarea } from '@apron/ui';
+import { Modal, ModalContent, Button, Textarea } from '@/ui';
 import { Check, Star, Edit3, PartyPopper } from 'lucide-react';
 import confetti from 'canvas-confetti';
 

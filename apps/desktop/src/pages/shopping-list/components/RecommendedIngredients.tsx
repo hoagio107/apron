@@ -1,11 +1,11 @@
 import { useRef, useState, useEffect } from 'react';
-import { Button } from '@apron/ui';
+import { Button } from '@/ui';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { SectionTitle } from '../../../components/shared/SectionTitle';
 import { useShoppingListStore } from '../../../store/useShoppingListStore';
 import { CATEGORIES } from '@apron/core';
 import { useIngredientCatalogStore } from '../../../store/useIngredientCatalogStore';
-import { Avatar } from '@apron/ui';
+import { Avatar } from '@/ui';
 import { ImageManager } from '../../../lib/image-manager';
 import { getCategoryTheme } from '../../../lib/categoryTheme';
 

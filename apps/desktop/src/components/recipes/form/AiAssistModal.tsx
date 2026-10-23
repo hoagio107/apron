@@ -8,7 +8,7 @@ import {
   Button, 
   Textarea, 
   Spinner
-} from '@apron/ui';
+} from '@/ui';
 import { Settings, Sparkles, Check, Clock, Users, Flame, ChefHat, AlertTriangle, ImagePlus, X } from 'lucide-react';
 import { GEMINI_MODELS, type ParseRecipeResult, parseRecipeWithGemini } from '../../../lib/gemini';
 import { convertToWebP, validateMediaFile } from '../../../lib/image-utils';

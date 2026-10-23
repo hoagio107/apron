@@ -1,5 +1,5 @@
 import { useFormContext, useFieldArray, Controller } from 'react-hook-form';
-import { Button, Card, CardBody, Input, Autocomplete, AutocompleteItem, Avatar } from '@apron/ui';
+import { Button, Card, CardBody, Input, Autocomplete, AutocompleteItem, Avatar } from '@/ui';
 import { Plus, Trash2, ShoppingCart, Users, GripVertical, X } from 'lucide-react';
 import type { FormValues } from './schema';
 import { useUnits } from '../../../hooks/useUnits';
@@ -137,7 +137,9 @@ function IngredientGroup({ sectionIndex, onRemove }: { sectionIndex: number, onR
               control={control}
               render={({ field, fieldState }) => (
                   <Autocomplete
-                    {...field}
+                    name={field.name}
+                    onBlur={field.onBlur}
+                    ref={field.ref}
                     allowsCustomValue
                     placeholder="Tên nguyên liệu"
                     variant="flat"

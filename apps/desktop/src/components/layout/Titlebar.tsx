@@ -5,7 +5,7 @@ export function Titlebar() {
   return (
     <div 
       data-tauri-drag-region
-      className="h-12 bg-white dark:bg-gray-800 flex items-center justify-between px-4 select-none z-50 flex-shrink-0"
+      className="h-12 bg-content1 border-b border-divider flex items-center justify-between px-4 select-none z-50 flex-shrink-0 text-foreground"
     >
       {/* Left: Window Controls */}
       <div className="flex items-center gap-2 w-1/3 z-10 pointer-events-auto" data-tauri-drag-region>

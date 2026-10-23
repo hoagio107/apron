@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@apron/ui';
+import { Button } from '@/ui';
 import { Plus, Search, Trash2, CalendarDays, Tags } from 'lucide-react';
 import { EmptyState } from '../../components/shared/EmptyState';
 import type { RecipeViewType } from '../../components/recipes/list/RecipeCard';

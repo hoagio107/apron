@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Popover, PopoverTrigger, PopoverContent, Button, Tabs, Tab } from '@apron/ui';
+import { Popover, PopoverTrigger, PopoverContent, Button, Tabs, Tab } from '@/ui';
 import * as LucideIcons from 'lucide-react';
 import { Info, ChevronDown } from 'lucide-react';
 

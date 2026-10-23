@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { 
   Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
   Button, Tabs, Tab, Input, Progress 
-} from '@apron/ui';
+} from '@/ui';
 import { CloudUpload, Link as LinkIcon, Trash2, CheckCircle2, XCircle, FileImage } from 'lucide-react';
 import { validateMediaFile, formatBytes, MAX_FILE_SIZE_MB, MAX_VIDEO_SIZE_MB } from '../../../lib/image-utils';
 import { ImageManager } from '../../../lib/image-manager';
@@ -151,7 +151,7 @@ export function ImagePickerModal({ isOpen, onOpenChange, onSelectMedia }: ImageP
       isOpen={isOpen} 
       onOpenChange={handleOpenChange} 
       size="2xl"
-      classNames={{ base: "bg-white dark:bg-gray-900" }}
+      classNames={{ base: "bg-content1" }}
     >
       <ModalContent>
         {(onClose) => (
@@ -216,7 +216,7 @@ export function ImagePickerModal({ isOpen, onOpenChange, onSelectMedia }: ImageP
                             key={u.id} 
                             className={`
                               flex items-center gap-4 p-3 rounded-xl border
-                              ${u.status === 'failed' ? 'border-danger-200 bg-danger-50' : 'border-default-200 bg-white dark:bg-gray-800'}
+                              ${u.status === 'failed' ? 'border-danger-200 bg-danger-50' : 'border-divider bg-content2'}
                             `}
                           >
                             <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-default-100 flex-shrink-0">
@@ -300,7 +300,7 @@ export function ImagePickerModal({ isOpen, onOpenChange, onSelectMedia }: ImageP
                     {urlList.length > 0 && (
                       <div className="flex flex-col gap-3 max-h-60 overflow-y-auto custom-scrollbar p-1">
                         {urlList.map((url, i) => (
-                          <div key={i} className="flex items-center gap-4 p-3 rounded-xl border border-default-200 bg-white dark:bg-gray-800">
+                          <div key={i} className="flex items-center gap-4 p-3 rounded-xl border border-divider bg-content2">
                             <div className="w-10 h-10 rounded-lg bg-default-100 flex-shrink-0 overflow-hidden">
                               <img src={url} alt="URL Preview" className="w-full h-full object-cover" onError={(e) => {
                                 (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwb2x5Z29uIHBvaW50cz0iMTQgMiAxOCA2IDcgMTcgMyAxNyAzIDEzIDE0IDIiPjwvcG9seWdvbj48bGluZSB4MT0iMyIgeTE9IjIyIiB4Mj0iMjEiIHkyPSIyMiI+PC9saW5lPjwvc3ZnPg=='; // fallback

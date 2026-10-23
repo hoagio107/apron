@@ -1,4 +1,4 @@
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from '@apron/ui';
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from '@/ui';
 import { Settings, MoreVertical, Database, Archive } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 

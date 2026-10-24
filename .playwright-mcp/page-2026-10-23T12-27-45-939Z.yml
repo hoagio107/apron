@@ -1,0 +1,131 @@
+- generic [ref=f30e1]:
+  - main [ref=f30e8]:
+    - generic [ref=f30e9]:
+      - generic [ref=f30e10]:
+        - generic [ref=f30e12]:
+          - heading "Sổ tay Công thức" [level=1] [ref=f30e13]
+          - paragraph [ref=f30e14]: 8 công thức đã lưu
+        - generic [ref=f30e16]:
+          - textbox "Tìm kiếm công thức..." [ref=f30e24]
+          - generic [ref=f30e25]:
+            - generic [ref=f30e26]:
+              - button [ref=f30e27] [cursor=pointer]
+              - generic: "0"
+            - button [ref=f30e30] [cursor=pointer]
+            - button [ref=f30e35] [cursor=pointer]
+            - generic [ref=f30e40]:
+              - button [ref=f30e41] [cursor=pointer]
+              - button [ref=f30e47] [cursor=pointer]
+      - generic [ref=f30e259]:
+        - generic [ref=f30e260]:
+          - button "Tất cả" [ref=f30e261] [cursor=pointer]
+          - generic [ref=f30e262]: Đã chọn 1
+        - button "Thao tác" [expanded] [ref=f30e265] [cursor=pointer]
+        - button "Hủy" [ref=f30e271] [cursor=pointer]
+      - generic [ref=f30e58]:
+        - generic [ref=f30e59] [cursor=pointer]:
+          - img "Canh Sườn Hầm Rau Củ" [ref=f30e60]
+          - checkbox [ref=f30e275]
+          - button [ref=f30e62]
+          - generic [ref=f30e67]:
+            - heading "Canh Sườn Hầm Rau Củ" [level=3] [ref=f30e68]
+            - generic [ref=f30e69]:
+              - generic [ref=f30e70]: 1h
+              - generic [ref=f30e75]: "0"
+              - generic [ref=f30e79]: 380 kcal
+        - generic [ref=f30e83] [cursor=pointer]:
+          - img "Canh Chua Cá Lóc Nam Bộ" [ref=f30e84]
+          - checkbox [checked] [ref=f30e280]
+          - button [ref=f30e86]
+          - generic [ref=f30e91]:
+            - heading "Canh Chua Cá Lóc Nam Bộ" [level=3] [ref=f30e92]
+            - generic [ref=f30e93]:
+              - generic [ref=f30e94]: 0m
+              - generic [ref=f30e99]: "0"
+        - generic [ref=f30e103] [cursor=pointer]:
+          - img "Gà Chiên Nước Mắm Giòn Rụm" [ref=f30e104]
+          - checkbox [ref=f30e285]
+          - button [ref=f30e106]
+          - generic [ref=f30e111]:
+            - heading "Gà Chiên Nước Mắm Giòn Rụm" [level=3] [ref=f30e112]
+            - generic [ref=f30e113]:
+              - generic [ref=f30e114]: 40m
+              - generic [ref=f30e119]: "0"
+              - generic [ref=f30e123]: 520 kcal
+        - generic [ref=f30e127] [cursor=pointer]:
+          - img "Bò Lúc Lắc Hạt Tiêu Đen" [ref=f30e128]
+          - checkbox [ref=f30e290]
+          - button [ref=f30e130]
+          - generic [ref=f30e135]:
+            - heading "Bò Lúc Lắc Hạt Tiêu Đen" [level=3] [ref=f30e136]
+            - generic [ref=f30e137]:
+              - generic [ref=f30e138]: 0m
+              - generic [ref=f30e143]: "0"
+        - generic [ref=f30e147] [cursor=pointer]:
+          - img "Cá Hồi Áp Chảo Sốt Bơ Chanh" [ref=f30e148]
+          - checkbox [ref=f30e295]
+          - button [ref=f30e150]
+          - generic [ref=f30e155]:
+            - heading "Cá Hồi Áp Chảo Sốt Bơ Chanh" [level=3] [ref=f30e156]
+            - generic [ref=f30e157]:
+              - generic [ref=f30e158]: 25m
+              - generic [ref=f30e163]: "0"
+              - generic [ref=f30e167]: 460 kcal
+        - generic [ref=f30e171] [cursor=pointer]:
+          - img "Salad Gà Nướng Bơ Quả" [ref=f30e172]
+          - checkbox [ref=f30e300]
+          - button [ref=f30e174]
+          - generic [ref=f30e179]:
+            - heading "Salad Gà Nướng Bơ Quả" [level=3] [ref=f30e180]
+            - generic [ref=f30e181]:
+              - generic [ref=f30e182]: 30m
+              - generic [ref=f30e187]: "0"
+              - generic [ref=f30e191]: 320 kcal
+        - generic [ref=f30e195] [cursor=pointer]:
+          - img "Sườn Xào Chua Ngọt" [ref=f30e196]
+          - checkbox [ref=f30e305]
+          - button [ref=f30e198]
+          - generic [ref=f30e203]:
+            - heading "Sườn Xào Chua Ngọt" [level=3] [ref=f30e204]
+            - generic [ref=f30e205]:
+              - generic [ref=f30e206]: 50m
+              - generic [ref=f30e211]: "0"
+              - generic [ref=f30e215]: 600 kcal
+        - generic [ref=f30e219] [cursor=pointer]:
+          - img "Phở Bò Gia Truyền" [ref=f30e220]
+          - checkbox [ref=f30e310]
+          - button [ref=f30e222]
+          - generic [ref=f30e227]:
+            - heading "Phở Bò Gia Truyền" [level=3] [ref=f30e228]
+            - generic [ref=f30e229]:
+              - generic [ref=f30e230]: 3h30m
+              - generic [ref=f30e235]: "0"
+              - generic [ref=f30e239]: 450 kcal
+  - generic [ref=f30e314]:
+    - dialog [active] [ref=f30e315]:
+      - generic [ref=f30e317]:
+        - generic [ref=f30e318]:
+          - generic [ref=f30e319]: Thao tác hàng loạt
+          - generic [ref=f30e320]: 1 mục
+        - generic [ref=f30e321]:
+          - button "Thực đơn Lên kế hoạch nấu cho các món đã chọn" [ref=f30e322]:
+            - generic [ref=f30e326]:
+              - generic [ref=f30e327]: Thực đơn
+              - generic [ref=f30e328]: Lên kế hoạch nấu cho các món đã chọn
+          - button "Gắn thẻ Gắn nhãn phân loại hàng loạt" [ref=f30e329]:
+            - generic [ref=f30e335]:
+              - generic [ref=f30e336]: Gắn thẻ
+              - generic [ref=f30e337]: Gắn nhãn phân loại hàng loạt
+          - button "Chèn ảnh cho từng món Chọn hoặc tải ảnh riêng cho từng món" [ref=f30e338]:
+            - generic [ref=f30e344]:
+              - generic [ref=f30e345]: Chèn ảnh cho từng món
+              - generic [ref=f30e346]: Chọn hoặc tải ảnh riêng cho từng món
+          - button "Gán công thức cha Liên kết thành nhóm biến thể" [ref=f30e347]:
+            - generic [ref=f30e352]:
+              - generic [ref=f30e353]: Gán công thức cha
+              - generic [ref=f30e354]: Liên kết thành nhóm biến thể
+          - button "Xoá công thức Xoá vĩnh viễn các món đã chọn" [ref=f30e355]:
+            - generic [ref=f30e360]:
+              - generic [ref=f30e361]: Xoá công thức
+              - generic [ref=f30e362]: Xoá vĩnh viễn các món đã chọn
+    - button "Dismiss" [ref=f30e364]

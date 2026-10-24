@@ -1,0 +1,74 @@
+- main [ref=e5]:
+  - generic [ref=e7]:
+    - generic [ref=e9]:
+      - button "Quay lại" [ref=e10] [cursor=pointer]
+      - heading "Tạo công thức mới" [level=1] [ref=e14]
+    - generic "Các phần của công thức" [ref=e16]:
+      - tablist "Các phần của công thức" [ref=e17]:
+        - tab "Thông tin" [selected] [ref=e19] [cursor=pointer]
+        - tab "Nguyên liệu" [ref=e26] [cursor=pointer]
+        - tab "Cách làm" [ref=e33] [cursor=pointer]
+    - generic [ref=e41]:
+      - generic [ref=e42]:
+        - generic [ref=e43]: Ảnh đại diện
+        - generic [ref=e50]:
+          - generic [ref=e51] [cursor=pointer]:
+            - paragraph [ref=e57]: Tải ảnh đại diện
+            - paragraph [ref=e58]: Kéo thả file hoặc bấm để chọn ảnh/video
+          - generic [ref=e60]:
+            - button "Thêm ảnh" [ref=e61] [cursor=pointer]
+            - button "Thêm ảnh" [ref=e66] [cursor=pointer]
+            - button "Thêm ảnh mới" [ref=e71] [cursor=pointer]:
+              - generic [ref=e76]: Thêm
+      - generic [ref=e77]:
+        - generic [ref=e79]:
+          - generic [ref=e80]: Tên món ăn
+          - 'textbox "Ví dụ: Phở bò Hà Nội" [ref=e87]'
+        - generic [ref=e88]:
+          - generic [ref=e89]:
+            - generic [ref=e94]: Độ khó
+            - generic [ref=e95]:
+              - combobox [ref=e98]
+              - button "Dễ Độ khó" [ref=e100]:
+                - generic [ref=e101]: Dễ
+          - generic [ref=e103]:
+            - generic [ref=e107]: Calories
+            - generic [ref=e108]:
+              - generic [ref=e109]: "0"
+              - generic [ref=e110]: kcal
+          - generic [ref=e111]:
+            - generic [ref=e116]: Sơ chế
+            - generic [ref=e117]:
+              - generic [ref=e118]: "0"
+              - generic [ref=e119]: phút
+          - generic [ref=e120]:
+            - generic [ref=e125]: Nấu
+            - generic [ref=e126]:
+              - generic [ref=e127]: "0"
+              - generic [ref=e128]: phút
+        - generic [ref=e129]:
+          - generic [ref=e130]: Ghi chú & Mẹo
+          - paragraph [ref=e137]: Ghi chú thêm về công thức, mẹo nấu nướng, hoặc lưu ý...
+      - generic [ref=e138]:
+        - generic [ref=e139]:
+          - generic [ref=e140]: Tags (Phân cấp)
+          - generic [ref=e146] [cursor=pointer]: Chọn tags...
+        - generic [ref=e148]:
+          - generic [ref=e149]:
+            - generic [ref=e150]: Video URL (YouTube/Tiktok)
+            - textbox "https://..." [ref=e158]
+          - generic [ref=e159]:
+            - generic [ref=e160]: Nguồn tham khảo
+            - textbox "Tên tác giả, trang web..." [ref=e168]
+        - generic [ref=e170]:
+          - generic [ref=e177]:
+            - generic [ref=e178]: Biến thể?
+            - checkbox [ref=e180] [cursor=pointer]
+          - button "Tìm kiếm công thức gốc..." [disabled]
+        - generic [ref=e182]:
+          - generic [ref=e183]: Công thức và mẹo liên kết
+          - button "Tìm kiếm công thức hoặc mẹo..." [ref=e188] [cursor=pointer]
+    - generic [ref=e192]:
+      - button "AI Nhập" [ref=e193] [cursor=pointer]
+      - button "Quay lại" [disabled]
+      - button "Tiếp tục" [ref=e196] [cursor=pointer]

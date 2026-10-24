@@ -3,7 +3,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
-import { Bold, Italic, Strikethrough, List, ListOrdered, Indent, Outdent } from 'lucide-react';
+import { Bold, Italic, Strikethrough, List, ListOrdered, Indent, Outdent, Check } from 'lucide-react';
 import { Button } from '@/ui';
 
 interface RichTextEditorProps {
@@ -12,33 +12,55 @@ interface RichTextEditorProps {
   placeholder?: string;
   isInvalid?: boolean;
   errorMessage?: string;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 
-export function RichTextEditor({ value, onChange, placeholder, isInvalid, errorMessage }: RichTextEditorProps) {
+export function RichTextEditor({ 
+  value, 
+  onChange, 
+  placeholder, 
+  isInvalid, 
+  errorMessage,
+  onFocus,
+  onBlur 
+}: RichTextEditorProps) {
   const [isFocused, setIsFocused] = useState(false);
   const editor = useEditor({
     extensions: [
       StarterKit,
       Placeholder.configure({
         placeholder: placeholder || 'Nhập nội dung...',
-        emptyEditorClass: 'cursor-text before:content-[attr(data-placeholder)] before:absolute before:text-default-400 before:pointer-events-none',
+        emptyEditorClass: 'cursor-text before:content-[attr(data-placeholder)] before:absolute before:left-3 before:top-2 before:text-default-400 before:pointer-events-none',
       }),
     ],
     content: value,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
-    onFocus: () => setIsFocused(true),
-    onBlur: () => setIsFocused(false),
+    onFocus: () => {
+      setIsFocused(true);
+      onFocus?.();
+    },
+    onBlur: () => {
+      setIsFocused(false);
+      onBlur?.();
+    },
     onTransaction: ({ editor }) => {
       setIsFocused(editor.isFocused);
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm prose-primary max-w-none focus:outline-none min-h-[120px] p-4',
+        class: 'prose prose-sm prose-primary max-w-none focus:outline-none min-h-[72px] px-3 py-2 text-sm leading-relaxed relative [&_p]:my-0',
       },
     },
   });
+
+  useEffect(() => {
+    if (editor && value !== undefined && editor.getHTML() !== value) {
+      editor.commands.setContent(value);
+    }
+  }, [value, editor]);
 
   if (!editor) {
     return null;
@@ -135,20 +157,30 @@ export function RichTextEditor({ value, onChange, placeholder, isInvalid, errorM
             >
               <Outdent className="w-5 h-5" />
             </Button>
+
+            <div className="ml-auto pl-2 flex items-center shrink-0">
+              <Button
+                size="sm"
+                variant="flat"
+                color="primary"
+                radius="full"
+                className="font-semibold text-xs px-3 h-8 shadow-sm"
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  editor.commands.blur();
+                  setIsFocused(false);
+                }}
+                onClick={() => {
+                  editor.commands.blur();
+                  setIsFocused(false);
+                }}
+              >
+                <Check className="w-4 h-4 mr-1" />
+                Xong
+              </Button>
+            </div>
           </div>
         </div>
-      )}
-
-      {/* Hide Recipe Form Actions when editor is focused */}
-      {isFocused && (
-        <style>{`
-          #recipe-form-actions {
-            opacity: 0 !important;
-            pointer-events: none !important;
-            visibility: hidden !important;
-            transform: translateY(100%) !important;
-          }
-        `}</style>
       )}
 
       {/* Editor Content */}

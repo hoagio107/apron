@@ -137,13 +137,13 @@ ${recipe.steps.map((s: any, i: number) => `Bước ${i + 1}: ${s.instruction}`).
       )}
       
       {!isOpen && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-content1/90 backdrop-blur-md border-t border-divider z-40 safe-area-inset-bottom flex items-center gap-3 animate-appearance-in pb-6">
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 dark:bg-content1/80 backdrop-blur-md border-t border-divider z-40 safe-area-inset-bottom flex items-center gap-3 animate-appearance-in pb-6">
           <Button 
             color="primary" 
             variant="flat"
-            className="flex-1 rounded-full font-bold h-12"
+            className="flex-1 rounded-full font-bold h-12 text-primary-700 dark:text-primary-300 dark:bg-primary-500/20 border border-primary-200/50 dark:border-primary-400/20"
             onPress={() => setIsOpen(true)}
-            startContent={<Sparkles className="w-5 h-5" />}
+            startContent={<Sparkles className="w-5 h-5 text-primary-500 dark:text-primary-300" />}
           >
             Hỏi AI
           </Button>

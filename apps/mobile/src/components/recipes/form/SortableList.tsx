@@ -3,7 +3,8 @@ import {
   DndContext,
   closestCenter,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
@@ -23,16 +24,24 @@ interface SortableListProps {
 }
 
 export function SortableList({ items, onDragEnd, children }: SortableListProps) {
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 5, // Requires a 5px movement before dragging starts (prevents accidental drags on click)
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 5, // Yêu cầu di chuyển 5px để bắt đầu kéo (chuột máy tính)
+    },
+  });
+
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 100, // 100ms chạm giữ trên màn hình cảm ứng để kích hoạt kéo
+      tolerance: 5,
+    },
+  });
+
+  const keyboardSensor = useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates,
+  });
+
+  const sensors = useSensors(mouseSensor, touchSensor, keyboardSensor);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -40,7 +49,9 @@ export function SortableList({ items, onDragEnd, children }: SortableListProps) 
     if (over && active.id !== over.id) {
       const oldIndex = items.findIndex((item) => item.id === active.id);
       const newIndex = items.findIndex((item) => item.id === over.id);
-      onDragEnd(oldIndex, newIndex);
+      if (oldIndex !== -1 && newIndex !== -1) {
+        onDragEnd(oldIndex, newIndex);
+      }
     }
   };
 
@@ -63,6 +74,7 @@ interface SortableItemProps {
     attributes: Record<string, any>;
     listeners: Record<string, any> | undefined;
     setNodeRef: (node: HTMLElement | null) => void;
+    isDragging: boolean;
   }) => React.ReactNode;
 }
 
@@ -76,17 +88,17 @@ export function SortableItem({ id, children }: SortableItemProps) {
     isDragging,
   } = useSortable({ id });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
+  const style: React.CSSProperties = {
+    transform: CSS.Translate.toString(transform),
     transition,
-    zIndex: isDragging ? 50 : 1,
-    position: isDragging ? ('relative' as const) : undefined,
-    opacity: isDragging ? 0.8 : 1,
+    zIndex: isDragging ? 50 : undefined,
+    position: 'relative',
+    opacity: isDragging ? 0.6 : 1,
   };
 
   return (
     <div ref={setNodeRef} style={style}>
-      {children({ attributes, listeners, setNodeRef })}
+      {children({ attributes, listeners, setNodeRef, isDragging })}
     </div>
   );
 }

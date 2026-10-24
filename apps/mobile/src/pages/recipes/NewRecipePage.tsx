@@ -30,15 +30,22 @@ export function NewRecipePage() {
   const handleSubmit = async (data: any) => {
     if (Array.isArray(data)) {
       await addBulkRecipes(data);
+      navigate('/recipes');
     } else {
+      let targetId = editId;
       if (editId && editRecipe) {
         await updateRecipe({ ...editRecipe, ...data, id: editId });
       } else {
-        await addRecipe(data);
+        const created = await addRecipe(data);
+        targetId = created?.id || data.id;
+      }
+
+      if (targetId) {
+        navigate(`/recipes/${targetId}`);
+      } else {
+        navigate('/recipes');
       }
     }
-
-    navigate('/recipes');
   };
 
   // Nếu đang edit mà chưa load xong recipe (ví dụ reload trang), có thể render loading

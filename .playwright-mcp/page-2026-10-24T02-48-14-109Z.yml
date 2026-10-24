@@ -1,0 +1,54 @@
+- main [ref=f9e8]:
+  - generic [ref=f9e9]:
+    - generic [ref=f9e10]:
+      - generic [ref=f9e11]:
+        - button "Quay lại" [ref=f9e14] [cursor=pointer]
+        - button "Tùy chọn" [ref=f9e18] [cursor=pointer]
+      - generic [ref=f9e23]:
+        - heading "Cá Hồi Nướng Nồi Chiên Không Dầu Danh sách biến thể" [level=1] [ref=f9e158]:
+          - generic [ref=f9e26]: Cá Hồi Nướng Nồi Chiên Không Dầu
+          - button "Danh sách biến thể" [active] [ref=f9e27] [cursor=pointer]
+        - generic [ref=f9e30]:
+          - generic [ref=f9e31]: Dễ
+          - generic [ref=f9e36]: 380 kcal
+          - generic [ref=f9e40]: 10p
+          - generic [ref=f9e45]: 12p
+          - generic [ref=f9e50]: N/A
+    - generic [ref=f9e54]:
+      - generic "Mobile Tabs" [ref=f9e55]:
+        - tablist "Mobile Tabs" [ref=f9e56]:
+          - tab "Nguyên liệu" [selected] [ref=f9e58] [cursor=pointer]
+          - tab "Cách làm" [ref=f9e66] [cursor=pointer]
+          - tab "Khác" [ref=f9e72] [cursor=pointer]
+      - tabpanel "Nguyên liệu" [ref=f9e78]:
+        - generic [ref=f9e79]:
+          - generic [ref=f9e80]:
+            - heading "Nguyên liệu" [level=2] [ref=f9e81]
+            - generic [ref=f9e86]:
+              - generic [ref=f9e87] [cursor=pointer]
+              - spinbutton [ref=f9e89]: "2"
+              - generic [ref=f9e90] [cursor=pointer]
+          - generic [ref=f9e92]:
+            - generic [ref=f9e93]:
+              - heading "Nguyên liệu chính" [level=3] [ref=f9e94]
+              - generic [ref=f9e98] [cursor=pointer]:
+                - generic [ref=f9e99]: Phi lê cá hồi tươi còn da
+                - generic [ref=f9e100]: 350 g
+            - generic [ref=f9e114]:
+              - heading "Gia vị" [level=3] [ref=f9e115]
+              - generic [ref=f9e116]:
+                - generic [ref=f9e161] [cursor=pointer]:
+                  - generic [ref=f9e162]: Dầu oliu nguyên chất
+                  - generic [ref=f9e163]: 1 muỗng canh
+                - generic [ref=f9e166] [cursor=pointer]:
+                  - generic [ref=f9e167]: Tỏi băm & lá hương thảo khô
+                  - generic [ref=f9e168]: 1 muỗng cà phê
+                - generic [ref=f9e171] [cursor=pointer]:
+                  - generic [ref=f9e172]: Muối biển & tiêu đen xay
+                  - generic [ref=f9e173]: 1 chút
+            - generic [ref=f9e101]:
+              - heading "Nước sốt" [level=3] [ref=f9e102]
+              - generic [ref=f9e176] [cursor=pointer]:
+                - generic [ref=f9e177]: Nước cốt chanh vàng
+                - generic [ref=f9e178]: 1 muỗng canh
+    - button "Bắt đầu nấu" [ref=f9e136] [cursor=pointer]

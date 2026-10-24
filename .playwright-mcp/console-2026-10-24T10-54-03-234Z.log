@@ -1,0 +1,3 @@
+[     163ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=2d688066:14333
+[     201ms] [INFO] Đang chạy ở môi trường Web thuần, Storage sử dụng BrowserStorageProvider (IndexedDB) @ http://localhost:5173/@fs/C:/apron/packages/core/src/storage/index.ts:18
+[     366ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://www.chromium.org/developers/design-documents/create-amazing-password-forms) %o @ http://localhost:5173/settings:0

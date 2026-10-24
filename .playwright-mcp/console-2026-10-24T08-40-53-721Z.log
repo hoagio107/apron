@@ -1,0 +1,30 @@
+[     139ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:14333
+[     181ms] [INFO] Đang chạy ở môi trường Web thuần, Storage sử dụng BrowserStorageProvider (IndexedDB) @ http://localhost:5173/@fs/C:/apron/packages/core/src/storage/index.ts:18
+[     217ms] [ERROR] %o
+
+%s
+
+%s
+ ReferenceError: Plus is not defined
+    at TipListPage (http://localhost:5173/src/pages/tips/TipListPage.tsx?t=1792831130901:142:43)
+    at Object.react_stack_bottom_frame (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:12864:12)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:4211:19)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:5567:16)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:6138:20)
+    at runWithFiberInDEV (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:850:66)
+    at performUnitOfWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:8427:92)
+    at workLoopSync (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:8323:37)
+    at renderRootSync (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:8307:6)
+    at performWorkOnRoot (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:7992:27) The above error occurred in the <TipListPage> component. React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary. @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:5271
+[     218ms] [ERROR] [ErrorBoundary] ReferenceError: Plus is not defined
+    at TipListPage (http://localhost:5173/src/pages/tips/TipListPage.tsx?t=1792831130901:142:43)
+    at Object.react_stack_bottom_frame (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:12864:12)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:4211:19)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:5567:16)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:6138:20)
+    at runWithFiberInDEV (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:850:66)
+    at performUnitOfWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:8427:92)
+    at workLoopSync (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:8323:37)
+    at renderRootSync (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:8307:6)
+    at performWorkOnRoot (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=4642de2d:7992:27) {componentStack: 
+    at TipListPage (http://localhost:5173/src/pag…http://localhost:5173/src/ui/UIProvider.tsx:6:30)} @ http://localhost:5173/src/components/shared/ErrorBoundary.tsx:18

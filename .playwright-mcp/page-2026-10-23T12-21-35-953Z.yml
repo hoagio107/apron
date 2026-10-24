@@ -1,0 +1,154 @@
+- generic [ref=f27e1]:
+  - main [ref=f27e8]:
+    - generic [ref=f27e9]:
+      - generic [ref=f27e10]:
+        - generic [ref=f27e12]:
+          - heading [level=1] [ref=f27e365]: Sổ tay Công thức
+          - paragraph [ref=f27e14]: 8 công thức đã lưu
+        - generic [ref=f27e16]:
+          - textbox [ref=f27e366]:
+            - /placeholder: Tìm kiếm công thức...
+          - generic [ref=f27e25]:
+            - button [ref=f27e27] [cursor=pointer]
+            - button [ref=f27e30] [cursor=pointer]
+            - button [ref=f27e35] [cursor=pointer]
+            - generic [ref=f27e40]:
+              - button [ref=f27e41] [cursor=pointer]
+              - button [ref=f27e47] [cursor=pointer]
+      - generic [ref=f27e259]:
+        - generic [ref=f27e260]:
+          - button [ref=f27e367] [cursor=pointer]: Tất cả
+          - generic [ref=f27e262]: Đã chọn 1
+        - button [expanded] [ref=f27e368] [cursor=pointer]: Thao tác
+        - button [ref=f27e369] [cursor=pointer]: Hủy
+      - generic [ref=f27e58]:
+        - generic [ref=f27e59] [cursor=pointer]:
+          - checkbox [ref=f27e275]
+          - button [ref=f27e62]
+          - generic [ref=f27e67]:
+            - heading [level=3] [ref=f27e371]: Canh Sườn Hầm Rau Củ
+            - generic [ref=f27e69]:
+              - generic [ref=f27e70]: 1h
+              - generic [ref=f27e75]: "0"
+              - generic [ref=f27e79]: 380 kcal
+        - generic [ref=f27e83] [cursor=pointer]:
+          - checkbox [checked] [ref=f27e280]
+          - button [ref=f27e86]
+          - generic [ref=f27e91]:
+            - heading [level=3] [ref=f27e373]: Canh Chua Cá Lóc Nam Bộ
+            - generic [ref=f27e93]:
+              - generic [ref=f27e94]: 0m
+              - generic [ref=f27e99]: "0"
+        - generic [ref=f27e103] [cursor=pointer]:
+          - checkbox [ref=f27e285]
+          - button [ref=f27e106]
+          - generic [ref=f27e111]:
+            - heading [level=3] [ref=f27e375]: Gà Chiên Nước Mắm Giòn Rụm
+            - generic [ref=f27e113]:
+              - generic [ref=f27e114]: 40m
+              - generic [ref=f27e119]: "0"
+              - generic [ref=f27e123]: 520 kcal
+        - generic [ref=f27e127] [cursor=pointer]:
+          - checkbox [ref=f27e290]
+          - button [ref=f27e130]
+          - generic [ref=f27e135]:
+            - heading [level=3] [ref=f27e377]: Bò Lúc Lắc Hạt Tiêu Đen
+            - generic [ref=f27e137]:
+              - generic [ref=f27e138]: 0m
+              - generic [ref=f27e143]: "0"
+        - generic [ref=f27e147] [cursor=pointer]:
+          - checkbox [ref=f27e295]
+          - button [ref=f27e150]
+          - generic [ref=f27e155]:
+            - heading [level=3] [ref=f27e379]: Cá Hồi Áp Chảo Sốt Bơ Chanh
+            - generic [ref=f27e157]:
+              - generic [ref=f27e158]: 25m
+              - generic [ref=f27e163]: "0"
+              - generic [ref=f27e167]: 460 kcal
+        - generic [ref=f27e171] [cursor=pointer]:
+          - checkbox [ref=f27e300]
+          - button [ref=f27e174]
+          - generic [ref=f27e179]:
+            - heading [level=3] [ref=f27e381]: Salad Gà Nướng Bơ Quả
+            - generic [ref=f27e181]:
+              - generic [ref=f27e182]: 30m
+              - generic [ref=f27e187]: "0"
+              - generic [ref=f27e191]: 320 kcal
+        - generic [ref=f27e195] [cursor=pointer]:
+          - checkbox [ref=f27e305]
+          - button [ref=f27e198]
+          - generic [ref=f27e203]:
+            - heading [level=3] [ref=f27e383]: Sườn Xào Chua Ngọt
+            - generic [ref=f27e205]:
+              - generic [ref=f27e206]: 50m
+              - generic [ref=f27e211]: "0"
+              - generic [ref=f27e215]: 600 kcal
+        - generic [ref=f27e219] [cursor=pointer]:
+          - checkbox [ref=f27e310]
+          - button [ref=f27e222]
+          - generic [ref=f27e227]:
+            - heading [level=3] [ref=f27e385]: Phở Bò Gia Truyền
+            - generic [ref=f27e229]:
+              - generic [ref=f27e230]: 3h30m
+              - generic [ref=f27e235]: "0"
+              - generic [ref=f27e239]: 450 kcal
+  - generic [ref=f27e314]:
+    - dialog [ref=f27e315]:
+      - generic [ref=f27e317]:
+        - generic [ref=f27e318]:
+          - generic [ref=f27e319]: Thao tác hàng loạt
+          - generic [ref=f27e320]: 1 mục
+        - generic [ref=f27e321]:
+          - button [ref=f27e386]:
+            - generic [ref=f27e326]:
+              - generic [ref=f27e327]: Thực đơn
+              - generic [ref=f27e328]: Lên kế hoạch nấu cho các món đã chọn
+          - button [ref=f27e387]:
+            - generic [ref=f27e335]:
+              - generic [ref=f27e336]: Gắn thẻ
+              - generic [ref=f27e337]: Gắn nhãn phân loại hàng loạt
+          - button [ref=f27e388]:
+            - generic [ref=f27e344]:
+              - generic [ref=f27e345]: Chèn ảnh cho từng món
+              - generic [ref=f27e346]: Chọn hoặc tải ảnh riêng cho từng món
+          - button [ref=f27e389]:
+            - generic [ref=f27e352]:
+              - generic [ref=f27e353]: Gán công thức cha
+              - generic [ref=f27e354]: Liên kết thành nhóm biến thể
+          - button [ref=f27e390]:
+            - generic [ref=f27e360]:
+              - generic [ref=f27e361]: Xoá công thức
+              - generic [ref=f27e362]: Xoá vĩnh viễn các món đã chọn
+    - button [ref=f27e391]
+  - dialog [active] [ref=f27e394]:
+    - button "Dismiss" [ref=f27e396]
+    - button "Close" [ref=f27e397]
+    - banner [ref=f27e400]:
+      - generic [ref=f27e408]:
+        - heading "Chèn ảnh cho từng món" [level=2] [ref=f27e409]
+        - paragraph [ref=f27e410]: Chọn ảnh riêng biệt cho từng món trong 1 công thức đã chọn
+      - button [ref=f27e411] [cursor=pointer]
+    - generic [ref=f27e417]:
+      - text: "Đã có ảnh:"
+      - strong [ref=f27e418]: 1 / 1
+      - text: món
+    - generic [ref=f27e420]:
+      - generic [ref=f27e421]:
+        - img "Canh Chua Cá Lóc Nam Bộ" [ref=f27e422]
+        - generic [ref=f27e423]: Hiện tại
+        - button "Xóa ảnh này" [ref=f27e424]
+      - generic [ref=f27e428]:
+        - generic [ref=f27e429]:
+          - heading "Canh Chua Cá Lóc Nam Bộ" [level=3] [ref=f27e431]
+          - generic [ref=f27e432]: Dễ
+        - generic [ref=f27e434]:
+          - button "Đổi ảnh từ máy" [ref=f27e435] [cursor=pointer]
+          - button "Dán link" [ref=f27e439] [cursor=pointer]
+          - button "Gợi ý ảnh" [ref=f27e443] [cursor=pointer]
+          - button "Xóa ảnh món này" [ref=f27e446] [cursor=pointer]
+    - contentinfo [ref=f27e450]:
+      - generic [ref=f27e451]: Chưa có thay đổi nào
+      - generic [ref=f27e452]:
+        - button "Hủy" [ref=f27e453] [cursor=pointer]
+        - button "Lưu thay đổi (0)" [disabled]
+    - button "Dismiss" [ref=f27e455]

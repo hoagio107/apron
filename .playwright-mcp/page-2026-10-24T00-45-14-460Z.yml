@@ -1,0 +1,60 @@
+- main [ref=f1e8]:
+  - generic [ref=f1e9]:
+    - generic [ref=f1e10]:
+      - generic [ref=f1e11]:
+        - button "Quay lại" [ref=f1e14] [cursor=pointer]
+        - button "Tùy chọn" [ref=f1e18] [cursor=pointer]
+      - generic [ref=f1e23]:
+        - heading "Cá Hồi Áp Chảo Sốt Bơ Chanh" [level=1] [ref=f1e24]
+        - generic [ref=f1e25]:
+          - generic [ref=f1e26]: Dễ
+          - generic [ref=f1e31]: 460 kcal
+          - generic [ref=f1e35]: 10p
+          - generic [ref=f1e40]: 15p
+          - generic [ref=f1e45]: N/A
+    - generic [ref=f1e49]:
+      - generic "Mobile Tabs" [ref=f1e50]:
+        - tablist "Mobile Tabs" [ref=f1e51]:
+          - tab "Nguyên liệu" [active] [selected] [ref=f1e53] [cursor=pointer]
+          - tab "Cách làm" [ref=f1e61] [cursor=pointer]
+          - tab "Khác" [ref=f1e67] [cursor=pointer]
+      - tabpanel "Nguyên liệu" [ref=f1e105]:
+        - generic [ref=f1e106]:
+          - generic [ref=f1e107]:
+            - heading "Nguyên liệu" [level=2] [ref=f1e108]
+            - generic [ref=f1e113]:
+              - generic [ref=f1e114] [cursor=pointer]
+              - spinbutton [ref=f1e116]: "2"
+              - generic [ref=f1e117] [cursor=pointer]
+          - generic [ref=f1e119]:
+            - generic [ref=f1e120]:
+              - heading "Nguyên liệu chính" [level=3] [ref=f1e121]
+              - generic [ref=f1e125] [cursor=pointer]:
+                - generic [ref=f1e126]: Phi lê cá hồi tươi còn da
+                - generic [ref=f1e127]: 350 g
+            - generic [ref=f1e128]:
+              - heading "Nước sốt" [level=3] [ref=f1e129]
+              - generic [ref=f1e130]:
+                - generic [ref=f1e133] [cursor=pointer]:
+                  - generic [ref=f1e134]: Bơ lạt Anchor hoặc President
+                  - generic [ref=f1e135]: 30 g
+                - generic [ref=f1e138] [cursor=pointer]:
+                  - generic [ref=f1e139]: Chanh vàng
+                  - generic [ref=f1e140]: 1 quả
+            - generic [ref=f1e141]:
+              - heading "Gia vị" [level=3] [ref=f1e142]
+              - generic [ref=f1e143]:
+                - generic [ref=f1e146] [cursor=pointer]:
+                  - generic [ref=f1e147]: Tỏi băm nhuyễn
+                  - generic [ref=f1e148]: 1 muỗng canh
+                - generic [ref=f1e151] [cursor=pointer]:
+                  - generic [ref=f1e152]: Muối biển, tiêu đen xay
+                  - generic [ref=f1e153]: 1 chút
+            - generic [ref=f1e154]:
+              - heading "Rau thơm" [level=3] [ref=f1e155]
+              - generic [ref=f1e159] [cursor=pointer]:
+                - generic [ref=f1e160]: Lá hương thảo (rosemary) hoặc ngò tây
+                - generic [ref=f1e161]: 2 nhánh
+    - generic [ref=f1e98]:
+      - button "Hỏi AI" [ref=f1e99] [cursor=pointer]
+      - button "Bắt đầu nấu" [ref=f1e102] [cursor=pointer]

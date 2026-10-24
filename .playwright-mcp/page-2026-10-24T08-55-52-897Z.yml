@@ -1,0 +1,138 @@
+- generic [ref=f13e1]:
+  - generic [ref=f13e7]:
+    - main [ref=f13e8]:
+      - generic [ref=f13e9]:
+        - generic [ref=f13e10]:
+          - generic [ref=f13e12]:
+            - heading [level=1] [ref=f13e130]: Mẹo nhà bếp
+            - paragraph [ref=f13e14]: 6 mẹo đã lưu
+          - generic [ref=f13e16]:
+            - textbox [ref=f13e131]:
+              - /placeholder: Tìm kiếm mẹo...
+            - generic [ref=f13e25]:
+              - button [ref=f13e132] [cursor=pointer]
+              - button [ref=f13e29] [cursor=pointer]
+              - button [ref=f13e133] [cursor=pointer]
+              - generic [ref=f13e37]:
+                - button [ref=f13e134] [cursor=pointer]
+                - button [ref=f13e135] [cursor=pointer]
+        - generic [ref=f13e47]:
+          - generic [ref=f13e48] [cursor=pointer]:
+            - generic [ref=f13e50]: mẹo bảo quản
+            - button [ref=f13e137]
+            - generic:
+              - heading [level=3]: Cách giữ bơ sáp không bị thâm
+              - paragraph: Khi cắt bơ mà dùng không hết, hãy quét một lớp dầu oliu mỏng hoặc vắt chút chanh lên bề mặt bơ rồi bọc kín bằng màng bọc thực phẩm, để tủ lạnh.
+              - generic: 1 ngày trước
+          - generic [ref=f13e59] [cursor=pointer]:
+            - generic [ref=f13e61]: mẹo chế biến
+            - button [ref=f13e139]
+            - generic:
+              - heading [level=3]: Mẹo ướp thịt nướng mềm mọng không bị khô
+              - paragraph: Thêm một thìa sữa đặc hoặc nước ép lê/táo vào sốt ướp. Enzyme tự nhiên trong hoa quả sẽ làm mềm thớ thịt mà không làm bở nát.
+              - generic: 1 ngày trước
+          - generic [ref=f13e70] [cursor=pointer]:
+            - generic [ref=f13e72]: mẹo chọn nguyên liệu
+            - button [ref=f13e141]
+            - generic:
+              - heading [level=3]: Bí quyết chọn xương bò nấu phở ngon
+              - paragraph: Nên chọn xương ống bò, có màu đỏ tươi, tủy bên trong còn màu hồng. Tránh xương có mùi hôi lạ hoặc màu xỉn.
+              - generic: 1 ngày trước
+          - generic [ref=f13e81] [cursor=pointer]:
+            - generic [ref=f13e83]: mẹo chọn nguyên liệu
+            - button [ref=f13e143]
+            - generic:
+              - heading [level=3]: Bí quyết chọn xương bò nấu phở ngon
+              - paragraph: Nên chọn xương ống bò, có màu đỏ tươi, tủy bên trong còn màu hồng. Tránh xương có mùi hôi lạ hoặc màu xỉn.
+              - generic: 1 ngày trước
+          - generic [ref=f13e92] [cursor=pointer]:
+            - generic [ref=f13e94]: mẹo bảo quản
+            - button [ref=f13e145]
+            - generic:
+              - heading [level=3]: Cách giữ bơ sáp không bị thâm
+              - paragraph: Khi cắt bơ mà dùng không hết, hãy quét một lớp dầu oliu mỏng hoặc vắt chút chanh lên bề mặt bơ rồi bọc kín bằng màng bọc thực phẩm, để tủ lạnh.
+              - generic: 1 ngày trước
+          - generic [ref=f13e103] [cursor=pointer]:
+            - generic [ref=f13e105]: mẹo chế biến
+            - button [ref=f13e147]
+            - generic:
+              - heading [level=3]: Mẹo ướp thịt nướng mềm mọng không bị khô
+              - paragraph: Thêm một thìa sữa đặc hoặc nước ép lê/táo vào sốt ướp. Enzyme tự nhiên trong hoa quả sẽ làm mềm thớ thịt mà không làm bở nát.
+              - generic: 1 ngày trước
+    - navigation:
+      - generic [ref=f13e114]:
+        - link [ref=f13e115] [cursor=pointer]:
+          - /url: /
+        - link [ref=f13e119] [cursor=pointer]:
+          - /url: /recipes
+        - link [ref=f13e122] [cursor=pointer]:
+          - /url: /tips
+        - button [ref=f13e125]
+    - button [ref=f13e128]
+  - dialog [ref=f13e150]:
+    - button "Dismiss" [ref=f13e152]
+    - generic [ref=f13e153]:
+      - generic [ref=f13e157]:
+        - button "Quay lại" [ref=f13e158] [cursor=pointer]
+        - heading "Thêm mẹo vặt mới" [level=1] [ref=f13e162]
+      - generic [ref=f13e164]:
+        - generic [ref=f13e165]:
+          - generic [ref=f13e166]: Ảnh đại diện
+          - generic [ref=f13e171] [cursor=pointer]:
+            - paragraph [ref=f13e177]: Tải ảnh đại diện mẹo
+            - paragraph [ref=f13e178]: Bấm để chọn từ thư viện ảnh hoặc tải lên từ thiết bị
+        - generic [ref=f13e179]:
+          - generic [ref=f13e180]: Tiêu đề mẹo
+          - 'textbox "Ví dụ: Cách giữ bơ sáp không bị thâm đen..." [ref=f13e187]'
+        - generic [ref=f13e188]:
+          - generic [ref=f13e189]: Chuyên mục mẹo
+          - generic [ref=f13e194]:
+            - combobox [ref=f13e197]
+            - button "Chọn một chuyên mục phù hợp" [expanded] [ref=f13e199]
+        - generic [ref=f13e204]:
+          - generic [ref=f13e205]: Nội dung hướng dẫn chi tiết
+          - paragraph [ref=f13e214]: Viết nội dung hướng dẫn mẹo vặt của bạn tại đây...
+      - generic [ref=f13e216]:
+        - button "AI Trợ lý mẹo vặt" [ref=f13e217] [cursor=pointer]
+        - button "Hủy bỏ" [ref=f13e220] [cursor=pointer]
+        - button "Lưu mẹo vặt" [ref=f13e221] [cursor=pointer]
+    - button "Dismiss" [ref=f13e227]
+  - dialog [active] [ref=f13e229]:
+    - listbox [ref=f13e233]:
+      - option [ref=f13e234] [cursor=pointer]:
+        - generic [ref=f13e240]:
+          - generic [ref=f13e241]: Mẹo nấu ăn
+          - generic [ref=f13e242]: Bí quyết giúp món ăn ngon hơn
+      - option [ref=f13e246] [cursor=pointer]:
+        - generic [ref=f13e252]:
+          - generic [ref=f13e253]: Mẹo vệ sinh
+          - generic [ref=f13e254]: Giữ bếp luôn sạch bóng
+      - option [ref=f13e258] [cursor=pointer]:
+        - generic [ref=f13e267]:
+          - generic [ref=f13e268]: Mẹo bảo quản
+          - generic [ref=f13e269]: Giữ thực phẩm tươi lâu
+      - option [ref=f13e273] [cursor=pointer]:
+        - generic [ref=f13e281]:
+          - generic [ref=f13e282]: Mẹo chọn mua
+          - generic [ref=f13e283]: Chọn đồ tươi ngon nhất
+      - option [ref=f13e287] [cursor=pointer]:
+        - generic [ref=f13e296]:
+          - generic [ref=f13e297]: Mẹo sơ chế
+          - generic [ref=f13e298]: Sơ chế nhanh và đúng cách
+      - option [ref=f13e302] [cursor=pointer]:
+        - generic [ref=f13e313]:
+          - generic [ref=f13e314]: Mẹo "chữa cháy"
+          - generic [ref=f13e315]: Cứu vãn các món ăn bị lỗi
+      - option [ref=f13e319] [cursor=pointer]:
+        - generic [ref=f13e327]:
+          - generic [ref=f13e328]: Sắp xếp & Tổ chức
+          - generic [ref=f13e329]: Tối ưu không gian bếp
+      - option [ref=f13e333] [cursor=pointer]:
+        - generic [ref=f13e339]:
+          - generic [ref=f13e340]: Chăm sóc dụng cụ
+          - generic [ref=f13e341]: Bảo dưỡng nồi, chảo, dao
+      - option [ref=f13e345] [cursor=pointer]:
+        - generic [ref=f13e356]:
+          - generic [ref=f13e357]: Mẹo tận dụng
+          - generic [ref=f13e358]: Tái chế & tránh lãng phí
+    - button [ref=f13e363]

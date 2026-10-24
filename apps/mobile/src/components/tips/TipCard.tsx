@@ -1,6 +1,5 @@
-import { Card, Button } from '@/ui';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
-import { Lightbulb, Edit, Trash2, MoreVertical } from 'lucide-react';
+import { Lightbulb, Edit, Trash2, MoreVertical, Check, Clock } from 'lucide-react';
 import type { Tip } from '@apron/core';
 import { TIP_CATEGORIES } from '@apron/core';
 import { formatDistanceToNow } from 'date-fns';
@@ -15,10 +14,26 @@ interface TipCardProps {
   isSelected?: boolean;
   onSelect?: () => void;
   selectable?: boolean;
+  viewMode?: 'grid' | 'single';
 }
 
-export function TipCard({ tip, onClick, onEdit, onDelete, isSelected, onSelect, selectable }: TipCardProps) {
-  const category = TIP_CATEGORIES.find(c => c.id === tip.category_id);
+export function TipCard({ 
+  tip, 
+  onClick, 
+  onEdit, 
+  onDelete, 
+  isSelected, 
+  onSelect, 
+  selectable,
+  viewMode = 'grid'
+}: TipCardProps) {
+  const isSingle = viewMode === 'single';
+
+  const category = TIP_CATEGORIES.find(c => 
+    c.id === tip.category_id || 
+    (tip as any).tags?.some((t: string) => t.includes(c.id) || c.name.toLowerCase().includes(t.replace(/mẹo-?/g, '').toLowerCase()))
+  );
+  const badgeLabel = category ? category.name : ((tip as any).tags?.[0] ? (tip as any).tags[0].replace(/-/g, ' ') : null);
   
   const handleClick = () => {
     if (selectable && onSelect) {
@@ -28,71 +43,87 @@ export function TipCard({ tip, onClick, onEdit, onDelete, isSelected, onSelect, 
     }
   };
 
-  // Strip complex HTML tags for preview, keeping it simple, but we will render it as HTML.
-  // Actually, since we want a WYSIWYG preview, we can just use dangerouslySetInnerHTML with line-clamp.
-  // To avoid breaking layout, we wrap it in a line-clamp-2 container.
+  const cleanContent = tip.content ? tip.content.replace(/<[^>]*>?/gm, '').trim() : '';
 
   return (
-    <Card 
+    <div 
       onClick={handleClick}
-      radius="lg"
-      className={`group w-full aspect-3/4 sm:aspect-4/5 relative overflow-hidden shadow-lg border-none cursor-pointer
-        ${isSelected ? 'ring-4 ring-primary' : ''}
-      `}
+      className={`group w-full ${isSingle ? 'aspect-4/3' : 'aspect-3/4 sm:aspect-4/5'} relative overflow-hidden rounded-2xl bg-black border-none shadow-none cursor-pointer active:scale-[0.98] transition-all duration-150 select-none card-media-root ${
+        isSelected ? 'ring-3 ring-primary shadow-primary/20' : ''
+      }`}
     >
-      {/* Background Image */}
+      {/* Background Image: dừng lại trước 2 góc dưới và mask mờ dần để triệt tiêu hoàn toàn viền trắng subpixel */}
       {tip.image_url ? (
         <img 
           src={ImageManager.getAssetUrl(tip.image_url)} 
           alt={tip.title}
-          className="absolute inset-0 w-full h-full object-cover z-0"
+          className="card-media-img absolute inset-x-0 top-0 bottom-7 w-full h-[calc(100%-1.75rem)] object-cover z-0 group-hover:scale-105 transition-transform duration-300"
         />
       ) : (
-        <div className="absolute inset-0 w-full h-full bg-default-200 flex items-center justify-center z-0">
-          <Lightbulb className="w-16 h-16 text-default-500" />
+        <div className="card-media-img absolute inset-x-0 top-0 bottom-7 w-full h-[calc(100%-1.75rem)] bg-gradient-to-br from-amber-500/20 via-primary/10 to-default-200 flex items-center justify-center z-0">
+          <Lightbulb className={isSingle ? "w-16 h-16 text-primary/40" : "w-12 h-12 text-primary/40"} />
         </div>
       )}
 
-      {/* Dark gradient for text readability */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+      {/* Dual Gradient Scrim for text readability and top action visibility */}
+      <div className={`absolute inset-0 z-0 ${
+        isSingle 
+          ? 'bg-gradient-to-t from-black via-black/55 via-55% to-black/20' 
+          : 'bg-gradient-to-t from-black via-black/45 via-50% to-black/25'
+      } pointer-events-none`} />
 
-      {/* Action Buttons (Top Right) */}
-      <div 
-        className="absolute top-4 right-4 z-20 flex gap-2"
-        onClick={(e) => e.stopPropagation()}
-        onPointerDown={(e) => e.stopPropagation()}
-        onMouseDown={(e) => e.stopPropagation()}
-        onTouchStart={(e) => e.stopPropagation()}
-      >
+      {/* Top Left: Category Badge or Select Checkbox */}
+      <div className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1.5">
         {selectable ? (
           <div 
             onClick={(e) => {
               e.stopPropagation();
               onSelect?.();
             }}
-            className="bg-black/40 backdrop-blur-md rounded-full p-1 border border-white/20 shadow-sm cursor-pointer"
+            className="w-7 h-7 rounded-full bg-black/50 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-xs cursor-pointer active:scale-90 transition-transform"
           >
-            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-primary border-primary text-white' : 'border-white/60 bg-transparent'}`}>
-              {isSelected && <span className="w-2.5 h-2.5 bg-white rounded-full" />}
+            <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors ${
+              isSelected ? 'bg-primary text-white' : 'border border-white/60 bg-transparent'
+            }`}>
+              {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
             </div>
           </div>
-        ) : (
-          <Dropdown placement="bottom-end" shouldBlockScroll={false} disableAnimation>
+        ) : badgeLabel ? (
+          <span className={`${
+            isSingle ? 'text-xs px-2.5 py-1' : 'text-[11px] px-2 py-0.5'
+          } font-semibold rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-white flex items-center gap-1.5 shadow-xs capitalize`}>
+            {category && <span className={`w-1.5 h-1.5 rounded-full ${category.color.replace('text-', 'bg-')}`} />}
+            <span className={isSingle ? "line-clamp-1 max-w-[200px]" : "line-clamp-1 max-w-[90px]"}>{badgeLabel}</span>
+          </span>
+        ) : null}
+      </div>
+
+      {/* Top Right: Context Menu (nút 3 chấm bỏ nền bỏ viền hoàn toàn) */}
+      {!selectable && (
+        <div 
+          className="absolute top-1.5 right-1.5 z-20"
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+        >
+          <Dropdown placement="bottom-end">
             <DropdownTrigger>
-              <Button 
-                isIconOnly 
-                variant="light" 
-                size="md" 
-                disableAnimation
-                className="bg-black/30 backdrop-blur-sm border-none text-white rounded-full"
+              <button 
+                type="button"
+                className="w-9 h-9 rounded-full bg-transparent hover:bg-white/15 active:bg-white/25 text-white flex items-center justify-center border-none shadow-none outline-none active:scale-90 transition-all cursor-pointer"
+                aria-label="Tùy chọn mẹo"
               >
-                <MoreVertical className="w-5 h-5" />
-              </Button>
+                <MoreVertical className="w-5 h-5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]" />
+              </button>
             </DropdownTrigger>
-            <DropdownMenu aria-label="Tip Actions">
+            <DropdownMenu 
+              aria-label="Tip Actions"
+              className="min-w-[140px]"
+            >
               <DropdownItem 
                 key="edit" 
-                startContent={<Edit className="w-4 h-4" />}
+                startContent={<Edit className="w-4 h-4 text-default-500" />}
                 onPress={onEdit}
               >
                 Chỉnh sửa
@@ -108,44 +139,36 @@ export function TipCard({ tip, onClick, onEdit, onDelete, isSelected, onSelect, 
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Content Area */}
-      <div className="relative z-10 flex flex-col justify-end h-full p-4 sm:p-5 text-white">
-        <h3 className="font-bold text-sm text-left line-clamp-2 leading-snug mb-1 drop-shadow-md">
+      {/* Content Area (flush to bottom, clean typography, whole card taps to open) */}
+      <div className={`relative z-10 flex flex-col justify-end h-full ${
+        isSingle ? 'p-3.5 sm:p-4' : 'p-3 sm:p-3.5'
+      } text-white pointer-events-none`}>
+        <h3 className={`font-bold ${
+          isSingle ? 'text-base sm:text-lg line-clamp-2' : 'text-sm sm:text-base line-clamp-2'
+        } text-left leading-snug drop-shadow-md text-white`}>
           {tip.title}
         </h3>
         
-        {/* Preview content */}
-        {tip.content && (
-          <p className="text-xs text-white/80 line-clamp-2 text-left mb-3 leading-relaxed">
-            {tip.content.replace(/<[^>]*>?/gm, '').trim()}
+        {/* Preview content snippet */}
+        {cleanContent && (
+          <p className={`${
+            isSingle ? 'text-xs sm:text-sm text-white/85 line-clamp-2 sm:line-clamp-3 mt-1.5' : 'text-xs text-white/75 line-clamp-2 mt-1'
+          } text-left leading-relaxed drop-shadow-2xs`}>
+            {cleanContent}
           </p>
         )}
 
-        {/* Badges */}
-        <div className="flex flex-wrap items-center gap-1.5 mb-3">
-          {category && (
-            <span className="text-xs font-medium tracking-wide px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/10 flex items-center gap-1">
-              <span className={`w-1.5 h-1.5 rounded-full ${category.color.replace('bg-', 'bg-').replace('text-', 'bg-')}`} />
-              {category.name}
-            </span>
-          )}
-          
-          <span className="text-xs font-medium tracking-wide px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/10">
-            {tip.created_at ? formatDistanceToNow(new Date(tip.created_at), { addSuffix: true, locale: vi }) : ''}
-          </span>
+        {/* Time footer */}
+        <div className={`flex items-center gap-1.5 ${
+          isSingle ? 'text-xs text-white/65 mt-2' : 'text-[11px] text-white/60 mt-1.5'
+        }`}>
+          <Clock className={`${isSingle ? 'w-3.5 h-3.5' : 'w-3 h-3'} shrink-0`} />
+          <span>{tip.created_at ? formatDistanceToNow(new Date(tip.created_at), { addSuffix: true, locale: vi }) : ''}</span>
         </div>
-        
-        <Button 
-          className="w-full bg-white text-black font-semibold rounded-xl text-xs h-8 shadow-sm"
-          size="sm"
-          onPress={handleClick}
-        >
-          Xem chi tiết
-        </Button>
       </div>
-    </Card>
+    </div>
   );
 }

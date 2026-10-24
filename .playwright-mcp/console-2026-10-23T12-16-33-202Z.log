@@ -1,0 +1,58 @@
+[     143ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:14333
+[     189ms] [INFO] Đang chạy ở môi trường Web thuần, Storage sử dụng BrowserStorageProvider (IndexedDB) @ http://localhost:5173/@fs/C:/apron/packages/core/src/storage/index.ts?t=1792755976769:18
+[  150529ms] [ERROR] %o
+
+%s
+
+%s
+ ReferenceError: ImagePickerModal is not defined
+    at RecipeListPage (http://localhost:5173/src/pages/recipes/RecipeListPage.tsx?t=1792757943438:481:28)
+    at Object.react_stack_bottom_frame (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:12864:12)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:4211:19)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:5567:16)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:6138:20)
+    at runWithFiberInDEV (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:850:66)
+    at performUnitOfWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:8427:92)
+    at workLoopSync (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:8323:37)
+    at renderRootSync (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:8307:6)
+    at performWorkOnRoot (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:7992:27) The above error occurred in the <RecipeListPage> component. React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary. @ http://localhost:5173/@vite/client:528
+[  150530ms] [ERROR] [ErrorBoundary] ReferenceError: ImagePickerModal is not defined
+    at RecipeListPage (http://localhost:5173/src/pages/recipes/RecipeListPage.tsx?t=1792757943438:481:28)
+    at Object.react_stack_bottom_frame (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:12864:12)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:4211:19)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:5567:16)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:6138:20)
+    at runWithFiberInDEV (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:850:66)
+    at performUnitOfWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:8427:92)
+    at workLoopSync (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:8323:37)
+    at renderRootSync (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:8307:6)
+    at performWorkOnRoot (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:7992:27) {componentStack: 
+    at RecipeListPage (http://localhost:5173/src/…http://localhost:5173/src/ui/UIProvider.tsx:6:30)} @ http://localhost:5173/@vite/client:528
+[  187382ms] [ERROR] %o
+
+%s
+
+%s
+ ReferenceError: ImagePickerModal is not defined
+    at RecipeListPage (http://localhost:5173/src/pages/recipes/RecipeListPage.tsx?t=1792757980360:481:28)
+    at Object.react_stack_bottom_frame (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:12864:12)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:4211:19)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:5567:16)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:6138:20)
+    at runWithFiberInDEV (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:850:66)
+    at performUnitOfWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:8427:92)
+    at workLoopSync (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:8323:37)
+    at renderRootSync (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:8307:6)
+    at performWorkOnRoot (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:7992:27) The above error occurred in the <RecipeListPage> component. React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary. @ http://localhost:5173/@vite/client:528
+[  187383ms] [ERROR] [ErrorBoundary] ReferenceError: ImagePickerModal is not defined
+    at RecipeListPage (http://localhost:5173/src/pages/recipes/RecipeListPage.tsx?t=1792757980360:481:28)
+    at Object.react_stack_bottom_frame (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:12864:12)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:4211:19)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:5567:16)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:6138:20)
+    at runWithFiberInDEV (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:850:66)
+    at performUnitOfWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:8427:92)
+    at workLoopSync (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:8323:37)
+    at renderRootSync (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:8307:6)
+    at performWorkOnRoot (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:7992:27) {componentStack: 
+    at RecipeListPage (http://localhost:5173/src/…http://localhost:5173/src/ui/UIProvider.tsx:6:30)} @ http://localhost:5173/@vite/client:528

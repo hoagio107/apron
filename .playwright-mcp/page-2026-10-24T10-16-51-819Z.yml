@@ -1,0 +1,173 @@
+- generic [ref=f12e1]:
+  - generic [ref=f12e7]:
+    - main [ref=f12e8]:
+      - generic [ref=f12e9]:
+        - generic [ref=f12e10]:
+          - generic [ref=f12e11]:
+            - heading [level=1] [ref=f12e498]: Từ điển nguyên liệu
+            - paragraph [ref=f12e13]: 7 nguyên liệu đã lưu trữ
+          - button [ref=f12e499] [cursor=pointer]: Thêm mới
+        - generic [ref=f12e16]:
+          - generic [ref=f12e20]:
+            - textbox [ref=f12e500]:
+              - /placeholder: Tìm theo tên, nhóm, đơn vị...
+            - button
+          - generic [ref=f12e25]:
+            - button [ref=f12e501]:
+              - generic [ref=f12e27]: 🍱 Tất cả
+              - generic [ref=f12e28]: (7)
+            - button [ref=f12e502]:
+              - generic [ref=f12e33]: Rau củ quả
+              - generic [ref=f12e34]: (3)
+            - button [ref=f12e503]:
+              - generic [ref=f12e40]: Thịt cá & Hải sản
+              - generic [ref=f12e41]: (4)
+            - button [ref=f12e504]:
+              - generic [ref=f12e46]: Trứng & Bơ sữa
+              - generic [ref=f12e47]: (0)
+            - button [ref=f12e505]:
+              - generic [ref=f12e51]: Gia vị & Nước sốt
+              - generic [ref=f12e52]: (0)
+            - button [ref=f12e506]:
+              - generic [ref=f12e63]: Ngũ cốc & Tinh bột
+              - generic [ref=f12e64]: (0)
+            - button [ref=f12e507]:
+              - generic [ref=f12e68]: Khác
+              - generic [ref=f12e69]: (0)
+          - generic [ref=f12e70]:
+            - generic [ref=f12e71]:
+              - button [ref=f12e508]: Tất cả
+              - button [ref=f12e509]:
+                - generic [ref=f12e79]: Đang dùng (0)
+              - button [ref=f12e510]: Chưa dùng (7)
+            - generic [ref=f12e82]:
+              - combobox [ref=f12e85]
+              - button [ref=f12e511]:
+                - generic [ref=f12e88]: Tên A-Z
+        - generic [ref=f12e103]:
+          - generic [ref=f12e324] [cursor=pointer]:
+            - generic [ref=f12e325]:
+              - generic [ref=f12e326]: B
+              - generic [ref=f12e331]: Rau củ quả
+              - button [ref=f12e512]
+            - generic [ref=f12e342]:
+              - generic [ref=f12e343]:
+                - heading [level=3] [ref=f12e513]: Bắp ngô ngọt
+                - generic [ref=f12e345]: "ĐV: bắp"
+              - generic [ref=f12e347]:
+                - generic [ref=f12e348]: Chưa dùng
+                - generic [ref=f12e349]: Sửa
+          - generic [ref=f12e352] [cursor=pointer]:
+            - generic [ref=f12e353]:
+              - generic [ref=f12e354]: C
+              - generic [ref=f12e360]: Thịt cá & Hải sản
+              - button [ref=f12e514]
+            - generic [ref=f12e372]:
+              - generic [ref=f12e373]:
+                - heading [level=3] [ref=f12e515]: Cá lóc đồng
+                - generic [ref=f12e375]: "ĐV: g"
+              - generic [ref=f12e377]:
+                - generic [ref=f12e378]: Chưa dùng
+                - generic [ref=f12e379]: Sửa
+          - generic [ref=f12e382] [cursor=pointer]:
+            - generic [ref=f12e383]:
+              - generic [ref=f12e384]: C
+              - generic [ref=f12e390]: Thịt cá & Hải sản
+              - button [ref=f12e516]
+            - generic [ref=f12e402]:
+              - generic [ref=f12e403]:
+                - heading [level=3] [ref=f12e517]: Cà rốt
+                - generic [ref=f12e405]: "ĐV: củ"
+              - generic [ref=f12e407]:
+                - generic [ref=f12e408]: Chưa dùng
+                - generic [ref=f12e409]: Sửa
+          - generic [ref=f12e412] [cursor=pointer]:
+            - generic [ref=f12e413]:
+              - generic [ref=f12e414]: H
+              - generic [ref=f12e419]: Rau củ quả
+              - button [ref=f12e518]
+            - generic [ref=f12e430]:
+              - generic [ref=f12e431]:
+                - heading [level=3] [ref=f12e519]: Hành lá, ngò rí
+                - generic [ref=f12e433]: "ĐV: g"
+              - generic [ref=f12e435]:
+                - generic [ref=f12e436]: Chưa dùng
+                - generic [ref=f12e437]: Sửa
+          - generic [ref=f12e440] [cursor=pointer]:
+            - generic [ref=f12e441]:
+              - generic [ref=f12e442]: K
+              - generic [ref=f12e447]: Rau củ quả
+              - button [ref=f12e520]
+            - generic [ref=f12e458]:
+              - generic [ref=f12e459]:
+                - heading [level=3] [ref=f12e521]: Khoai tây
+                - generic [ref=f12e461]: "ĐV: củ"
+              - generic [ref=f12e463]:
+                - generic [ref=f12e464]: Chưa dùng
+                - generic [ref=f12e465]: Sửa
+          - generic [ref=f12e468] [cursor=pointer]:
+            - generic [ref=f12e469]:
+              - generic [ref=f12e470]: S
+              - generic [ref=f12e476]: Thịt cá & Hải sản
+              - button [ref=f12e522]
+            - generic [ref=f12e488]:
+              - generic [ref=f12e489]:
+                - heading [level=3] [ref=f12e523]: Sườn heo
+                - generic [ref=f12e491]: "ĐV: g"
+              - generic [ref=f12e493]:
+                - generic [ref=f12e494]: Chưa dùng
+                - generic [ref=f12e495]: Sửa
+          - generic [ref=f12e294] [cursor=pointer]:
+            - generic [ref=f12e295]:
+              - generic [ref=f12e296]: T
+              - generic [ref=f12e302]: Thịt cá & Hải sản
+              - button [ref=f12e524]
+            - generic [ref=f12e314]:
+              - generic [ref=f12e315]:
+                - heading [level=3] [ref=f12e525]: Thịt thăn bò
+                - generic [ref=f12e317]: "ĐV: g"
+              - generic [ref=f12e319]:
+                - generic [ref=f12e320]: Chưa dùng
+                - generic [ref=f12e321]: Sửa
+    - navigation:
+      - generic [ref=f12e188]:
+        - link [ref=f12e189] [cursor=pointer]:
+          - /url: /
+        - link [ref=f12e193] [cursor=pointer]:
+          - /url: /recipes
+        - link [ref=f12e196] [cursor=pointer]:
+          - /url: /tips
+        - button [ref=f12e199]
+    - button [ref=f12e202]
+  - dialog "Thêm nguyên liệu mới" [active] [ref=f12e528]:
+    - button "Dismiss" [ref=f12e530]
+    - button "Close" [ref=f12e531]
+    - banner [ref=f12e534]:
+      - generic [ref=f12e535]: Thêm nguyên liệu mới
+    - generic [ref=f12e541]:
+      - generic [ref=f12e542]:
+        - generic [ref=f12e543] [cursor=pointer]:
+          - generic [ref=f12e544]: Tải ảnh
+          - generic [ref=f12e550]: Đổi ảnh
+        - button "Chọn ảnh từ máy" [ref=f12e556] [cursor=pointer]
+      - generic [ref=f12e557]:
+        - generic [ref=f12e558]: Tên nguyên liệu
+        - 'textbox "VD: Thịt ba chỉ, Cà chua bi, Hành hoa..." [ref=f12e566]'
+      - generic [ref=f12e567]:
+        - generic [ref=f12e568]: Nhóm phân loại
+        - generic [ref=f12e573]:
+          - combobox [ref=f12e576]
+          - button "Rau củ quả Chọn nhóm phân loại" [ref=f12e578]:
+            - generic [ref=f12e579]: Rau củ quả
+      - generic [ref=f12e583]:
+        - generic [ref=f12e584]: Đơn vị mặc định
+        - generic [ref=f12e593]:
+          - combobox "Chọn hoặc nhập đơn vị mặc định" [ref=f12e594]: g
+          - generic [ref=f12e595]:
+            - button [ref=f12e596] [cursor=pointer]
+            - button "Show suggestions" [ref=f12e599] [cursor=pointer]
+    - contentinfo [ref=f12e602]:
+      - generic [ref=f12e603]:
+        - button "Hủy" [ref=f12e604] [cursor=pointer]
+        - button "Thêm nguyên liệu" [disabled]
+    - button "Dismiss" [ref=f12e606]

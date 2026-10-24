@@ -1,0 +1,65 @@
+- generic [ref=f7e7]:
+  - main [ref=f7e8]:
+    - generic [ref=f7e9]:
+      - generic [ref=f7e10]:
+        - generic [ref=f7e12]:
+          - heading "Từ điển nguyên liệu" [level=1] [ref=f7e13]
+          - paragraph [ref=f7e14]: Hiển thị 3 / 8 nguyên liệu
+        - generic [ref=f7e16]:
+          - generic [ref=f7e20]:
+            - textbox "Tìm kiếm nguyên liệu..." [ref=f7e24]
+            - button "clear input"
+          - generic [ref=f7e25]:
+            - button "Thêm mới" [ref=f7e26] [cursor=pointer]
+            - generic [ref=f7e288]:
+              - button "Bộ lọc" [active] [ref=f7e289] [cursor=pointer]
+              - generic [ref=f7e340]: "1"
+            - button "Sắp xếp" [ref=f7e32] [cursor=pointer]
+      - generic [ref=f7e37]:
+        - generic [ref=f7e38] [cursor=pointer]:
+          - generic [ref=f7e39]:
+            - generic [ref=f7e40]: B
+            - generic [ref=f7e45]: Rau củ quả
+            - button "Xoá nguyên liệu" [ref=f7e52]
+          - generic [ref=f7e56]:
+            - generic [ref=f7e57]:
+              - heading "Bắp ngô ngọt" [level=3] [ref=f7e58]
+              - generic [ref=f7e59]: "ĐV: bắp"
+            - generic [ref=f7e61]:
+              - generic [ref=f7e62]: Chưa dùng
+              - generic [ref=f7e63]: Sửa
+        - generic [ref=f7e126] [cursor=pointer]:
+          - generic [ref=f7e127]:
+            - generic [ref=f7e128]: H
+            - generic [ref=f7e133]: Rau củ quả
+            - button "Xoá nguyên liệu" [ref=f7e140]
+          - generic [ref=f7e144]:
+            - generic [ref=f7e145]:
+              - heading "Hành lá, ngò rí" [level=3] [ref=f7e146]
+              - generic [ref=f7e147]: "ĐV: g"
+            - generic [ref=f7e149]:
+              - generic [ref=f7e150]: Chưa dùng
+              - generic [ref=f7e151]: Sửa
+        - generic [ref=f7e154] [cursor=pointer]:
+          - generic [ref=f7e155]:
+            - generic [ref=f7e156]: K
+            - generic [ref=f7e161]: Rau củ quả
+            - button "Xoá nguyên liệu" [ref=f7e168]
+          - generic [ref=f7e172]:
+            - generic [ref=f7e173]:
+              - heading "Khoai tây" [level=3] [ref=f7e174]
+              - generic [ref=f7e175]: "ĐV: củ"
+            - generic [ref=f7e177]:
+              - generic [ref=f7e178]: Chưa dùng
+              - generic [ref=f7e179]: Sửa
+  - generic:
+    - navigation:
+      - generic [ref=f7e272]:
+        - link [ref=f7e273] [cursor=pointer]:
+          - /url: /
+        - link [ref=f7e277] [cursor=pointer]:
+          - /url: /recipes
+        - link [ref=f7e280] [cursor=pointer]:
+          - /url: /tips
+        - button [ref=f7e283]
+    - button [ref=f7e286]

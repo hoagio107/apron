@@ -1,0 +1,43 @@
+- main [ref=f11e30]:
+  - generic [ref=f11e196]:
+    - generic [ref=f11e198]:
+      - button "Quay lại" [ref=f11e199] [cursor=pointer]
+      - heading "Tạo công thức mới" [level=1] [ref=f11e203]
+    - generic "Các phần của công thức" [ref=f11e205]:
+      - tablist "Các phần của công thức" [ref=f11e206]:
+        - tab "Thông tin" [ref=f11e208] [cursor=pointer]
+        - tab "Nguyên liệu" [selected] [ref=f11e215] [cursor=pointer]
+        - tab "Cách làm" [ref=f11e222] [cursor=pointer]
+    - generic [ref=f11e386]:
+      - generic [ref=f11e388]:
+        - generic [ref=f11e389]: Khẩu phần
+        - generic [ref=f11e396]:
+          - spinbutton [ref=f11e401]: "1"
+          - generic [ref=f11e402]: người
+      - generic [ref=f11e404]:
+        - generic [ref=f11e405]:
+          - 'textbox "Tên nhóm nguyên liệu (VD: Phần sốt, Phần bánh...)" [ref=f11e410]': Nguyên liệu chính
+          - button [ref=f11e411] [cursor=pointer]
+        - generic [ref=f11e415]:
+          - generic [ref=f11e417]:
+            - button "Kéo thả để đổi thứ tự" [ref=f11e418]
+            - generic [ref=f11e419]:
+              - generic [ref=f11e420]:
+                - generic [ref=f11e425]:
+                  - combobox "Tên nguyên liệu" [ref=f11e426]
+                  - generic [ref=f11e427]:
+                    - button
+                    - button "Show suggestions" [ref=f11e428] [cursor=pointer]
+                - button [ref=f11e431] [cursor=pointer]
+              - generic [ref=f11e435]:
+                - textbox "Số lượng" [ref=f11e440]: "1"
+                - generic [ref=f11e445]:
+                  - combobox "Chọn đơn vị" [ref=f11e446]: g
+                  - button "Show suggestions" [ref=f11e448] [cursor=pointer]
+          - status [ref=f11e451]
+          - button "Thêm nguyên liệu" [ref=f11e452] [cursor=pointer]
+      - button "Thêm nhóm nguyên liệu" [ref=f11e455] [cursor=pointer]
+    - generic [ref=f11e381]:
+      - button "AI Nhập" [ref=f11e382] [cursor=pointer]
+      - button "Quay lại" [ref=f11e457] [cursor=pointer]
+      - button "Tiếp tục" [active] [ref=f11e385] [cursor=pointer]

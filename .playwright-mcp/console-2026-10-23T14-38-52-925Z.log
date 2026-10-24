@@ -1,0 +1,12 @@
+[     191ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:14333
+[     255ms] [INFO] Đang chạy ở môi trường Web thuần, Storage sử dụng BrowserStorageProvider (IndexedDB) @ http://localhost:5173/@fs/C:/apron/packages/core/src/storage/index.ts?t=1792766117233:18
+[   32488ms] [ERROR] [vite] SyntaxError: The requested module '/src/ui/index.ts?t=1792766314746' contains conflicting star exports for name 'toast' @ http://localhost:5173/@vite/client:528
+[   32489ms] [ERROR] [vite] Failed to reload /src/pages/recipes/RecipeListPage.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5173/@vite/client:528
+[   52937ms] [ERROR] [vite] SyntaxError: The requested module '/src/ui/index.ts?t=1792766314746' contains conflicting star exports for name 'toast' @ http://localhost:5173/@vite/client:528
+[   52937ms] [ERROR] [vite] Failed to reload /src/pages/recipes/RecipeListPage.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5173/@vite/client:528
+[   77488ms] [ERROR] [vite] SyntaxError: The requested module '/src/ui/index.ts?t=1792766314746' contains conflicting star exports for name 'toast' @ http://localhost:5173/@vite/client:528
+[   77488ms] [ERROR] [vite] Failed to reload /src/pages/recipes/components/BatchImageDrawer.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5173/@vite/client:528
+[  109032ms] [ERROR] [vite] SyntaxError: The requested module '/src/ui/index.ts?t=1792766314746' contains conflicting star exports for name 'toast' @ http://localhost:5173/@vite/client:528
+[  109032ms] [ERROR] [vite] Failed to reload /src/pages/recipes/components/BatchImageDrawer.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5173/@vite/client:528
+[  131920ms] [ERROR] [vite] SyntaxError: The requested module '/src/ui/index.ts?t=1792766314746' contains conflicting star exports for name 'toast' @ http://localhost:5173/@vite/client:528
+[  131920ms] [ERROR] [vite] Failed to reload /src/pages/recipes/components/BatchImageDrawer.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5173/@vite/client:528

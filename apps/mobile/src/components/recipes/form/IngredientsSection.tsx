@@ -1,10 +1,9 @@
 import { useFormContext, useFieldArray, Controller } from 'react-hook-form';
-import { Button, Card, CardBody, Input, Autocomplete, AutocompleteItem, Avatar } from '@/ui';
-import { Plus, Trash2, ShoppingCart, Users, GripVertical, X } from 'lucide-react';
+import { Button, Input, Autocomplete, AutocompleteItem } from '@/ui';
+import { Plus, Trash2, Users, GripVertical, X } from 'lucide-react';
 import type { FormValues } from './schema';
 import { useUnits } from '../../../hooks/useUnits';
-import { useIngredientCatalogStore } from '../../../store/useIngredientCatalogStore';
-import { SectionHeader } from '../../shared/SectionHeader';
+import { IngredientCombobox } from './IngredientCombobox';
 import { SortableList, SortableItem } from './SortableList';
 
 export function IngredientsSection() {
@@ -16,27 +15,28 @@ export function IngredientsSection() {
   });
 
   return (
-    <Card className="w-full" shadow="none">
-      <SectionHeader 
-        title="Nguyên liệu" 
-        icon={ShoppingCart}
-        action={
-          <Controller
-            name="servings"
-            control={control}
-            render={({ field, fieldState }) => (
+    <div className="flex flex-col gap-6 w-full">
+      {/* Top action row: Servings */}
+      <div className="flex items-center justify-between pb-3 border-b border-divider/40">
+        <Controller
+          name="servings"
+          control={control}
+          render={({ field, fieldState }) => (
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2 text-sm text-default-600 font-medium">
+                <Users className="w-4 h-4 text-primary" />
+                <span>Khẩu phần</span>
+              </div>
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 text-sm text-default-500 whitespace-nowrap font-medium">
-                  <Users className="w-4 h-4" /> Khẩu phần:
-                </div>
                 <Input
                   {...field}
                   type="number"
                   variant="flat"
-                  size="md"
-                  className="w-10"
+                  size="sm"
+                  className="w-16"
                   classNames={{
-                    input: "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-center font-bold"
+                    inputWrapper: "h-8 min-h-8 bg-default-100 hover:bg-default-200 border-none shadow-none px-2 rounded-xl",
+                    input: "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-center font-bold text-sm"
                   }}
                   min={0.1}
                   step={0.1}
@@ -45,38 +45,40 @@ export function IngredientsSection() {
                   isInvalid={!!fieldState.error}
                   errorMessage={fieldState.error?.message}
                 />
+                <span className="text-xs text-default-400 font-medium">người</span>
               </div>
-            )}
-          />
-        }
-      />
-      <CardBody className="gap-0">
-        {sections.length === 0 && (
-          <div className="text-center text-gray-500 py-4">Chưa có nguyên liệu nào. Hãy thêm nhóm nguyên liệu đầu tiên.</div>
-        )}
-        
-        {sections.map((section, sectionIndex) => (
-          <div key={section.id} className="flex flex-col w-full">
-            <IngredientGroup 
-              sectionIndex={sectionIndex} 
-              onRemove={() => removeSection(sectionIndex)} 
-            />
-          </div>
-        ))}
+            </div>
+          )}
+        />
+      </div>
 
-        <div className="pt-4 border-t border-divider">
-          <Button 
-            color="primary"
-            variant="solid"
-            className="w-full" 
-            onPress={() => appendSection({ name: 'Nhóm nguyên liệu mới', ingredients: [{ id: crypto.randomUUID(), name: '', quantity: 1, unit: 'g' }] })}
-            startContent={<Plus className="w-4 h-4" />}
-          >
-            Thêm nhóm
-          </Button>
+      {sections.length === 0 && (
+        <div className="text-center text-default-400 py-8 text-sm">
+          Chưa có nguyên liệu nào. Hãy thêm nhóm nguyên liệu đầu tiên.
         </div>
-      </CardBody>
-    </Card>
+      )}
+      
+      {sections.map((section, sectionIndex) => (
+        <div key={section.id} className="flex flex-col w-full">
+          <IngredientGroup 
+            sectionIndex={sectionIndex} 
+            onRemove={() => removeSection(sectionIndex)} 
+          />
+        </div>
+      ))}
+
+      <div className="pt-2">
+        <Button 
+          color="primary"
+          variant="flat"
+          className="w-full font-semibold h-11 rounded-xl" 
+          onPress={() => appendSection({ name: 'Nhóm nguyên liệu mới', ingredients: [{ id: crypto.randomUUID(), name: '', quantity: 1, unit: 'g' }] })}
+          startContent={<Plus className="w-4 h-4" />}
+        >
+          Thêm nhóm nguyên liệu
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -89,8 +91,6 @@ function IngredientGroup({ sectionIndex, onRemove }: { sectionIndex: number, onR
   });
   
   const { units } = useUnits();
-  const { getAllIngredients } = useIngredientCatalogStore();
-  const catalog = getAllIngredients();
 
   return (
     <div className="flex flex-col">
@@ -123,14 +123,15 @@ function IngredientGroup({ sectionIndex, onRemove }: { sectionIndex: number, onR
         <SortableList items={ingredients} onDragEnd={(oldIndex, newIndex) => move(oldIndex, newIndex)}>
           {ingredients.map((ingredient, index) => (
             <SortableItem key={ingredient.id} id={ingredient.id}>
-              {({ attributes, listeners }) => (
-                <div className="flex gap-2 items-start group/ing w-full">
+              {({ attributes, listeners, isDragging }) => (
+                <div className={`flex gap-2 items-start group/ing w-full transition-shadow ${isDragging ? 'bg-default-100/80 rounded-xl p-1 shadow-lg ring-1 ring-primary/30' : ''}`}>
                   <div 
-                    className="cursor-move pt-3 text-default-300 hover:text-default-500 transition-colors"
+                    className="touch-none select-none cursor-grab active:cursor-grabbing p-2 -ml-2 text-default-300 hover:text-default-600 active:text-primary transition-colors shrink-0 mt-1"
+                    title="Kéo thả để đổi thứ tự"
                     {...attributes}
                     {...listeners}
                   >
-                    <GripVertical className="w-5 h-5" />
+                    <GripVertical className="w-5 h-5 pointer-events-none" />
                   </div>
                   <div className="flex flex-col flex-1 gap-2">
                     <div className="flex gap-2 items-start w-full">
@@ -138,72 +139,19 @@ function IngredientGroup({ sectionIndex, onRemove }: { sectionIndex: number, onR
                         name={`ingredientSections.${sectionIndex}.ingredients.${index}.name`}
                         control={control}
                         render={({ field, fieldState }) => (
-                          <Autocomplete
-                            name={field.name}
-                            onBlur={field.onBlur}
-                            ref={field.ref}
-                            allowsCustomValue
-                            placeholder="Tên nguyên liệu"
-                            variant="flat"
-                            className="flex-1"
-                            aria-label="Tên nguyên liệu"
-                            defaultFilter={(textValue, inputValue) => {
-                              return textValue.toLowerCase().includes(inputValue.toLowerCase());
-                            }}
-                            onSelectionChange={(val) => {
-                              if (val) {
-                                const selected = catalog.find(i => i.id === val);
-                                if (selected) {
-                                  field.onChange(selected.name);
-                                  setValue(`ingredientSections.${sectionIndex}.ingredients.${index}.ingredient_id`, selected.id);
-                                  if (selected.default_unit) {
-                                    setValue(`ingredientSections.${sectionIndex}.ingredients.${index}.unit`, selected.default_unit);
-                                  }
-                                  // Bỏ focus khỏi ô nhập liệu để tắt bàn phím và đóng popover trên mobile
-                                  setTimeout(() => {
-                                    if (document.activeElement instanceof HTMLElement) {
-                                      document.activeElement.blur();
-                                    }
-                                  }, 10);
-                                  return;
-                                }
-                              }
-                              field.onChange(val || '');
-                              setValue(`ingredientSections.${sectionIndex}.ingredients.${index}.ingredient_id`, undefined);
-                            }}
-                            onInputChange={(val) => {
-                              field.onChange(val);
-                              setValue(`ingredientSections.${sectionIndex}.ingredients.${index}.ingredient_id`, undefined);
-                            }}
-                            selectedKey={ingredients[index].ingredient_id || null}
-                            inputValue={field.value || ''}
-                            classNames={{
-                              base: "bg-default-100 hover:bg-default-200 border-none shadow-none rounded-medium"
-                            }}
-                            inputProps={{
-                              classNames: {
-                                inputWrapper: "bg-transparent shadow-none border-none",
+                          <IngredientCombobox
+                            value={field.value || ''}
+                            ingredientId={ingredients[index].ingredient_id}
+                            onChange={(name, id, defaultUnit) => {
+                              field.onChange(name);
+                              setValue(`ingredientSections.${sectionIndex}.ingredients.${index}.ingredient_id`, id);
+                              if (defaultUnit) {
+                                setValue(`ingredientSections.${sectionIndex}.ingredients.${index}.unit`, defaultUnit);
                               }
                             }}
                             isInvalid={!!fieldState.error}
                             errorMessage={fieldState.error?.message}
-                          >
-                            {catalog.map((i) => (
-                              <AutocompleteItem 
-                                key={i.id} 
-                                textValue={i.name}
-                                className="data-[hover=true]:bg-default-100 data-[hover=true]:text-default-foreground transition-colors"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <Avatar alt={i.name} className="flex-shrink-0" size="sm" src={i.image_url} name={i.name} />
-                                  <div className="flex flex-col">
-                                    <span className="text-small">{i.name}</span>
-                                    {i.default_category && <span className="text-tiny text-default-400">{i.default_category}</span>}
-                                  </div>
-                                </div>
-                              </AutocompleteItem>
-                            ))}
-                          </Autocomplete>
+                          />
                         )}
                       />
                       <button 

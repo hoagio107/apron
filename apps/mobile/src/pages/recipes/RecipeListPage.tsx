@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/ui';
+import { Button, Spinner, toast } from '@/ui';
 import { BulkActionBar } from '../../components/shared/BulkActionBar';
 import { ConfirmModal } from '../../components/shared/ConfirmModal';
 import { PageHeader } from '../../components/layout/PageHeader';
@@ -17,7 +17,7 @@ import { useEffect } from 'react';
 import { MealPlannerSelectModal } from './components/MealPlannerSelectModal';
 import { TagSelectModal } from './components/TagSelectModal';
 import { ParentRecipeSelectModal } from './components/ParentRecipeSelectModal';
-import { ImagePickerModal } from '../../components/recipes/form/ImagePickerModal';
+import { BatchImageDrawer } from './components/BatchImageDrawer';
 import { useMealPlanStore } from '../../store/useMealPlanStore';
 import { Link as LinkIcon, Image as ImageIcon } from 'lucide-react';
 
@@ -39,13 +39,13 @@ export function RecipeListPage() {
   const [deleteTarget, setDeleteTarget] = useState<Recipe | null>(null);
   const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
 
-  const { recipes, fetchRecipes, deleteBulkRecipes, updateRecipe, deleteRecipe } = useRecipeStore();
+  const { recipes, fetchRecipes, deleteBulkRecipes, updateRecipe, deleteRecipe, isLoading } = useRecipeStore();
   const { addMealPlanEntry } = useMealPlanStore();
 
   const [isMealPlannerModalOpen, setIsMealPlannerModalOpen] = useState(false);
   const [isTagModalOpen, setIsTagModalOpen] = useState(false);
   const [isParentModalOpen, setIsParentModalOpen] = useState(false);
-  const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
+  const [isBatchImageDrawerOpen, setIsBatchImageDrawerOpen] = useState(false);
 
   useEffect(() => {
     fetchRecipes();
@@ -74,27 +74,34 @@ export function RecipeListPage() {
     (filters.maxTime !== null ? 1 : 0) + 
     ((filters.tags?.length || 0) > 0 ? 1 : 0) + 
     (filters.cookedStatus && filters.cookedStatus !== 'all' ? 1 : 0) + 
-    (filters.minRating ? 1 : 0);
+    (filters.minRating ? 1 : 0) +
+    (filters.hideVariants ? 1 : 0);
 
   const filteredAndSortedRecipes = useMemo(() => {
     let result = [...recipes];
     
-    // Filter out children (variants)
-    result = result.filter(r => !r.parent_id);
+    // Chỉ ẩn món biến thể khi người dùng chủ động chọn ẩn trong bộ lọc
+    if (filters.hideVariants && !searchQuery.trim()) {
+      result = result.filter(r => !r.parent_id || !recipes.some(parent => parent.id === r.parent_id));
+    }
 
-    // Search
+    // Tìm kiếm theo từ khóa an toàn
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(r => r.title.toLowerCase().includes(q));
+      result = result.filter(r => (r.title || '').toLowerCase().includes(q));
     }
     
-    // Filters
+    // Lọc độ khó (tương thích cả 'Trung bình' và 'Vừa')
     if (filters.difficulties.length > 0) {
-      result = result.filter(r => filters.difficulties.includes(r.difficulty));
+      result = result.filter(r => 
+        filters.difficulties.includes(r.difficulty) ||
+        (filters.difficulties.includes('Trung bình') && r.difficulty === 'Vừa') ||
+        (filters.difficulties.includes('Vừa') && r.difficulty === 'Trung bình')
+      );
     }
     
     if (filters.maxTime !== null) {
-      result = result.filter(r => (r.prep_time + r.cook_time) <= filters.maxTime!);
+      result = result.filter(r => ((r.prep_time || 0) + (r.cook_time || 0)) <= filters.maxTime!);
     }
 
     if (filters.tags && filters.tags.length > 0) {
@@ -120,14 +127,27 @@ export function RecipeListPage() {
     // Sort
     result.sort((a, b) => {
       switch (sortOption) {
-        case 'newest':
-          return new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime();
-        case 'oldest':
-          return new Date(a.created_at || '').getTime() - new Date(b.created_at || '').getTime();
+        case 'newest': {
+          const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          const validA = isNaN(timeA) ? 0 : timeA;
+          const validB = isNaN(timeB) ? 0 : timeB;
+          return validB - validA;
+        }
+        case 'oldest': {
+          const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          const validA = isNaN(timeA) ? 0 : timeA;
+          const validB = isNaN(timeB) ? 0 : timeB;
+          return validA - validB;
+        }
         case 'highest_rated':
-          return b.taste_score - a.taste_score;
-        case 'quickest':
-          return (a.prep_time + a.cook_time) - (b.prep_time + b.cook_time);
+          return (b.taste_score || 0) - (a.taste_score || 0);
+        case 'quickest': {
+          const totalA = (a.prep_time || 0) + (a.cook_time || 0);
+          const totalB = (b.prep_time || 0) + (b.cook_time || 0);
+          return totalA - totalB;
+        }
         default:
           return 0;
       }
@@ -171,9 +191,16 @@ export function RecipeListPage() {
 
   const handleRecipeAction = async (action: string, recipe: Recipe) => {
     switch (action) {
-      case 'favorite':
-        await updateRecipe({ ...recipe, is_favorite: !recipe.is_favorite });
+      case 'favorite': {
+        const nextFav = !recipe.is_favorite;
+        await updateRecipe({ ...recipe, is_favorite: nextFav });
+        if (nextFav) {
+          toast.success(`Đã thêm "${recipe.title}" vào yêu thích!`);
+        } else {
+          toast.info(`Đã bỏ yêu thích "${recipe.title}".`);
+        }
         break;
+      }
       case 'edit':
         navigate(`/recipes/${recipe.id}/edit`);
         break;
@@ -191,9 +218,11 @@ export function RecipeListPage() {
   };
 
   const handleBulkDeleteConfirm = async () => {
+    const count = selectedIds.size;
     await deleteBulkRecipes(Array.from(selectedIds));
     setSelectedIds(new Set());
     setIsSelectMode(false);
+    toast.success(`Đã xoá ${count} công thức thành công!`);
   };
 
   const handleBulkAddToMealPlan = async (date: string, slotId: string) => {
@@ -201,11 +230,11 @@ export function RecipeListPage() {
       for (const id of Array.from(selectedIds)) {
         await addMealPlanEntry(date, { recipe_id: id, meal_type: slotId });
       }
-      alert(`Đã thêm ${selectedIds.size} công thức vào thực đơn!`);
+      toast.success(`Đã thêm ${selectedIds.size} công thức vào thực đơn!`);
       toggleSelectMode();
     } catch (e) {
       console.error(e);
-      alert('Có lỗi xảy ra.');
+      toast.error('Có lỗi xảy ra khi thêm vào thực đơn.');
     }
   };
 
@@ -219,11 +248,11 @@ export function RecipeListPage() {
           await updateRecipe({ ...recipe, tags: newTags });
         }
       }
-      alert(`Đã gắn thẻ cho ${selectedIds.size} công thức!`);
+      toast.success(`Đã gắn thẻ cho ${selectedIds.size} công thức!`);
       toggleSelectMode();
     } catch (e) {
       console.error(e);
-      alert('Có lỗi xảy ra.');
+      toast.error('Có lỗi xảy ra khi gắn thẻ.');
     }
   };
 
@@ -237,41 +266,50 @@ export function RecipeListPage() {
           }
         }
       }
-      alert(`Đã gán cha cho ${selectedIds.size} công thức!`);
+      toast.success(`Đã gán món cha cho ${selectedIds.size} công thức!`);
       toggleSelectMode();
     } catch (e) {
       console.error(e);
-      alert('Có lỗi xảy ra.');
+      toast.error('Có lỗi xảy ra khi gán món cha.');
     }
   };
 
-  const handleBulkAddImages = async (images: string[], _videos: string[]) => {
+  const handleBulkSaveImages = async (updates: { recipeId: string; imageUrl: string }[]) => {
     try {
-      for (const id of Array.from(selectedIds)) {
-        const recipe = recipes.find(r => r.id === id);
+      for (const update of updates) {
+        const recipe = recipes.find(r => r.id === update.recipeId);
         if (recipe) {
-          const currentImages = recipe.images || (recipe.image_url ? [recipe.image_url] : []);
-          const newImages = [...currentImages, ...images];
-          const updates: Partial<Recipe> = { images: newImages };
-          if (!recipe.image_url && newImages.length > 0) {
-            updates.image_url = newImages[0];
+          const currentImages = recipe.images || [];
+          let updatedImages = [...currentImages];
+          if (update.imageUrl) {
+            updatedImages = [update.imageUrl, ...updatedImages.filter(img => img !== update.imageUrl && img !== recipe.image_url)];
+          } else {
+            updatedImages = updatedImages.filter(img => img !== recipe.image_url);
           }
-          await updateRecipe({ ...recipe, ...updates });
+          await updateRecipe({
+            ...recipe,
+            image_url: update.imageUrl || '',
+            images: updatedImages,
+          });
         }
       }
-      alert(`Đã thêm ảnh vào ${selectedIds.size} công thức!`);
+      toast.success(`Đã cập nhật ảnh thành công cho ${updates.length} công thức!`);
       toggleSelectMode();
     } catch (e) {
       console.error(e);
-      alert('Có lỗi xảy ra.');
+      toast.error('Có lỗi xảy ra khi lưu ảnh.');
     }
   };
 
   return (
-    <div className="flex flex-col min-h-full gap-6 w-full pt-6 pb-16 px-4 md:px-8">
+    <div className="flex flex-col min-h-full gap-6 w-full pt-6 pb-28 px-4 md:px-8">
       <PageHeader
         title="Sổ tay Công thức"
-        description={`${recipes.length} công thức đã lưu`}
+        description={
+          filteredAndSortedRecipes.length === recipes.length
+            ? `${recipes.length} công thức đã lưu`
+            : `Hiển thị ${filteredAndSortedRecipes.length} / ${recipes.length} công thức`
+        }
         prefix={
           <Button 
             isIconOnly
@@ -313,17 +351,57 @@ export function RecipeListPage() {
           onSelectAll={selectAll}
           onCancel={toggleSelectMode}
           actions={[
-            { key: 'meal-plan', label: 'Thực đơn', icon: <CalendarDays className="w-4 h-4" />, color: 'primary', onPress: () => setIsMealPlannerModalOpen(true) },
-            { key: 'tags', label: 'Gắn thẻ', icon: <Tags className="w-4 h-4" />, color: 'secondary', onPress: () => setIsTagModalOpen(true) },
-            { key: 'images', label: 'Thêm ảnh', icon: <ImageIcon className="w-4 h-4" />, color: 'warning', onPress: () => setIsImagePickerOpen(true) },
-            { key: 'parent', label: 'Gán cha', icon: <LinkIcon className="w-4 h-4" />, color: 'default', onPress: () => setIsParentModalOpen(true) },
-            { key: 'delete', label: 'Xóa', icon: <Trash2 className="w-4 h-4" />, color: 'danger', onPress: handleBulkDelete },
+            { 
+              key: 'meal-plan', 
+              label: 'Thực đơn', 
+              description: 'Lên kế hoạch nấu cho các món đã chọn',
+              icon: <CalendarDays className="w-4 h-4" />, 
+              color: 'primary', 
+              onPress: () => setIsMealPlannerModalOpen(true) 
+            },
+            { 
+              key: 'tags', 
+              label: 'Gắn thẻ', 
+              description: 'Gắn nhãn phân loại hàng loạt',
+              icon: <Tags className="w-4 h-4" />, 
+              color: 'secondary', 
+              onPress: () => setIsTagModalOpen(true) 
+            },
+            { 
+              key: 'images', 
+              label: 'Chèn ảnh cho từng món', 
+              description: 'Chọn hoặc tải ảnh riêng cho từng món',
+              icon: <ImageIcon className="w-4 h-4" />, 
+              color: 'warning', 
+              onPress: () => setIsBatchImageDrawerOpen(true) 
+            },
+            { 
+              key: 'parent', 
+              label: 'Gán công thức cha', 
+              description: 'Liên kết thành nhóm biến thể',
+              icon: <LinkIcon className="w-4 h-4" />, 
+              color: 'default', 
+              onPress: () => setIsParentModalOpen(true) 
+            },
+            { 
+              key: 'delete', 
+              label: 'Xoá công thức', 
+              description: 'Xoá vĩnh viễn các món đã chọn',
+              icon: <Trash2 className="w-4 h-4" />, 
+              color: 'danger', 
+              onPress: handleBulkDelete 
+            },
           ]}
         />
       )}
 
       {/* Grid / List */}
-      {filteredAndSortedRecipes.length === 0 ? (
+      {isLoading && recipes.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <Spinner size="lg" color="primary" />
+          <p className="text-sm text-default-400">Đang tải danh sách công thức...</p>
+        </div>
+      ) : filteredAndSortedRecipes.length === 0 ? (
         <EmptyState
           icon={<Search className="w-10 h-10 text-default-300" />}
           title="Không tìm thấy công thức"
@@ -331,8 +409,10 @@ export function RecipeListPage() {
         />
       ) : (
         <div className={`
-          ${viewType === 'grid-portrait' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6' : ''}
-          ${viewType === 'grid-square' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6' : ''}
+          ${viewType === 'grid-portrait' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6' : ''}
+          ${viewType === 'grid-square' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6' : ''}
+          ${viewType === 'grid-landscape' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6' : ''}
+          ${viewType === 'grid-portrait-out' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6' : ''}
         `}>
           {filteredAndSortedRecipes.map(r => {
             const variantCount = recipes.filter(child => child.parent_id === r.id).length;
@@ -374,10 +454,11 @@ export function RecipeListPage() {
         onConfirm={handleBulkSetParent}
         recipeCount={selectedIds.size}
       />
-      <ImagePickerModal
-        isOpen={isImagePickerOpen}
-        onOpenChange={setIsImagePickerOpen}
-        onSelectMedia={handleBulkAddImages}
+      <BatchImageDrawer
+        isOpen={isBatchImageDrawerOpen}
+        onOpenChange={setIsBatchImageDrawerOpen}
+        selectedRecipes={recipes.filter(r => selectedIds.has(r.id!))}
+        onSave={handleBulkSaveImages}
       />
 
       {/* Confirm Modals */}
@@ -392,6 +473,7 @@ export function RecipeListPage() {
           if (deleteTarget) {
             await deleteRecipe(deleteTarget.id!);
             setDeleteTarget(null);
+            toast.success('Đã xoá công thức thành công!');
           }
         }}
       />

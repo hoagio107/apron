@@ -1,0 +1,122 @@
+- generic [ref=f8e17]:
+  - main [ref=f8e18]:
+    - generic [ref=f8e19]:
+      - generic [ref=f8e20]:
+        - generic [ref=f8e22]:
+          - heading "Tủ lạnh thông minh" [level=1] [ref=f8e411]
+          - paragraph [ref=f8e24]: 6 nguyên liệu trong bếp của bạn
+        - generic [ref=f8e26]:
+          - button "Gợi ý món (AI)" [ref=f8e412] [cursor=pointer]
+          - button "Thêm" [ref=f8e413] [cursor=pointer]
+      - generic "Các phần của tủ lạnh" [ref=f8e414]:
+        - tablist "Các phần của tủ lạnh" [ref=f8e415]:
+          - tab "Tủ lạnh (6)" [selected] [ref=f8e416] [cursor=pointer]
+          - tab "AI Gợi ý món" [ref=f8e417] [cursor=pointer]
+      - generic [ref=f8e457]:
+        - generic [ref=f8e461]:
+          - textbox "Tìm kiếm nguyên liệu trong tủ..." [ref=f8e465]
+          - button "clear input"
+        - button "1 sắp hết hạn" [ref=f8e470]
+        - generic [ref=f8e471]:
+          - button "🍱 Tất cả (6)" [active] [ref=f8e472]:
+            - generic [ref=f8e473]: 🍱 Tất cả
+            - generic [ref=f8e474]: (6)
+          - button "Rau củ quả (2)" [ref=f8e475]:
+            - generic [ref=f8e479]: Rau củ quả
+            - generic [ref=f8e480]: (2)
+          - button "Thịt cá & Hải sản (1)" [ref=f8e481]:
+            - generic [ref=f8e486]: Thịt cá & Hải sản
+            - generic [ref=f8e487]: (1)
+          - button "Trứng & Bơ sữa (2)" [ref=f8e488]:
+            - generic [ref=f8e492]: Trứng & Bơ sữa
+            - generic [ref=f8e493]: (2)
+          - button "Gia vị & Nước sốt (1)" [ref=f8e494]:
+            - generic [ref=f8e497]: Gia vị & Nước sốt
+            - generic [ref=f8e498]: (1)
+        - generic [ref=f8e499]:
+          - generic [ref=f8e500]: Nguyên liệu (6)
+          - combobox [ref=f8e505] [cursor=pointer]:
+            - option "Hạn sử dụng" [selected]
+            - option "Tên A-Z"
+            - option "Mới thêm"
+        - generic [ref=f8e506]:
+          - generic [ref=f8e562] [cursor=pointer]:
+            - generic [ref=f8e563]:
+              - generic [ref=f8e569]: Còn 2 ngày
+              - generic [ref=f8e571]:
+                - button "Sửa nguyên liệu" [ref=f8e572]
+                - button "Xoá nguyên liệu" [ref=f8e576]
+            - generic [ref=f8e580]:
+              - generic "Thịt bò xay" [ref=f8e581]
+              - generic [ref=f8e582]:
+                - generic [ref=f8e583]: 500 gam
+                - generic [ref=f8e584]: Thịt cá & Hải sản
+          - generic [ref=f8e507] [cursor=pointer]:
+            - generic [ref=f8e508]:
+              - generic [ref=f8e513]: 4 ngày
+              - generic [ref=f8e515]:
+                - button "Sửa nguyên liệu" [ref=f8e516]
+                - button "Xoá nguyên liệu" [ref=f8e520]
+            - generic [ref=f8e524]:
+              - generic "Cà chua bi" [ref=f8e525]
+              - generic [ref=f8e526]:
+                - generic [ref=f8e527]: 450 gam
+                - generic [ref=f8e528]: Rau củ quả
+          - generic [ref=f8e585] [cursor=pointer]:
+            - generic [ref=f8e586]:
+              - generic [ref=f8e591]: 5 ngày
+              - generic [ref=f8e593]:
+                - button "Sửa nguyên liệu" [ref=f8e594]
+                - button "Xoá nguyên liệu" [ref=f8e598]
+            - generic [ref=f8e602]:
+              - generic "Sữa tươi không đường" [ref=f8e603]
+              - generic [ref=f8e604]:
+                - generic [ref=f8e605]: 1 hộp
+                - generic [ref=f8e606]: Trứng & Bơ sữa
+          - generic [ref=f8e607] [cursor=pointer]:
+            - generic [ref=f8e608]:
+              - generic [ref=f8e613]: 10 ngày
+              - generic [ref=f8e615]:
+                - button "Sửa nguyên liệu" [ref=f8e616]
+                - button "Xoá nguyên liệu" [ref=f8e620]
+            - generic [ref=f8e624]:
+              - generic "Trứng gà ta" [ref=f8e625]
+              - generic [ref=f8e626]:
+                - generic [ref=f8e627]: 10 quả
+                - generic [ref=f8e628]: Trứng & Bơ sữa
+          - generic [ref=f8e529] [cursor=pointer]:
+            - generic [ref=f8e530]:
+              - generic [ref=f8e535]: 14 ngày
+              - generic [ref=f8e537]:
+                - button "Sửa nguyên liệu" [ref=f8e538]
+                - button "Xoá nguyên liệu" [ref=f8e542]
+            - generic [ref=f8e546]:
+              - generic "Hành tây" [ref=f8e547]
+              - generic [ref=f8e548]:
+                - generic [ref=f8e549]: 2 củ
+                - generic [ref=f8e550]: Rau củ quả
+          - generic [ref=f8e629] [cursor=pointer]:
+            - generic [ref=f8e634]:
+              - button "Sửa nguyên liệu" [ref=f8e635]
+              - button "Xoá nguyên liệu" [ref=f8e639]
+            - generic [ref=f8e643]:
+              - generic "Nước mắm Phú Quốc" [ref=f8e644]
+              - generic [ref=f8e645]:
+                - generic [ref=f8e646]: 1 chai
+                - generic [ref=f8e647]: Gia vị & Nước sốt
+        - generic [ref=f8e551]:
+          - generic [ref=f8e558]:
+            - generic [ref=f8e559]: Thiếu nguyên liệu?
+            - generic [ref=f8e560]: Lên thực đơn và chuẩn bị đi chợ
+          - button "Đi chợ" [ref=f8e561] [cursor=pointer]
+  - generic:
+    - navigation:
+      - generic [ref=f8e240]:
+        - link [ref=f8e241] [cursor=pointer]:
+          - /url: /
+        - link [ref=f8e245] [cursor=pointer]:
+          - /url: /recipes
+        - link [ref=f8e248] [cursor=pointer]:
+          - /url: /tips
+        - button [ref=f8e251]
+    - button [ref=f8e254]

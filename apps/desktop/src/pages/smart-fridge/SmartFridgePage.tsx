@@ -1,13 +1,12 @@
 import { useState, useMemo } from 'react';
 import { Button, Input, Autocomplete, AutocompleteItem, Avatar, Chip, EmptyState } from '@/ui';
-import { Plus, Search, Sparkles, AlertTriangle, Layers, Calendar } from 'lucide-react';
+import { Plus, Search, AlertTriangle, Layers, Calendar } from 'lucide-react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { usePantryStore } from '../../store/usePantryStore';
 import { useIngredientCatalogStore } from '../../store/useIngredientCatalogStore';
 import { CATEGORIES, autoCategorizeIngredient } from '@apron/core';
 import type { PantryItem } from '@apron/core';
 import { getCategoryTheme } from '../../lib/categoryTheme';
-import { AiSuggestionPanel } from './components/AiSuggestionPanel';
 import { PantryItemCard } from './components/PantryItemCard';
 
 const isExpiredOrNear = (date?: string) => {
@@ -270,21 +269,6 @@ export function SmartFridgePage() {
 
           </div>
         </div>
-
-        {/* RIGHT: AI Suggestions Sidebar */}
-        <div className="w-[340px] shrink-0 flex flex-col min-h-0 bg-white rounded-2xl border border-default-100 shadow-none overflow-hidden">
-          <div className="p-4 border-b border-default-100 flex items-center gap-2 bg-gradient-to-r from-purple-50 to-pink-50">
-            <Sparkles className="w-5 h-5 text-purple-600" />
-            <h3 className="font-semibold text-purple-900">Gợi ý món ăn</h3>
-          </div>
-          <div className="p-3 border-b border-default-100 bg-default-50/50">
-            <p className="text-sm text-default-600 font-medium">Từ nguyên liệu hiện có trong tủ ({items.length})</p>
-          </div>
-          <div className="flex-1 overflow-y-auto">
-            <AiSuggestionPanel pantryItems={items} />
-          </div>
-        </div>
-
       </div>
     </div>
   );

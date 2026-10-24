@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Input, Tabs, Tab, EmptyState } from '@/ui';
+import { Button, Input, Tabs, Tab, EmptyState, toast } from '@/ui';
 import { Plus, Search, ArrowDownUp, Share2, ListTodo, ShoppingCart } from 'lucide-react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { useShoppingListStore } from '../../store/useShoppingListStore';
@@ -84,7 +84,7 @@ export function ShoppingListPage() {
                   isIconOnly 
                   variant="flat" 
                   color="default"
-                  onPress={() => navigator.clipboard.writeText(window.location.href).then(() => alert('Đã sao chép liên kết vào bộ nhớ tạm!'))}
+                  onPress={() => navigator.clipboard.writeText(window.location.href).then(() => toast.success('Đã sao chép liên kết vào bộ nhớ tạm!'))}
                 >
                   <Share2 className="w-4 h-4" />
                 </Button>

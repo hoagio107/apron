@@ -1,0 +1,76 @@
+- generic [ref=e1]:
+  - main [ref=e8]:
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]:
+          - button [ref=e14] [cursor=pointer]
+          - button [ref=e18] [cursor=pointer]
+        - generic [ref=e23]:
+          - generic [ref=e24]:
+            - heading [level=1] [ref=e25]: Cá Hồi Nướng Nồi Chiên Không Dầu
+            - button [ref=e27]
+          - generic [ref=e30]:
+            - generic [ref=e31]: Dễ
+            - generic [ref=e36]: 380 kcal
+            - generic [ref=e40]: 10p
+            - generic [ref=e45]: 12p
+            - generic [ref=e50]: "5"
+      - generic [ref=e54]:
+        - tablist [ref=e56]:
+          - tab [selected] [ref=e58] [cursor=pointer]:
+            - generic [ref=e59]: Nguyên liệu
+          - tab [ref=e66] [cursor=pointer]:
+            - generic [ref=e67]: Cách làm
+          - tab [ref=e72] [cursor=pointer]:
+            - generic [ref=e73]: Khác
+        - tabpanel [ref=e78]:
+          - generic [ref=e79]:
+            - generic [ref=e80]:
+              - heading [level=2] [ref=e81]: Nguyên liệu
+              - generic [ref=e86]:
+                - generic [ref=e87] [cursor=pointer]
+                - spinbutton [ref=e89]: "2"
+                - generic [ref=e90] [cursor=pointer]
+            - generic [ref=e92]:
+              - generic [ref=e93]:
+                - heading [level=3] [ref=e94]: Nguyên liệu chính
+                - generic [ref=e98] [cursor=pointer]:
+                  - generic [ref=e99]: Phi lê cá hồi tươi còn da
+                  - generic [ref=e100]: 350 g
+              - generic [ref=e101]:
+                - heading [level=3] [ref=e102]: Gia vị
+                - generic [ref=e103]:
+                  - generic [ref=e106] [cursor=pointer]:
+                    - generic [ref=e107]: Dầu oliu nguyên chất
+                    - generic [ref=e108]: 1 muỗng canh
+                  - generic [ref=e111] [cursor=pointer]:
+                    - generic [ref=e112]: Tỏi băm & lá hương thảo khô
+                    - generic [ref=e113]: 1 muỗng cà phê
+                  - generic [ref=e116] [cursor=pointer]:
+                    - generic [ref=e117]: Muối biển & tiêu đen xay
+                    - generic [ref=e118]: 1 chút
+              - generic [ref=e119]:
+                - heading [level=3] [ref=e120]: Nước sốt
+                - generic [ref=e124] [cursor=pointer]:
+                  - generic [ref=e125]: Nước cốt chanh vàng
+                  - generic [ref=e126]: 1 muỗng canh
+      - button [ref=e128] [cursor=pointer]: Bắt đầu nấu
+  - dialog [ref=e133]:
+    - button "Dismiss" [ref=e135]
+    - generic [ref=e136]:
+      - generic [ref=e137]:
+        - generic [ref=e138]:
+          - button [ref=e139] [cursor=pointer]
+          - generic [ref=e143]: Cá Hồi Nướng Nồi Chiên Không Dầu
+        - generic [ref=e144]: Bước 1 / 3
+      - generic [ref=e146]:
+        - img "Step 1 visualization" [ref=e195]
+        - generic [ref=e152]:
+          - generic [ref=e196]:
+            - generic [ref=e197]: "1"
+            - heading "Ướp gia vị" [level=4] [ref=e198]
+          - generic [ref=e199]: Thấm thật khô miếng cá hồi. Ướp với dầu oliu, muối biển, tiêu, tỏi băm và hương thảo trong 5 phút.
+      - generic [ref=e188]:
+        - button "Quay lại" [ref=e201] [cursor=pointer]
+        - button "Tiếp theo" [active] [ref=e204] [cursor=pointer]
+    - button "Dismiss" [ref=e193]

@@ -3,8 +3,6 @@ import {
   Heart, GraduationCap, Lightbulb,
   Refrigerator, NotebookTabs, Scale, Settings, X
 } from 'lucide-react';
-import { useState } from 'react';
-import { SettingsModal } from '../settings/SettingsModal';
 
 interface BottomNavMoreProps {
   isOpen: boolean;
@@ -22,7 +20,6 @@ const moreItems = [
 
 export function BottomNavMore({ isOpen, onClose }: BottomNavMoreProps) {
   const navigate = useNavigate();
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   if (!isOpen) return null;
 
@@ -78,7 +75,10 @@ export function BottomNavMore({ isOpen, onClose }: BottomNavMoreProps) {
         {/* Settings */}
         <div className="px-4 pb-8 border-t border-divider pt-3 mt-2">
           <button
-            onClick={() => { setIsSettingsOpen(true); }}
+            onClick={() => {
+              navigate('/settings');
+              onClose();
+            }}
             className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl active:bg-content2 text-default-700 transition-colors"
           >
             <Settings className="w-6 h-6 text-default-500" />
@@ -86,8 +86,6 @@ export function BottomNavMore({ isOpen, onClose }: BottomNavMoreProps) {
           </button>
         </div>
       </div>
-
-      <SettingsModal isOpen={isSettingsOpen} onOpenChange={(v) => { setIsSettingsOpen(v); if (!v) onClose(); }} />
     </>
   );
 }

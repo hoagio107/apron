@@ -22,7 +22,7 @@ export function getStorageProvider(): StorageProvider {
     cachedProvider = new CapacitorStorageProvider();
   } else {
     // Fallback khi code chạy thử trên web browser (dev)
-    console.warn('Đang chạy ở môi trường Web thuần, Storage sẽ tạm dùng BrowserStorageProvider (localStorage)');
+    console.info('Đang chạy ở môi trường Web thuần, Storage sử dụng BrowserStorageProvider (IndexedDB)');
     cachedProvider = new BrowserStorageProvider();
   }
 

@@ -41,7 +41,7 @@ export function CourseCard({
 
   return (
     <div
-      className={`group w-full ${className || 'aspect-4/3'} relative overflow-hidden rounded-xl transition-transform duration-200 shadow-lg cursor-pointer border-none active:scale-95
+      className={`group w-full ${className || 'aspect-4/3'} relative overflow-hidden rounded-xl bg-black border-none transition-transform duration-200 shadow-none cursor-pointer active:scale-95 card-media-root
         ${isSelected ? 'ring-4 ring-primary' : ''}
       `}
       onClick={handleClick}
@@ -49,21 +49,21 @@ export function CourseCard({
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && handleClick(e)}
     >
-      {/* Background Image */}
+      {/* Background Image: dừng lại trước 2 góc dưới và fade mask để triệt tiêu hoàn toàn viền trắng subpixel */}
       {course.thumbnail_url ? (
         <img
           src={ImageManager.getAssetUrl(course.thumbnail_url)}
           alt={course.title}
-          className="absolute inset-0 w-full h-full object-cover z-0"
+          className="card-media-img absolute inset-x-0 top-0 bottom-6 w-full h-[calc(100%-1.5rem)] object-cover z-0"
         />
       ) : (
-        <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-default-100 text-default-400 z-0">
+        <div className="card-media-img absolute inset-x-0 top-0 bottom-6 w-full h-[calc(100%-1.5rem)] flex items-center justify-center bg-default-100 text-default-400 z-0">
           <BookOpen className="w-10 h-10" />
         </div>
       )}
 
       {/* Dark gradient for text readability */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/50 to-transparent pointer-events-none" />
 
       {/* Edit and Delete Buttons */}
       {showActions && (
@@ -164,24 +164,6 @@ export function CourseCard({
             {totalLessons} bài
           </span>
         </div>
-
-        {showActions && (
-          <div className="mt-2.5 pt-2 border-t border-white/10 w-full">
-            <Button
-              as="div"
-              size="sm"
-              className="w-full h-8 text-xs font-semibold text-white shadow-sm"
-              color="primary"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                navigate(`/courses/${course.id}`);
-              }}
-            >
-              Xem nội dung khoá học
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -1,0 +1,38 @@
+- main [ref=f14e8]:
+  - generic [ref=f14e313]:
+    - generic [ref=f14e314]:
+      - generic [ref=f14e315]:
+        - button "Quay lại" [ref=f14e318] [cursor=pointer]
+        - button "Tùy chọn" [ref=f14e322] [cursor=pointer]
+      - generic [ref=f14e327]:
+        - heading [level=1] [ref=f14e329]:
+          - text: Cá Hồi Nướng Nồi Chiên Không Dầu
+          - button "Danh sách biến thể" [ref=f14e331]
+        - generic [ref=f14e334]:
+          - generic [ref=f14e335]: Dễ
+          - generic [ref=f14e340]: 380 kcal
+          - generic [ref=f14e344]: 10p
+          - generic [ref=f14e349]: 12p
+          - generic [ref=f14e354]: N/A
+    - generic [ref=f14e358]:
+      - generic "Mobile Tabs" [ref=f14e359]:
+        - tablist "Mobile Tabs" [ref=f14e360]:
+          - tab "Nguyên liệu" [ref=f14e362] [cursor=pointer]
+          - tab "Cách làm" [ref=f14e370] [cursor=pointer]
+          - tab "Khác" [active] [selected] [ref=f14e376] [cursor=pointer]
+      - tabpanel "Khác" [ref=f14e454]:
+        - generic [ref=f14e455]:
+          - generic [ref=f14e456]:
+            - heading "Ghi chú" [level=3] [ref=f14e457]
+            - generic [ref=f14e460]: Lưu ý khi nướng bằng nồi chiên:• Không nướng quá lâu trên 12 phút để tránh cá bị khô bở.• Lót giấy nến có đục lỗ thoát khí để da cá giòn đều.
+          - generic [ref=f14e461]:
+            - heading "Tags" [level=3] [ref=f14e462]
+            - generic [ref=f14e466]:
+              - generic [ref=f14e467]: món âu
+              - generic [ref=f14e468]: hải sản
+              - generic [ref=f14e469]: Eat Clean / Healthy
+              - generic [ref=f14e470]: nồi chiên không dầu
+          - generic [ref=f14e471]:
+            - heading "Lịch sử nấu" [level=3] [ref=f14e473]
+            - generic [ref=f14e478]: Chưa có lịch sử nấu nào.Nhấn "Bắt đầu nấu" để lưu lại!
+    - button "Bắt đầu nấu" [ref=f14e432] [cursor=pointer]

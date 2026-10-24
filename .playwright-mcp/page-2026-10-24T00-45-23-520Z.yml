@@ -1,0 +1,42 @@
+- main [ref=f1e8]:
+  - generic [ref=f1e9]:
+    - generic [ref=f1e10]:
+      - generic [ref=f1e11]:
+        - button "Quay lại" [ref=f1e14] [cursor=pointer]
+        - button "Tùy chọn" [ref=f1e18] [cursor=pointer]
+      - generic [ref=f1e23]:
+        - heading "Cá Hồi Áp Chảo Sốt Bơ Chanh" [level=1] [ref=f1e24]
+        - generic [ref=f1e25]:
+          - generic [ref=f1e26]: Dễ
+          - generic [ref=f1e31]: 460 kcal
+          - generic [ref=f1e35]: 10p
+          - generic [ref=f1e40]: 15p
+          - generic [ref=f1e45]: N/A
+    - generic [ref=f1e49]:
+      - generic "Mobile Tabs" [ref=f1e50]:
+        - tablist "Mobile Tabs" [ref=f1e51]:
+          - tab "Nguyên liệu" [ref=f1e53] [cursor=pointer]
+          - tab "Cách làm" [active] [selected] [ref=f1e61] [cursor=pointer]
+          - tab "Khác" [ref=f1e67] [cursor=pointer]
+      - tabpanel "Cách làm" [ref=f1e162]:
+        - generic [ref=f1e163]:
+          - heading "Cách làm" [level=2] [ref=f1e164]
+          - generic [ref=f1e167]:
+            - generic [ref=f1e168]:
+              - heading "Sơ chế cá hồi" [level=3] [ref=f1e169]
+              - generic [ref=f1e171]:
+                - generic [ref=f1e172]: "1"
+                - generic [ref=f1e174]: Dùng khăn giấy thấm thật khô bề mặt miếng cá hồi. Rắc muối biển và tiêu đen đều 2 mặt, để ngấm 5 phút.
+            - generic [ref=f1e176]:
+              - heading "Áp chảo da giòn rụm" [level=3] [ref=f1e177]
+              - generic [ref=f1e179]:
+                - generic [ref=f1e180]: "1"
+                - generic [ref=f1e182]: Đun nóng chảo chống dính với 1 muỗng dầu oliu. Đặt mặt da cá hồi xuống áp chảo lửa vừa trong 4-5 phút cho da giòn tan, lật mặt thịt áp thêm 2-3 phút.
+            - generic [ref=f1e184]:
+              - heading "Rưới sốt bơ chanh tỏi" [level=3] [ref=f1e185]
+              - generic [ref=f1e187]:
+                - generic [ref=f1e188]: "1"
+                - generic [ref=f1e190]: Hạ nhỏ lửa, thả bơ lạt, tỏi băm và hương thảo vào chảo. Vắt nước cốt nửa quả chanh vàng, nghiêng chảo múc sốt bơ rưới liên tục lên miếng cá trong 1 phút rồi dọn ra đĩa.
+    - generic [ref=f1e98]:
+      - button "Hỏi AI" [ref=f1e99] [cursor=pointer]
+      - button "Bắt đầu nấu" [ref=f1e102] [cursor=pointer]

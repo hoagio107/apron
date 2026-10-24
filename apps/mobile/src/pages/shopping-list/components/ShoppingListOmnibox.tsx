@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import type { Key } from 'react';
-import { Autocomplete, AutocompleteItem, AutocompleteSection, Tabs, Tab, Avatar } from '@/ui';
+import { Autocomplete, AutocompleteItem, AutocompleteSection, Tabs, Tab, Avatar, toast } from '@/ui';
 import { Search, Plus, ListTodo, BookOpen } from 'lucide-react';
 import { useShoppingListStore } from '../../../store/useShoppingListStore';
 import { useIngredientCatalogStore } from '../../../store/useIngredientCatalogStore';
@@ -47,14 +47,14 @@ export function ShoppingListOmnibox() {
       const name = strKey.replace('custom_', '');
       addItem(name, 1, 'đơn vị');
       setInputValue('');
-      alert(`Đã thêm ${name} vào danh sách`);
+      toast.success(`Đã thêm ${name} vào danh sách`);
     } else if (strKey.startsWith('catalog_')) {
       const id = strKey.replace('catalog_', '');
       const catItem = catalogItems.find((i: IngredientMeta) => i.id === id);
       if (catItem) {
         addItem(catItem.name, 1, catItem.default_unit || 'đơn vị', catItem.default_category);
         setInputValue('');
-        alert(`Đã thêm ${catItem.name} vào danh sách`);
+        toast.success(`Đã thêm ${catItem.name} vào danh sách`);
       }
     } else if (strKey.startsWith('recipe_')) {
       const id = strKey.replace('recipe_', '');
@@ -69,7 +69,7 @@ export function ShoppingListOmnibox() {
           }));
           addItems(newItems);
           setInputValue('');
-          alert(`Đã thêm nguyên liệu của ${recipe.title}`);
+          toast.success(`Đã thêm nguyên liệu của ${recipe.title}`);
         }
       }
     } else if (strKey.startsWith('list_')) {

@@ -58,8 +58,9 @@ export function getRecipeDuplicateStats(recipes: Recipe[]): DuplicateStats {
       // Sắp xếp các công thức trong cùng một nhóm:
       // Ưu tiên món có nhiều thông tin hơn (ảnh, nguyên liệu, hướng dẫn) hoặc món tạo mới hơn
       groupRecipes.sort((a, b) => {
-        const scoreA = (a.image_url ? 2 : 0) + (a.ingredients?.length ?? 0) + (a.instructions?.length ?? 0);
-        const scoreB = (b.image_url ? 2 : 0) + (b.ingredients?.length ?? 0) + (b.instructions?.length ?? 0);
+        const getStepsCount = (r: Recipe) => (r.steps?.length ?? (r as any).instructions?.length ?? 0);
+        const scoreA = (a.image_url ? 2 : 0) + (a.ingredients?.length ?? 0) + getStepsCount(a);
+        const scoreB = (b.image_url ? 2 : 0) + (b.ingredients?.length ?? 0) + getStepsCount(b);
         if (scoreB !== scoreA) return scoreB - scoreA;
 
         const timeA = new Date(a.created_at ?? 0).getTime();

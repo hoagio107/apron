@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Modal, ModalContent, ModalBody, useDisclosure, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tabs, Tab } from '@/ui';
-import { ArrowLeft, Edit, Clock, Star, Flame, Play, Info, Share, Check, Image as ImageIcon, Plus, Gauge, Timer, Minus, Carrot, ChefHat, Link as LinkIcon, Video, Tag, X, Calendar, ShoppingCart, Printer, Download, ImageDown, ChevronDown, ChevronUp, History } from 'lucide-react';
+import { Button, Modal, ModalContent, ModalBody, useDisclosure, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tabs, Tab, Spinner, toast, Chip } from '@/ui';
+import { ArrowLeft, Edit, Clock, Star, Flame, Play, Info, Share, Check, Image as ImageIcon, Plus, Gauge, Timer, Minus, Carrot, ChefHat, Link as LinkIcon, Video, Tag, X, Calendar, ShoppingCart, Printer, Download, ImageDown, ChevronDown, ChevronUp, History, GitFork, Layers, ArrowRight, Sparkles } from 'lucide-react';
 import { useRecipeStore } from '../../store/useRecipeStore';
 import { useShoppingListStore } from '../../store/useShoppingListStore';
 import { useMealPlanStore } from '../../store/useMealPlanStore';
@@ -11,14 +11,19 @@ import { exportToPdf, exportToPng } from '../../lib/exportUtils';
 import { CookingModeModal } from '../../components/recipes/CookingModeModal';
 import { CookingRatingModal } from '../../components/recipes/CookingRatingModal';
 import { RecipeSnapshotModal } from '../../components/recipes/RecipeSnapshotModal';
-import { RecipeFloatingChat } from '../../components/recipes/RecipeFloatingChat';
 import { MealPlannerSelectModal } from './components/MealPlannerSelectModal';
 
 export function RecipeDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { recipes, updateRecipe } = useRecipeStore();
+  const { recipes, updateRecipe, fetchRecipes, isLoading } = useRecipeStore();
   
+  useEffect(() => {
+    if (recipes.length === 0) {
+      fetchRecipes();
+    }
+  }, [recipes.length, fetchRecipes]);
+
   const recipe = useMemo(() => {
     if (!id) return null;
     return recipes.find(r => r.id === id) || null;
@@ -45,10 +50,10 @@ export function RecipeDetailPage() {
     }));
     try {
       await addItems(items);
-      alert('Đã thêm nguyên liệu vào giỏ đi chợ!');
+      toast.success('Đã thêm nguyên liệu vào giỏ đi chợ!');
     } catch (e) {
       console.error(e);
-      alert('Có lỗi xảy ra khi thêm vào giỏ đi chợ.');
+      toast.error('Có lỗi xảy ra khi thêm vào giỏ đi chợ.');
     }
   };
 
@@ -70,10 +75,10 @@ export function RecipeDetailPage() {
     }
     try {
       await navigator.clipboard.writeText(text);
-      alert('Đã sao chép công thức vào khay nhớ tạm!');
+      toast.success('Đã sao chép công thức vào khay nhớ tạm!');
     } catch (e) {
       console.error(e);
-      alert('Không thể sao chép.');
+      toast.error('Không thể sao chép công thức.');
     }
   };
 
@@ -84,10 +89,10 @@ export function RecipeDetailPage() {
         recipe_id: recipe.id!,
         meal_type: slotId,
       });
-      alert('Đã thêm vào thực đơn!');
+      toast.success('Đã thêm món vào thực đơn!');
     } catch (e) {
       console.error(e);
-      alert('Có lỗi xảy ra khi thêm vào thực đơn.');
+      toast.error('Có lỗi xảy ra khi thêm vào thực đơn.');
     }
   };
 
@@ -208,7 +213,13 @@ export function RecipeDetailPage() {
     if (recipe.parent_id) {
       const parent = recipes.find(r => r.id === recipe.parent_id);
       const siblings = recipes.filter(r => r.parent_id === recipe.parent_id);
-      return [parent, ...siblings].filter(Boolean) as typeof recipes;
+      const list = [parent, ...siblings].filter(Boolean) as typeof recipes;
+      const seen = new Set<string>();
+      return list.filter(item => {
+        if (!item?.id || seen.has(item.id)) return false;
+        seen.add(item.id);
+        return true;
+      });
     } else {
       const children = recipes.filter(r => r.parent_id === recipe.id);
       if (children.length === 0) return [];
@@ -216,9 +227,54 @@ export function RecipeDetailPage() {
     }
   }, [recipe, recipes]);
 
+  const parentRecipe = useMemo(() => {
+    if (!recipe?.parent_id) return null;
+    return recipes.find(r => r.id === recipe.parent_id) || null;
+  }, [recipe?.parent_id, recipes]);
+
+  const isVariant = !!recipe?.parent_id;
+
+  const childVariants = useMemo(() => {
+    if (!recipe) return [];
+    return recipes.filter(r => r.parent_id === recipe.id);
+  }, [recipe, recipes]);
+
+  // Danh sách biến thể trong đó Bản gốc LUÔN xếp đầu tiên
+  const sortedVariants = useMemo(() => {
+    if (!recipe) return [];
+    let original: typeof recipe | undefined;
+    let variantsList: typeof recipes = [];
+
+    if (recipe.parent_id) {
+      original = recipes.find(r => r.id === recipe.parent_id);
+      variantsList = recipes.filter(r => r.parent_id === recipe.parent_id);
+    } else {
+      original = recipe;
+      variantsList = recipes.filter(r => r.parent_id === recipe.id);
+    }
+
+    if (variantsList.length === 0) return [];
+
+    const list = [original, ...variantsList].filter(Boolean) as typeof recipes;
+    const seen = new Set<string>();
+    return list.filter(item => {
+      if (!item?.id || seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
+    });
+  }, [recipe, recipes]);
+
   const allSteps = useMemo(() => Object.values(stepGroups).flat(), [stepGroups]);
 
   if (!recipe) {
+    if (isLoading) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3">
+          <Spinner size="lg" color="primary" />
+          <p className="text-default-500 text-sm">Đang tải công thức...</p>
+        </div>
+      );
+    }
     return (
       <div className="flex flex-col items-center justify-center h-full">
         <h2 className="text-xl font-bold">Không tìm thấy công thức</h2>
@@ -247,7 +303,12 @@ export function RecipeDetailPage() {
             {variants.map(v => (
               <Tab 
                 key={v.id!} 
-                title={!v.parent_id ? "Bản gốc" : v.title}
+                title={
+                  <div className="flex items-center gap-1.5">
+                    {!v.parent_id ? <Sparkles className="w-3.5 h-3.5 text-amber-500" /> : <GitFork className="w-3.5 h-3.5 text-secondary-500" />}
+                    <span>{!v.parent_id ? `⭐ Bản gốc (${v.title})` : `Biến thể: ${v.title}`}</span>
+                  </div>
+                }
               />
             ))}
           </Tabs>
@@ -285,50 +346,114 @@ export function RecipeDetailPage() {
            )}
 
 
+           <div className="absolute top-4 left-4 z-10">
+             <Button 
+               isIconOnly 
+               className="bg-background/80 dark:bg-black/60 backdrop-blur-md shadow-md text-foreground rounded-full w-10 h-10 min-w-0 p-0 flex items-center justify-center border border-white/20 dark:border-white/10 hover:bg-background active:scale-95 transition-all"
+               onPress={() => navigate('/recipes')}
+               aria-label="Quay lại"
+             >
+               <ArrowLeft className="w-5 h-5" />
+             </Button>
+           </div>
+
            <div className="absolute top-4 right-4 z-10">
              <Dropdown>
                <DropdownTrigger>
-                 <Button isIconOnly className="bg-white shadow-md text-default-700 rounded-full w-10 h-10 min-w-0 p-0 flex items-center justify-center">
+                 <Button 
+                  isIconOnly 
+                  className="bg-background/80 dark:bg-black/60 backdrop-blur-md shadow-md text-foreground rounded-full w-10 h-10 min-w-0 p-0 flex items-center justify-center border border-white/20 dark:border-white/10 hover:bg-background active:scale-95 transition-all"
+                  aria-label="Tùy chọn"
+                >
                    <div className="flex gap-1">
-                     <div className="w-1 h-1 bg-current rounded-full" />
-                     <div className="w-1 h-1 bg-current rounded-full" />
-                     <div className="w-1 h-1 bg-current rounded-full" />
-                   </div>
-                 </Button>
-               </DropdownTrigger>
-               <DropdownMenu>
-                 <DropdownItem key="cook" startContent={<Play className="w-4 h-4"/>} onPress={() => setIsCookingModeOpen(true)}>Bắt đầu nấu</DropdownItem>
-                 <DropdownItem key="plan" startContent={<Calendar className="w-4 h-4"/>} onPress={() => setIsMealPlannerModalOpen(true)}>Lên kế hoạch</DropdownItem>
-                 <DropdownItem key="cart" startContent={<ShoppingCart className="w-4 h-4"/>} onPress={handleAddToShoppingList}>Đi chợ</DropdownItem>
-                 <DropdownItem key="share" startContent={<Share className="w-4 h-4"/>} onPress={handleShare}>Chia sẻ</DropdownItem>
-                 <DropdownItem key="edit" startContent={<Edit className="w-4 h-4"/>} onPress={() => navigate(`/recipes/new?edit=${recipe.id}`)}>Chỉnh sửa</DropdownItem>
-               </DropdownMenu>
-             </Dropdown>
-           </div>
-        </div>
+                      <div className="w-1 h-1 bg-current rounded-full" />
+                      <div className="w-1 h-1 bg-current rounded-full" />
+                      <div className="w-1 h-1 bg-current rounded-full" />
+                    </div>
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu>
+                  <DropdownItem key="cook" startContent={<Play className="w-4 h-4"/>} onPress={() => setIsCookingModeOpen(true)}>Bắt đầu nấu</DropdownItem>
+                  <DropdownItem key="plan" startContent={<Calendar className="w-4 h-4"/>} onPress={() => setIsMealPlannerModalOpen(true)}>Lên kế hoạch</DropdownItem>
+                  <DropdownItem key="cart" startContent={<ShoppingCart className="w-4 h-4"/>} onPress={handleAddToShoppingList}>Đi chợ</DropdownItem>
+                  <DropdownItem key="share" startContent={<Share className="w-4 h-4"/>} onPress={handleShare}>Chia sẻ</DropdownItem>
+                  <DropdownItem key="edit" startContent={<Edit className="w-4 h-4"/>} onPress={() => navigate(`/recipes/new?edit=${recipe.id}`)}>Chỉnh sửa</DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+            </div>
+         </div>
 
         <div className="p-4 flex flex-col gap-3">
-          <h1 className="text-xl font-extrabold leading-tight text-foreground">{recipe.title}</h1>
-          <div className="flex flex-wrap items-center gap-4 mt-2">
-            <div className="flex flex-row items-center gap-1.5 text-default-500">
-              <Gauge className="w-4 h-4 shrink-0" />
-              <span className="text-[14px] leading-none">{recipe.difficulty || '-'}</span>
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="text-xl font-extrabold leading-tight text-foreground flex-1 min-w-0">
+              {recipe.title}
+            </h1>
+            {sortedVariants.length > 1 && (
+              <div className="shrink-0 pt-0.5">
+                <Dropdown placement="bottom-end">
+                  <DropdownTrigger>
+                    <button 
+                      type="button"
+                      className="w-7 h-7 rounded-full bg-default-100 dark:bg-default-100/70 hover:bg-default-200 text-default-600 hover:text-foreground active:scale-95 transition-all inline-flex items-center justify-center shrink-0 border border-divider/40"
+                      aria-label="Danh sách biến thể"
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </DropdownTrigger>
+                  <DropdownMenu
+                    aria-label="Danh sách biến thể công thức"
+                    onAction={(key) => navigate(`/recipes/${key}`)}
+                    className="min-w-[220px] max-w-[280px]"
+                  >
+                    {sortedVariants.map((v, index) => {
+                      const isCurrent = v.id === recipe.id;
+                      const isOriginal = index === 0;
+                      return (
+                        <DropdownItem
+                          key={v.id!}
+                          textValue={v.title}
+                          className={isCurrent ? 'text-primary font-semibold' : ''}
+                          startContent={
+                            isOriginal ? (
+                              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0 mr-1" />
+                            ) : null
+                          }
+                          endContent={
+                            isCurrent ? (
+                              <Check className="w-4 h-4 text-primary shrink-0 stroke-[2.5]" />
+                            ) : null
+                          }
+                        >
+                          <span className="text-sm line-clamp-1">{v.title}</span>
+                        </DropdownItem>
+                      );
+                    })}
+                  </DropdownMenu>
+                </Dropdown>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 mt-1">
+            <div className="flex flex-row items-center gap-1.5 text-default-600 dark:text-default-400">
+              <Gauge className="w-4 h-4 shrink-0 text-primary" />
+              <span className="text-[14px] leading-none font-medium">{recipe.difficulty || '-'}</span>
             </div>
-            <div className="flex flex-row items-center gap-1.5 text-default-500">
-              <Flame className="w-4 h-4 shrink-0" />
-              <span className="text-[14px] leading-none">{recipe.calories || '-'} kcal</span>
+            <div className="flex flex-row items-center gap-1.5 text-default-600 dark:text-default-400">
+              <Flame className="w-4 h-4 shrink-0 text-danger" />
+              <span className="text-[14px] leading-none font-medium">{recipe.calories || '-'} kcal</span>
             </div>
-            <div className="flex flex-row items-center gap-1.5 text-default-500">
-              <Clock className="w-4 h-4 shrink-0" />
-              <span className="text-[14px] leading-none">{recipe.prep_time || 0}p</span>
+            <div className="flex flex-row items-center gap-1.5 text-default-600 dark:text-default-400">
+              <Clock className="w-4 h-4 shrink-0 text-secondary" />
+              <span className="text-[14px] leading-none font-medium">{recipe.prep_time || 0}p</span>
             </div>
-            <div className="flex flex-row items-center gap-1.5 text-default-500">
-              <Timer className="w-4 h-4 shrink-0" />
-              <span className="text-[14px] leading-none">{recipe.cook_time || 0}p</span>
+            <div className="flex flex-row items-center gap-1.5 text-default-600 dark:text-default-400">
+              <Timer className="w-4 h-4 shrink-0 text-warning" />
+              <span className="text-[14px] leading-none font-medium">{recipe.cook_time || 0}p</span>
             </div>
-            <div className="flex flex-row items-center gap-1.5 text-default-500">
-              <Star className="w-4 h-4 shrink-0 fill-current" />
-              <span className="text-[14px] leading-none">
+            <div className="flex flex-row items-center gap-1.5 text-default-600 dark:text-default-400">
+              <Star className={`w-4 h-4 shrink-0 ${averageRating > 0 ? 'fill-warning-400 text-warning-400' : 'text-default-400'}`} />
+              <span className="text-[14px] leading-none font-semibold text-foreground">
                 {averageRating > 0 ? averageRating : 'N/A'}
               </span>
             </div>
@@ -341,41 +466,54 @@ export function RecipeDetailPage() {
         <Tabs 
           aria-label="Mobile Tabs" 
           fullWidth
-          variant="underlined"
+          variant="solid"
           color="primary"
+          size="sm"
           classNames={{
-            tabList: "w-full border-b border-default-200",
-            tab: "py-4",
-            tabContent: "font-semibold text-base",
+            base: "w-full sticky top-0 z-30 bg-background/95 backdrop-blur-md px-4 py-1.5 border-b border-divider/40 shadow-xs",
+            tabList: "bg-default-100/80 dark:bg-default-50/50 p-0.5 rounded-xl gap-1 w-full border border-divider/20",
+            tab: "h-9 rounded-lg font-medium text-default-600 data-[selected=true]:text-primary-foreground data-[selected=true]:font-semibold transition-all text-sm",
+            cursor: "bg-primary rounded-lg shadow-xs",
+            panel: "p-0",
           }}
         >
-          <Tab key="ingredients" title="Nguyên liệu">
-             <div className="p-4 pt-6">
+          <Tab 
+            key="ingredients" 
+            title={
+              <div className="flex items-center justify-center gap-1.5">
+                <Carrot className="w-4 h-4 shrink-0" />
+                <span className="font-semibold text-sm tracking-tight">Nguyên liệu</span>
+              </div>
+            }
+          >
+             <div className="p-4 pt-3">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-bold flex items-center gap-2">
                     <Carrot className="w-5 h-5 text-success" /> Nguyên liệu
                   </h2>
-                  <div className="flex items-center gap-2 bg-default-100 px-2 py-1 rounded-full text-sm font-medium">
+                  <div className="flex items-center gap-2 bg-default-100 dark:bg-default-100/70 border border-default-200/50 dark:border-divider px-2 py-1 rounded-full text-sm font-medium">
                     <span className="text-default-500 mr-1 hidden sm:inline ml-2">Khẩu phần</span>
-                    <div className="w-6 h-6 flex items-center justify-center bg-white rounded-full cursor-pointer shadow-sm text-default-600 active:text-primary shrink-0" onClick={() => setTargetServingsStr(Math.max(0.1, targetServings - 1).toString())}><Minus className="w-3 h-3" /></div>
-                    <input type="number" className="w-12 text-center bg-transparent border-none outline-none text-sm font-bold p-0" value={targetServingsStr} onChange={(e) => setTargetServingsStr(e.target.value)} />
-                    <div className="w-6 h-6 flex items-center justify-center bg-white rounded-full cursor-pointer shadow-sm text-default-600 active:text-primary shrink-0" onClick={() => setTargetServingsStr((targetServings + 1).toString())}><Plus className="w-3 h-3" /></div>
+                    <div className="w-6 h-6 flex items-center justify-center bg-content1 dark:bg-default-200 rounded-full cursor-pointer shadow-xs text-foreground active:text-primary transition-all shrink-0 border border-divider/40 active:scale-95" onClick={() => setTargetServingsStr(Math.max(0.1, targetServings - 1).toString())}><Minus className="w-3 h-3" /></div>
+                    <input type="number" className="w-12 text-center bg-transparent border-none outline-none text-sm font-bold p-0 text-foreground" value={targetServingsStr} onChange={(e) => setTargetServingsStr(e.target.value)} />
+                    <div className="w-6 h-6 flex items-center justify-center bg-content1 dark:bg-default-200 rounded-full cursor-pointer shadow-xs text-foreground active:text-primary transition-all shrink-0 border border-divider/40 active:scale-95" onClick={() => setTargetServingsStr((targetServings + 1).toString())}><Plus className="w-3 h-3" /></div>
                   </div>
                 </div>
                 <div className="flex flex-col gap-5">
                   {Object.entries(ingredientGroups).map(([group, ingredients], gIndex) => (
                     <div key={group} className="flex flex-col gap-3">
-                      {group !== 'Chung' && <h3 className="font-bold text-xs text-default-400 uppercase tracking-wider">{group}</h3>}
+                      {group !== 'Chung' && <h3 className="font-bold text-sm text-default-500 dark:text-default-400 uppercase tracking-wider">{group}</h3>}
                       <div className="flex flex-col gap-3">
                         {ingredients.map((ing, i) => {
                           const globalIndex = gIndex * 100 + i;
                           const isChecked = checkedIngredients.has(globalIndex);
                           return (
-                            <div key={globalIndex} className="flex items-center gap-3 group cursor-pointer" onClick={() => toggleIngredient(globalIndex)}>
-                              <div className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 ${isChecked ? 'bg-primary border-primary text-white' : 'border-default-300'}`}>{isChecked && <Check className="w-3 h-3" />}</div>
-                              <div className={`flex flex-col flex-1 ${isChecked ? 'opacity-50 line-through' : ''}`}>
-                                <span className="font-medium text-foreground text-sm">{ing.name}</span>
-                                <span className="text-xs text-default-500">{scaleQuantity(ing.quantity)} {ing.unit}</span>
+                            <div key={globalIndex} className="flex items-center gap-3 group cursor-pointer py-1" onClick={() => toggleIngredient(globalIndex)}>
+                              <div className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors ${isChecked ? 'bg-primary border-primary text-white' : 'border-default-300 dark:border-default-600 group-hover:border-primary'}`}>{isChecked && <Check className="w-3 h-3" />}</div>
+                              <div className={`flex items-center justify-between flex-1 gap-2 min-w-0 transition-opacity ${isChecked ? 'opacity-50 line-through' : ''}`}>
+                                <span className="font-medium text-foreground text-sm truncate">{ing.name}</span>
+                                <span className="text-sm font-semibold text-default-500 dark:text-default-400 shrink-0 text-right">
+                                  {scaleQuantity(ing.quantity)} {ing.unit}
+                                </span>
                               </div>
                             </div>
                           );
@@ -386,34 +524,49 @@ export function RecipeDetailPage() {
                 </div>
              </div>
           </Tab>
-          <Tab key="instructions" title="Cách làm">
-             <div className="p-4 pt-6">
+          <Tab 
+            key="instructions" 
+            title={
+              <div className="flex items-center justify-center gap-1.5">
+                <ChefHat className="w-4 h-4 shrink-0" />
+                <span className="font-semibold text-sm tracking-tight">Cách làm</span>
+              </div>
+            }
+          >
+             <div className="p-4 pt-3">
                 <h2 className="text-lg font-bold flex items-center gap-2 mb-4">
                   <ChefHat className="w-5 h-5 text-success" /> Cách làm
                 </h2>
                 <div className="flex flex-col gap-2">
                   {Object.entries(stepGroups).map(([group, steps]) => (
                     <div key={group} className="flex flex-col">
-                      {group !== 'Các bước thực hiện' && <h3 className="text-md font-bold text-default-700 mb-4">{group}</h3>}
+                      {group !== 'Các bước thực hiện' && (
+                        <div className="flex items-center gap-2 mb-3.5 mt-2 first:mt-0">
+                          <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
+                          <h3 className="text-base font-bold text-foreground tracking-tight">{group}</h3>
+                        </div>
+                      )}
                       <div className="flex flex-col">
                         {steps.map((step, i) => (
                           <div key={i} className="flex gap-4">
                             <div className="flex flex-col items-center">
-                              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center shrink-0">{i + 1}</div>
-                              {i < steps.length - 1 && <div className="w-px flex-1 bg-default-200 my-2" />}
+                              <div className="w-8 h-8 rounded-full bg-primary/15 dark:bg-primary/25 text-primary dark:text-primary-300 border border-primary/20 font-bold flex items-center justify-center shrink-0 text-sm shadow-2xs">{i + 1}</div>
+                              {i < steps.length - 1 && <div className="w-0.5 flex-1 bg-default-200 dark:bg-divider my-1.5" />}
                             </div>
                             <div className="flex flex-col gap-3 pb-6 pt-1">
-                              <div className="text-default-700 text-sm leading-relaxed prose prose-sm prose-primary max-w-none prose-p:my-1 prose-ul:my-1" dangerouslySetInnerHTML={{ __html: step.instruction }} />
+                              <div className="text-foreground text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1" dangerouslySetInnerHTML={{ __html: step.instruction }} />
                               {((step.images && step.images.length > 0) || step.image_url) && (
-                                <div className="flex flex-wrap gap-2 mt-2">
+                                <div className="mt-1">
                                   {step.images && step.images.length > 0 ? (
-                                    step.images.map((imgUrl: string, imgIdx: number) => (
-                                      <div key={imgIdx} className="w-full sm:w-48 aspect-video rounded-xl overflow-hidden relative cursor-pointer" onClick={() => handleOpenLightbox('image', imgUrl)}>
-                                        <img src={ImageManager.getAssetUrl(imgUrl)} className="w-full h-full object-cover" />
-                                      </div>
-                                    ))
+                                    <div className={`grid gap-2 ${step.images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                                      {step.images.map((imgUrl: string, imgIdx: number) => (
+                                        <div key={imgIdx} className="aspect-video rounded-xl overflow-hidden relative cursor-pointer border border-default-200/60 dark:border-divider/50 shadow-xs active:scale-[0.98] transition-all bg-default-100" onClick={() => handleOpenLightbox('image', imgUrl)}>
+                                          <img src={ImageManager.getAssetUrl(imgUrl)} className="w-full h-full object-cover" />
+                                        </div>
+                                      ))}
+                                    </div>
                                   ) : step.image_url ? (
-                                    <div className="w-full sm:w-48 aspect-video rounded-xl overflow-hidden relative cursor-pointer" onClick={() => handleOpenLightbox('image', step.image_url!)}>
+                                    <div className="w-full sm:w-64 aspect-video rounded-xl overflow-hidden relative cursor-pointer border border-default-200/60 dark:border-divider/50 shadow-xs active:scale-[0.98] transition-all bg-default-100" onClick={() => handleOpenLightbox('image', step.image_url!)}>
                                       <img src={ImageManager.getAssetUrl(step.image_url)} className="w-full h-full object-cover" />
                                     </div>
                                   ) : null}
@@ -428,12 +581,23 @@ export function RecipeDetailPage() {
                 </div>
              </div>
           </Tab>
-          <Tab key="info" title="Khác">
-             <div className="p-4 pt-6 flex flex-col gap-6">
+          <Tab 
+            key="info" 
+            title={
+              <div className="flex items-center justify-center gap-1.5">
+                <Info className="w-4 h-4 shrink-0" />
+                <span className="font-semibold text-sm tracking-tight">Khác</span>
+              </div>
+            }
+          >
+             <div className="p-4 pt-3 flex flex-col gap-6">
                 {recipe.notes && (
                   <div className="flex flex-col gap-2">
                      <h3 className="font-bold text-sm flex items-center gap-2"><Info className="w-4 h-4 text-warning-500" /> Ghi chú</h3>
-                     <div className="text-sm leading-relaxed text-default-700 bg-warning-50 p-4 rounded-xl border border-warning-100 prose prose-sm prose-warning max-w-none prose-p:my-1" dangerouslySetInnerHTML={{ __html: recipe.notes }} />
+                     <div 
+                       className="text-sm leading-relaxed text-amber-950 dark:text-amber-100 bg-amber-500/10 dark:bg-amber-500/15 p-4 rounded-xl border border-amber-500/30 prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 [&_*]:text-amber-950 dark:[&_*]:text-amber-100 [&_strong]:text-amber-950 dark:[&_strong]:text-amber-50 [&_b]:text-amber-950 dark:[&_b]:text-amber-50 [&_li]:text-amber-950/90 dark:[&_li]:text-amber-100/90" 
+                       dangerouslySetInnerHTML={{ __html: recipe.notes }} 
+                     />
                   </div>
                 )}
                 {recipe.tags && recipe.tags.length > 0 && (
@@ -443,7 +607,7 @@ export function RecipeDetailPage() {
                        {recipe.tags.map(tagId => {
                           const t = DEFAULT_TAGS.find(x => x.id === tagId || x.slug === tagId);
                           const displayName = t ? t.name : tagId.replace(/-/g, ' ');
-                          return <span key={tagId} className="px-3 py-1 bg-default-100 rounded-full text-xs font-medium text-default-700 capitalize">{displayName}</span>;
+                          return <span key={tagId} className="px-3 py-1 bg-default-100 dark:bg-default-100/70 border border-default-200/50 dark:border-divider rounded-full text-sm font-medium text-default-700 dark:text-default-300 capitalize">{displayName}</span>;
                        })}
                      </div>
                   </div>
@@ -467,7 +631,7 @@ export function RecipeDetailPage() {
                         <History className="w-4 h-4 text-primary" /> Lịch sử nấu
                       </h3>
                       {recipe.cooking_history && recipe.cooking_history.length > 0 && (
-                        <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-[10px] font-bold">
+                        <span className="bg-primary/10 text-primary px-2.5 py-0.5 rounded-full text-xs font-semibold">
                           {recipe.cooking_history.length} lần
                         </span>
                       )}
@@ -478,7 +642,7 @@ export function RecipeDetailPage() {
                           {recipe.cooking_history.slice().reverse().map((history) => (
                             <div 
                               key={history.id} 
-                              className={`p-3 -mx-3 flex flex-col gap-2 rounded-xl transition-colors ${history.recipe_snapshot ? 'cursor-pointer hover:bg-default-100' : ''}`}
+                              className={`p-3 -mx-3 flex flex-col gap-2 rounded-xl transition-colors ${history.recipe_snapshot ? 'cursor-pointer hover:bg-default-100 dark:hover:bg-default-100/50 active:bg-default-100' : ''}`}
                               onClick={() => {
                                 if (history.recipe_snapshot) {
                                   setSnapshotData({ 
@@ -491,7 +655,7 @@ export function RecipeDetailPage() {
                               }}
                             >
                               <div className="flex justify-between items-center">
-                                <span className="text-xs text-default-500 font-medium">
+                                <span className="text-sm text-default-500 font-medium">
                                   {new Date(history.date).toLocaleDateString('vi-VN', { 
                                     day: '2-digit', month: '2-digit', year: 'numeric',
                                     hour: '2-digit', minute: '2-digit'
@@ -499,20 +663,20 @@ export function RecipeDetailPage() {
                                 </span>
                                 <div className="flex items-center gap-1">
                                   {[...Array(5)].map((_, i) => (
-                                    <Star key={i} className={`w-3 h-3 ${i < history.rating ? 'fill-current text-warning-400' : 'text-default-300'}`} />
+                                    <Star key={i} className={`w-3 h-3 ${i < history.rating ? 'fill-current text-warning-400' : 'text-default-300 dark:text-default-600'}`} />
                                   ))}
                                 </div>
                               </div>
                               {history.notes && (
-                                <p className="text-sm text-default-700 italic border-l-2 border-default-200 pl-3">{history.notes}</p>
+                                <p className="text-sm text-default-700 dark:text-default-300 italic border-l-2 border-default-300 dark:border-default-700 pl-3">{history.notes}</p>
                               )}
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <div className="py-6 flex flex-col items-center justify-center text-center gap-2 text-default-400 bg-default-50 rounded-xl">
+                        <div className="py-6 flex flex-col items-center justify-center text-center gap-2 text-default-400 bg-default-50 dark:bg-default-100/30 border border-dashed border-default-200 dark:border-divider rounded-xl">
                           <History className="w-5 h-5" />
-                          <span className="text-xs">Chưa có lịch sử nấu nào.<br/>Nhấn "Bắt đầu nấu" để lưu lại!</span>
+                          <span className="text-sm text-default-400">Chưa có lịch sử nấu nào.<br/>Nhấn "Bắt đầu nấu" để lưu lại!</span>
                         </div>
                       )}
                     </div>
@@ -525,7 +689,18 @@ export function RecipeDetailPage() {
       <div className="hidden xl:flex flex-col lg:flex-row gap-8 items-start">
         
         {/* Left Column (Hero + Content) */}
-        <div className="flex-1 flex flex-col gap-10 min-w-0 w-full">
+        <div className="flex-1 flex flex-col gap-6 min-w-0 w-full">
+          <div className="flex items-center">
+            <Button
+              variant="light"
+              size="sm"
+              onPress={() => navigate('/recipes')}
+              startContent={<ArrowLeft className="w-4 h-4" />}
+              className="text-default-600 dark:text-default-400 hover:text-foreground font-medium -ml-2"
+            >
+              Quay lại danh sách
+            </Button>
+          </div>
           
           {/* Intro Section (Split Image / Details) */}
           <div className="app-card flex flex-col xl:flex-row gap-8 w-full p-6">
@@ -569,9 +744,10 @@ export function RecipeDetailPage() {
             
             {/* Details */}
             <div className="flex flex-col flex-1 gap-5">
-               <div className="flex flex-col gap-2">
-
-                 <h1 className="text-3xl lg:text-4xl font-extrabold leading-tight text-foreground">{recipe.title}</h1>
+               <div className="flex flex-col gap-2.5">
+                 <h1 className="text-3xl lg:text-4xl font-extrabold leading-tight text-foreground flex items-center gap-3">
+                   <span>{recipe.title}</span>
+                 </h1>
                </div>
                
                <div className="flex items-center gap-2 text-default-600 font-medium">
@@ -660,7 +836,7 @@ export function RecipeDetailPage() {
                    </div>
                    {recipe.tags.map(tagId => {
                       const t = DEFAULT_TAGS.find(x => x.id === tagId);
-                      return t ? <span key={tagId} className="px-3 py-1 bg-default-100 rounded-full text-xs font-medium text-default-700">{t.name}</span> : null;
+                      return t ? <span key={tagId} className="px-3 py-1 bg-default-100 dark:bg-default-100/70 border border-default-200/50 dark:border-divider rounded-full text-sm font-medium text-default-700 dark:text-default-300">{t.name}</span> : null;
                    })}
                  </div>
                )}
@@ -697,10 +873,10 @@ export function RecipeDetailPage() {
                   <Carrot className="w-6 h-6 text-success" />
                   Nguyên liệu
                 </h2>
-                <div className="flex items-center gap-2 bg-default-100 px-2 py-1 rounded-full text-sm font-medium">
+                <div className="flex items-center gap-2 bg-default-100 dark:bg-default-100/70 border border-default-200/50 dark:border-divider px-2 py-1 rounded-full text-sm font-medium">
                   <span className="text-default-500 mr-1 hidden sm:inline ml-2">Khẩu phần</span>
                   <div 
-                    className="w-6 h-6 flex items-center justify-center bg-white rounded-full cursor-pointer shadow-sm text-default-600 active:text-primary transition-colors shrink-0"
+                    className="w-6 h-6 flex items-center justify-center bg-content1 dark:bg-default-200 rounded-full cursor-pointer shadow-xs text-foreground active:text-primary transition-all shrink-0 border border-divider/40 active:scale-95"
                     onClick={() => {
                       const val = Math.max(0.1, targetServings - 1);
                       setTargetServingsStr(Number.isInteger(val) ? val.toString() : val.toFixed(1));
@@ -712,12 +888,12 @@ export function RecipeDetailPage() {
                     type="number"
                     step="0.1"
                     min="0.1"
-                    className="w-12 text-center bg-transparent border-none outline-none text-sm font-bold p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="w-12 text-center bg-transparent border-none outline-none text-sm font-bold p-0 text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     value={targetServingsStr}
                     onChange={(e) => setTargetServingsStr(e.target.value)}
                   />
                   <div 
-                    className="w-6 h-6 flex items-center justify-center bg-white rounded-full cursor-pointer shadow-sm text-default-600 active:text-primary transition-colors shrink-0"
+                    className="w-6 h-6 flex items-center justify-center bg-content1 dark:bg-default-200 rounded-full cursor-pointer shadow-xs text-foreground active:text-primary transition-all shrink-0 border border-divider/40 active:scale-95"
                     onClick={() => {
                       const val = targetServings + 1;
                       setTargetServingsStr(Number.isInteger(val) ? val.toString() : val.toFixed(1));
@@ -741,15 +917,17 @@ export function RecipeDetailPage() {
                         return (
                           <div 
                             key={globalIndex}
-                            className="flex items-center gap-3 group cursor-pointer"
+                            className="flex items-center gap-3 group cursor-pointer py-1"
                             onClick={() => toggleIngredient(globalIndex)}
                           >
-                            <div className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors ${isChecked ? 'bg-primary border-primary text-white' : 'border-default-300 group-hover:border-primary'}`}>
+                            <div className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors ${isChecked ? 'bg-primary border-primary text-white' : 'border-default-300 dark:border-default-600 group-hover:border-primary'}`}>
                               {isChecked && <Check className="w-3 h-3" />}
                             </div>
-                            <div className={`flex flex-col flex-1 transition-opacity ${isChecked ? 'opacity-50 line-through' : ''}`}>
-                              <span className="font-medium text-foreground">{ing.name}</span>
-                              <span className="text-sm text-default-500">{scaleQuantity(ing.quantity)} {ing.unit}</span>
+                            <div className={`flex items-center justify-between flex-1 gap-3 min-w-0 transition-opacity ${isChecked ? 'opacity-50 line-through' : ''}`}>
+                              <span className="font-medium text-foreground truncate">{ing.name}</span>
+                              <span className="text-sm font-semibold text-default-500 dark:text-default-400 shrink-0 text-right">
+                                {scaleQuantity(ing.quantity)} {ing.unit}
+                              </span>
                             </div>
                           </div>
                         );
@@ -770,20 +948,25 @@ export function RecipeDetailPage() {
                <div className="flex flex-col gap-2">
                  {Object.entries(stepGroups).map(([group, steps]) => (
                    <div key={group} className="flex flex-col">
-                     {group !== 'Các bước thực hiện' && <h3 className="text-lg font-bold text-default-700 mb-4">{group}</h3>}
+                     {group !== 'Các bước thực hiện' && (
+                       <div className="flex items-center gap-2 mb-4 mt-2 first:mt-0">
+                         <span className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
+                         <h3 className="text-lg font-bold text-foreground">{group}</h3>
+                       </div>
+                     )}
                      
                      <div className="flex flex-col">
                        {steps.map((step, i) => (
                          <div key={i} className="flex gap-4">
                            <div className="flex flex-col items-center">
-                             <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center shrink-0">
+                             <div className="w-8 h-8 rounded-full bg-primary/15 dark:bg-primary/25 text-primary dark:text-primary-300 border border-primary/20 font-bold flex items-center justify-center shrink-0">
                                {i + 1}
                              </div>
-                             {i < steps.length - 1 && <div className="w-px flex-1 bg-default-200 my-2" />}
+                             {i < steps.length - 1 && <div className="w-0.5 flex-1 bg-default-200 dark:bg-divider my-1.5" />}
                            </div>
                            <div className="flex flex-col gap-3 pb-6 pt-1">
                              <div 
-                               className="text-default-700 leading-relaxed prose prose-sm prose-primary max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1"
+                               className="text-foreground leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1"
                                dangerouslySetInnerHTML={{ __html: step.instruction }}
                              />
                              
@@ -914,7 +1097,7 @@ export function RecipeDetailPage() {
                     <div className="py-5 first:pt-2 last:pb-0 flex flex-col gap-3">
                        <h3 className="font-bold text-base flex items-center gap-2"><Info className="w-5 h-5 text-warning-500" /> Ghi chú</h3>
                        <div 
-                         className="text-sm leading-relaxed text-default-700 bg-warning-50 p-4 rounded-2xl border border-warning-100 prose prose-sm prose-warning max-w-none prose-p:my-1 prose-ul:my-1"
+                         className="text-sm leading-relaxed text-amber-950 dark:text-amber-100 bg-amber-500/10 dark:bg-amber-500/15 p-4 rounded-2xl border border-amber-500/30 prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 [&_*]:text-amber-950 dark:[&_*]:text-amber-100 [&_strong]:text-amber-950 dark:[&_strong]:text-amber-50 [&_b]:text-amber-950 dark:[&_b]:text-amber-50 [&_li]:text-amber-950/90 dark:[&_li]:text-amber-100/90"
                          dangerouslySetInnerHTML={{ __html: recipe.notes }}
                        />
                     </div>
@@ -938,7 +1121,7 @@ export function RecipeDetailPage() {
                       {recipe.cooking_history.slice().reverse().map((history) => (
                         <div 
                           key={history.id} 
-                          className={`p-3 -mx-3 flex flex-col gap-2 rounded-xl transition-colors ${history.recipe_snapshot ? 'cursor-pointer hover:bg-default-100' : ''}`}
+                          className={`p-3 -mx-3 flex flex-col gap-2 rounded-xl transition-colors ${history.recipe_snapshot ? 'cursor-pointer hover:bg-default-100 dark:hover:bg-default-100/50' : ''}`}
                           onClick={() => {
                             if (history.recipe_snapshot) {
                               setSnapshotData({ 
@@ -959,12 +1142,12 @@ export function RecipeDetailPage() {
                             </span>
                             <div className="flex gap-1 text-warning-400">
                               {[...Array(5)].map((_, i) => (
-                                <Star key={i} className={`w-3 h-3 ${i < history.rating ? 'fill-current text-warning-400' : 'text-default-300'}`} />
+                                <Star key={i} className={`w-3 h-3 ${i < history.rating ? 'fill-current text-warning-400' : 'text-default-300 dark:text-default-600'}`} />
                               ))}
                             </div>
                           </div>
                           {history.notes && (
-                            <p className="text-default-700 text-sm whitespace-pre-wrap">{history.notes}</p>
+                            <p className="text-default-700 dark:text-default-300 text-sm whitespace-pre-wrap">{history.notes}</p>
                           )}
                         </div>
                       ))}
@@ -1057,11 +1240,17 @@ export function RecipeDetailPage() {
         notes={snapshotData?.notes}
       />
       
-      {/* Floating AI Chat & Bottom Action Bar */}
-      <RecipeFloatingChat 
-        recipe={recipe} 
-        onStartCooking={() => setIsCookingModeOpen(true)} 
-      />
+      {/* Mobile Sticky Bottom Action Bar */}
+      <div className="flex xl:hidden fixed bottom-0 left-0 right-0 p-4 bg-background/80 dark:bg-content1/80 backdrop-blur-md border-t border-divider z-40 safe-area-inset-bottom items-center gap-3 animate-appearance-in pb-6">
+        <Button 
+          color="primary"
+          className="w-full rounded-full font-bold h-12 shadow-md shadow-primary/30 text-base"
+          onPress={() => setIsCookingModeOpen(true)}
+          startContent={<Play className="w-5 h-5 fill-current" />}
+        >
+          Bắt đầu nấu
+        </Button>
+      </div>
       <MealPlannerSelectModal 
         isOpen={isMealPlannerModalOpen} 
         onOpenChange={setIsMealPlannerModalOpen} 

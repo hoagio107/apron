@@ -1,0 +1,99 @@
+- generic [ref=f7e1]:
+  - generic [ref=f7e7]:
+    - main [ref=f7e8]:
+      - generic [ref=f7e9]:
+        - generic [ref=f7e10]:
+          - generic [ref=f7e11]:
+            - button [ref=f7e12] [cursor=pointer]
+            - generic [ref=f7e14]:
+              - heading [level=1] [ref=f7e130]: Mẹo nhà bếp
+              - paragraph [ref=f7e16]: 6 mẹo đã lưu
+          - generic [ref=f7e18]:
+            - textbox [ref=f7e131]:
+              - /placeholder: Tìm kiếm mẹo...
+            - generic [ref=f7e27]:
+              - button [ref=f7e29] [cursor=pointer]
+              - button [ref=f7e132] [cursor=pointer]
+              - generic [ref=f7e37]:
+                - button [ref=f7e133] [cursor=pointer]
+                - button [ref=f7e134] [cursor=pointer]
+        - generic [ref=f7e47]:
+          - generic [ref=f7e48] [cursor=pointer]:
+            - generic [ref=f7e50]: mẹo bảo quản
+            - button [ref=f7e136]
+            - generic:
+              - heading [level=3]: Cách giữ bơ sáp không bị thâm
+              - paragraph: Khi cắt bơ mà dùng không hết, hãy quét một lớp dầu oliu mỏng hoặc vắt chút chanh lên bề mặt bơ rồi bọc kín bằng màng bọc thực phẩm, để tủ lạnh.
+              - generic: 1 ngày trước
+          - generic [ref=f7e59] [cursor=pointer]:
+            - generic [ref=f7e61]: mẹo chế biến
+            - button [ref=f7e138]
+            - generic:
+              - heading [level=3]: Mẹo ướp thịt nướng mềm mọng không bị khô
+              - paragraph: Thêm một thìa sữa đặc hoặc nước ép lê/táo vào sốt ướp. Enzyme tự nhiên trong hoa quả sẽ làm mềm thớ thịt mà không làm bở nát.
+              - generic: 1 ngày trước
+          - generic [ref=f7e70] [cursor=pointer]:
+            - generic [ref=f7e72]: mẹo chọn nguyên liệu
+            - button [ref=f7e140]
+            - generic:
+              - heading [level=3]: Bí quyết chọn xương bò nấu phở ngon
+              - paragraph: Nên chọn xương ống bò, có màu đỏ tươi, tủy bên trong còn màu hồng. Tránh xương có mùi hôi lạ hoặc màu xỉn.
+              - generic: 1 ngày trước
+          - generic [ref=f7e81] [cursor=pointer]:
+            - generic [ref=f7e83]: mẹo chọn nguyên liệu
+            - button [ref=f7e142]
+            - generic:
+              - heading [level=3]: Bí quyết chọn xương bò nấu phở ngon
+              - paragraph: Nên chọn xương ống bò, có màu đỏ tươi, tủy bên trong còn màu hồng. Tránh xương có mùi hôi lạ hoặc màu xỉn.
+              - generic: 1 ngày trước
+          - generic [ref=f7e92] [cursor=pointer]:
+            - generic [ref=f7e94]: mẹo bảo quản
+            - button [ref=f7e144]
+            - generic:
+              - heading [level=3]: Cách giữ bơ sáp không bị thâm
+              - paragraph: Khi cắt bơ mà dùng không hết, hãy quét một lớp dầu oliu mỏng hoặc vắt chút chanh lên bề mặt bơ rồi bọc kín bằng màng bọc thực phẩm, để tủ lạnh.
+              - generic: 1 ngày trước
+          - generic [ref=f7e103] [cursor=pointer]:
+            - generic [ref=f7e105]: mẹo chế biến
+            - button [ref=f7e146]
+            - generic:
+              - heading [level=3]: Mẹo ướp thịt nướng mềm mọng không bị khô
+              - paragraph: Thêm một thìa sữa đặc hoặc nước ép lê/táo vào sốt ướp. Enzyme tự nhiên trong hoa quả sẽ làm mềm thớ thịt mà không làm bở nát.
+              - generic: 1 ngày trước
+    - navigation:
+      - generic [ref=f7e114]:
+        - link [ref=f7e115] [cursor=pointer]:
+          - /url: /
+        - link [ref=f7e119] [cursor=pointer]:
+          - /url: /recipes
+        - link [ref=f7e122] [cursor=pointer]:
+          - /url: /tips
+        - button [ref=f7e125]
+    - button [ref=f7e128]
+  - dialog [active] [ref=f7e149]:
+    - button "Dismiss" [ref=f7e151]
+    - generic [ref=f7e152]:
+      - generic [ref=f7e156]:
+        - button "Quay lại" [ref=f7e157] [cursor=pointer]
+        - heading "Thêm mẹo vặt mới" [level=1] [ref=f7e161]
+      - generic [ref=f7e163]:
+        - generic [ref=f7e164]:
+          - generic [ref=f7e165]: Ảnh đại diện
+          - generic [ref=f7e170] [cursor=pointer]:
+            - paragraph [ref=f7e176]: Tải ảnh đại diện mẹo
+            - paragraph [ref=f7e177]: Bấm để chọn từ thư viện ảnh hoặc tải lên từ thiết bị
+        - generic [ref=f7e178]:
+          - generic [ref=f7e179]: Tiêu đề mẹo
+          - 'textbox "Ví dụ: Cách giữ bơ sáp không bị thâm đen..." [ref=f7e186]'
+        - generic [ref=f7e187]:
+          - generic [ref=f7e188]: Chuyên mục mẹo
+          - generic [ref=f7e193]:
+            - combobox [ref=f7e196]
+            - button "Chọn một chuyên mục phù hợp" [ref=f7e198]
+        - generic [ref=f7e203]:
+          - generic [ref=f7e204]: Nội dung hướng dẫn chi tiết
+          - paragraph [ref=f7e213]: Viết nội dung hướng dẫn mẹo vặt của bạn tại đây...
+      - generic [ref=f7e215]:
+        - button "Hủy bỏ" [ref=f7e216] [cursor=pointer]
+        - button "Lưu mẹo vặt" [ref=f7e217] [cursor=pointer]
+    - button "Dismiss" [ref=f7e223]

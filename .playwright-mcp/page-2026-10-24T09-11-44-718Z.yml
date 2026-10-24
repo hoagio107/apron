@@ -1,0 +1,135 @@
+- generic [active] [ref=f4e1]:
+  - generic [ref=f4e7]:
+    - main [ref=f4e8]:
+      - generic [ref=f4e9]:
+        - generic [ref=f4e10]:
+          - generic [ref=f4e12]:
+            - heading [level=1] [ref=f4e144]: Mẹo nhà bếp
+            - paragraph [ref=f4e14]: 7 mẹo đã lưu
+          - generic [ref=f4e16]:
+            - textbox [ref=f4e145]:
+              - /placeholder: Tìm kiếm mẹo...
+            - generic [ref=f4e25]:
+              - button [ref=f4e146] [cursor=pointer]
+              - button [ref=f4e29] [cursor=pointer]
+              - button [ref=f4e147] [cursor=pointer]
+              - generic [ref=f4e37]:
+                - button [ref=f4e148] [cursor=pointer]
+                - button [ref=f4e149] [cursor=pointer]
+        - generic [ref=f4e47]:
+          - generic [ref=f4e48] [cursor=pointer]:
+            - generic [ref=f4e52]: Mẹo nấu ăn
+            - button [ref=f4e150]
+            - generic:
+              - heading [level=3]: Mẹo luộc trứng lòng đào dẻo quánh chuẩn vị
+              - paragraph: Cách thực hiện chuẩn:Đun sôi nước với 1 thìa giấm trắng để trứng dễ bóc vỏ.Hạ lửa vừa, cho trứng vào luộc đúng 6 phút 30 giây.Vớt ra ngâm ngay vào âu nước đá lạnh 5 phút.
+              - generic: 8 phút trước
+          - generic [ref=f4e62] [cursor=pointer]:
+            - generic [ref=f4e64]: mẹo bảo quản
+            - button [ref=f4e152]
+            - generic:
+              - heading [level=3]: Cách giữ bơ sáp không bị thâm
+              - paragraph: Khi cắt bơ mà dùng không hết, hãy quét một lớp dầu oliu mỏng hoặc vắt chút chanh lên bề mặt bơ rồi bọc kín bằng màng bọc thực phẩm, để tủ lạnh.
+              - generic: 1 ngày trước
+          - generic [ref=f4e73] [cursor=pointer]:
+            - generic [ref=f4e75]: mẹo chế biến
+            - button [ref=f4e154]
+            - generic:
+              - heading [level=3]: Mẹo ướp thịt nướng mềm mọng không bị khô
+              - paragraph: Thêm một thìa sữa đặc hoặc nước ép lê/táo vào sốt ướp. Enzyme tự nhiên trong hoa quả sẽ làm mềm thớ thịt mà không làm bở nát.
+              - generic: 1 ngày trước
+          - generic [ref=f4e84] [cursor=pointer]:
+            - generic [ref=f4e86]: mẹo chọn nguyên liệu
+            - button [ref=f4e156]
+            - generic:
+              - heading [level=3]: Bí quyết chọn xương bò nấu phở ngon
+              - paragraph: Nên chọn xương ống bò, có màu đỏ tươi, tủy bên trong còn màu hồng. Tránh xương có mùi hôi lạ hoặc màu xỉn.
+              - generic: 1 ngày trước
+          - generic [ref=f4e95] [cursor=pointer]:
+            - generic [ref=f4e97]: mẹo chọn nguyên liệu
+            - button [ref=f4e158]
+            - generic:
+              - heading [level=3]: Bí quyết chọn xương bò nấu phở ngon
+              - paragraph: Nên chọn xương ống bò, có màu đỏ tươi, tủy bên trong còn màu hồng. Tránh xương có mùi hôi lạ hoặc màu xỉn.
+              - generic: 1 ngày trước
+          - generic [ref=f4e106] [cursor=pointer]:
+            - generic [ref=f4e108]: mẹo bảo quản
+            - button [ref=f4e160]
+            - generic:
+              - heading [level=3]: Cách giữ bơ sáp không bị thâm
+              - paragraph: Khi cắt bơ mà dùng không hết, hãy quét một lớp dầu oliu mỏng hoặc vắt chút chanh lên bề mặt bơ rồi bọc kín bằng màng bọc thực phẩm, để tủ lạnh.
+              - generic: 1 ngày trước
+          - generic [ref=f4e117] [cursor=pointer]:
+            - generic [ref=f4e119]: mẹo chế biến
+            - button [ref=f4e162]
+            - generic:
+              - heading [level=3]: Mẹo ướp thịt nướng mềm mọng không bị khô
+              - paragraph: Thêm một thìa sữa đặc hoặc nước ép lê/táo vào sốt ướp. Enzyme tự nhiên trong hoa quả sẽ làm mềm thớ thịt mà không làm bở nát.
+              - generic: 1 ngày trước
+    - navigation:
+      - generic [ref=f4e128]:
+        - link [ref=f4e129] [cursor=pointer]:
+          - /url: /
+        - link [ref=f4e133] [cursor=pointer]:
+          - /url: /recipes
+        - link [ref=f4e136] [cursor=pointer]:
+          - /url: /tips
+        - button [ref=f4e139]
+    - button [ref=f4e142]
+  - dialog [ref=f4e165]:
+    - button [ref=f4e243]
+    - generic [ref=f4e168]:
+      - generic [ref=f4e172]:
+        - button [ref=f4e244] [cursor=pointer]
+        - heading [level=1] [ref=f4e245]: Thêm mẹo vặt mới
+      - generic [ref=f4e179]:
+        - generic [ref=f4e180]:
+          - generic [ref=f4e181]: Ảnh đại diện
+          - generic [ref=f4e186] [cursor=pointer]:
+            - paragraph [ref=f4e192]: Tải ảnh đại diện mẹo
+            - paragraph [ref=f4e193]: Bấm để chọn từ thư viện ảnh hoặc tải lên từ thiết bị
+        - generic [ref=f4e194]:
+          - generic [ref=f4e195]: Tiêu đề mẹo
+          - textbox [ref=f4e246]:
+            - /placeholder: "Ví dụ: Cách giữ bơ sáp không bị thâm đen..."
+        - generic [ref=f4e203]:
+          - generic [ref=f4e204]: Chuyên mục mẹo
+          - generic [ref=f4e209]:
+            - combobox [ref=f4e212]
+            - button [ref=f4e247]:
+              - generic [ref=f4e215]: Chọn một chuyên mục phù hợp
+        - generic [ref=f4e219]:
+          - generic [ref=f4e220]: Nội dung hướng dẫn chi tiết
+          - paragraph [ref=f4e229]: Viết nội dung hướng dẫn mẹo vặt của bạn tại đây...
+      - generic [ref=f4e231]:
+        - button [ref=f4e248] [cursor=pointer]
+        - button [ref=f4e249] [cursor=pointer]: Hủy bỏ
+        - button [ref=f4e250] [cursor=pointer]: Lưu mẹo vặt
+    - button [ref=f4e251]
+  - dialog [ref=f4e316]:
+    - button "Dismiss" [ref=f4e256]
+    - button "Close" [ref=f4e257]
+    - banner [ref=f4e260]:
+      - generic [ref=f4e265]:
+        - heading "AI Trợ lý mẹo vặt (Web Gemini)" [level=3] [ref=f4e266]
+        - paragraph [ref=f4e267]: Không cần API Key. Tạo prompt gửi sang Gemini Web miễn phí và dán kết quả để tự động điền form.
+      - tablist [ref=f4e270]:
+        - tab "1 Tạo Prompt cho Gemini Web" [ref=f4e317] [cursor=pointer]:
+          - generic [ref=f4e318]:
+            - generic [ref=f4e319]: "1"
+            - generic [ref=f4e320]: Tạo Prompt cho Gemini Web
+        - tab "2 Dán kết quả & Điền vào Form" [selected] [ref=f4e321] [cursor=pointer]:
+          - generic [ref=f4e276]:
+            - generic [ref=f4e277]: "2"
+            - generic [ref=f4e322]: Dán kết quả & Điền vào Form
+    - generic [ref=f4e372]:
+      - generic [ref=f4e373]:
+        - generic [ref=f4e374]: "Dán kết quả phản hồi từ Gemini Web vào đây:"
+        - button "Dán từ Clipboard" [ref=f4e376] [cursor=pointer]
+      - 'textbox "Dán toàn bộ kết quả nhận được từ Gemini Web vào đây... Ví dụ: { \"title\": \"Cách giữ bơ sáp tươi lâu không thâm\", \"category_id\": \"storage\", \"content\": \"<p>Khi cắt bơ mà dùng không hết...</p>\" }" [ref=f4e384]':
+        - /placeholder: "Dán toàn bộ kết quả nhận được từ Gemini Web vào đây...\nVí dụ:\n{\n  \"title\": \"Cách giữ bơ sáp tươi lâu không thâm\",\n  \"category_id\": \"storage\",\n  \"content\": \"<p>Khi cắt bơ mà dùng không hết...</p>\"\n}"
+      - button "Trích xuất dữ liệu" [ref=f4e386] [cursor=pointer]
+    - contentinfo [ref=f4e311]:
+      - button "Đóng" [ref=f4e312] [cursor=pointer]
+      - button "Áp dụng vào Form mẹo vặt" [disabled]
+    - button "Dismiss" [ref=f4e315]

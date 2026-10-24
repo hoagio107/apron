@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/ui';
+import { Button, Spinner } from '@/ui';
 import { Plus, Search, Trash2, CalendarDays, Tags } from 'lucide-react';
 import { EmptyState } from '../../components/shared/EmptyState';
 import type { RecipeViewType } from '../../components/recipes/list/RecipeCard';
@@ -32,7 +32,7 @@ export function RecipeListPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState<RecipeFilterState>(defaultFilterState);
 
-  const { recipes, fetchRecipes, deleteBulkRecipes, updateRecipe, deleteRecipe } = useRecipeStore();
+  const { recipes, fetchRecipes, deleteBulkRecipes, updateRecipe, deleteRecipe, isLoading } = useRecipeStore();
   const { addMealPlanEntry } = useMealPlanStore();
 
   const [isMealPlannerModalOpen, setIsMealPlannerModalOpen] = useState(false);
@@ -58,27 +58,34 @@ export function RecipeListPage() {
     (filters.maxTime !== null ? 1 : 0) + 
     ((filters.tags?.length || 0) > 0 ? 1 : 0) + 
     (filters.cookedStatus && filters.cookedStatus !== 'all' ? 1 : 0) + 
-    (filters.minRating ? 1 : 0);
+    (filters.minRating ? 1 : 0) +
+    (filters.hideVariants ? 1 : 0);
 
   const filteredAndSortedRecipes = useMemo(() => {
     let result = [...recipes];
     
-    // Filter out children (variants)
-    result = result.filter(r => !r.parent_id);
+    // Chỉ ẩn món biến thể khi người dùng chủ động chọn ẩn trong bộ lọc
+    if (filters.hideVariants && !searchQuery.trim()) {
+      result = result.filter(r => !r.parent_id || !recipes.some(parent => parent.id === r.parent_id));
+    }
 
-    // Search
+    // Tìm kiếm theo từ khóa an toàn
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(r => r.title.toLowerCase().includes(q));
+      result = result.filter(r => (r.title || '').toLowerCase().includes(q));
     }
     
-    // Filters
+    // Lọc độ khó (tương thích cả 'Trung bình' và 'Vừa')
     if (filters.difficulties.length > 0) {
-      result = result.filter(r => filters.difficulties.includes(r.difficulty));
+      result = result.filter(r => 
+        filters.difficulties.includes(r.difficulty) ||
+        (filters.difficulties.includes('Trung bình') && r.difficulty === 'Vừa') ||
+        (filters.difficulties.includes('Vừa') && r.difficulty === 'Trung bình')
+      );
     }
     
     if (filters.maxTime !== null) {
-      result = result.filter(r => (r.prep_time + r.cook_time) <= filters.maxTime!);
+      result = result.filter(r => ((r.prep_time || 0) + (r.cook_time || 0)) <= filters.maxTime!);
     }
 
     if (filters.tags && filters.tags.length > 0) {
@@ -104,14 +111,30 @@ export function RecipeListPage() {
     // Sort
     result.sort((a, b) => {
       switch (sortOption) {
-        case 'newest':
-          return new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime();
-        case 'oldest':
-          return new Date(a.created_at || '').getTime() - new Date(b.created_at || '').getTime();
-        case 'highest_rated':
-          return b.taste_score - a.taste_score;
-        case 'quickest':
-          return (a.prep_time + a.cook_time) - (b.prep_time + b.cook_time);
+        case 'newest': {
+          const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          const validA = isNaN(timeA) ? 0 : timeA;
+          const validB = isNaN(timeB) ? 0 : timeB;
+          return validB - validA;
+        }
+        case 'oldest': {
+          const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          const validA = isNaN(timeA) ? 0 : timeA;
+          const validB = isNaN(timeB) ? 0 : timeB;
+          return validA - validB;
+        }
+        case 'highest_rated': {
+          const scoreA = typeof a.taste_score === 'number' && !isNaN(a.taste_score) ? a.taste_score : 0;
+          const scoreB = typeof b.taste_score === 'number' && !isNaN(b.taste_score) ? b.taste_score : 0;
+          return scoreB - scoreA;
+        }
+        case 'quickest': {
+          const totalA = (a.prep_time || 0) + (a.cook_time || 0);
+          const totalB = (b.prep_time || 0) + (b.cook_time || 0);
+          return totalA - totalB;
+        }
         default:
           return 0;
       }
@@ -267,7 +290,11 @@ export function RecipeListPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold text-foreground leading-tight">Sổ tay Công thức</h1>
-            <p className="text-default-500">{recipes.length} công thức đã lưu</p>
+            <p className="text-default-500">
+              {filteredAndSortedRecipes.length === recipes.length
+                ? `${recipes.length} công thức đã lưu`
+                : `Hiển thị ${filteredAndSortedRecipes.length} / ${recipes.length} công thức`}
+            </p>
           </div>
         </div>
 
@@ -336,7 +363,12 @@ export function RecipeListPage() {
       )}
 
       {/* Grid / List */}
-      {filteredAndSortedRecipes.length === 0 ? (
+      {isLoading && recipes.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <Spinner size="lg" color="primary" />
+          <p className="text-sm text-default-400">Đang tải danh sách công thức...</p>
+        </div>
+      ) : filteredAndSortedRecipes.length === 0 ? (
         <EmptyState
           icon={<Search className="w-10 h-10 text-default-300" />}
           title="Không tìm thấy công thức"
@@ -346,6 +378,8 @@ export function RecipeListPage() {
         <div className={`
           ${viewType === 'grid-portrait' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6' : ''}
           ${viewType === 'grid-square' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6' : ''}
+          ${viewType === 'grid-landscape' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6' : ''}
+          ${viewType === 'grid-portrait-out' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6' : ''}
         `}>
           {filteredAndSortedRecipes.map(r => {
             const variantCount = recipes.filter(child => child.parent_id === r.id).length;

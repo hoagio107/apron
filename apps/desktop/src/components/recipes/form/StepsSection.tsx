@@ -111,14 +111,15 @@ function StepGroup({ sectionIndex, onRemove, onOpenImageModal }: { sectionIndex:
         <SortableList items={steps} onDragEnd={(oldIndex, newIndex) => move(oldIndex, newIndex)}>
           {steps.map((step, index) => (
             <SortableItem key={step.id} id={step.id}>
-              {({ attributes, listeners }) => (
-                <div className="flex items-start gap-4 p-2 rounded-lg hover:bg-default-50 transition-colors group/step">
+              {({ attributes, listeners, isDragging }) => (
+                <div className={`flex items-start gap-4 p-2 rounded-lg hover:bg-default-50 transition-colors group/step ${isDragging ? 'bg-default-100/80 shadow-lg ring-1 ring-primary/30' : ''}`}>
                   <div 
-                    className="cursor-move pt-2 text-default-300 hover:text-default-500 transition-colors"
+                    className="touch-none select-none cursor-grab active:cursor-grabbing p-1.5 -ml-1 text-default-300 hover:text-default-600 active:text-primary transition-colors shrink-0 mt-1"
+                    title="Kéo thả để đổi thứ tự bước"
                     {...attributes}
                     {...listeners}
                   >
-                    <GripVertical className="w-5 h-5" />
+                    <GripVertical className="w-5 h-5 pointer-events-none" />
                   </div>
             
             <div className="flex-1 flex flex-col gap-3">

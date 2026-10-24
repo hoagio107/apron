@@ -40,10 +40,11 @@ export function RecipeCard({
     onSelectChange?.(!isSelected);
   };
 
-  const totalTime = recipe.prep_time + recipe.cook_time;
+  const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
   
   // Format thời gian nấu (vd: 1h30m hoặc 45m)
   const formatTime = (minutes: number) => {
+    if (!minutes || isNaN(minutes) || minutes <= 0) return '0m';
     if (minutes < 60) return `${minutes}m`;
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
@@ -102,25 +103,24 @@ export function RecipeCard({
     return (
       <div 
         onClick={onClick}
-        className={`group w-full aspect-[3/4] sm:aspect-[4/5] relative overflow-hidden transition-all duration-300 shadow-lg rounded-2xl cursor-pointer ${isSelected ? 'ring-4 ring-primary' : 'hover:scale-[1.02]'}`}
+        className={`group w-full aspect-[3/4] sm:aspect-[4/5] relative overflow-hidden transition-all duration-300 rounded-2xl bg-black border-none shadow-none cursor-pointer card-media-root ${isSelected ? 'ring-4 ring-primary' : 'hover:scale-[1.02]'}`}
       >
-        {/* Background Image */}
+        {/* Background Image: dừng lại trước 2 góc dưới và fade mask để triệt tiêu hoàn toàn viền trắng subpixel */}
         {recipe.image_url ? (
           <img 
             src={ImageManager.getAssetUrl(recipe.image_url)} 
             alt={recipe.title} 
-            className="absolute inset-0 w-full h-full object-cover z-0 transition-transform duration-300 group-hover:scale-105"
+            className="card-media-img absolute inset-x-0 top-0 bottom-7 w-full h-[calc(100%-1.75rem)] object-cover z-0 transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="absolute inset-0 w-full h-full bg-default-200 flex items-center justify-center z-0 transition-transform duration-300 group-hover:scale-105">
+          <div className="card-media-img absolute inset-x-0 top-0 bottom-7 w-full h-[calc(100%-1.75rem)] bg-default-200 flex items-center justify-center z-0 transition-transform duration-300 group-hover:scale-105">
             <ImageIcon className="w-16 h-16 text-default-500" />
           </div>
         )}
 
         {/* Additional dark gradient for text readability */}
         <div 
-          className="absolute inset-0 z-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none"
-          style={{ borderRadius: 'inherit' }}
+          className="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/50 via-50% to-transparent pointer-events-none"
         ></div>
 
         {/* Top Actions */}

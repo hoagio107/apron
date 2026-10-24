@@ -1,5 +1,6 @@
 import { ShoppingBasket, BookOpen, Sparkles, ChevronRight } from 'lucide-react';
 import { useShoppingListStore } from '../../../store/useShoppingListStore';
+import { toast } from '@/ui';
 
 export function ShoppingListQuickActions() {
   const { addItem } = useShoppingListStore();
@@ -10,7 +11,7 @@ export function ShoppingListQuickActions() {
       {/* Quick Action 1 */}
       <div 
         className="bg-success-50/50 border border-success-100 rounded-xl p-4 flex items-center justify-between cursor-pointer hover:bg-success-50 transition-colors group"
-        onClick={() => alert('Đang mở danh sách nguyên liệu hay dùng...')}
+        onClick={() => toast.info('Đang mở danh sách nguyên liệu hay dùng...')}
       >
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-full bg-success-100 flex items-center justify-center text-success shrink-0">
@@ -27,7 +28,7 @@ export function ShoppingListQuickActions() {
       {/* Quick Action 2 */}
       <div 
         className="bg-primary-50/50 border border-primary-100 rounded-xl p-4 flex items-center justify-between cursor-pointer hover:bg-primary-50 transition-colors group"
-        onClick={() => alert('Kéo thả công thức từ cột bên phải vào danh sách để thêm nguyên liệu!')}
+        onClick={() => toast.info('Kéo thả công thức từ cột bên phải vào danh sách để thêm nguyên liệu!')}
       >
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary shrink-0">

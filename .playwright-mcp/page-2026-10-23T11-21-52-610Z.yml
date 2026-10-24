@@ -1,0 +1,81 @@
+- generic [ref=f19e29]:
+  - main [ref=f19e30]:
+    - generic [ref=f19e31]:
+      - generic [ref=f19e32]:
+        - generic [ref=f19e33]:
+          - button [ref=f19e34] [cursor=pointer]
+          - generic [ref=f19e36]:
+            - heading "Sổ tay Công thức" [level=1] [ref=f19e37]
+            - paragraph [ref=f19e38]: 6 công thức đã lưu
+        - generic [ref=f19e40]:
+          - textbox "Tìm kiếm công thức..." [ref=f19e48]
+          - generic [ref=f19e49]:
+            - generic [ref=f19e50]:
+              - button [ref=f19e51] [cursor=pointer]
+              - generic: "0"
+            - button [ref=f19e54] [cursor=pointer]
+            - button [ref=f19e59] [cursor=pointer]
+            - generic [ref=f19e64]:
+              - button [ref=f19e65] [cursor=pointer]
+              - button [ref=f19e71] [cursor=pointer]
+      - generic [ref=f19e82]:
+        - generic [ref=f19e83] [cursor=pointer]:
+          - button [ref=f19e90]
+          - generic [ref=f19e95]:
+            - heading "Canh Sườn Hầm Rau Củ" [level=3] [ref=f19e96]
+            - generic [ref=f19e97]:
+              - generic [ref=f19e98]: 1h
+              - generic [ref=f19e103]: "0"
+              - generic [ref=f19e107]: 380 kcal
+        - generic [ref=f19e111] [cursor=pointer]:
+          - button [ref=f19e118]
+          - generic [ref=f19e123]:
+            - heading "Canh Chua Cá Lóc Nam Bộ" [level=3] [ref=f19e124]
+            - generic [ref=f19e125]:
+              - generic [ref=f19e126]: 0m
+              - generic [ref=f19e131]: "0"
+        - generic [ref=f19e135] [cursor=pointer]:
+          - button [ref=f19e142]
+          - generic [ref=f19e147]:
+            - heading "Bò Lúc Lắc Hạt Tiêu Đen" [level=3] [ref=f19e148]
+            - generic [ref=f19e149]:
+              - generic [ref=f19e150]: 0m
+              - generic [ref=f19e155]: "0"
+        - generic [ref=f19e159] [cursor=pointer]:
+          - img "Salad Gà Nướng Bơ Quả" [ref=f19e160]
+          - button [ref=f19e162]
+          - generic [ref=f19e167]:
+            - heading "Salad Gà Nướng Bơ Quả" [level=3] [ref=f19e168]
+            - generic [ref=f19e169]:
+              - generic [ref=f19e170]: 30m
+              - generic [ref=f19e175]: "0"
+              - generic [ref=f19e179]: 320 kcal
+        - generic [ref=f19e183] [cursor=pointer]:
+          - img "Sườn Xào Chua Ngọt" [ref=f19e184]
+          - button [ref=f19e186]
+          - generic [ref=f19e191]:
+            - heading "Sườn Xào Chua Ngọt" [level=3] [ref=f19e192]
+            - generic [ref=f19e193]:
+              - generic [ref=f19e194]: 50m
+              - generic [ref=f19e199]: "0"
+              - generic [ref=f19e203]: 600 kcal
+        - generic [ref=f19e207] [cursor=pointer]:
+          - img "Phở Bò Gia Truyền" [ref=f19e208]
+          - button [ref=f19e210]
+          - generic [ref=f19e215]:
+            - heading "Phở Bò Gia Truyền" [level=3] [ref=f19e216]
+            - generic [ref=f19e217]:
+              - generic [ref=f19e218]: 3h30m
+              - generic [ref=f19e223]: "0"
+              - generic [ref=f19e227]: 450 kcal
+  - generic:
+    - navigation:
+      - generic [ref=f19e231]:
+        - link [ref=f19e232] [cursor=pointer]:
+          - /url: /
+        - link [ref=f19e236] [cursor=pointer]:
+          - /url: /recipes
+        - link [ref=f19e239] [cursor=pointer]:
+          - /url: /tips
+        - button [ref=f19e242]
+    - button [ref=f19e245]

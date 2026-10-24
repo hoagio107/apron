@@ -1,0 +1,77 @@
+- generic [ref=f20e7]:
+  - main [ref=f20e8]:
+    - generic [ref=f20e9]:
+      - generic [ref=f20e10]:
+        - generic [ref=f20e11]:
+          - heading "Tủ lạnh thông minh" [level=1] [ref=f20e12]
+          - paragraph [ref=f20e13]: 5 nguyên liệu trong bếp của bạn
+        - button "Thêm nguyên liệu" [ref=f20e14] [cursor=pointer]
+      - generic [ref=f20e16]:
+        - generic [ref=f20e17]:
+          - generic [ref=f20e18]:
+            - generic [ref=f20e22]:
+              - textbox "Tìm kiếm nguyên liệu trong tủ..." [ref=f20e26]
+              - button "clear input"
+            - combobox "Sắp xếp tủ lạnh" [ref=f20e32] [cursor=pointer]:
+              - option "Hạn sử dụng" [selected]
+              - option "Tên A-Z"
+              - option "Mới thêm"
+          - generic [ref=f20e33]:
+            - button "🍱 Tất cả (5)" [ref=f20e34]:
+              - generic [ref=f20e35]: 🍱 Tất cả
+              - generic [ref=f20e36]: (5)
+            - button "Rau củ quả (2)" [active] [ref=f20e37]:
+              - generic [ref=f20e41]: Rau củ quả
+              - generic [ref=f20e42]: (2)
+            - button "Trứng & Bơ sữa (2)" [ref=f20e43]:
+              - generic [ref=f20e47]: Trứng & Bơ sữa
+              - generic [ref=f20e48]: (2)
+            - button "Gia vị & Nước sốt (1)" [ref=f20e49]:
+              - generic [ref=f20e52]: Gia vị & Nước sốt
+              - generic [ref=f20e53]: (1)
+            - button "Đặt lại" [ref=f20e54]
+          - generic [ref=f20e59]:
+            - generic [ref=f20e60]:
+              - text: Hiển thị
+              - strong [ref=f20e61]: "2"
+              - text: / 5 nguyên liệu
+            - button "Xoá bộ lọc" [ref=f20e62]
+        - generic [ref=f20e66]:
+          - generic [ref=f20e67] [cursor=pointer]:
+            - generic [ref=f20e68]:
+              - generic [ref=f20e73]: 4 ngày
+              - generic [ref=f20e75]:
+                - button "Sửa nguyên liệu" [ref=f20e76]
+                - button "Xoá nguyên liệu" [ref=f20e80]
+            - generic [ref=f20e84]:
+              - generic "Cà chua bi" [ref=f20e85]
+              - generic [ref=f20e86]:
+                - generic [ref=f20e87]: 450 gam
+                - generic [ref=f20e88]: Rau củ quả
+          - generic [ref=f20e89] [cursor=pointer]:
+            - generic [ref=f20e90]:
+              - generic [ref=f20e95]: 14 ngày
+              - generic [ref=f20e97]:
+                - button "Sửa nguyên liệu" [ref=f20e98]
+                - button "Xoá nguyên liệu" [ref=f20e102]
+            - generic [ref=f20e106]:
+              - generic "Hành tây" [ref=f20e107]
+              - generic [ref=f20e108]:
+                - generic [ref=f20e109]: 2 củ
+                - generic [ref=f20e110]: Rau củ quả
+        - generic [ref=f20e111]:
+          - generic [ref=f20e118]:
+            - generic [ref=f20e119]: Thiếu nguyên liệu?
+            - generic [ref=f20e120]: Lên thực đơn và chuẩn bị đi chợ
+          - button "Đi chợ" [ref=f20e121] [cursor=pointer]
+  - generic:
+    - navigation:
+      - generic [ref=f20e122]:
+        - link [ref=f20e123] [cursor=pointer]:
+          - /url: /
+        - link [ref=f20e127] [cursor=pointer]:
+          - /url: /recipes
+        - link [ref=f20e130] [cursor=pointer]:
+          - /url: /tips
+        - button [ref=f20e133]
+    - button [ref=f20e136]

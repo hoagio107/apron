@@ -29,11 +29,11 @@ function EditableMetric({
   if (!isFocused && value !== undefined && value !== null) {
     return (
       <div 
-        className="min-h-8 h-8 px-1 flex items-center justify-center cursor-text w-full hover:bg-default-100 rounded-lg transition-colors"
+        className="min-h-7 h-7 px-0.5 flex items-center justify-center cursor-text w-full hover:bg-default-100 rounded-lg transition-colors"
         onClick={() => setIsFocused(true)}
       >
-        <span className="font-semibold text-default-700">{value}</span>
-        <span className="text-default-400 text-xs ml-1">{unit}</span>
+        <span className="font-semibold text-xs sm:text-sm text-default-700">{value}</span>
+        <span className="text-default-400 text-xs ml-0.5">{unit}</span>
       </div>
     );
   }
@@ -47,8 +47,8 @@ function EditableMetric({
       variant="flat"
       classNames={{ 
         base: "w-full",
-        inputWrapper: "bg-transparent shadow-none border-none min-h-8 h-8 px-0",
-        input: "text-center font-semibold text-default-700"
+        inputWrapper: "bg-transparent shadow-none border-none min-h-7 h-7 px-0",
+        input: "text-center font-semibold text-xs sm:text-sm text-default-700"
       }}
       min={0}
       value={value !== undefined && value !== null ? value.toString() : ''}
@@ -110,14 +110,14 @@ export function InfoSection({ currentRecipeId }: { currentRecipeId?: string }) {
 
 
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-4 gap-2">
         <Controller
           name="difficulty"
           control={control}
           render={({ field, fieldState }) => (
-            <div className="flex flex-col items-center gap-1 p-3 rounded-2xl bg-default-50">
-              <div className="p-2 rounded-full bg-primary/10 text-primary mb-1">
-                <Gauge className="w-5 h-5" />
+            <div className="flex flex-col items-center gap-1 p-2 sm:p-2.5 rounded-2xl bg-default-50">
+              <div className="p-1.5 rounded-full bg-primary/10 text-primary mb-0.5">
+                <Gauge className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <span className="text-default-500 text-xs font-medium">Độ khó</span>
               <Select
@@ -125,8 +125,8 @@ export function InfoSection({ currentRecipeId }: { currentRecipeId?: string }) {
                 placeholder="Chọn..."
                 variant="flat"
                 classNames={{ 
-                  trigger: "bg-transparent shadow-none border-none min-h-8 h-8 px-0 data-[hover=true]:bg-default-100 transition-colors",
-                  value: "text-center font-semibold text-default-700 !text-default-700",
+                  trigger: "bg-transparent shadow-none border-none min-h-7 h-7 px-0 data-[hover=true]:bg-default-100 transition-colors",
+                  value: "text-center font-semibold text-xs sm:text-sm text-default-700 !text-default-700",
                   innerWrapper: "w-full flex justify-center",
                   selectorIcon: "hidden"
                 }}
@@ -150,9 +150,9 @@ export function InfoSection({ currentRecipeId }: { currentRecipeId?: string }) {
           name="calories"
           control={control}
           render={({ field, fieldState }) => (
-            <div className="flex flex-col items-center gap-1 p-3 rounded-2xl bg-default-50">
-              <div className="p-2 rounded-full bg-warning/10 text-warning mb-1">
-                <Flame className="w-5 h-5" />
+            <div className="flex flex-col items-center gap-1 p-2 sm:p-2.5 rounded-2xl bg-default-50">
+              <div className="p-1.5 rounded-full bg-warning/10 text-warning mb-0.5">
+                <Flame className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <span className="text-default-500 text-xs font-medium">Calories</span>
               <EditableMetric 
@@ -171,9 +171,9 @@ export function InfoSection({ currentRecipeId }: { currentRecipeId?: string }) {
           name="prep_time"
           control={control}
           render={({ field, fieldState }) => (
-            <div className="flex flex-col items-center gap-1 p-3 rounded-2xl bg-default-50">
-              <div className="p-2 rounded-full bg-secondary/10 text-secondary mb-1">
-                <Clock className="w-5 h-5" />
+            <div className="flex flex-col items-center gap-1 p-2 sm:p-2.5 rounded-2xl bg-default-50">
+              <div className="p-1.5 rounded-full bg-secondary/10 text-secondary mb-0.5">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <span className="text-default-500 text-xs font-medium">Sơ chế</span>
               <EditableMetric 
@@ -192,9 +192,9 @@ export function InfoSection({ currentRecipeId }: { currentRecipeId?: string }) {
           name="cook_time"
           control={control}
           render={({ field, fieldState }) => (
-            <div className="flex flex-col items-center gap-1 p-3 rounded-2xl bg-default-50">
-              <div className="p-2 rounded-full bg-success/10 text-success mb-1">
-                <Timer className="w-5 h-5" />
+            <div className="flex flex-col items-center gap-1 p-2 sm:p-2.5 rounded-2xl bg-default-50">
+              <div className="p-1.5 rounded-full bg-success/10 text-success mb-0.5">
+                <Timer className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <span className="text-default-500 text-xs font-medium">Nấu</span>
               <EditableMetric 

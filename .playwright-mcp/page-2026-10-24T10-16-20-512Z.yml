@@ -1,0 +1,97 @@
+- generic [ref=f12e7]:
+  - main [ref=f12e8]:
+    - generic [ref=f12e9]:
+      - generic [ref=f12e10]:
+        - generic [ref=f12e11]:
+          - heading "Từ điển nguyên liệu" [level=1] [ref=f12e12]
+          - paragraph [ref=f12e13]: 7 nguyên liệu đã lưu trữ
+        - button "Thêm mới" [ref=f12e14] [cursor=pointer]
+      - generic [ref=f12e16]:
+        - generic [ref=f12e20]:
+          - textbox "Tìm theo tên, nhóm, đơn vị..." [ref=f12e24]
+          - button "clear input"
+        - generic [ref=f12e25]:
+          - button "🍱 Tất cả (7)" [ref=f12e26]:
+            - generic [ref=f12e27]: 🍱 Tất cả
+            - generic [ref=f12e28]: (7)
+          - button "Rau củ quả (3)" [active] [ref=f12e29]:
+            - generic [ref=f12e33]: Rau củ quả
+            - generic [ref=f12e34]: (3)
+          - button "Thịt cá & Hải sản (4)" [ref=f12e35]:
+            - generic [ref=f12e40]: Thịt cá & Hải sản
+            - generic [ref=f12e41]: (4)
+          - button "Trứng & Bơ sữa (0)" [ref=f12e42]:
+            - generic [ref=f12e46]: Trứng & Bơ sữa
+            - generic [ref=f12e47]: (0)
+          - button "Gia vị & Nước sốt (0)" [ref=f12e48]:
+            - generic [ref=f12e51]: Gia vị & Nước sốt
+            - generic [ref=f12e52]: (0)
+          - button "Ngũ cốc & Tinh bột (0)" [ref=f12e53]:
+            - generic [ref=f12e63]: Ngũ cốc & Tinh bột
+            - generic [ref=f12e64]: (0)
+          - button "Khác (0)" [ref=f12e65]:
+            - generic [ref=f12e68]: Khác
+            - generic [ref=f12e69]: (0)
+        - generic [ref=f12e70]:
+          - generic [ref=f12e71]:
+            - button "Tất cả" [ref=f12e72]
+            - button "Đang dùng (0)" [ref=f12e73]
+            - button "Chưa dùng (7)" [ref=f12e80]
+          - generic [ref=f12e82]:
+            - combobox [ref=f12e85]
+            - button "Tên A-Z Sắp xếp nguyên liệu" [ref=f12e87]:
+              - generic [ref=f12e88]: Tên A-Z
+        - generic [ref=f12e95]:
+          - generic [ref=f12e96]:
+            - text: Tìm thấy
+            - strong [ref=f12e97]: "3"
+            - text: / 7 nguyên liệu
+          - button "Đặt lại" [ref=f12e98]
+      - generic [ref=f12e103]:
+        - generic [ref=f12e104] [cursor=pointer]:
+          - generic [ref=f12e105]:
+            - generic [ref=f12e106]: B
+            - generic [ref=f12e111]: Rau củ quả
+            - button "Xoá nguyên liệu" [ref=f12e118]
+          - generic [ref=f12e122]:
+            - generic [ref=f12e123]:
+              - heading "Bắp ngô ngọt" [level=3] [ref=f12e124]
+              - generic [ref=f12e125]: "ĐV: bắp"
+            - generic [ref=f12e127]:
+              - generic [ref=f12e128]: Chưa dùng
+              - generic [ref=f12e129]: Sửa
+        - generic [ref=f12e132] [cursor=pointer]:
+          - generic [ref=f12e133]:
+            - generic [ref=f12e134]: H
+            - generic [ref=f12e139]: Rau củ quả
+            - button "Xoá nguyên liệu" [ref=f12e146]
+          - generic [ref=f12e150]:
+            - generic [ref=f12e151]:
+              - heading "Hành lá, ngò rí" [level=3] [ref=f12e152]
+              - generic [ref=f12e153]: "ĐV: g"
+            - generic [ref=f12e155]:
+              - generic [ref=f12e156]: Chưa dùng
+              - generic [ref=f12e157]: Sửa
+        - generic [ref=f12e160] [cursor=pointer]:
+          - generic [ref=f12e161]:
+            - generic [ref=f12e162]: K
+            - generic [ref=f12e167]: Rau củ quả
+            - button "Xoá nguyên liệu" [ref=f12e174]
+          - generic [ref=f12e178]:
+            - generic [ref=f12e179]:
+              - heading "Khoai tây" [level=3] [ref=f12e180]
+              - generic [ref=f12e181]: "ĐV: củ"
+            - generic [ref=f12e183]:
+              - generic [ref=f12e184]: Chưa dùng
+              - generic [ref=f12e185]: Sửa
+  - generic:
+    - navigation:
+      - generic [ref=f12e188]:
+        - link [ref=f12e189] [cursor=pointer]:
+          - /url: /
+        - link [ref=f12e193] [cursor=pointer]:
+          - /url: /recipes
+        - link [ref=f12e196] [cursor=pointer]:
+          - /url: /tips
+        - button [ref=f12e199]
+    - button [ref=f12e202]

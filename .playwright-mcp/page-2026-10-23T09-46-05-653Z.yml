@@ -1,0 +1,59 @@
+- main [ref=f13e30]:
+  - generic [ref=f13e219]:
+    - generic [ref=f13e220]:
+      - generic [ref=f13e221]:
+        - button "Quay lại danh sách" [ref=f13e223] [cursor=pointer]
+        - generic [ref=f13e226]:
+          - generic [ref=f13e229] [cursor=pointer]
+          - generic [ref=f13e235]:
+            - heading "Bò Lúc Lắc Hạt Tiêu Đen" [level=1] [ref=f13e237]
+            - generic [ref=f13e238]: Chưa có đánh giá
+            - generic [ref=f13e251]:
+              - button "Bắt đầu nấu" [ref=f13e252] [cursor=pointer]
+              - button "Kế hoạch" [ref=f13e255] [cursor=pointer]
+              - button "Đi chợ" [ref=f13e258] [cursor=pointer]
+              - button [ref=f13e263] [cursor=pointer]
+              - button [ref=f13e267] [cursor=pointer]
+            - generic [ref=f13e271]:
+              - generic [ref=f13e272]:
+                - generic [ref=f13e277]: Độ khó
+                - generic [ref=f13e278]: Dễ
+              - generic [ref=f13e279]:
+                - generic [ref=f13e283]: Calories
+                - generic [ref=f13e284]: "- kcal"
+              - generic [ref=f13e285]:
+                - generic [ref=f13e290]: Sơ chế
+                - generic [ref=f13e291]: 0 phút
+              - generic [ref=f13e292]:
+                - generic [ref=f13e297]: Nấu
+                - generic [ref=f13e298]: 0 phút
+        - generic [ref=f13e299]:
+          - generic [ref=f13e300]:
+            - generic [ref=f13e301]:
+              - heading "Nguyên liệu" [level=2] [ref=f13e302]
+              - generic [ref=f13e307]:
+                - generic [ref=f13e308]: Khẩu phần
+                - generic [ref=f13e309] [cursor=pointer]
+                - spinbutton [ref=f13e311]: "1"
+                - generic [ref=f13e312] [cursor=pointer]
+            - generic [ref=f13e315]:
+              - heading "Nguyên liệu chính" [level=3] [ref=f13e316]
+              - generic [ref=f13e320] [cursor=pointer]:
+                - generic [ref=f13e321]: Thịt thăn bò
+                - generic [ref=f13e322]: 1 g
+          - generic [ref=f13e323]:
+            - heading "Cách làm" [level=2] [ref=f13e324]
+            - generic [ref=f13e328]:
+              - heading "Thực hiện" [level=3] [ref=f13e329]
+              - generic [ref=f13e331]:
+                - generic [ref=f13e332]: "1"
+                - paragraph [ref=f13e336]: Cắt thịt bò thành khối vuông vừa ăn, xào lửa lớn với tiêu đen và ớt chuông.
+      - generic [ref=f13e338]:
+        - generic "Recipe Sidebar Tabs" [ref=f13e339]:
+          - tablist "Recipe Sidebar Tabs" [ref=f13e340]:
+            - tab "Tổng quan" [selected] [ref=f13e342] [cursor=pointer]
+            - tab "Lịch sử nấu" [ref=f13e344] [cursor=pointer]
+        - tabpanel "Tổng quan" [ref=f13e348]
+    - generic [ref=f13e349]:
+      - button "Hỏi AI" [ref=f13e350] [cursor=pointer]
+      - button "Bắt đầu nấu" [ref=f13e353] [cursor=pointer]

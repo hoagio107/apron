@@ -194,34 +194,24 @@ export function DashboardPage() {
                   <div 
                     key={course.id} 
                     onClick={() => navigate(`/courses/${course.id}`)}
-                    className="group w-full aspect-[4/3] relative overflow-hidden rounded-xl transition-all duration-300 shadow-lg border-none hover:scale-[1.02] cursor-pointer"
+                    className="group w-full aspect-[4/3] relative overflow-hidden rounded-xl transition-all duration-300 rounded-xl bg-black border-none shadow-none hover:scale-[1.02] cursor-pointer card-media-root"
                   >
-                    {/* Background Image */}
+                    {/* Background Image: dừng lại trước 2 góc dưới và fade mask để triệt tiêu hoàn toàn viền trắng subpixel */}
                     {course.thumbnail_url ? (
                       <img 
                         src={ImageManager.getAssetUrl(course.thumbnail_url)} 
                         alt={course.title} 
-                        className="absolute inset-0 w-full h-full object-cover z-0" 
+                        className="card-media-img absolute inset-x-0 top-0 bottom-6 w-full h-[calc(100%-1.5rem)] object-cover z-0" 
                       />
                     ) : (
-                      <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-default-100 text-default-400 z-0">
+                      <div className="card-media-img absolute inset-x-0 top-0 bottom-6 w-full h-[calc(100%-1.5rem)] flex items-center justify-center bg-default-100 text-default-400 z-0">
                         <BookOpen className="w-12 h-12" />
                       </div>
                     )}
 
-                    {/* Gradient Blur Overlay */}
-                    <div 
-                      className="absolute inset-0 z-0 bg-black/30 backdrop-blur-md"
-                      style={{ 
-                        borderRadius: 'inherit',
-                        WebkitMaskImage: 'linear-gradient(to top, black 0%, black 30%, transparent 60%)', 
-                        maskImage: 'linear-gradient(to top, black 0%, black 30%, transparent 60%)' 
-                      }}
-                    />
                     {/* Additional dark gradient for text readability */}
                     <div 
-                      className="absolute inset-0 z-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"
-                      style={{ borderRadius: 'inherit' }}
+                      className="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/50 via-50% to-transparent pointer-events-none"
                     />
 
                     {/* Content Area */}

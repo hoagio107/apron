@@ -1,0 +1,130 @@
+- generic [ref=f2e1]:
+  - main [ref=f2e8]:
+    - generic [ref=f2e10]:
+      - generic [ref=f2e12]:
+        - button [ref=f2e13] [cursor=pointer]
+        - heading [level=1] [ref=f2e17]: Tạo công thức mới
+      - tablist [ref=f2e20]:
+        - tab [selected] [ref=f2e22] [cursor=pointer]:
+          - generic [ref=f2e23]: Thông tin
+        - tab [ref=f2e29] [cursor=pointer]:
+          - generic [ref=f2e30]: Nguyên liệu
+        - tab [ref=f2e36] [cursor=pointer]:
+          - generic [ref=f2e37]: Cách làm
+      - generic [ref=f2e44]:
+        - generic [ref=f2e45]:
+          - generic [ref=f2e46]: Ảnh đại diện
+          - generic [ref=f2e53]:
+            - generic [ref=f2e54] [cursor=pointer]:
+              - paragraph [ref=f2e60]: Tải ảnh đại diện
+              - paragraph [ref=f2e61]: Kéo thả file hoặc bấm để chọn ảnh/video
+            - generic [ref=f2e63]:
+              - button [ref=f2e64] [cursor=pointer]
+              - button [ref=f2e69] [cursor=pointer]
+              - button [ref=f2e74] [cursor=pointer]:
+                - generic [ref=f2e79]: Thêm
+        - generic [ref=f2e80]:
+          - generic [ref=f2e82]:
+            - generic [ref=f2e83]: Tên món ăn
+            - textbox [ref=f2e90]:
+              - /placeholder: "Ví dụ: Phở bò Hà Nội"
+          - generic [ref=f2e91]:
+            - generic [ref=f2e92]:
+              - generic [ref=f2e97]: Độ khó
+              - generic [ref=f2e98]:
+                - combobox [ref=f2e101]
+                - button [ref=f2e103]:
+                  - generic [ref=f2e104]: Dễ
+            - generic [ref=f2e106]:
+              - generic [ref=f2e110]: Calories
+              - generic [ref=f2e111]:
+                - generic [ref=f2e112]: "0"
+                - generic [ref=f2e113]: kcal
+            - generic [ref=f2e114]:
+              - generic [ref=f2e119]: Sơ chế
+              - generic [ref=f2e120]:
+                - generic [ref=f2e121]: "0"
+                - generic [ref=f2e122]: phút
+            - generic [ref=f2e123]:
+              - generic [ref=f2e128]: Nấu
+              - generic [ref=f2e129]:
+                - generic [ref=f2e130]: "0"
+                - generic [ref=f2e131]: phút
+          - generic [ref=f2e132]:
+            - generic [ref=f2e133]: Ghi chú & Mẹo
+            - paragraph [ref=f2e140]: Ghi chú thêm về công thức, mẹo nấu nướng, hoặc lưu ý...
+        - generic [ref=f2e141]:
+          - generic [ref=f2e142]:
+            - generic [ref=f2e143]: Tags (Phân cấp)
+            - generic [ref=f2e149] [cursor=pointer]: Chọn tags...
+          - generic [ref=f2e151]:
+            - generic [ref=f2e152]:
+              - generic [ref=f2e153]: Video URL (YouTube/Tiktok)
+              - textbox [ref=f2e161]:
+                - /placeholder: https://...
+            - generic [ref=f2e162]:
+              - generic [ref=f2e163]: Nguồn tham khảo
+              - textbox [ref=f2e171]:
+                - /placeholder: Tên tác giả, trang web...
+          - generic [ref=f2e173]:
+            - generic [ref=f2e180]:
+              - generic [ref=f2e181]: Biến thể?
+              - checkbox [ref=f2e183] [cursor=pointer]
+            - button [disabled]: Tìm kiếm công thức gốc...
+          - generic [ref=f2e185]:
+            - generic [ref=f2e186]: Công thức và mẹo liên kết
+            - button [ref=f2e191] [cursor=pointer]: Tìm kiếm công thức hoặc mẹo...
+      - generic [ref=f2e195]:
+        - button [ref=f2e196] [cursor=pointer]
+        - button [disabled]: Quay lại
+        - button [ref=f2e199] [cursor=pointer]: Tiếp tục
+  - dialog [active] [ref=f2e202]:
+    - button "Dismiss" [ref=f2e204]
+    - button "Close" [ref=f2e205]
+    - banner [ref=f2e208]:
+      - generic [ref=f2e213]:
+        - heading "AI Trợ lý công thức (Web Gemini)" [level=3] [ref=f2e214]
+        - paragraph [ref=f2e215]: Không cần API Key. Tạo prompt gửi sang Gemini Web miễn phí và dán kết quả để tự động điền form.
+      - tablist [ref=f2e218]:
+        - tab "1 Tạo Prompt cho Gemini Web" [selected] [ref=f2e220] [cursor=pointer]:
+          - generic [ref=f2e222]:
+            - generic [ref=f2e223]: "1"
+            - generic [ref=f2e224]: Tạo Prompt cho Gemini Web
+        - tab "2 Dán kết quả & Điền vào Form" [ref=f2e225] [cursor=pointer]:
+          - generic [ref=f2e227]:
+            - generic [ref=f2e228]: "2"
+            - generic [ref=f2e229]: Dán kết quả & Điền vào Form
+    - generic [ref=f2e231]:
+      - generic [ref=f2e232]:
+        - generic [ref=f2e233]:
+          - generic [ref=f2e234]: "1"
+          - generic [ref=f2e235]:
+            - strong [ref=f2e236]: Nhập nội dung
+            - text: Dán bài viết, link hoặc ghi chú vào ô bên dưới.
+        - generic [ref=f2e237]:
+          - generic [ref=f2e238]: "2"
+          - generic [ref=f2e239]:
+            - strong [ref=f2e240]: Copy & Gửi Web
+            - generic [ref=f2e241]:
+              - text: Bấm
+              - strong [ref=f2e242]: Sao chép Prompt
+              - text: rồi mở
+              - strong [ref=f2e243]: Web Gemini
+              - text: dán vào chat.
+        - generic [ref=f2e244]:
+          - generic [ref=f2e245]: "3"
+          - generic [ref=f2e246]:
+            - strong [ref=f2e247]: Lấy kết quả
+            - generic [ref=f2e248]:
+              - text: Copy phản hồi của Gemini và chuyển sang tab
+              - strong [ref=f2e249]: Dán kết quả
+              - text: .
+      - generic [ref=f2e250]:
+        - generic [ref=f2e251]: "Nội dung công thức thô / Ghi chú / Link món ăn:"
+        - 'textbox "Dán bài viết công thức, danh sách nguyên liệu, ghi chú hoặc ý tưởng nấu nướng vào đây (ví dụ: Canh chua cá lóc: 500g cá lóc, 1 vắt me, cà chua, dứa, đậu bắp...)..." [ref=f2e256]'
+      - generic [ref=f2e257]:
+        - button "Sao chép Prompt" [ref=f2e258] [cursor=pointer]
+        - button "Mở Web Gemini (gemini.google.com)" [ref=f2e262] [cursor=pointer]
+      - 'button "Tiếp theo: Chuyển sang bước Dán kết quả" [ref=f2e268] [cursor=pointer]'
+      - button "Xem trước Prompt sẽ gửi sang Web Gemini" [ref=f2e272]
+    - button "Dismiss" [ref=f2e280]

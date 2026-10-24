@@ -1,0 +1,102 @@
+- main [ref=f34e8]:
+  - generic [ref=f34e9]:
+    - generic [ref=f34e10]:
+      - generic [ref=f34e12]:
+        - heading "Sổ tay Công thức" [level=1] [ref=f34e13]
+        - paragraph [ref=f34e14]: 8 công thức đã lưu
+      - generic [ref=f34e16]:
+        - textbox "Tìm kiếm công thức..." [ref=f34e24]
+        - generic [ref=f34e25]:
+          - generic [ref=f34e26]:
+            - button [ref=f34e27] [cursor=pointer]
+            - generic: "0"
+          - button [ref=f34e30] [cursor=pointer]
+          - button [ref=f34e35] [cursor=pointer]
+          - generic [ref=f34e40]:
+            - button [ref=f34e41] [cursor=pointer]
+            - button [ref=f34e47] [cursor=pointer]
+    - generic [ref=f34e259]:
+      - generic [ref=f34e260]:
+        - button "Tất cả" [ref=f34e261] [cursor=pointer]
+        - generic [ref=f34e262]: Đã chọn 0
+      - button "Thao tác" [ref=f34e265] [cursor=pointer]
+      - button "Thoát chế độ chọn" [ref=f34e271] [cursor=pointer]
+    - generic [ref=f34e58]:
+      - generic [ref=f34e59] [cursor=pointer]:
+        - img "Canh Sườn Hầm Rau Củ" [ref=f34e60]
+        - checkbox [ref=f34e278]
+        - button [ref=f34e62]
+        - generic [ref=f34e67]:
+          - heading "Canh Sườn Hầm Rau Củ" [level=3] [ref=f34e68]
+          - generic [ref=f34e69]:
+            - generic [ref=f34e70]: 1h
+            - generic [ref=f34e75]: "0"
+            - generic [ref=f34e79]: 380 kcal
+      - generic [ref=f34e83] [cursor=pointer]:
+        - img "Canh Chua Cá Lóc Nam Bộ" [ref=f34e84]
+        - checkbox [ref=f34e283]
+        - button [ref=f34e86]
+        - generic [ref=f34e91]:
+          - heading "Canh Chua Cá Lóc Nam Bộ" [level=3] [ref=f34e92]
+          - generic [ref=f34e93]:
+            - generic [ref=f34e94]: 0m
+            - generic [ref=f34e99]: "0"
+      - generic [ref=f34e103] [cursor=pointer]:
+        - img "Gà Chiên Nước Mắm Giòn Rụm" [ref=f34e104]
+        - checkbox [ref=f34e288]
+        - button [ref=f34e106]
+        - generic [ref=f34e111]:
+          - heading "Gà Chiên Nước Mắm Giòn Rụm" [level=3] [ref=f34e112]
+          - generic [ref=f34e113]:
+            - generic [ref=f34e114]: 40m
+            - generic [ref=f34e119]: "0"
+            - generic [ref=f34e123]: 520 kcal
+      - generic [ref=f34e127] [cursor=pointer]:
+        - img "Bò Lúc Lắc Hạt Tiêu Đen" [ref=f34e128]
+        - checkbox [ref=f34e293]
+        - button [ref=f34e130]
+        - generic [ref=f34e135]:
+          - heading "Bò Lúc Lắc Hạt Tiêu Đen" [level=3] [ref=f34e136]
+          - generic [ref=f34e137]:
+            - generic [ref=f34e138]: 0m
+            - generic [ref=f34e143]: "0"
+      - generic [ref=f34e147] [cursor=pointer]:
+        - img "Cá Hồi Áp Chảo Sốt Bơ Chanh" [ref=f34e148]
+        - checkbox [ref=f34e298]
+        - button [ref=f34e150]
+        - generic [ref=f34e155]:
+          - heading "Cá Hồi Áp Chảo Sốt Bơ Chanh" [level=3] [ref=f34e156]
+          - generic [ref=f34e157]:
+            - generic [ref=f34e158]: 25m
+            - generic [ref=f34e163]: "0"
+            - generic [ref=f34e167]: 460 kcal
+      - generic [ref=f34e171] [cursor=pointer]:
+        - img "Salad Gà Nướng Bơ Quả" [ref=f34e172]
+        - checkbox [ref=f34e303]
+        - button [ref=f34e174]
+        - generic [ref=f34e179]:
+          - heading "Salad Gà Nướng Bơ Quả" [level=3] [ref=f34e180]
+          - generic [ref=f34e181]:
+            - generic [ref=f34e182]: 30m
+            - generic [ref=f34e187]: "0"
+            - generic [ref=f34e191]: 320 kcal
+      - generic [ref=f34e195] [cursor=pointer]:
+        - img "Sườn Xào Chua Ngọt" [ref=f34e196]
+        - checkbox [ref=f34e308]
+        - button [ref=f34e198]
+        - generic [ref=f34e203]:
+          - heading "Sườn Xào Chua Ngọt" [level=3] [ref=f34e204]
+          - generic [ref=f34e205]:
+            - generic [ref=f34e206]: 50m
+            - generic [ref=f34e211]: "0"
+            - generic [ref=f34e215]: 600 kcal
+      - generic [ref=f34e219] [cursor=pointer]:
+        - img "Phở Bò Gia Truyền" [ref=f34e220]
+        - checkbox [ref=f34e313]
+        - button [ref=f34e222]
+        - generic [ref=f34e227]:
+          - heading "Phở Bò Gia Truyền" [level=3] [ref=f34e228]
+          - generic [ref=f34e229]:
+            - generic [ref=f34e230]: 3h30m
+            - generic [ref=f34e235]: "0"
+            - generic [ref=f34e239]: 450 kcal

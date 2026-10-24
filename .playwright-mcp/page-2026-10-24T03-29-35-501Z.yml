@@ -1,0 +1,110 @@
+- generic [ref=f14e1]:
+  - main [ref=f14e8]:
+    - generic [ref=f14e313]:
+      - generic [ref=f14e314]:
+        - generic [ref=f14e315]:
+          - button [ref=f14e658] [cursor=pointer]
+          - button [ref=f14e659] [cursor=pointer]
+        - generic [ref=f14e327]:
+          - heading [level=1] [ref=f14e660]:
+            - text: Cá Hồi Nướng Nồi Chiên Không Dầu
+            - button [ref=f14e661]
+          - generic [ref=f14e334]:
+            - generic [ref=f14e335]: Dễ
+            - generic [ref=f14e340]: 380 kcal
+            - generic [ref=f14e344]: 10p
+            - generic [ref=f14e349]: 12p
+            - generic [ref=f14e354]: "5"
+      - generic [ref=f14e358]:
+        - tablist [ref=f14e663]:
+          - tab [ref=f14e664] [cursor=pointer]:
+            - generic [ref=f14e363]: Nguyên liệu
+          - tab [ref=f14e665] [cursor=pointer]:
+            - generic [ref=f14e371]: Cách làm
+          - tab [selected] [ref=f14e666] [cursor=pointer]:
+            - generic [ref=f14e377]: Khác
+        - tabpanel [ref=f14e667]:
+          - generic [ref=f14e455]:
+            - generic [ref=f14e456]:
+              - heading [level=3] [ref=f14e668]: Ghi chú
+              - generic [ref=f14e460]: "Lưu ý khi nướng bằng nồi chiên: • Không nướng quá lâu trên 12 phút để tránh cá bị khô bở. • Lót giấy nến có đục lỗ thoát khí để da cá giòn đều."
+            - generic [ref=f14e461]:
+              - heading [level=3] [ref=f14e669]: Tags
+              - generic [ref=f14e466]:
+                - generic [ref=f14e467]: món âu
+                - generic [ref=f14e468]: hải sản
+                - generic [ref=f14e469]: Eat Clean / Healthy
+                - generic [ref=f14e470]: nồi chiên không dầu
+            - generic [ref=f14e471]:
+              - generic [ref=f14e472]:
+                - heading [level=3] [ref=f14e670]: Lịch sử nấu
+                - generic [ref=f14e641]: 1 lần
+              - generic [ref=f14e642] [cursor=pointer]:
+                - generic [ref=f14e643]: 10:29 24/10/2026
+                - paragraph [ref=f14e656]: Cá hồi nướng rất thơm và giòn da, lần sau thử thêm chút tiêu chanh.
+      - button [ref=f14e671] [cursor=pointer]: Bắt đầu nấu
+  - dialog [active] [ref=f14e674]:
+    - button "Dismiss" [ref=f14e676]
+    - button "Close" [ref=f14e677]
+    - banner [ref=f14e680]:
+      - img "Cá Hồi Nướng Nồi Chiên Không Dầu" [ref=f14e682]
+      - generic [ref=f14e683]:
+        - heading "Cá Hồi Nướng Nồi Chiên Không Dầu" [level=2] [ref=f14e684]
+        - paragraph [ref=f14e685]: 10:29 24/10/2026
+        - paragraph [ref=f14e697]: "\"Cá hồi nướng rất thơm và giòn da, lần sau thử thêm chút tiêu chanh.\""
+    - generic [ref=f14e698]:
+      - generic [ref=f14e699]:
+        - heading "Thông tin chung" [level=2] [ref=f14e701]
+        - generic [ref=f14e706]:
+          - generic [ref=f14e712]:
+            - generic [ref=f14e713]: Chuẩn bị
+            - generic [ref=f14e714]: 10 phút
+          - generic [ref=f14e719]:
+            - generic [ref=f14e720]: Nấu
+            - generic [ref=f14e721]: 12 phút
+          - generic [ref=f14e726]:
+            - generic [ref=f14e727]: Độ khó
+            - generic [ref=f14e728]: Dễ
+          - generic [ref=f14e733]:
+            - generic [ref=f14e734]: Calories
+            - generic [ref=f14e735]: 380 kcal
+        - generic [ref=f14e736]:
+          - generic [ref=f14e737]: Ghi chú công thức
+          - generic [ref=f14e740]: Lưu ý khi nướng bằng nồi chiên:• Không nướng quá lâu trên 12 phút để tránh cá bị khô bở.• Lót giấy nến có đục lỗ thoát khí để da cá giòn đều.
+      - generic [ref=f14e741]:
+        - heading "Nguyên liệu (2 phần)" [level=2] [ref=f14e743]
+        - generic [ref=f14e750]:
+          - generic [ref=f14e751]:
+            - generic [ref=f14e752]: Phi lê cá hồi tươi còn da
+            - generic [ref=f14e753]: 350 g
+          - generic [ref=f14e754]:
+            - generic [ref=f14e755]: Dầu oliu nguyên chất
+            - generic [ref=f14e756]: 1 muỗng canh
+          - generic [ref=f14e757]:
+            - generic [ref=f14e758]: Nước cốt chanh vàng
+            - generic [ref=f14e759]: 1 muỗng canh
+          - generic [ref=f14e760]:
+            - generic [ref=f14e761]: Tỏi băm & lá hương thảo khô
+            - generic [ref=f14e762]: 1 muỗng cà phê
+          - generic [ref=f14e763]:
+            - generic [ref=f14e764]: Muối biển & tiêu đen xay
+            - generic [ref=f14e765]: 1 chút
+      - generic [ref=f14e766]:
+        - heading "Cách làm" [level=2] [ref=f14e768]
+        - generic [ref=f14e773]:
+          - generic [ref=f14e774]:
+            - generic [ref=f14e775]: "1"
+            - generic [ref=f14e776]:
+              - generic [ref=f14e777]: Thấm thật khô miếng cá hồi. Ướp với dầu oliu, muối biển, tiêu, tỏi băm và hương thảo trong 5 phút.
+              - img "Ảnh bước làm 1" [ref=f14e780]
+          - generic [ref=f14e781]:
+            - generic [ref=f14e782]: "2"
+            - generic [ref=f14e783]:
+              - generic [ref=f14e784]: Làm nóng nồi chiên không dầu ở 180°C trong 3 phút. Lót giấy nến hoặc quét lớp dầu mỏng vào giỏ nướng. Đặt cá hồi vào nướng ở 180°C trong 10-12 phút tùy độ dày miếng cá.
+              - img "Ảnh bước làm 1" [ref=f14e787]
+          - generic [ref=f14e788]:
+            - generic [ref=f14e789]: "3"
+            - generic [ref=f14e790]:
+              - generic [ref=f14e791]: Lấy cá ra đĩa, vắt chút cốt chanh vàng lên trên bề mặt và rắc ngò tây thái nhỏ. Thưởng thức ngay khi còn nóng.
+              - img "Ảnh bước làm 1" [ref=f14e794]
+    - button "Dismiss" [ref=f14e796]

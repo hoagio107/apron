@@ -1,0 +1,57 @@
+- generic [ref=f14e1]:
+  - main [ref=f14e8]:
+    - generic [ref=f14e313]:
+      - generic [ref=f14e314]:
+        - generic [ref=f14e315]:
+          - button [ref=f14e485] [cursor=pointer]
+          - button [ref=f14e486] [cursor=pointer]
+        - generic [ref=f14e327]:
+          - heading [level=1] [ref=f14e487]:
+            - text: Cá Hồi Nướng Nồi Chiên Không Dầu
+            - button [ref=f14e488]
+          - generic [ref=f14e334]:
+            - generic [ref=f14e335]: Dễ
+            - generic [ref=f14e340]: 380 kcal
+            - generic [ref=f14e344]: 10p
+            - generic [ref=f14e349]: 12p
+            - generic [ref=f14e354]: N/A
+      - generic [ref=f14e358]:
+        - tablist [ref=f14e490]:
+          - tab [ref=f14e491] [cursor=pointer]:
+            - generic [ref=f14e363]: Nguyên liệu
+          - tab [ref=f14e492] [cursor=pointer]:
+            - generic [ref=f14e371]: Cách làm
+          - tab [selected] [ref=f14e493] [cursor=pointer]:
+            - generic [ref=f14e377]: Khác
+        - tabpanel [ref=f14e494]:
+          - generic [ref=f14e455]:
+            - generic [ref=f14e456]:
+              - heading [level=3] [ref=f14e495]: Ghi chú
+              - generic [ref=f14e460]: "Lưu ý khi nướng bằng nồi chiên: • Không nướng quá lâu trên 12 phút để tránh cá bị khô bở. • Lót giấy nến có đục lỗ thoát khí để da cá giòn đều."
+            - generic [ref=f14e461]:
+              - heading [level=3] [ref=f14e496]: Tags
+              - generic [ref=f14e466]:
+                - generic [ref=f14e467]: món âu
+                - generic [ref=f14e468]: hải sản
+                - generic [ref=f14e469]: Eat Clean / Healthy
+                - generic [ref=f14e470]: nồi chiên không dầu
+            - generic [ref=f14e471]:
+              - heading [level=3] [ref=f14e497]: Lịch sử nấu
+              - generic [ref=f14e478]: Chưa có lịch sử nấu nào. Nhấn "Bắt đầu nấu" để lưu lại!
+      - button [ref=f14e498] [cursor=pointer]: Bắt đầu nấu
+  - dialog [ref=f14e582]:
+    - button "Dismiss" [ref=f14e584]
+    - generic [ref=f14e586]:
+      - generic [ref=f14e587]:
+        - heading "Tuyệt vời!" [level=3] [ref=f14e595]
+        - paragraph [ref=f14e596]: Bạn đã hoàn thành món ăn. Hãy đánh giá thành quả nhé!
+      - generic [ref=f14e597]:
+        - generic [ref=f14e598]:
+          - button [ref=f14e599] [cursor=pointer]
+          - button [ref=f14e602] [cursor=pointer]
+          - button [ref=f14e605] [cursor=pointer]
+          - button [ref=f14e608] [cursor=pointer]
+          - button [active] [ref=f14e611] [cursor=pointer]
+        - 'textbox "Ghi chú cho lần nấu này (VD: Lần sau nên cho ít muối hơn...)" [ref=f14e617]': Cá hồi nướng rất thơm và giòn da, lần sau thử thêm chút tiêu chanh.
+      - button "Gửi đánh giá" [ref=f14e619] [cursor=pointer]
+    - button "Dismiss" [ref=f14e621]

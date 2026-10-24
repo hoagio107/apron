@@ -1,0 +1,12 @@
+- generic [ref=f14e3]:
+  - generic [ref=f14e4]: "[plugin:vite:oxc] Transform failed with 1 error: [PARSE_ERROR] Expected `}` but found `EOF` ╭─[ src/lib/gemini.ts:455:2 ] │ 69 │ ): Promise<ParseRecipeResult[]> { │ ┬ │ ╰── Opened here │ 455 │ │ │ │ ╰─ `}` expected ─────╯"
+  - generic [ref=f14e5]: C:/apron/apps/mobile/src/lib/gemini.ts
+  - generic [ref=f14e6]: at transformWithOxc (file:///C:/apron/node_modules/.pnpm/vite@8.2.0_@types+node@24.13.3_jiti@2.7.0/node_modules/vite/dist/node/chunks/node.js:4090:19) at TransformPluginContext.transform (file:///C:/apron/node_modules/.pnpm/vite@8.2.0_@types+node@24.13.3_jiti@2.7.0/node_modules/vite/dist/node/chunks/node.js:4161:26) at EnvironmentPluginContainer.transform (file:///C:/apron/node_modules/.pnpm/vite@8.2.0_@types+node@24.13.3_jiti@2.7.0/node_modules/vite/dist/node/chunks/node.js:30796:51) at async loadAndTransform (file:///C:/apron/node_modules/.pnpm/vite@8.2.0_@types+node@24.13.3_jiti@2.7.0/node_modules/vite/dist/node/chunks/node.js:20594:26) at async viteTransformMiddleware (file:///C:/apron/node_modules/.pnpm/vite@8.2.0_@types+node@24.13.3_jiti@2.7.0/node_modules/vite/dist/node/chunks/node.js:25092:20)
+  - generic [ref=f14e7]:
+    - text: Click outside, press Esc key, or fix the code to dismiss.You can also disable this overlay by setting
+    - code [ref=f14e8]: server.hmr.overlay
+    - text: to
+    - code [ref=f14e9]: "false"
+    - text: in
+    - code [ref=f14e10]: vite.config.ts
+    - text: .

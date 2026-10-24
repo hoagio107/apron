@@ -1,0 +1,15 @@
+- generic [ref=f19e5]:
+  - generic [ref=f19e6]:
+    - heading "Chào mừng đến với Cookbook" [level=1] [ref=f19e11]
+    - paragraph [ref=f19e12]: Cài đặt thông tin cá nhân và nơi lưu trữ dữ liệu
+  - generic [ref=f19e13]:
+    - generic [ref=f19e15]:
+      - generic [ref=f19e16]: Tên sổ tay / Tài khoản*
+      - textbox "Tên sổ tay / Tài khoản*" [ref=f19e21]:
+        - /placeholder: "VD: Nhà bếp của bếp trưởng"
+    - generic [ref=f19e22]:
+      - generic [ref=f19e23]: Vị trí lưu trữ dữ liệu *
+      - paragraph [ref=f19e24]: Toàn bộ công thức và hình ảnh sẽ được lưu tại đây. Khuyên dùng Google Drive, OneDrive để đồng bộ đa thiết bị.
+      - button "Chọn thư mục trên máy" [ref=f19e25] [cursor=pointer]
+    - generic [ref=f19e28]:
+      - button "Bắt đầu sử dụng" [disabled]

@@ -1,0 +1,100 @@
+- generic [ref=f26e7]:
+  - main [ref=f26e8]:
+    - generic [ref=f26e9]:
+      - generic [ref=f26e10]:
+        - generic [ref=f26e12]:
+          - heading "Sổ tay Công thức" [level=1] [ref=f26e13]
+          - paragraph [ref=f26e14]: 8 công thức đã lưu
+        - generic [ref=f26e16]:
+          - textbox "Tìm kiếm công thức..." [ref=f26e24]
+          - generic [ref=f26e25]:
+            - generic [ref=f26e26]:
+              - button [ref=f26e27] [cursor=pointer]
+              - generic: "0"
+            - button [ref=f26e30] [cursor=pointer]
+            - button [ref=f26e35] [cursor=pointer]
+            - generic [ref=f26e40]:
+              - button [ref=f26e41] [cursor=pointer]
+              - button [ref=f26e47] [cursor=pointer]
+      - generic [ref=f26e58]:
+        - generic [ref=f26e59] [cursor=pointer]:
+          - img "Canh Sườn Hầm Rau Củ" [ref=f26e60]
+          - button [ref=f26e62]
+          - generic [ref=f26e67]:
+            - heading "Canh Sườn Hầm Rau Củ" [level=3] [ref=f26e68]
+            - generic [ref=f26e69]:
+              - generic [ref=f26e70]: 1h
+              - generic [ref=f26e75]: "0"
+              - generic [ref=f26e79]: 380 kcal
+        - generic [ref=f26e83] [cursor=pointer]:
+          - img "Canh Chua Cá Lóc Nam Bộ" [ref=f26e84]
+          - button [ref=f26e86]
+          - generic [ref=f26e91]:
+            - heading "Canh Chua Cá Lóc Nam Bộ" [level=3] [ref=f26e92]
+            - generic [ref=f26e93]:
+              - generic [ref=f26e94]: 0m
+              - generic [ref=f26e99]: "0"
+        - generic [ref=f26e103] [cursor=pointer]:
+          - img "Gà Chiên Nước Mắm Giòn Rụm" [ref=f26e104]
+          - button [ref=f26e106]
+          - generic [ref=f26e111]:
+            - heading "Gà Chiên Nước Mắm Giòn Rụm" [level=3] [ref=f26e112]
+            - generic [ref=f26e113]:
+              - generic [ref=f26e114]: 40m
+              - generic [ref=f26e119]: "0"
+              - generic [ref=f26e123]: 520 kcal
+        - generic [ref=f26e127] [cursor=pointer]:
+          - img "Bò Lúc Lắc Hạt Tiêu Đen" [ref=f26e128]
+          - button [ref=f26e130]
+          - generic [ref=f26e135]:
+            - heading "Bò Lúc Lắc Hạt Tiêu Đen" [level=3] [ref=f26e136]
+            - generic [ref=f26e137]:
+              - generic [ref=f26e138]: 0m
+              - generic [ref=f26e143]: "0"
+        - generic [ref=f26e147] [cursor=pointer]:
+          - img "Cá Hồi Áp Chảo Sốt Bơ Chanh" [ref=f26e148]
+          - button [ref=f26e150]
+          - generic [ref=f26e155]:
+            - heading "Cá Hồi Áp Chảo Sốt Bơ Chanh" [level=3] [ref=f26e156]
+            - generic [ref=f26e157]:
+              - generic [ref=f26e158]: 25m
+              - generic [ref=f26e163]: "0"
+              - generic [ref=f26e167]: 460 kcal
+        - generic [ref=f26e171] [cursor=pointer]:
+          - img "Salad Gà Nướng Bơ Quả" [ref=f26e172]
+          - button [ref=f26e174]
+          - generic [ref=f26e179]:
+            - heading "Salad Gà Nướng Bơ Quả" [level=3] [ref=f26e180]
+            - generic [ref=f26e181]:
+              - generic [ref=f26e182]: 30m
+              - generic [ref=f26e187]: "0"
+              - generic [ref=f26e191]: 320 kcal
+        - generic [ref=f26e195] [cursor=pointer]:
+          - img "Sườn Xào Chua Ngọt" [ref=f26e196]
+          - button [ref=f26e198]
+          - generic [ref=f26e203]:
+            - heading "Sườn Xào Chua Ngọt" [level=3] [ref=f26e204]
+            - generic [ref=f26e205]:
+              - generic [ref=f26e206]: 50m
+              - generic [ref=f26e211]: "0"
+              - generic [ref=f26e215]: 600 kcal
+        - generic [ref=f26e219] [cursor=pointer]:
+          - img "Phở Bò Gia Truyền" [ref=f26e220]
+          - button [ref=f26e222]
+          - generic [ref=f26e227]:
+            - heading "Phở Bò Gia Truyền" [level=3] [ref=f26e228]
+            - generic [ref=f26e229]:
+              - generic [ref=f26e230]: 3h30m
+              - generic [ref=f26e235]: "0"
+              - generic [ref=f26e239]: 450 kcal
+  - generic:
+    - navigation:
+      - generic [ref=f26e243]:
+        - link [ref=f26e244] [cursor=pointer]:
+          - /url: /
+        - link [ref=f26e248] [cursor=pointer]:
+          - /url: /recipes
+        - link [ref=f26e251] [cursor=pointer]:
+          - /url: /tips
+        - button [ref=f26e254]
+    - button [ref=f26e257]

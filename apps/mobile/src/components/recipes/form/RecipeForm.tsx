@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { recipeSchema } from './schema';
 import type { FormValues } from './schema';
 
-import { Button, Tabs, Tab, PageHeader } from '@/ui';
+import { Button, Tabs, Tab, PageHeader, toast } from '@/ui';
 import { Sparkles, FileText, Utensils, ChefHat } from 'lucide-react';
 import { ImageSection } from './ImageSection';
 import { InfoSection } from './InfoSection';
@@ -28,23 +28,17 @@ interface RecipeFormProps {
 interface TabHeaderProps {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
-  count?: number;
   hasError?: boolean;
 }
 
-function TabHeader({ icon: Icon, label, count, hasError }: TabHeaderProps) {
+function TabHeader({ icon: Icon, label, hasError }: TabHeaderProps) {
   return (
-    <div className="flex items-center justify-center gap-1.5 sm:gap-2 relative py-1">
-      <Icon className="w-4 h-4 shrink-0" />
-      <span className="font-semibold text-xs sm:text-sm tracking-tight">{label}</span>
-      {typeof count === 'number' && count > 0 && (
-        <span className="px-1.5 py-0.5 min-w-5 h-5 flex items-center justify-center text-xs font-bold rounded-full bg-default-200/80 dark:bg-default-100 text-default-700 dark:text-default-300 group-data-[selected=true]:bg-primary-foreground/20 group-data-[selected=true]:text-primary-foreground">
-          {count}
-        </span>
-      )}
+    <div className="flex items-center justify-center gap-1.5 relative">
+      <Icon className="w-3.5 h-3.5 shrink-0" />
+      <span className="font-semibold text-xs tracking-tight">{label}</span>
       {hasError && (
         <span
-          className="w-2 h-2 rounded-full bg-danger shrink-0 ring-2 ring-background animate-pulse"
+          className="w-1.5 h-1.5 rounded-full bg-danger shrink-0 ring-2 ring-background animate-pulse"
           title="Có trường cần kiểm tra lại"
         />
       )}
@@ -326,13 +320,14 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
       setIsSaving(true);
       const finalData = await prepareFinalData(data);
       await onSubmit(finalData);
-    } catch (error) {
+      if (!initialData) {
+        localStorage.removeItem('recipe_form_draft');
+      }
+    } catch (error: any) {
       console.error('Error saving recipe', error);
+      toast.error('Không thể lưu công thức: ' + (error?.message || 'Có lỗi xảy ra, vui lòng thử lại'));
     } finally {
       setIsSaving(false);
-    }
-    if (!initialData) {
-      localStorage.removeItem('recipe_form_draft');
     }
   };
 
@@ -359,26 +354,19 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
       setIsSaving(true);
       const allFinalData = await Promise.all(newBulk.map(prepareFinalData));
       await onSubmit(allFinalData);
-    } catch (error) {
+      if (!initialData) {
+        localStorage.removeItem('recipe_form_draft');
+      }
+    } catch (error: any) {
       console.error('Error saving bulk recipes', error);
+      toast.error('Không thể lưu các công thức: ' + (error?.message || 'Có lỗi xảy ra, vui lòng thử lại'));
     } finally {
       setIsSaving(false);
     }
   };
 
   const currentTitle = methods.watch('title');
-  const watchedIngredientSections = methods.watch('ingredientSections');
-  const watchedStepSections = methods.watch('stepSections');
 
-  const ingredientCount = useMemo(() => {
-    if (!watchedIngredientSections || !Array.isArray(watchedIngredientSections)) return 0;
-    return watchedIngredientSections.reduce((sum, section) => sum + (section.ingredients?.length || 0), 0);
-  }, [watchedIngredientSections]);
-
-  const stepCount = useMemo(() => {
-    if (!watchedStepSections || !Array.isArray(watchedStepSections)) return 0;
-    return watchedStepSections.reduce((sum, section) => sum + (section.steps?.length || 0), 0);
-  }, [watchedStepSections]);
 
   const { errors } = methods.formState;
 
@@ -468,7 +456,7 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
           className="px-4 pt-4 pb-2"
         />
 
-        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md px-4 py-2 border-b border-divider/60 shadow-sm mb-4">
+        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md px-4 py-1.5 border-b border-divider/40 shadow-xs mb-3">
           <Tabs
             aria-label="Các phần của công thức"
             selectedKey={activeStep}
@@ -476,12 +464,12 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
             color="primary"
             variant="solid"
             fullWidth
-            size="md"
+            size="sm"
             classNames={{
               base: "w-full",
-              tabList: "bg-default-100/90 dark:bg-default-50/60 p-1 rounded-2xl gap-1 w-full border border-divider/30",
-              tab: "h-11 rounded-xl font-medium text-default-600 data-[selected=true]:text-primary-foreground data-[selected=true]:font-semibold transition-all",
-              cursor: "bg-primary rounded-xl shadow-sm",
+              tabList: "bg-default-100/80 dark:bg-default-50/50 p-0.5 rounded-xl gap-1 w-full border border-divider/20",
+              tab: "h-8 rounded-lg font-medium text-default-600 data-[selected=true]:text-primary-foreground data-[selected=true]:font-semibold transition-all text-xs",
+              cursor: "bg-primary rounded-lg shadow-xs",
             }}
           >
             <Tab 
@@ -490,11 +478,11 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
             />
             <Tab 
               key="ingredients" 
-              title={<TabHeader icon={Utensils} label="Nguyên liệu" count={ingredientCount} hasError={hasIngredientsError} />} 
+              title={<TabHeader icon={Utensils} label="Nguyên liệu" hasError={hasIngredientsError} />} 
             />
             <Tab 
               key="steps" 
-              title={<TabHeader icon={ChefHat} label="Cách làm" count={stepCount} hasError={hasStepsError} />} 
+              title={<TabHeader icon={ChefHat} label="Cách làm" hasError={hasStepsError} />} 
             />
           </Tabs>
         </div>
@@ -536,10 +524,12 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
               type="button"
               variant="flat"
               color="secondary"
+              isIconOnly
               onPress={() => setIsAiModalOpen(true)}
-              className="shrink-0 font-medium h-12 px-6"
+              className="shrink-0 h-12 w-12 rounded-xl"
+              aria-label="AI Nhập"
             >
-              <Sparkles className="w-5 h-5 mr-1" /> AI Nhập
+              <Sparkles className="w-5 h-5 text-secondary" />
             </Button>
           }
         />

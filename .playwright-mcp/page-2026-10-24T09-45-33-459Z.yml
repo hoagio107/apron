@@ -1,0 +1,27 @@
+- main [ref=f2e8]:
+  - generic [ref=f2e10]:
+    - generic [ref=f2e12]:
+      - button "Quay lại" [ref=f2e13] [cursor=pointer]
+      - heading "Tạo công thức mới" [level=1] [ref=f2e17]
+    - generic "Các phần của công thức" [ref=f2e19]:
+      - tablist "Các phần của công thức" [ref=f2e20]:
+        - tab "Thông tin" [ref=f2e22] [cursor=pointer]
+        - tab "Nguyên liệu" [ref=f2e29] [cursor=pointer]
+        - tab "Cách làm" [active] [selected] [ref=f2e36] [cursor=pointer]
+    - generic [ref=f2e44]:
+      - generic [ref=f2e46]:
+        - generic [ref=f2e47]:
+          - 'textbox "Tên giai đoạn (VD: Sơ chế, Chế biến...)" [ref=f2e52]': Thực hiện
+          - button [ref=f2e53] [cursor=pointer]
+        - generic [ref=f2e57]:
+          - generic [ref=f2e59]:
+            - button "Kéo thả để đổi thứ tự bước" [ref=f2e60]
+            - paragraph [ref=f2e66]: Bước 1...
+            - button [ref=f2e67] [cursor=pointer]
+          - status [ref=f2e71]
+          - button "Thêm bước" [ref=f2e72] [cursor=pointer]
+      - button "Thêm giai đoạn" [ref=f2e75] [cursor=pointer]
+    - generic [ref=f2e77]:
+      - button "AI Nhập" [ref=f2e78] [cursor=pointer]
+      - button "Quay lại" [ref=f2e81] [cursor=pointer]
+      - button "Lưu công thức" [ref=f2e82] [cursor=pointer]

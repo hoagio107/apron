@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Button } from '@/ui';
-import { ImagePlus, Star, ChevronLeft, ChevronRight, Trash2, PlayCircle } from 'lucide-react';
+import { Image as ImageIcon, ImagePlus, Star, ChevronLeft, ChevronRight, Trash2, PlayCircle } from 'lucide-react';
 import type { FormValues } from './schema';
+import { FormField } from '../../shared/form';
 import { ImagePickerModal } from './ImagePickerModal';
 import { ImageManager } from '../../../lib/image-manager';
 
@@ -136,42 +137,40 @@ export function ImageSection() {
   };
 
   return (
-    <div className="flex flex-col gap-2 w-full h-full">
-      {/* Header Info */}
-      <div className="flex items-center justify-between px-0.5">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-foreground">Ảnh đại diện & Thư viện ảnh</span>
+    <FormField
+      label={
+        <span className="flex items-center justify-between w-full">
+          <span>Ảnh đại diện</span>
           {allMedia.length > 0 && (
-            <span className="text-xs text-default-500 font-medium">({allMedia.length} ảnh)</span>
+            <Button
+              size="sm"
+              variant="flat"
+              color="primary"
+              onPress={() => setIsModalOpen(true)}
+              startContent={<ImagePlus className="w-3.5 h-3.5" />}
+              className="font-medium text-xs h-7 px-2.5 rounded-lg"
+            >
+              Thêm ảnh
+            </Button>
           )}
-        </div>
-        {allMedia.length > 0 && (
-          <Button
-            size="sm"
-            variant="flat"
-            color="primary"
-            onPress={() => setIsModalOpen(true)}
-            startContent={<ImagePlus className="w-3.5 h-3.5" />}
-            className="font-medium text-xs h-7 px-2.5 rounded-lg"
-          >
-            Thêm ảnh
-          </Button>
-        )}
-      </div>
-
+        </span>
+      }
+      icon={ImageIcon}
+      className="h-full"
+    >
       {/* Main Container: Left Large Preview (1:1) + Right Multi-Avatar Column */}
       <div className="flex items-stretch gap-3 w-full">
         {/* Left Side: Main Preview or Dropzone strictly 1:1 */}
         {allMedia.length === 0 ? (
           <div 
             onClick={() => setIsModalOpen(true)}
-            className="flex-1 aspect-square min-w-0 border-2 border-dashed border-primary/40 rounded-2xl flex flex-col items-center justify-center bg-primary-50/40 dark:bg-primary-950/20 text-primary-600 hover:bg-primary-50/60 hover:border-primary transition-all cursor-pointer p-4 group"
+            className="flex-1 aspect-square min-w-0 border-2 border-dashed border-default-300 dark:border-default-200/40 hover:border-primary rounded-2xl flex flex-col items-center justify-center bg-default-100/40 dark:bg-default-100/10 hover:bg-default-100/70 dark:hover:bg-default-100/20 text-default-500 hover:text-primary transition-all cursor-pointer p-4 group"
           >
-            <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/40 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <ImagePlus className="w-7 h-7 text-primary" />
+            <div className="w-12 h-12 bg-default-200/60 dark:bg-default-100/20 rounded-2xl flex items-center justify-center mb-2.5 text-default-400 group-hover:text-primary group-hover:scale-110 transition-all">
+              <ImagePlus className="w-6 h-6" />
             </div>
-            <p className="font-bold text-base mb-1 text-center text-foreground">Tải ảnh đại diện</p>
-            <p className="text-xs text-default-500 text-center">Kéo thả file hoặc bấm để chọn ảnh/video</p>
+            <p className="font-semibold text-sm mb-1 text-center text-foreground group-hover:text-primary transition-colors">Tải ảnh đại diện</p>
+            <p className="text-xs text-default-400 text-center">Kéo thả file hoặc bấm để chọn ảnh/video</p>
           </div>
         ) : (
           <div className="flex-1 aspect-square min-w-0 bg-default-100 dark:bg-default-50/40 rounded-2xl relative group overflow-hidden flex items-center justify-center shadow-inner border border-divider/60">
@@ -349,7 +348,7 @@ export function ImageSection() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(true)}
-                  className="aspect-square w-full rounded-xl border-2 border-dashed border-default-300 dark:border-default-200/50 bg-default-50/50 dark:bg-default-100/30 text-default-400 hover:text-primary hover:border-primary hover:bg-primary-50/30 transition-all flex items-center justify-center cursor-pointer group shrink-0"
+                  className="aspect-square w-full rounded-xl border-2 border-dashed border-default-300 dark:border-default-200/40 bg-default-100/40 dark:bg-default-100/10 hover:bg-default-100/70 dark:hover:bg-default-100/20 hover:border-primary text-default-400 hover:text-primary transition-all flex items-center justify-center cursor-pointer group shrink-0"
                   title="Thêm ảnh"
                   aria-label="Thêm ảnh"
                 >
@@ -358,7 +357,7 @@ export function ImageSection() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(true)}
-                  className="aspect-square w-full rounded-xl border-2 border-dashed border-default-200 dark:border-default-200/30 bg-default-50/30 dark:bg-default-100/20 text-default-400 hover:text-primary hover:border-primary hover:bg-primary-50/30 transition-all flex items-center justify-center cursor-pointer group shrink-0"
+                  className="aspect-square w-full rounded-xl border-2 border-dashed border-default-300 dark:border-default-200/40 bg-default-100/40 dark:bg-default-100/10 hover:bg-default-100/70 dark:hover:bg-default-100/20 hover:border-primary text-default-400 hover:text-primary transition-all flex items-center justify-center cursor-pointer group shrink-0"
                   title="Thêm ảnh"
                   aria-label="Thêm ảnh"
                 >
@@ -371,12 +370,12 @@ export function ImageSection() {
             <button 
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="cursor-pointer rounded-xl border-2 border-dashed border-default-300 dark:border-default-200/50 bg-default-50/50 dark:bg-default-100/30 text-default-500 hover:text-primary hover:border-primary hover:bg-primary-50/30 transition-all flex flex-col items-center justify-center shrink-0 aspect-square w-full group py-2"
+              className="cursor-pointer rounded-xl border-2 border-dashed border-default-300 dark:border-default-200/40 bg-default-100/40 dark:bg-default-100/10 hover:bg-default-100/70 dark:hover:bg-default-100/20 hover:border-primary text-default-400 hover:text-primary transition-all flex flex-col items-center justify-center shrink-0 aspect-square w-full group py-2"
               title="Thêm ảnh mới"
               aria-label="Thêm ảnh mới"
             >
-              <ImagePlus className="w-5 h-5 group-hover:scale-110 transition-transform mb-0.5 text-default-400 group-hover:text-primary" />
-              <span className="text-xs font-semibold text-default-500 group-hover:text-primary">Thêm</span>
+              <ImagePlus className="w-5 h-5 group-hover:scale-110 transition-transform mb-0.5" />
+              <span className="text-xs font-semibold">Thêm</span>
             </button>
           </div>
         </div>
@@ -388,6 +387,6 @@ export function ImageSection() {
         onOpenChange={setIsModalOpen}
         onSelectMedia={handleSelectMedia}
       />
-    </div>
+    </FormField>
   );
 }

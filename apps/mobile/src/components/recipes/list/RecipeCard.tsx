@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import type { Recipe } from '@apron/core';
 import { RecipeRepository } from '@apron/core';
 import { Clock, Star, Flame, Image as ImageIcon, MoreVertical, Heart, Trash2, CalendarDays, Edit2 } from 'lucide-react';
-import { Checkbox, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from '@/ui';
+import { Checkbox, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button, toast } from '@/ui';
 import { ImageManager } from '../../../lib/image-manager';
 import { useRecipeStore } from '../../../store/useRecipeStore';
 import { DROPDOWN_CLOSE_DELAY_MS } from '../../../constants';
@@ -46,16 +46,38 @@ export function RecipeCard({
     onSelectChange?.(!isSelected);
   };
 
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onAction) {
+      onAction('favorite', recipe);
+      return;
+    }
+    try {
+      const nextFav = !recipe.is_favorite;
+      await RecipeRepository.save({ ...recipe, is_favorite: nextFav });
+      useRecipeStore.getState().fetchRecipes();
+      if (nextFav) {
+        toast.success(`Đã thêm "${recipe.title}" vào yêu thích!`);
+      } else {
+        toast.info(`Đã bỏ yêu thích "${recipe.title}".`);
+      }
+    } catch (err) {
+      console.error('Failed to update favorite status:', err);
+      toast.error('Không thể cập nhật trạng thái yêu thích.');
+    }
+  };
+
   const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
     setImgError(false);
   }, [recipe.image_url]);
 
-  const totalTime = recipe.prep_time + recipe.cook_time;
+  const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
   
   // Format thời gian nấu (vd: 1h30m hoặc 45m)
   const formatTime = (minutes: number) => {
+    if (!minutes || isNaN(minutes) || minutes <= 0) return '0m';
     if (minutes < 60) return `${minutes}m`;
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
@@ -150,24 +172,24 @@ export function RecipeCard({
     return (
       <div 
         onClick={onClick}
-        className={`group w-full aspect-3/4 sm:aspect-4/5 relative overflow-hidden shadow-lg rounded-2xl cursor-pointer ${isSelected ? 'ring-4 ring-primary' : ''}`}
+        className={`group w-full aspect-3/4 sm:aspect-4/5 relative overflow-hidden rounded-2xl bg-black border-none shadow-none cursor-pointer card-media-root ${isSelected ? 'ring-4 ring-primary' : ''}`}
       >
-        {/* Background Image */}
+        {/* Background Image: dừng lại trước 2 góc dưới và fade mask để triệt tiêu hoàn toàn viền trắng subpixel */}
         {recipe.image_url && !imgError ? (
           <img 
             src={ImageManager.getAssetUrl(recipe.image_url)} 
             alt={recipe.title} 
-            className="absolute inset-0 w-full h-full object-cover z-0"
+            className="card-media-img absolute inset-x-0 top-0 bottom-7 w-full h-[calc(100%-1.75rem)] object-cover z-0"
             onError={() => setImgError(true)}
           />
         ) : (
-          <div className="absolute inset-0 w-full h-full bg-default-200 flex items-center justify-center z-0">
+          <div className="card-media-img absolute inset-x-0 top-0 bottom-7 w-full h-[calc(100%-1.75rem)] bg-default-200 flex items-center justify-center z-0">
             <ImageIcon className="w-16 h-16 text-default-500" />
           </div>
         )}
 
         {/* Additional dark gradient for text readability */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none rounded-2xl" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/50 via-50% to-transparent pointer-events-none" />
 
         {/* Top Actions */}
         <div className="absolute top-2.5 left-2.5 z-10 flex items-center gap-1.5 flex-wrap">
@@ -175,6 +197,17 @@ export function RecipeCard({
             <div onClick={handleSelectClick}>
               <Checkbox isSelected={isSelected} onValueChange={(val) => onSelectChange?.(val)} />
             </div>
+          )}
+          {recipe.is_favorite && (
+            <button
+              type="button"
+              onClick={handleToggleFavorite}
+              title="Bỏ yêu thích"
+              aria-label="Bỏ yêu thích"
+              className="w-7 h-7 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-danger shadow-sm transition-transform active:scale-90 border border-white/10"
+            >
+              <Heart className="w-3.5 h-3.5 fill-danger text-danger drop-shadow-sm" />
+            </button>
           )}
           {variantCount > 0 && (
             <div className="bg-black/60 backdrop-blur-sm text-white text-xs font-semibold px-2 py-0.5 rounded-full">
@@ -234,13 +267,6 @@ export function RecipeCard({
               </div>
             )}
           </div>
-          
-          {/* Favorite Icon (Bottom Right) */}
-          {recipe.is_favorite && (
-            <div className="absolute bottom-3 right-3 z-20 pointer-events-none">
-              <Heart className="w-4 h-4 text-danger" fill="currentColor" />
-            </div>
-          )}
         </div>
       </div>
     );
@@ -252,12 +278,23 @@ export function RecipeCard({
       onClick={onClick}
       className={`group flex flex-col cursor-pointer relative ${size === 'sm' ? 'gap-1.5' : 'gap-3'}`}
     >
-      <div className={`relative rounded-xl overflow-hidden bg-primary-50 ${viewType === 'grid-landscape' ? 'w-full aspect-4/3' : viewType === 'grid-portrait-out' ? 'w-full aspect-3/4' : 'w-full aspect-square'}`}>
+      <div className={`relative rounded-xl overflow-hidden bg-default-100 dark:bg-default-50/20 ${viewType === 'grid-landscape' ? 'w-full aspect-4/3' : viewType === 'grid-portrait-out' ? 'w-full aspect-3/4' : 'w-full aspect-square'}`}>
         <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 flex-wrap">
           {selectable && (
             <div onClick={handleSelectClick}>
               <Checkbox isSelected={isSelected} onValueChange={(val) => onSelectChange?.(val)} />
             </div>
+          )}
+          {recipe.is_favorite && (
+            <button
+              type="button"
+              onClick={handleToggleFavorite}
+              title="Bỏ yêu thích"
+              aria-label="Bỏ yêu thích"
+              className="w-7 h-7 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-danger shadow-sm transition-transform active:scale-90 border border-white/10"
+            >
+              <Heart className="w-3.5 h-3.5 fill-danger text-danger drop-shadow-sm" />
+            </button>
           )}
           {variantCount > 0 && (
             <div className="bg-black/60 backdrop-blur-sm text-white text-xs font-semibold px-2 py-0.5 rounded-full">
@@ -303,13 +340,6 @@ export function RecipeCard({
         ) : (
           <div className="w-full h-full bg-default-200 flex items-center justify-center">
             <ImageIcon className="w-12 h-12 text-default-500" />
-          </div>
-        )}
-
-        {/* Favorite Icon (Bottom Right of Image) */}
-        {recipe.is_favorite && (
-          <div className="absolute bottom-2 right-2 z-20 bg-black/40 backdrop-blur-md rounded-full p-1.5 text-white">
-            <Heart className="w-4 h-4 text-danger" fill="currentColor" />
           </div>
         )}
       </div>

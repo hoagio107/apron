@@ -1,0 +1,131 @@
+- generic [ref=f8e1]:
+  - generic [ref=f8e17]:
+    - main [ref=f8e18]:
+      - generic [ref=f8e19]:
+        - generic [ref=f8e20]:
+          - generic [ref=f8e22]:
+            - heading [level=1] [ref=f8e256]: Tủ lạnh thông minh
+            - paragraph [ref=f8e24]: 6 nguyên liệu trong bếp của bạn
+          - generic [ref=f8e26]:
+            - button [ref=f8e257] [cursor=pointer]: Gợi ý món (AI)
+            - button [ref=f8e258] [cursor=pointer]: Thêm
+        - tablist [ref=f8e260]:
+          - tab [selected] [ref=f8e261] [cursor=pointer]:
+            - generic [ref=f8e37]: Tủ lạnh (6)
+          - tab [ref=f8e262] [cursor=pointer]:
+            - generic [ref=f8e43]: AI Gợi ý món
+        - generic [ref=f8e49]:
+          - generic [ref=f8e53]:
+            - textbox [ref=f8e263]:
+              - /placeholder: Tìm kiếm nguyên liệu trong tủ...
+            - button
+          - button [ref=f8e264]: 1 sắp hết hạn
+          - generic [ref=f8e63]:
+            - button [ref=f8e265]:
+              - generic [ref=f8e65]: 🍱 Tất cả
+              - generic [ref=f8e66]: (6)
+            - button [ref=f8e266]:
+              - generic [ref=f8e71]: Rau củ quả
+              - generic [ref=f8e72]: (2)
+            - button [ref=f8e267]:
+              - generic [ref=f8e78]: Thịt cá & Hải sản
+              - generic [ref=f8e79]: (1)
+            - button [ref=f8e268]:
+              - generic [ref=f8e84]: Trứng & Bơ sữa
+              - generic [ref=f8e85]: (2)
+            - button [ref=f8e269]:
+              - generic [ref=f8e89]: Gia vị & Nước sốt
+              - generic [ref=f8e90]: (1)
+          - generic [ref=f8e91]:
+            - generic [ref=f8e92]: Rau củ quả (2)
+            - combobox [ref=f8e97] [cursor=pointer]
+          - generic [ref=f8e98]:
+            - generic [ref=f8e122] [cursor=pointer]:
+              - generic [ref=f8e123]:
+                - generic [ref=f8e128]: 4 ngày
+                - generic [ref=f8e130]:
+                  - button [ref=f8e270]
+                  - button [ref=f8e271]
+              - generic [ref=f8e139]:
+                - generic [ref=f8e272]: Cà chua bi
+                - generic [ref=f8e141]:
+                  - generic [ref=f8e142]: 300 gam
+                  - generic [ref=f8e143]: Rau củ quả
+            - generic [ref=f8e188] [cursor=pointer]:
+              - generic [ref=f8e189]:
+                - generic [ref=f8e194]: 14 ngày
+                - generic [ref=f8e196]:
+                  - button [ref=f8e273]
+                  - button [ref=f8e274]
+              - generic [ref=f8e205]:
+                - generic [ref=f8e275]: Hành tây
+                - generic [ref=f8e207]:
+                  - generic [ref=f8e208]: 2 củ
+                  - generic [ref=f8e209]: Rau củ quả
+          - generic [ref=f8e229]:
+            - generic [ref=f8e236]:
+              - generic [ref=f8e237]: Thiếu nguyên liệu?
+              - generic [ref=f8e238]: Lên thực đơn và chuẩn bị đi chợ
+            - button [ref=f8e276] [cursor=pointer]: Đi chợ
+    - navigation:
+      - generic [ref=f8e240]:
+        - link [ref=f8e241] [cursor=pointer]:
+          - /url: /
+        - link [ref=f8e245] [cursor=pointer]:
+          - /url: /recipes
+        - link [ref=f8e248] [cursor=pointer]:
+          - /url: /tips
+        - button [ref=f8e251]
+    - button [ref=f8e254]
+  - dialog "Chỉnh sửa nguyên liệu Xoá nguyên liệu" [active] [ref=f8e279]:
+    - button "Dismiss" [ref=f8e281]
+    - button "Close" [ref=f8e282]
+    - banner [ref=f8e285]:
+      - generic [ref=f8e286]: Chỉnh sửa nguyên liệu
+      - button "Xoá nguyên liệu" [ref=f8e292] [cursor=pointer]
+    - generic [ref=f8e296]:
+      - generic [ref=f8e297]:
+        - generic [ref=f8e298]: Tên nguyên liệu
+        - generic [ref=f8e306]:
+          - 'combobox "VD: Thịt ba chỉ, Trứng gà, Cà chua..." [ref=f8e307]': Cà chua bi
+          - generic [ref=f8e308]:
+            - button [ref=f8e309] [cursor=pointer]
+            - button "Show suggestions" [ref=f8e312] [cursor=pointer]
+      - generic [ref=f8e315]:
+        - generic [ref=f8e316]: Danh mục
+        - generic [ref=f8e321]:
+          - combobox [ref=f8e324]
+          - button "Rau củ quả" [ref=f8e326]
+      - generic [ref=f8e331]:
+        - generic [ref=f8e332]:
+          - generic [ref=f8e333]: Số lượng
+          - spinbutton "1" [ref=f8e342]: "300"
+        - generic [ref=f8e343]:
+          - generic [ref=f8e344]: Đơn vị
+          - generic [ref=f8e353]:
+            - combobox "gam, quả..." [ref=f8e354]: gam
+            - generic [ref=f8e355]:
+              - button [ref=f8e356] [cursor=pointer]
+              - button "Show suggestions" [ref=f8e359] [cursor=pointer]
+      - generic [ref=f8e362]:
+        - generic [ref=f8e363]: Hạn sử dụng
+        - generic [ref=f8e366]:
+          - textbox [ref=f8e371]: 2026-10-28
+          - generic [ref=f8e372]:
+            - generic [ref=f8e373]: "HSD:"
+            - button "+3 ngày" [ref=f8e374]
+            - button "+1 tuần" [ref=f8e375]
+            - button "+2 tuần" [ref=f8e376]
+            - button "+1 tháng" [ref=f8e377]
+            - button "Bỏ HSD" [ref=f8e378]
+      - generic [ref=f8e379]:
+        - generic [ref=f8e380]: Ảnh nguyên liệu
+        - generic [ref=f8e385]:
+          - generic [ref=f8e386] [cursor=pointer]
+          - generic [ref=f8e390]:
+            - button "Tải ảnh lên" [ref=f8e391] [cursor=pointer]
+            - generic [ref=f8e395]: Tự động lưu vào thư viện nguyên liệu
+    - contentinfo [ref=f8e396]:
+      - button "Hủy" [ref=f8e397] [cursor=pointer]
+      - button "Lưu thay đổi" [ref=f8e398] [cursor=pointer]
+    - button "Dismiss" [ref=f8e400]

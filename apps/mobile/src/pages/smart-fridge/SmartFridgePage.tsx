@@ -1,65 +1,88 @@
 import { useState, useMemo } from 'react';
-import { Button, Input, Autocomplete, AutocompleteItem, Avatar, Chip, EmptyState } from '@/ui';
-import { Plus, Search, Sparkles, AlertTriangle, Layers, Calendar } from 'lucide-react';
-import { PageHeader } from '../../components/layout/PageHeader';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Button, 
+  EmptyState, 
+  PageHeader,
+  ListToolbar,
+  toast 
+} from '@/ui';
+import type { ToolbarFilterItem } from '@/ui';
+import { 
+  Plus, 
+  Refrigerator, 
+  X, 
+  ShoppingCart, 
+  PackagePlus
+} from 'lucide-react';
 import { usePantryStore } from '../../store/usePantryStore';
-import { useIngredientCatalogStore } from '../../store/useIngredientCatalogStore';
-import { CATEGORIES, autoCategorizeIngredient } from '@apron/core';
+import { CATEGORIES } from '@apron/core';
 import type { PantryItem } from '@apron/core';
 import { getCategoryTheme } from '../../lib/categoryTheme';
-import { AiSuggestionPanel } from './components/AiSuggestionPanel';
 import { PantryItemCard } from './components/PantryItemCard';
-
-const isExpiredOrNear = (date?: string) => {
-  if (!date) return false;
-  const daysUntil = (new Date(date).getTime() - new Date().getTime()) / (1000 * 3600 * 24);
-  return daysUntil <= 3;
-};
+import { PantryItemModal } from './components/PantryItemModal';
+import { ConfirmModal } from '../../components/shared/ConfirmModal';
 
 const isExpired = (date?: string) => {
   if (!date) return false;
   return new Date(date).getTime() < new Date().getTime();
-}
+};
+
+const getDaysUntilExpiry = (date?: string): number | null => {
+  if (!date) return null;
+  const diffTime = new Date(date).getTime() - new Date().getTime();
+  return Math.ceil(diffTime / (1000 * 3600 * 24));
+};
 
 export function SmartFridgePage() {
-  const { items, addItem, removeItem } = usePantryStore();
-  const { getAllIngredients, updateIngredientMeta, addIngredientMeta, getIngredientMetaByName } = useIngredientCatalogStore();
-  const catalogItems = getAllIngredients();
+  const navigate = useNavigate();
+  const { items, addItem, updateItem, removeItem } = usePantryStore();
 
-  const [newItemName, setNewItemName] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [freshnessFilter, setFreshnessFilter] = useState<'all' | 'near_expiry' | 'expired'>('all');
   const [sortBy, setSortBy] = useState<'expiry' | 'name' | 'added'>('expiry');
 
-  const quickAdd = (name: string) => {
-    const group = autoCategorizeIngredient(name.trim());
-    addItem({ name: name.trim(), quantity: 1, unit: 'đơn vị', group, added_date: new Date().toISOString().split('T')[0] });
-    const existingMeta = getIngredientMetaByName(name.trim());
-    if (existingMeta) {
-      updateIngredientMeta(existingMeta.id, { default_category: group, default_unit: 'đơn vị' });
-    } else {
-      addIngredientMeta(name.trim(), { default_category: group, default_unit: 'đơn vị' });
-    }
-    setNewItemName('');
-  };
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<PantryItem | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
-  const handleSearchBlur = () => {
-    if (newItemName.trim() && !items.find(i => i.name.toLowerCase() === newItemName.toLowerCase())) {
-        // Can optionally auto-add on blur or just let them use the combobox options
-    }
-  };
-
-  // Derived state
-  const activeItems = useMemo(() => items.filter(i => !isExpired(i.expiry_date)), [items]);
+  // Expiry calculations
   const expiredItems = useMemo(() => items.filter(i => isExpired(i.expiry_date)), [items]);
+  const nearExpiryItems = useMemo(() => {
+    return items.filter(i => {
+      const d = getDaysUntilExpiry(i.expiry_date);
+      return !isExpired(i.expiry_date) && d !== null && d <= 3 && d >= 0;
+    });
+  }, [items]);
 
+  // Filtered and sorted items
   const filteredItems = useMemo(() => {
-    let result = activeItems;
+    let result = [...items];
+
+    // Filter by freshness
+    if (freshnessFilter === 'expired') {
+      result = result.filter(i => isExpired(i.expiry_date));
+    } else if (freshnessFilter === 'near_expiry') {
+      result = result.filter(i => {
+        const d = getDaysUntilExpiry(i.expiry_date);
+        return !isExpired(i.expiry_date) && d !== null && d <= 3 && d >= 0;
+      });
+    }
+
+    // Filter by category
     if (selectedCategory) {
       result = result.filter(i => (i.group || CATEGORIES.OTHERS) === selectedCategory);
     }
-    if (newItemName.trim()) {
-      result = result.filter(i => i.name.toLowerCase().includes(newItemName.toLowerCase()));
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(i => i.name.toLowerCase().includes(q));
     }
+
+    // Sort
     return result.sort((a, b) => {
       if (sortBy === 'expiry') {
         const dateA = a.expiry_date ? new Date(a.expiry_date).getTime() : Infinity;
@@ -69,11 +92,12 @@ export function SmartFridgePage() {
       if (sortBy === 'name') return a.name.localeCompare(b.name);
       const dateA = a.added_date ? new Date(a.added_date).getTime() : 0;
       const dateB = b.added_date ? new Date(b.added_date).getTime() : 0;
-      return dateB - dateA; // Newest first
+      return dateB - dateA;
     });
-  }, [activeItems, selectedCategory, newItemName, sortBy]);
+  }, [items, selectedCategory, freshnessFilter, searchQuery, sortBy]);
 
-  const groupedCounts = useMemo(() => {
+  // Grouped category counts
+  const categoryCounts = useMemo(() => {
     return items.reduce((acc, item) => {
       const group = item.group || CATEGORIES.OTHERS;
       acc[group] = (acc[group] || 0) + 1;
@@ -81,211 +105,271 @@ export function SmartFridgePage() {
     }, {} as Record<string, number>);
   }, [items]);
 
+  // Filter options for standard ListToolbar
+  const filterItems = useMemo(() => {
+    const list: ToolbarFilterItem[] = [
+      { key: 'all', label: 'Tất cả nguyên liệu', count: items.length }
+    ];
+
+    if (expiredItems.length > 0) {
+      list.push({
+        key: 'status:expired',
+        label: '⚠️ Đã hết hạn',
+        count: expiredItems.length
+      });
+    }
+
+    if (nearExpiryItems.length > 0) {
+      list.push({
+        key: 'status:near_expiry',
+        label: '⏳ Sắp hết hạn',
+        count: nearExpiryItems.length
+      });
+    }
+
+    Object.values(CATEGORIES).forEach(cat => {
+      const count = categoryCounts[cat] || 0;
+      if (count > 0) {
+        list.push({
+          key: `cat:${cat}`,
+          label: cat,
+          count
+        });
+      }
+    });
+
+    return list;
+  }, [items.length, expiredItems.length, nearExpiryItems.length, categoryCounts]);
+
+  const selectedFilterKey = useMemo(() => {
+    if (freshnessFilter === 'expired') return 'status:expired';
+    if (freshnessFilter === 'near_expiry') return 'status:near_expiry';
+    if (selectedCategory) return `cat:${selectedCategory}`;
+    return 'all';
+  }, [freshnessFilter, selectedCategory]);
+
+  const handleFilterChange = (key: string) => {
+    if (key === 'status:expired') {
+      setFreshnessFilter('expired');
+      setSelectedCategory(null);
+    } else if (key === 'status:near_expiry') {
+      setFreshnessFilter('near_expiry');
+      setSelectedCategory(null);
+    } else if (key.startsWith('cat:')) {
+      setSelectedCategory(key.replace('cat:', ''));
+      setFreshnessFilter('all');
+    } else {
+      setSelectedCategory(null);
+      setFreshnessFilter('all');
+    }
+  };
+
+  const sortItems = [
+    { key: 'expiry', label: 'Hạn sử dụng' },
+    { key: 'name', label: 'Tên A-Z' },
+    { key: 'added', label: 'Mới thêm' }
+  ];
+
+  const handleSaveItem = (itemData: Omit<PantryItem, 'id'>, id?: string) => {
+    if (id) {
+      updateItem(id, itemData);
+      toast.success('Đã cập nhật nguyên liệu!');
+    } else {
+      addItem(itemData);
+      toast.success('Đã thêm nguyên liệu vào tủ lạnh!');
+    }
+    setEditingItem(null);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deleteTargetId) {
+      removeItem(deleteTargetId);
+      toast.success('Đã xoá nguyên liệu!');
+      setDeleteTargetId(null);
+    }
+  };
+
+  const handleSeedSampleItems = () => {
+    const sampleItems: Omit<PantryItem, 'id'>[] = [
+      {
+        name: 'Thịt bò xay',
+        quantity: 500,
+        unit: 'gam',
+        group: CATEGORIES.MEAT_SEAFOOD,
+        added_date: new Date().toISOString().split('T')[0],
+        expiry_date: new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0]
+      },
+      {
+        name: 'Trứng gà ta',
+        quantity: 10,
+        unit: 'quả',
+        group: CATEGORIES.DAIRY_EGGS,
+        added_date: new Date().toISOString().split('T')[0],
+        expiry_date: new Date(Date.now() + 10 * 86400000).toISOString().split('T')[0]
+      },
+      {
+        name: 'Cà chua bi',
+        quantity: 300,
+        unit: 'gam',
+        group: CATEGORIES.VEGGIES,
+        added_date: new Date().toISOString().split('T')[0],
+        expiry_date: new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0]
+      },
+      {
+        name: 'Hành tây',
+        quantity: 2,
+        unit: 'củ',
+        group: CATEGORIES.VEGGIES,
+        added_date: new Date().toISOString().split('T')[0],
+        expiry_date: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0]
+      },
+      {
+        name: 'Sữa tươi không đường',
+        quantity: 1,
+        unit: 'hộp',
+        group: CATEGORIES.DAIRY_EGGS,
+        added_date: new Date().toISOString().split('T')[0],
+        expiry_date: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0]
+      },
+      {
+        name: 'Nước mắm Phú Quốc',
+        quantity: 1,
+        unit: 'chai',
+        group: CATEGORIES.SPICES_SAUCES,
+        added_date: new Date().toISOString().split('T')[0]
+      }
+    ];
+
+    sampleItems.forEach(item => addItem(item));
+    toast.success('Đã nạp 6 nguyên liệu mẫu vào tủ lạnh!');
+  };
+
   return (
-    <div className="h-full flex flex-col pt-6">
+    <div className="flex flex-col min-h-full gap-6 w-full pt-6 pb-28 px-4 md:px-8">
+      {/* 1. Header & Toolbar chuẩn hệ thống */}
       <PageHeader
         title="Tủ lạnh thông minh"
-        description={`Quản lý ${items.length} nguyên liệu trong bếp của bạn`}
-        className="pt-0"
+        description={
+          filteredItems.length === items.length
+            ? `${items.length} nguyên liệu trong bếp của bạn`
+            : `Hiển thị ${filteredItems.length} / ${items.length} nguyên liệu`
+        }
+        actions={
+          <ListToolbar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            searchPlaceholder="Tìm kiếm nguyên liệu..."
+            filterItems={filterItems}
+            selectedFilter={selectedFilterKey}
+            onFilterChange={handleFilterChange}
+            sortItems={sortItems}
+            selectedSort={sortBy}
+            onSortChange={(key) => setSortBy(key as any)}
+            onAdd={() => {
+              setEditingItem(null);
+              setIsModalOpen(true);
+            }}
+            addLabel="Thêm mới"
+          />
+        }
       />
 
-      <div className="max-w-[96rem] mx-auto w-full flex-1 flex gap-5 min-h-0 pb-8 px-4">
-        
-        {/* LEFT: Categories Sidebar */}
-        <div className="w-72 shrink-0 flex flex-col min-h-0 app-card overflow-hidden">
-          <div className="p-4 border-b border-divider flex items-center gap-2">
-            <Layers className="w-5 h-5 text-default-500" />
-            <h3 className="font-semibold text-foreground">Danh mục</h3>
-          </div>
-          <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-1">
-            <button
-              onClick={() => setSelectedCategory(null)}
-              className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${selectedCategory === null ? 'bg-primary-50 text-primary-700' : 'text-default-600 active:bg-default-100'}`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-default-100 flex items-center justify-center">
-                  🍱
-                </div>
-                <span>Tất cả</span>
-              </div>
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${selectedCategory === null ? 'bg-primary-100 text-primary-700' : 'bg-default-100 text-default-500'}`}>
-                {items.length}
-              </span>
-            </button>
-            
-            {Object.values(CATEGORIES).map(cat => {
-              const count = groupedCounts[cat] || 0;
-              const theme = getCategoryTheme(cat);
-              const Icon = theme.icon;
-              const isSelected = selectedCategory === cat;
-              
-              if (count === 0 && !isSelected) return null; // Hide empty categories unless selected
-              
-              return (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${isSelected ? 'bg-primary-50 text-primary-700' : 'text-default-600 active:bg-default-100'}`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isSelected ? 'bg-primary-100' : theme.bg}`}>
-                      <Icon className={`w-4 h-4 ${isSelected ? 'text-primary-700' : theme.text}`} />
-                    </div>
-                    <span>{cat}</span>
+      {/* Ingredients Grid / Empty State */}
+        {filteredItems.length === 0 ? (
+          <EmptyState
+            icon={<Refrigerator className="w-12 h-12 text-default-300" />}
+            title={items.length === 0 ? 'Tủ lạnh đang trống' : 'Không tìm thấy nguyên liệu'}
+            description={
+              items.length === 0
+                ? 'Thêm nguyên liệu vào tủ để theo dõi hạn sử dụng và chuẩn bị bữa ăn chu đáo!'
+                : 'Thử tìm với từ khoá khác hoặc xoá bộ lọc danh mục.'
+            }
+                action={
+                  <div className="flex flex-col sm:flex-row items-center gap-2 mt-2">
+                    <Button
+                      color="primary"
+                      startContent={<Plus className="w-4 h-4" />}
+                      onPress={() => {
+                        setEditingItem(null);
+                        setIsModalOpen(true);
+                      }}
+                      className="font-semibold h-11 px-4 rounded-xl"
+                    >
+                      Thêm nguyên liệu
+                    </Button>
+                    {items.length === 0 && (
+                      <Button
+                        variant="flat"
+                        color="secondary"
+                        startContent={<PackagePlus className="w-4 h-4" />}
+                        onPress={handleSeedSampleItems}
+                        className="font-semibold h-11 px-4 rounded-xl"
+                      >
+                        Nạp dữ liệu mẫu
+                      </Button>
+                    )}
                   </div>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${isSelected ? 'bg-primary-100 text-primary-700' : 'bg-default-100 text-default-500'}`}>
-                    {count}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* MIDDLE: Main Content (Search & Grid) */}
-        <div className="flex-1 flex flex-col min-w-0 app-card overflow-hidden">
-          <div className="p-4 border-b border-divider flex flex-col gap-4">
-            <Autocomplete
-              placeholder="Tìm hoặc thêm nguyên liệu vào tủ lạnh..."
-              inputValue={newItemName}
-              onInputChange={(value) => setNewItemName(value)}
-              onSelectionChange={(key) => {
-                if (!key) return;
-                if (key === '__add_new__') { quickAdd(newItemName); return; }
-                const selectedItem = catalogItems.find(i => i.name === key);
-                if (selectedItem) { quickAdd(selectedItem.name); }
-              }}
-              onBlur={handleSearchBlur}
-              allowsCustomValue
-              size="lg"
-              classNames={{
-                base: "w-full",
-                inputWrapper: "bg-default-50 border border-default-200 rounded-xl"
-              }}
-              startContent={<Search className="w-5 h-5 text-default-400" />}
-            >
-              {catalogItems
-                .filter(ci => !newItemName || ci.name.toLowerCase().includes(newItemName.toLowerCase()))
-                .slice(0, 5)
-                .map((item) => (
-                  <AutocompleteItem
-                    key={item.name}
-                    textValue={item.name}
-                    startContent={
-                      item.image_url
-                        ? <Avatar alt={item.name} size="sm" src={item.image_url} className="shrink-0" />
-                        : <div className="w-8 h-8 rounded-full bg-default-100 flex items-center justify-center shrink-0">🥩</div>
-                    }
-                  >
-                    <div className="flex flex-col">
-                      <span className="text-small font-medium">{item.name}</span>
-                      <span className="text-tiny text-default-400">{item.default_category || 'Chưa phân loại'}</span>
-                    </div>
-                  </AutocompleteItem>
-                ))}
-              {newItemName.trim() && (
-                <AutocompleteItem
-                  key="__add_new__"
-                  textValue={`Thêm "${newItemName}" vào tủ`}
-                  startContent={
-                    <div className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center shrink-0">
-                      <Plus className="w-4 h-4 text-primary-500" />
-                    </div>
-                  }
-                  className="text-primary"
-                >
-                  Thêm "{newItemName}" vào tủ
-                </AutocompleteItem>
-              )}
-            </Autocomplete>
-
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-foreground">
-                {selectedCategory || 'Tất cả nguyên liệu'} 
-                <span className="text-default-400 font-normal ml-2">({filteredItems.length})</span>
-              </h2>
-              <div className="flex items-center gap-2 text-sm text-default-500">
-                <span>Sắp xếp theo:</span>
-                <select 
-                  className="bg-transparent font-medium text-foreground outline-none cursor-pointer"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                >
-                  <option value="expiry">Hạn sử dụng</option>
-                  <option value="name">Tên A-Z</option>
-                  <option value="added">Mới thêm</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-6 bg-default-50/50">
-            {filteredItems.length === 0 ? (
-              <EmptyState
-                icon={<Search className="w-10 h-10 text-default-400" />}
-                title="Không tìm thấy nguyên liệu"
-                description="Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc."
+                }
               />
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {filteredItems.map(item => (
-                  <PantryItemCard key={item.id} item={item} onRemove={removeItem} />
+                  <PantryItemCard
+                    key={item.id}
+                    item={item}
+                    onRemove={(id) => setDeleteTargetId(id)}
+                    onEdit={(it) => {
+                      setEditingItem(it);
+                      setIsModalOpen(true);
+                    }}
+                  />
                 ))}
               </div>
             )}
-            
-            {expiredItems.length > 0 && (!selectedCategory || expiredItems.some(i => i.group === selectedCategory)) && (
-              <div className="border border-danger-200 bg-danger-50 rounded-xl p-4 flex flex-col gap-4">
-                <div className="flex items-center justify-between cursor-pointer">
-                  <div className="flex items-center gap-2 text-danger-700">
-                    <AlertTriangle className="w-5 h-5" />
-                    <span className="font-semibold">Xem thêm nguyên liệu đã hết hạn ({expiredItems.length})</span>
+
+            {/* Shopping List Card CTA */}
+            {items.length > 0 && (
+              <div className="mt-4 p-4 rounded-2xl bg-primary-50/50 dark:bg-primary-950/20 border border-primary/20 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                    <ShoppingCart className="w-5 h-5" />
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-bold text-sm text-foreground">Thiếu nguyên liệu?</span>
+                    <span className="text-xs text-default-500 truncate">Lên thực đơn và chuẩn bị đi chợ</span>
                   </div>
                 </div>
-                {/* Could expand here, but for now just show a summary or first few */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 opacity-75">
-                   {expiredItems.slice(0, 5).map(item => (
-                     <PantryItemCard key={item.id} item={item} onRemove={removeItem} />
-                   ))}
-                </div>
+                <Button
+                  color="primary"
+                  variant="flat"
+                  size="sm"
+                  onPress={() => navigate('/shopping-list')}
+                  className="font-semibold text-xs h-9 px-3 rounded-xl shrink-0"
+                >
+                  Đi chợ
+                </Button>
               </div>
             )}
 
-            <div className="mt-auto pt-6 pb-2">
-              <div className="bg-primary-50 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border border-primary-100">
-                 <div className="flex items-center gap-3">
-                   <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center shrink-0">
-                     <span className="text-xl">🛒</span>
-                   </div>
-                   <div>
-                     <h4 className="font-semibold text-primary-900">Thiếu nguyên liệu?</h4>
-                     <p className="text-sm text-primary-700">Thêm ngay vào danh sách đi chợ của bạn</p>
-                   </div>
-                 </div>
-                 <Button color="primary" className="font-medium shrink-0" startContent={<Plus className="w-4 h-4" />}>
-                   Đến danh sách mua sắm
-                 </Button>
-              </div>
-            </div>
+      {/* Add / Edit Ingredient Modal */}
+      <PantryItemModal
+        isOpen={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        item={editingItem}
+        onSave={handleSaveItem}
+        onDelete={(id) => setDeleteTargetId(id)}
+      />
 
-          </div>
-        </div>
-
-        {/* RIGHT: AI Suggestions Sidebar */}
-        <div className="w-[340px] shrink-0 flex flex-col min-h-0 app-card overflow-hidden">
-          <div className="p-4 border-b border-divider flex items-center gap-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10">
-            <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-            <h3 className="font-semibold text-foreground">Gợi ý món ăn</h3>
-          </div>
-          <div className="p-3 border-b border-divider bg-default-50/50">
-            <p className="text-sm text-default-600 font-medium">Từ nguyên liệu hiện có trong tủ ({items.length})</p>
-          </div>
-          <div className="flex-1 overflow-y-auto">
-            <AiSuggestionPanel pantryItems={items} />
-          </div>
-        </div>
-
-      </div>
+      {/* Confirm Delete Modal */}
+      <ConfirmModal
+        isOpen={Boolean(deleteTargetId)}
+        onOpenChange={(open) => !open && setDeleteTargetId(null)}
+        title="Xoá nguyên liệu"
+        description="Bạn có chắc chắn muốn xoá nguyên liệu này khỏi tủ lạnh không?"
+        confirmLabel="Xoá"
+        confirmColor="danger"
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }

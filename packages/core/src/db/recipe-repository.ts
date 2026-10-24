@@ -24,18 +24,54 @@ export class RecipeRepository {
   static async getAll(): Promise<Recipe[]> {
     const storage = getStorageProvider();
     const recipes: Recipe[] = [];
-    try {
-      if (!(await storage.exists(RECIPES_DIR))) return recipes;
+    const seenIds = new Set<string>();
 
-      const files = await storage.readDir(RECIPES_DIR);
-      for (const file of files) {
-        if (!file.isDirectory && file.name.endsWith('.json')) {
-          try {
-            const content = await storage.readTextFile(`${RECIPES_DIR}/${file.name}`);
-            const recipe = JSON.parse(content) as Recipe;
-            recipes.push(recipe);
-          } catch (e) {
-            console.error(`Failed to parse recipe ${file.name}`, e);
+    try {
+      // 1. Ưu tiên đọc hàng loạt siêu tốc (0ms qua In-Memory Cache) nếu Provider hỗ trợ
+      if (typeof (storage as any).readDirFiles === 'function') {
+        const dirFiles = await (storage as any).readDirFiles(RECIPES_DIR);
+        for (const file of dirFiles) {
+          if (file.name.endsWith('.json')) {
+            try {
+              const r = JSON.parse(file.content) as Recipe;
+              if (r) {
+                if (!r.id) {
+                  r.id = file.name.replace('.json', '');
+                }
+                if (!seenIds.has(r.id)) {
+                  seenIds.add(r.id);
+                  recipes.push(r);
+                }
+              }
+            } catch (e) {
+              console.error(`Failed to parse recipe ${file.name}`, e);
+            }
+          }
+        }
+      } else {
+        // Fallback đọc tuần tự/song song qua readDir
+        const files = await storage.readDir(RECIPES_DIR);
+        const filePromises = files
+          .filter(file => !file.isDirectory && file.name.endsWith('.json'))
+          .map(async file => {
+            try {
+              const content = await storage.readTextFile(`${RECIPES_DIR}/${file.name}`);
+              const r = JSON.parse(content) as Recipe;
+              if (r && !r.id) {
+                r.id = file.name.replace('.json', '');
+              }
+              return r;
+            } catch (e) {
+              console.error(`Failed to parse recipe ${file.name}`, e);
+              return null;
+            }
+          });
+
+        const results = await Promise.all(filePromises);
+        for (const r of results) {
+          if (r && !seenIds.has(r.id)) {
+            seenIds.add(r.id);
+            recipes.push(r);
           }
         }
       }
@@ -43,11 +79,13 @@ export class RecipeRepository {
       console.error('Failed to get all recipes', e);
     }
     
-    // Sort by created_at descending by default
+    // Sắp xếp theo created_at giảm dần một cách an toàn (tránh lỗi NaN)
     return recipes.sort((a, b) => {
       const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
       const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-      return dateB - dateA;
+      const validA = isNaN(dateA) ? 0 : dateA;
+      const validB = isNaN(dateB) ? 0 : dateB;
+      return validB - validA;
     });
   }
 
@@ -61,7 +99,9 @@ export class RecipeRepository {
       if (!(await storage.exists(path))) return null;
       
       const content = await storage.readTextFile(path);
-      return JSON.parse(content) as Recipe;
+      const r = JSON.parse(content) as Recipe;
+      if (r && !r.id) r.id = id;
+      return r;
     } catch (e) {
       console.error(`Failed to get recipe ${id}`, e);
       return null;
@@ -78,6 +118,15 @@ export class RecipeRepository {
       
       if (!recipe.id) {
         recipe.id = crypto.randomUUID();
+      }
+      if (!recipe.slug && recipe.title) {
+        recipe.slug = recipe.title
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/đ/g, 'd')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '') || recipe.id;
       }
       if (!recipe.created_at) {
         recipe.created_at = new Date().toISOString();

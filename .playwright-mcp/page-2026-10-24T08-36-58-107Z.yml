@@ -1,0 +1,49 @@
+- generic [ref=f7e1]:
+  - main [ref=f7e8]:
+    - generic [ref=f7e242]:
+      - button [ref=f7e284] [cursor=pointer]: Quay lại danh sách mẹo
+      - generic [ref=f7e247] [cursor=pointer]: Bấm để phóng to ảnh
+      - generic [ref=f7e256]:
+        - heading [level=1] [ref=f7e286]: Cách giữ bơ sáp không bị thâm
+        - generic [ref=f7e258]:
+          - generic [ref=f7e259]:
+            - generic [ref=f7e260]: Mẹo bảo quản
+            - generic [ref=f7e261]: •
+            - generic [ref=f7e262]: 23 tháng 10, 2026
+            - generic [ref=f7e263]: •
+            - generic [ref=f7e264]: ~1 phút đọc
+          - generic [ref=f7e265]:
+            - button [ref=f7e287] [cursor=pointer]: Sao chép
+            - button [ref=f7e288] [cursor=pointer]: Chia sẻ
+            - button [ref=f7e289] [cursor=pointer]: Chỉnh sửa
+            - button [ref=f7e290] [cursor=pointer]
+      - generic [ref=f7e282]: Khi cắt bơ mà dùng không hết, hãy quét một lớp dầu oliu mỏng hoặc vắt chút chanh lên bề mặt bơ rồi bọc kín bằng màng bọc thực phẩm, để tủ lạnh.
+  - dialog [active] [ref=f7e293]:
+    - button "Dismiss" [ref=f7e295]
+    - generic [ref=f7e296]:
+      - generic [ref=f7e300]:
+        - button "Quay lại" [ref=f7e301] [cursor=pointer]
+        - heading "Chỉnh sửa mẹo vặt" [level=1] [ref=f7e305]
+      - generic [ref=f7e307]:
+        - generic [ref=f7e308]:
+          - generic [ref=f7e309]: Ảnh đại diện
+          - generic [ref=f7e314]:
+            - img "Ảnh bìa mẹo" [ref=f7e315]
+            - generic [ref=f7e316]:
+              - button "Đổi ảnh" [ref=f7e317] [cursor=pointer]
+              - button "Xóa ảnh" [ref=f7e322] [cursor=pointer]
+        - generic [ref=f7e326]:
+          - generic [ref=f7e327]: Tiêu đề mẹo
+          - 'textbox "Ví dụ: Cách giữ bơ sáp không bị thâm đen..." [ref=f7e334]': Cách giữ bơ sáp không bị thâm
+        - generic [ref=f7e335]:
+          - generic [ref=f7e336]: Chuyên mục mẹo
+          - generic [ref=f7e341]:
+            - combobox [ref=f7e344]
+            - button "Chọn một chuyên mục phù hợp" [ref=f7e346]
+        - generic [ref=f7e351]:
+          - generic [ref=f7e352]: Nội dung hướng dẫn chi tiết
+          - paragraph [ref=f7e361]: Khi cắt bơ mà dùng không hết, hãy quét một lớp dầu oliu mỏng hoặc vắt chút chanh lên bề mặt bơ rồi bọc kín bằng màng bọc thực phẩm, để tủ lạnh.
+      - generic [ref=f7e363]:
+        - button "Hủy bỏ" [ref=f7e364] [cursor=pointer]
+        - button "Lưu thay đổi" [ref=f7e365] [cursor=pointer]
+    - button "Dismiss" [ref=f7e371]

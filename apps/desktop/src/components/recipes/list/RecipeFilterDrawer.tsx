@@ -7,6 +7,7 @@ export interface RecipeFilterState {
   tags: string[];
   cookedStatus?: 'all' | 'cooked' | 'uncooked';
   minRating?: number;
+  hideVariants?: boolean;
 }
 
 export const defaultFilterState: RecipeFilterState = {
@@ -14,7 +15,8 @@ export const defaultFilterState: RecipeFilterState = {
   maxTime: null,
   tags: [],
   cookedStatus: 'all',
-  minRating: 0
+  minRating: 0,
+  hideVariants: false
 };
 
 interface RecipeFilterDrawerProps {
@@ -51,8 +53,8 @@ export function RecipeFilterDrawer({
           <>
             <DrawerHeader className="flex justify-between items-center border-b border-divider">
               <div className="flex gap-2 items-center">
-                <Filter className="w-5 h-5" />
-                <span className="text-lg">Lọc công thức</span>
+                <Filter className="w-5 h-5 text-primary" />
+                <span className="text-lg font-bold">Lọc công thức</span>
               </div>
             </DrawerHeader>
             <DrawerBody className="py-6">
@@ -65,9 +67,19 @@ export function RecipeFilterDrawer({
                   orientation="horizontal"
                 >
                   <Checkbox value="Dễ">Dễ</Checkbox>
-                  <Checkbox value="Vừa">Vừa</Checkbox>
+                  <Checkbox value="Trung bình">Trung bình</Checkbox>
                   <Checkbox value="Khó">Khó</Checkbox>
                 </CheckboxGroup>
+
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs font-semibold text-default-600 uppercase tracking-wider">Món biến thể</span>
+                  <Checkbox 
+                    isSelected={!filters.hideVariants}
+                    onValueChange={(val) => onFilterChange({ ...filters, hideVariants: !val })}
+                  >
+                    Hiển thị cả món biến thể
+                  </Checkbox>
+                </div>
 
                 <RadioGroup
                   label="Thời gian nấu"

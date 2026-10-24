@@ -1,0 +1,79 @@
+- generic [ref=f3e7]:
+  - main [ref=f3e8]:
+    - generic [ref=f3e9]:
+      - generic [ref=f3e10]:
+        - generic [ref=f3e11]:
+          - button [ref=f3e12] [cursor=pointer]
+          - generic [ref=f3e14]:
+            - heading "Mẹo nhà bếp" [level=1] [ref=f3e15]
+            - paragraph [ref=f3e16]: 6 mẹo đã lưu
+        - generic [ref=f3e18]:
+          - textbox "Tìm kiếm mẹo..." [ref=f3e26]
+          - generic [ref=f3e27]:
+            - generic [ref=f3e28]:
+              - button [ref=f3e29] [cursor=pointer]
+              - generic: "0"
+            - button "Chọn nhiều" [ref=f3e32] [cursor=pointer]
+            - generic [ref=f3e37]:
+              - button "Lưới 2 cột" [ref=f3e38] [cursor=pointer]
+              - button "1 cột tỷ lệ 4:3" [ref=f3e44] [cursor=pointer]
+      - generic [ref=f3e47]:
+        - generic [ref=f3e48] [cursor=pointer]:
+          - img "Cách giữ bơ sáp không bị thâm" [ref=f3e49]
+          - generic [ref=f3e50]: mẹo bảo quản
+          - button "Tùy chọn mẹo" [ref=f3e54]
+          - generic:
+            - heading "Cách giữ bơ sáp không bị thâm" [level=3]
+            - paragraph: Khi cắt bơ mà dùng không hết, hãy quét một lớp dầu oliu mỏng hoặc vắt chút chanh lên bề mặt bơ rồi bọc kín bằng màng bọc thực phẩm, để tủ lạnh.
+            - generic: 1 ngày trước
+        - generic [ref=f3e59] [cursor=pointer]:
+          - img "Mẹo ướp thịt nướng mềm mọng không bị khô" [ref=f3e60]
+          - generic [ref=f3e61]: mẹo chế biến
+          - button "Tùy chọn mẹo" [ref=f3e65]
+          - generic:
+            - heading "Mẹo ướp thịt nướng mềm mọng không bị khô" [level=3]
+            - paragraph: Thêm một thìa sữa đặc hoặc nước ép lê/táo vào sốt ướp. Enzyme tự nhiên trong hoa quả sẽ làm mềm thớ thịt mà không làm bở nát.
+            - generic: 1 ngày trước
+        - generic [ref=f3e70] [cursor=pointer]:
+          - img "Bí quyết chọn xương bò nấu phở ngon" [ref=f3e71]
+          - generic [ref=f3e72]: mẹo chọn nguyên liệu
+          - button "Tùy chọn mẹo" [ref=f3e76]
+          - generic:
+            - heading "Bí quyết chọn xương bò nấu phở ngon" [level=3]
+            - paragraph: Nên chọn xương ống bò, có màu đỏ tươi, tủy bên trong còn màu hồng. Tránh xương có mùi hôi lạ hoặc màu xỉn.
+            - generic: 1 ngày trước
+        - generic [ref=f3e81] [cursor=pointer]:
+          - img "Bí quyết chọn xương bò nấu phở ngon" [ref=f3e82]
+          - generic [ref=f3e83]: mẹo chọn nguyên liệu
+          - button "Tùy chọn mẹo" [ref=f3e87]
+          - generic:
+            - heading "Bí quyết chọn xương bò nấu phở ngon" [level=3]
+            - paragraph: Nên chọn xương ống bò, có màu đỏ tươi, tủy bên trong còn màu hồng. Tránh xương có mùi hôi lạ hoặc màu xỉn.
+            - generic: 1 ngày trước
+        - generic [ref=f3e92] [cursor=pointer]:
+          - img "Cách giữ bơ sáp không bị thâm" [ref=f3e93]
+          - generic [ref=f3e94]: mẹo bảo quản
+          - button "Tùy chọn mẹo" [ref=f3e98]
+          - generic:
+            - heading "Cách giữ bơ sáp không bị thâm" [level=3]
+            - paragraph: Khi cắt bơ mà dùng không hết, hãy quét một lớp dầu oliu mỏng hoặc vắt chút chanh lên bề mặt bơ rồi bọc kín bằng màng bọc thực phẩm, để tủ lạnh.
+            - generic: 1 ngày trước
+        - generic [ref=f3e103] [cursor=pointer]:
+          - img "Mẹo ướp thịt nướng mềm mọng không bị khô" [ref=f3e104]
+          - generic [ref=f3e105]: mẹo chế biến
+          - button "Tùy chọn mẹo" [ref=f3e109]
+          - generic:
+            - heading "Mẹo ướp thịt nướng mềm mọng không bị khô" [level=3]
+            - paragraph: Thêm một thìa sữa đặc hoặc nước ép lê/táo vào sốt ướp. Enzyme tự nhiên trong hoa quả sẽ làm mềm thớ thịt mà không làm bở nát.
+            - generic: 1 ngày trước
+  - generic:
+    - navigation:
+      - generic [ref=f3e114]:
+        - link [ref=f3e115] [cursor=pointer]:
+          - /url: /
+        - link [ref=f3e119] [cursor=pointer]:
+          - /url: /recipes
+        - link [ref=f3e122] [cursor=pointer]:
+          - /url: /tips
+        - button [ref=f3e125]
+    - button [ref=f3e128]

@@ -1,0 +1,64 @@
+- main [ref=f3e8]:
+  - generic [ref=f3e10]:
+    - generic [ref=f3e12]:
+      - button "Quay lại" [ref=f3e13] [cursor=pointer]
+      - heading "Chỉnh sửa khoá học" [level=1] [ref=f3e17]
+    - generic "Các phần của khoá học" [ref=f3e19]:
+      - tablist "Các phần của khoá học" [ref=f3e20]:
+        - tab "Thông tin" [ref=f3e22] [cursor=pointer]
+        - tab "Nội dung (2 chương)" [active] [selected] [ref=f3e29] [cursor=pointer]
+    - generic [ref=f3e38]:
+      - generic [ref=f3e39]: Chương trình học (2 chương, 4 bài)
+      - generic [ref=f3e46]:
+        - generic [ref=f3e47]:
+          - generic [ref=f3e48]:
+            - generic [ref=f3e49]:
+              - button "Chọn biểu tượng" [ref=f3e50] [cursor=pointer]
+              - textbox "Tên chương..." [ref=f3e57]: "Chương 1: Dụng cụ cắt thái & bảo quản dao"
+            - button "Xoá chương" [ref=f3e58] [cursor=pointer]
+          - generic [ref=f3e62]:
+            - generic [ref=f3e63] [cursor=pointer]:
+              - generic [ref=f3e64]: "1"
+              - generic [ref=f3e65]:
+                - generic [ref=f3e66]: Phân loại các dòng dao cơ bản (Chef knife, Santoku, Paring)
+                - generic [ref=f3e67]: 15p
+              - generic [ref=f3e72]:
+                - button "Sửa bài học" [ref=f3e73]
+                - button "Xoá bài học" [ref=f3e76]
+            - generic [ref=f3e80] [cursor=pointer]:
+              - generic [ref=f3e81]: "2"
+              - generic [ref=f3e82]:
+                - generic [ref=f3e83]: Tư thế đứng & kỹ thuật giữ thực phẩm an toàn (The Claw Grip)
+                - generic [ref=f3e84]: 20p
+              - generic [ref=f3e89]:
+                - button "Sửa bài học" [ref=f3e90]
+                - button "Xoá bài học" [ref=f3e93]
+            - button "Thêm bài học vào Chương 1" [ref=f3e97] [cursor=pointer]
+        - generic [ref=f3e99]:
+          - generic [ref=f3e100]:
+            - generic [ref=f3e101]:
+              - button "Chọn biểu tượng" [ref=f3e102] [cursor=pointer]
+              - textbox "Tên chương..." [ref=f3e110]: "Chương 2: Các kỹ thuật cắt thái chuẩn ẩm thực quốc tế"
+            - button "Xoá chương" [ref=f3e111] [cursor=pointer]
+          - generic [ref=f3e115]:
+            - generic [ref=f3e116] [cursor=pointer]:
+              - generic [ref=f3e117]: "1"
+              - generic [ref=f3e118]:
+                - generic [ref=f3e119]: Cắt hạt lựu (Brunoise) & sợi que diêm (Julienne)
+                - generic [ref=f3e120]: 25p
+              - generic [ref=f3e125]:
+                - button "Sửa bài học" [ref=f3e126]
+                - button "Xoá bài học" [ref=f3e129]
+            - generic [ref=f3e133] [cursor=pointer]:
+              - generic [ref=f3e134]: "2"
+              - generic [ref=f3e135]:
+                - generic [ref=f3e136]: Kỹ thuật lóc xương cá & phi lê gia cầm siêu tốc
+                - generic [ref=f3e137]: 30p
+              - generic [ref=f3e142]:
+                - button "Sửa bài học" [ref=f3e143]
+                - button "Xoá bài học" [ref=f3e146]
+            - button "Thêm bài học vào Chương 2" [ref=f3e150] [cursor=pointer]
+      - button "Thêm Chương Mới" [ref=f3e152] [cursor=pointer]
+    - generic [ref=f3e154]:
+      - button "Quay lại" [ref=f3e155] [cursor=pointer]
+      - button "Lưu thay đổi" [ref=f3e156] [cursor=pointer]

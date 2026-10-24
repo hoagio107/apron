@@ -11,6 +11,7 @@ interface BottomActionStepperProps {
   submitText?: string;
   isSaving?: boolean;
   extraAction?: React.ReactNode;
+  className?: string;
 }
 
 export function BottomActionStepper({
@@ -21,10 +22,11 @@ export function BottomActionStepper({
   onSubmit,
   submitText = "Lưu",
   isSaving = false,
-  extraAction
+  extraAction,
+  className = ""
 }: BottomActionStepperProps) {
   return (
-    <div className="fixed bottom-0 left-0 lg:left-64 right-0 p-4 bg-background/85 backdrop-blur-md border-t border-divider flex justify-between gap-3 z-50">
+    <div className={`fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t border-divider flex justify-between gap-3 z-50 ${className}`}>
       {extraAction}
       <Button 
         size="lg"

@@ -1,0 +1,127 @@
+- generic [ref=f16e7]:
+  - main [ref=f16e8]:
+    - generic [ref=f16e226]:
+      - generic [ref=f16e227]:
+        - generic [ref=f16e228]:
+          - heading "Đơn vị tính" [level=1] [ref=f16e229]
+          - paragraph [ref=f16e230]: 9 đơn vị đo lường
+        - button "Thêm đơn vị" [ref=f16e231] [cursor=pointer]
+      - generic [ref=f16e233]:
+        - generic [ref=f16e237]:
+          - textbox "Tìm đơn vị (gam, ml, quả, muỗng...)" [ref=f16e241]
+          - button "clear input"
+        - generic [ref=f16e242]:
+          - button "⚖️ Tất cả (9)" [ref=f16e243]:
+            - generic [ref=f16e244]: ⚖️ Tất cả
+            - generic [ref=f16e245]: (9)
+          - button "Khối lượng (2)" [ref=f16e246]:
+            - generic [ref=f16e251]: Khối lượng
+            - generic [ref=f16e252]: (2)
+          - button "Thể tích (4)" [ref=f16e253]:
+            - generic [ref=f16e256]: Thể tích
+            - generic [ref=f16e257]: (4)
+          - button "Số lượng / Đếm (3)" [ref=f16e258]:
+            - generic [ref=f16e262]: Số lượng / Đếm
+            - generic [ref=f16e263]: (3)
+          - button "Đóng gói & Khác (0)" [ref=f16e264]:
+            - generic [ref=f16e269]: Đóng gói & Khác
+            - generic [ref=f16e270]: (0)
+        - generic [ref=f16e272]:
+          - button "Tất cả" [ref=f16e273]
+          - button "Đang dùng (0)" [ref=f16e274]
+          - button "Chưa dùng (9)" [ref=f16e281]
+      - generic [ref=f16e283]:
+        - generic [ref=f16e284] [cursor=pointer]:
+          - generic [ref=f16e291]:
+            - generic [ref=f16e292]:
+              - generic [ref=f16e293]: g
+              - generic [ref=f16e294]: Khối lượng
+            - generic [ref=f16e295]: Chưa dùng
+          - generic [ref=f16e297]:
+            - button "Chỉnh sửa đơn vị" [ref=f16e298]
+            - button "Xoá đơn vị" [ref=f16e301]
+        - generic [ref=f16e305] [cursor=pointer]:
+          - generic [ref=f16e312]:
+            - generic [ref=f16e313]:
+              - generic [ref=f16e314]: kg
+              - generic [ref=f16e315]: Khối lượng
+            - generic [ref=f16e316]:
+              - generic [ref=f16e317]: 1 kg = 1000 g
+              - generic [ref=f16e318]: Chưa dùng
+          - generic [ref=f16e319]:
+            - button "Chỉnh sửa đơn vị" [ref=f16e320]
+            - button "Xoá đơn vị" [ref=f16e323]
+        - generic [ref=f16e327] [cursor=pointer]:
+          - generic [ref=f16e332]:
+            - generic [ref=f16e333]:
+              - generic [ref=f16e334]: ml
+              - generic [ref=f16e335]: Thể tích
+            - generic [ref=f16e336]: Chưa dùng
+          - generic [ref=f16e338]:
+            - button "Chỉnh sửa đơn vị" [ref=f16e339]
+            - button "Xoá đơn vị" [ref=f16e342]
+        - generic [ref=f16e346] [cursor=pointer]:
+          - generic [ref=f16e351]:
+            - generic [ref=f16e352]:
+              - generic [ref=f16e353]: lít
+              - generic [ref=f16e354]: Thể tích
+            - generic [ref=f16e355]: Chưa dùng
+          - generic [ref=f16e357]:
+            - button "Chỉnh sửa đơn vị" [ref=f16e358]
+            - button "Xoá đơn vị" [ref=f16e361]
+        - generic [ref=f16e365] [cursor=pointer]:
+          - generic [ref=f16e370]:
+            - generic [ref=f16e371]:
+              - generic [ref=f16e372]: muỗng cà phê
+              - generic [ref=f16e373]: Thể tích
+            - generic [ref=f16e374]: Chưa dùng
+          - generic [ref=f16e376]:
+            - button "Chỉnh sửa đơn vị" [ref=f16e377]
+            - button "Xoá đơn vị" [ref=f16e380]
+        - generic [ref=f16e384] [cursor=pointer]:
+          - generic [ref=f16e389]:
+            - generic [ref=f16e390]:
+              - generic [ref=f16e391]: muỗng canh
+              - generic [ref=f16e392]: Thể tích
+            - generic [ref=f16e393]: Chưa dùng
+          - generic [ref=f16e395]:
+            - button "Chỉnh sửa đơn vị" [ref=f16e396]
+            - button "Xoá đơn vị" [ref=f16e399]
+        - generic [ref=f16e403] [cursor=pointer]:
+          - generic [ref=f16e409]:
+            - generic [ref=f16e410]:
+              - generic [ref=f16e411]: quả
+              - generic [ref=f16e412]: Số lượng / Đếm
+            - generic [ref=f16e413]: Chưa dùng
+          - generic [ref=f16e415]:
+            - button "Chỉnh sửa đơn vị" [ref=f16e416]
+            - button "Xoá đơn vị" [ref=f16e419]
+        - generic [ref=f16e423] [cursor=pointer]:
+          - generic [ref=f16e429]:
+            - generic [ref=f16e430]:
+              - generic [ref=f16e431]: bó
+              - generic [ref=f16e432]: Số lượng / Đếm
+            - generic [ref=f16e433]: Chưa dùng
+          - generic [ref=f16e435]:
+            - button "Chỉnh sửa đơn vị" [ref=f16e436]
+            - button "Xoá đơn vị" [ref=f16e439]
+        - generic [ref=f16e443] [cursor=pointer]:
+          - generic [ref=f16e449]:
+            - generic [ref=f16e450]:
+              - generic [ref=f16e451]: củ
+              - generic [ref=f16e452]: Số lượng / Đếm
+            - generic [ref=f16e453]: Chưa dùng
+          - generic [ref=f16e455]:
+            - button "Chỉnh sửa đơn vị" [ref=f16e456]
+            - button "Xoá đơn vị" [ref=f16e459]
+  - generic:
+    - navigation:
+      - generic [ref=f16e166]:
+        - link [ref=f16e167] [cursor=pointer]:
+          - /url: /
+        - link [ref=f16e171] [cursor=pointer]:
+          - /url: /recipes
+        - link [ref=f16e174] [cursor=pointer]:
+          - /url: /tips
+        - button [ref=f16e177]
+    - button [ref=f16e180]

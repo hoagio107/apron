@@ -1,0 +1,67 @@
+- main [ref=f4e8]:
+  - generic [ref=f4e488]:
+    - generic [ref=f4e490]:
+      - generic [ref=f4e492]:
+        - heading "Khoá học làm bánh mì Artisan" [level=1] [ref=f4e493]
+        - paragraph [ref=f4e494]: Chế độ học tập
+      - button "Sửa khoá học" [ref=f4e496] [cursor=pointer]
+    - generic [ref=f4e501]:
+      - generic [ref=f4e502]:
+        - heading "Nội dung khoá học Tiến độ 0/2 bài học 0%" [level=3] [ref=f4e503]:
+          - generic [ref=f4e504]: Nội dung khoá học
+          - generic [ref=f4e508]:
+            - generic [ref=f4e509]:
+              - generic [ref=f4e510]: Tiến độ
+              - generic [ref=f4e511]: 0/2 bài học
+            - progressbar "Tiến độ khoá học" [ref=f4e512]
+        - generic [ref=f4e515]:
+          - generic "Chương 1" [ref=f4e516]:
+            - heading [level=2] [ref=f4e517]:
+              - button "1. Chương 1" [expanded] [ref=f4e518]
+            - region "1. Chương 1" [ref=f4e527]:
+              - generic [ref=f4e528]: Bài học 1
+          - separator [ref=f4e536]
+          - generic "Chương 2" [ref=f4e537]:
+            - heading [level=2] [ref=f4e538]:
+              - button "2. Chương 2" [expanded] [ref=f4e539]
+            - region "2. Chương 2" [ref=f4e551]:
+              - generic [ref=f4e553] [cursor=pointer]:
+                - generic [ref=f4e554]: "1"
+                - generic [ref=f4e556]:
+                  - generic [ref=f4e557]: Bài học mới
+                  - generic [ref=f4e558]: 15m
+      - generic [ref=f4e563]:
+        - generic [ref=f4e564]:
+          - generic [ref=f4e566]:
+            - generic [ref=f4e567]: Chương 1
+            - generic [ref=f4e571]: Bài 1
+          - heading "Bài học 1" [level=1] [ref=f4e572]
+          - generic [ref=f4e573]:
+            - generic [ref=f4e574]: 0 Đánh giá
+            - generic [ref=f4e577]: 0 phút
+            - generic [ref=f4e581]: 0 file đính kèm
+            - generic [ref=f4e584]: 0 ghi chú
+        - paragraph [ref=f4e593]: Chưa có nội dung bài học
+        - generic [ref=f4e594]:
+          - button "Bài trước" [disabled]
+          - button "Tiếp theo" [ref=f4e595] [cursor=pointer]
+      - generic [ref=f4e598]:
+        - generic "Course Sidebar Tabs" [ref=f4e599]:
+          - tablist "Course Sidebar Tabs" [ref=f4e600]:
+            - tab "Thông tin" [selected] [ref=f4e602] [cursor=pointer]
+            - tab "Ghi chú & Đính kèm" [ref=f4e604] [cursor=pointer]
+        - tabpanel "Thông tin" [ref=f4e606]:
+          - generic [ref=f4e607]:
+            - generic [ref=f4e608]:
+              - heading "Bài học 1" [level=3] [ref=f4e609]
+              - generic [ref=f4e610]:
+                - generic [ref=f4e611]: 0 Đánh giá
+                - generic [ref=f4e615]: 0 phút
+                - generic [ref=f4e620]: 0 file đính kèm
+                - generic [ref=f4e624]: 0 ghi chú
+            - separator [ref=f4e629]
+            - generic [ref=f4e630]:
+              - generic [ref=f4e631] [cursor=pointer]:
+                - checkbox "Đánh dấu đã hoàn thành" [ref=f4e632]
+                - generic [ref=f4e634]: Đánh dấu đã hoàn thành
+              - paragraph [ref=f4e635]: Lưu lại tiến độ học tập của bạn

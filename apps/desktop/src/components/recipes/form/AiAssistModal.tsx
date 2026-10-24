@@ -1,17 +1,31 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { 
-  Modal, 
-  ModalContent, 
-  ModalHeader, 
-  ModalBody, 
-  ModalFooter, 
+  Drawer, 
+  DrawerContent, 
+  DrawerHeader, 
+  DrawerBody, 
+  DrawerFooter,
   Button, 
-  Textarea, 
-  Spinner
+  Textarea,
+  Tabs,
+  Tab,
+  Chip,
+  toast
 } from '@/ui';
-import { Settings, Sparkles, Check, Clock, Users, Flame, ChefHat, AlertTriangle, ImagePlus, X } from 'lucide-react';
-import { GEMINI_MODELS, type ParseRecipeResult, parseRecipeWithGemini } from '../../../lib/gemini';
-import { convertToWebP, validateMediaFile } from '../../../lib/image-utils';
+import { 
+  Sparkles, 
+  Check, 
+  Clock, 
+  ChefHat, 
+  AlertTriangle, 
+  Copy, 
+  ExternalLink, 
+  ArrowRight, 
+  ClipboardPaste, 
+  RotateCcw,
+  FileText
+} from 'lucide-react';
+import { type ParseRecipeResult, buildRecipePrompt, parseGeminiResponse } from '../../../lib/gemini';
 import { useIngredientCatalogStore } from '../../../store/useIngredientCatalogStore';
 import { useTipStore } from '../../../store/useTipStore';
 
@@ -22,501 +36,430 @@ interface AiAssistModalProps {
   onApplyBulk?: (data: ParseRecipeResult[]) => void;
 }
 
-interface SelectedImage {
-  id: string;
-  file: File;
-  previewUrl: string;
-}
-
 export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: AiAssistModalProps) {
+  const [activeTab, setActiveTab] = useState<'prompt' | 'result'>('prompt');
   const [inputText, setInputText] = useState('');
-  const [apiKey, setApiKey] = useState('');
-  const [selectedModel, setSelectedModel] = useState(GEMINI_MODELS[0].name);
-  const [isLoading, setIsLoading] = useState(false);
+  const [resultText, setResultText] = useState('');
+  const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [parsedData, setParsedData] = useState<ParseRecipeResult[] | null>(null);
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
-  
-  const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activeRecipeIndex, setActiveRecipeIndex] = useState(0);
   
   const catalog = useIngredientCatalogStore(state => state.catalog);
-  const { tips, addTip, fetchTips } = useTipStore();
+  const { tips, fetchTips } = useTipStore();
 
   useEffect(() => {
     fetchTips();
   }, [fetchTips]);
 
   useEffect(() => {
-    if (isOpen) {
-      const savedKey = localStorage.getItem('gemini_api_key') || '';
-      const savedModel = localStorage.getItem('gemini_model') || GEMINI_MODELS[0].name;
-      setApiKey(savedKey);
-      setSelectedModel(savedModel);
-      setError('');
-    } else {
-      // Cleanup image previews when modal closes
-      selectedImages.forEach(img => URL.revokeObjectURL(img.previewUrl));
-      setSelectedImages([]);
-      setInputText('');
-      setParsedData(null);
-      setActiveTabIndex(0);
-      setError('');
+    if (!isOpen) {
+      setCopied(false);
+      setError(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  const isConfigured = !!apiKey;
+  const existingIngredients = useMemo(() => {
+    return Object.values(catalog).map(ing => ing.name);
+  }, [catalog]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    
-    const files = Array.from(e.target.files);
-    const newImages: SelectedImage[] = [];
-    
-    let overLimit = false;
-    for (const file of files) {
-      if (selectedImages.length + newImages.length >= 20) {
-        overLimit = true;
-        break;
-      }
-      
-      const { valid, type } = validateMediaFile(file);
-      if (valid && type === 'image') {
-        newImages.push({
-          id: crypto.randomUUID(),
-          file,
-          previewUrl: URL.createObjectURL(file)
-        });
-      }
-    }
-    
-    if (overLimit) {
-      setError('Chỉ được chọn tối đa 20 ảnh.');
-    } else {
-      setError('');
-    }
-    
-    if (newImages.length > 0) {
-      setSelectedImages(prev => [...prev, ...newImages]);
-    }
-    
-    // reset input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  const existingTips = useMemo(() => {
+    return tips.map(t => ({ id: t.id, title: t.title }));
+  }, [tips]);
+
+  const generatedPrompt = useMemo(() => {
+    return buildRecipePrompt(inputText, existingIngredients, existingTips);
+  }, [inputText, existingIngredients, existingTips]);
+
+  const handleCopyPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedPrompt);
+      setCopied(true);
+      toast.success('Đã sao chép Prompt!');
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      const el = document.createElement('textarea');
+      el.value = generatedPrompt;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      setCopied(true);
+      toast.success('Đã sao chép Prompt!');
+      setTimeout(() => setCopied(false), 2500);
     }
   };
 
-  const handleRemoveImage = (id: string) => {
-    setSelectedImages(prev => {
-      const filtered = prev.filter(img => {
-        if (img.id === id) {
-          URL.revokeObjectURL(img.previewUrl);
-          return false;
-        }
-        return true;
-      });
-      return filtered;
-    });
+  const handleOpenGemini = () => {
+    window.open('https://gemini.google.com/app', '_blank', 'noopener,noreferrer');
   };
 
-  const handleAnalyze = async () => {
-    if (!inputText.trim() && selectedImages.length === 0) return;
-    if (!apiKey.trim()) {
-      setError('Vui lòng nhập Gemini API Key.');
-      return;
+  const handlePasteClipboard = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        setResultText(text);
+        handleParse(text);
+      } else {
+        toast.info('Bộ nhớ tạm trống');
+      }
+    } catch {
+      toast.error('Không thể đọc bộ nhớ tạm. Vui lòng dán thủ công.');
     }
-    if (!selectedModel) {
-      setError('Vui lòng chọn model AI.');
+  };
+
+  const handleParse = (textToParse?: string) => {
+    const raw = textToParse !== undefined ? textToParse : resultText;
+    if (!raw.trim()) {
+      setError('Vui lòng dán kết quả từ Gemini Web.');
+      setParsedData(null);
       return;
     }
 
     try {
-      setIsLoading(true);
-      setError('');
-      setParsedData(null);
-      
-      localStorage.setItem('gemini_api_key', apiKey.trim());
-      
-      // Chuyển đổi tất cả ảnh sang base64 webp
-      const base64Images: string[] = [];
-      for (const img of selectedImages) {
-        try {
-          const webpDataUrl = await convertToWebP(img.file);
-          base64Images.push(webpDataUrl);
-        } catch (e) {
-          console.error("Lỗi chuyển đổi ảnh:", e);
-        }
-      }
-      
-      const existingIngredients = Object.values(catalog).map(ing => ing.name);
-      const existingTips = tips.map(t => ({ id: t.id, title: t.title }));
-      
-      const result = await parseRecipeWithGemini(selectedModel, inputText, apiKey.trim(), base64Images, existingIngredients, existingTips);
-      setParsedData(result);
-      setActiveTabIndex(0);
+      setError(null);
+      const results = parseGeminiResponse(raw);
+      setParsedData(results);
+      setActiveRecipeIndex(0);
+      toast.success(`Đã trích xuất ${results.length} công thức!`);
     } catch (err: any) {
-      setError(err.message || 'Có lỗi xảy ra khi phân tích dữ liệu.');
-    } finally {
-      setIsLoading(false);
+      setError(err.message || 'Lỗi khi phân tích dữ liệu JSON.');
+      setParsedData(null);
     }
   };
 
-  const handleApply = () => {
+  const handleApply = (onClose: () => void) => {
     if (parsedData && parsedData.length > 0) {
-      onApply(parsedData[activeTabIndex]);
-      onOpenChange(false);
-      
-      // Reset state for next use
+      onApply(parsedData[activeRecipeIndex]);
+      toast.success('Đã điền công thức vào form!');
+      onClose();
       setInputText('');
+      setResultText('');
       setParsedData(null);
-      setActiveTabIndex(0);
+      setError(null);
+      setActiveTab('prompt');
     }
   };
 
-  const handleExportTip = async (idx: number, suggested: { title: string, content: string }) => {
-    try {
-      const newTip = {
-        id: crypto.randomUUID(),
-        title: suggested.title,
-        content: suggested.content,
-        category_id: 'cooking'
-      };
-      await addTip(newTip);
-      
-      setParsedData(prev => {
-        if (!prev) return prev;
-        const newData = [...prev];
-        newData[idx] = { ...newData[idx] };
-        newData[idx].linked_tips = [...(newData[idx].linked_tips || []), newTip.id];
-        delete newData[idx].suggested_tip;
-        return newData;
-      });
-    } catch (err: any) {
-      setError(err.message || 'Lỗi khi xuất mẹo');
+  const handleApplyAll = (onClose: () => void) => {
+    if (parsedData && parsedData.length > 0 && onApplyBulk) {
+      onApplyBulk(parsedData);
+      toast.success(`Đã lưu ${parsedData.length} công thức!`);
+      onClose();
+      setInputText('');
+      setResultText('');
+      setParsedData(null);
+      setError(null);
+      setActiveTab('prompt');
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="4xl" scrollBehavior="inside">
-      <ModalContent>
+    <Drawer 
+      isOpen={isOpen} 
+      onOpenChange={onOpenChange} 
+      placement="bottom"
+      size="2xl" 
+      classNames={{
+        wrapper: "z-[200]",
+        base: "rounded-t-3xl rounded-b-none m-0 sm:m-auto sm:rounded-3xl max-h-[90vh] sm:max-h-[85vh] bg-content1 border-t sm:border border-divider/40 sm:max-w-xl mx-auto shadow-2xl",
+        header: "border-b border-divider/40 px-5 py-4 shrink-0",
+        body: "p-5 overflow-y-auto space-y-4",
+        footer: "border-t border-divider/40 px-5 py-3.5 shrink-0 flex items-center gap-3 bg-content1"
+      }}
+    >
+      <DrawerContent>
         {(onClose) => (
           <>
-            <ModalHeader className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-primary" />
-                <span>AI Hỗ trợ điền công thức</span>
+            <DrawerHeader className="flex items-center gap-3 px-5 py-4 border-b border-divider/40 shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-secondary/15 text-secondary flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5 text-secondary" />
               </div>
-              <p className="text-sm text-default-500 font-normal">
-                Dán nội dung công thức hoặc <strong>đường dẫn (URL)</strong> vào đây để AI tự động trích xuất thông tin điền vào Form.
-              </p>
-            </ModalHeader>
-            <ModalBody>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-2">
-                {/* Column 1: Input */}
+              <div className="flex flex-col text-left">
+                <h3 className="text-base sm:text-lg font-bold text-foreground">Trợ lý AI Công thức</h3>
+                <p className="text-xs text-default-400 font-normal">Tự động trích xuất công thức từ Gemini Web</p>
+              </div>
+            </DrawerHeader>
+
+            {/* Tabs */}
+            <div className="px-5 pt-2 border-b border-divider/40 shrink-0">
+              <Tabs 
+                selectedKey={activeTab} 
+                onSelectionChange={(k) => setActiveTab(k as 'prompt' | 'result')}
+                color="primary"
+                variant="underlined"
+                classNames={{
+                  tabList: "gap-6 p-0 border-none w-full",
+                  tab: "h-11 px-1 font-semibold text-sm",
+                  cursor: "w-full bg-primary"
+                }}
+              >
+                <Tab key="prompt" title="1. Lấy Prompt gửi Gemini" />
+                <Tab 
+                  key="result" 
+                  title={
+                    <div className="flex items-center gap-2">
+                      <span>2. Nhập kết quả</span>
+                      {parsedData && parsedData.length > 0 && (
+                        <span className="w-2 h-2 rounded-full bg-success" />
+                      )}
+                    </div>
+                  } 
+                />
+              </Tabs>
+            </div>
+
+            <DrawerBody className="p-5">
+              {/* TAB 1: TẠO PROMPT */}
+              {activeTab === 'prompt' && (
                 <div className="flex flex-col gap-4">
-                  {error && (
-                    <div className="p-3 bg-danger-50 text-danger-600 rounded-lg flex items-start gap-2 text-sm">
-                      <AlertTriangle className="w-5 h-5 shrink-0" />
-                      <span>{error}</span>
-                    </div>
-                  )}
-                  
-                  {/* Warning nếu chưa cấu hình */}
-                  {!isConfigured && (
-                    <div className="p-3 bg-warning-50 text-warning-700 rounded-lg flex items-start gap-2 text-sm">
-                      <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="font-medium">Chưa cấu hình AI</p>
-                        <p className="text-xs mt-0.5">Vui lòng nhập Gemini API Key trong phần cài đặt để sử dụng tính năng này.</p>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="flat"
-                        color="warning"
-                        startContent={<Settings className="w-3.5 h-3.5" />}
-                        onPress={() => {
-                          onOpenChange(false);
-                          window.dispatchEvent(new CustomEvent('open-settings'));
-                        }}
-                      >
-                        Cài đặt
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Model đang dùng */}
-                  {isConfigured && (
-                    <div className="flex items-center gap-2 text-xs text-default-400 bg-default-50 rounded-lg px-3 py-2">
-                      <Sparkles className="w-3.5 h-3.5 text-primary" />
-                      <span>Model: <strong className="text-default-600">{GEMINI_MODELS.find(m => m.name === selectedModel)?.label || selectedModel}</strong></span>
-                    </div>
-                  )}
-
-                  <Textarea
-                    label="Nội dung công thức hoặc URL"
-                    placeholder="Dán đường link web, toàn bộ bài viết, hoặc để trống nếu dùng ảnh..."
-                    value={inputText}
-                    onValueChange={setInputText}
-                    minRows={6}
-                    maxRows={10}
-                    variant="flat"
-                    isDisabled={isLoading}
-                    className="flex-1"
-                    classNames={{
-                      inputWrapper: "h-full",
-                      base: "flex-1"
-                    }}
-                  />
-
-                  {/* Image Selector */}
                   <div className="flex flex-col gap-2">
-                    <span className="text-sm font-medium">Hình ảnh ({selectedImages.length}/20)</span>
-                    
-                    <input 
-                      type="file" 
-                      ref={fileInputRef} 
-                      className="hidden" 
-                      multiple 
-                      accept="image/*" 
-                      onChange={handleFileChange} 
-                    />
-                    
-                    <div className="flex gap-2 flex-wrap">
-                      {selectedImages.map((img) => (
-                        <div key={img.id} className="relative w-16 h-16 shrink-0 group rounded-md overflow-hidden border border-default-200">
-                          <img src={img.previewUrl} className="w-full h-full object-cover" alt="preview" />
-                          <button
-                            type="button"
-                            className="absolute top-1 right-1 bg-black/50 hover:bg-danger text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-all"
-                            onClick={() => handleRemoveImage(img.id)}
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ))}
-                      
-                      {selectedImages.length < 20 && (
-                        <button 
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-primary" />
+                        Nội dung công thức thô hoặc link:
+                      </label>
+                      {inputText.trim() && (
+                        <button
                           type="button"
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={isLoading}
-                          className="w-16 h-16 rounded-md border-2 border-dashed border-default-300 hover:border-primary hover:bg-primary/5 flex items-center justify-center text-default-400 hover:text-primary transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={() => setInputText('')}
+                          className="text-xs text-default-400 hover:text-danger flex items-center gap-1 transition-colors"
                         >
-                          <ImagePlus className="w-6 h-6" />
+                          <RotateCcw className="w-3.5 h-3.5" /> Xóa
                         </button>
                       )}
                     </div>
+
+                    <Textarea
+                      placeholder="Dán bài viết, danh sách nguyên liệu, ghi chú hoặc link món ăn vào đây..."
+                      value={inputText}
+                      onValueChange={setInputText}
+                      minRows={6}
+                      maxRows={10}
+                      variant="flat"
+                      classNames={{
+                        inputWrapper: "bg-default-100 hover:bg-default-200/70 dark:bg-default-100/20 border border-divider/50 rounded-2xl shadow-none p-3.5",
+                        input: "text-sm text-foreground leading-relaxed"
+                      }}
+                    />
+                  </div>
+
+                  {/* 2 buttons with exact same width (50% each), height h-12, radius rounded-xl */}
+                  <div className="grid grid-cols-2 gap-3 pt-1">
+                    <Button
+                      color="primary"
+                      className="h-12 rounded-xl font-bold shadow-none text-white"
+                      startContent={copied ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4" />}
+                      onPress={handleCopyPrompt}
+                    >
+                      {copied ? 'Đã chép Prompt' : 'Sao chép Prompt'}
+                    </Button>
+
+                    <Button
+                      variant="flat"
+                      color="secondary"
+                      className="h-12 rounded-xl font-semibold shadow-none"
+                      startContent={<ExternalLink className="w-4 h-4" />}
+                      onPress={handleOpenGemini}
+                    >
+                      Mở Gemini Web
+                    </Button>
                   </div>
                 </div>
+              )}
 
-                {/* Column 2: Preview */}
-                <div className="flex flex-col h-full min-h-[350px]">
-                  {parsedData && parsedData.length > 0 ? (
-                    <div className="flex flex-col h-full border border-success-200 rounded-xl overflow-hidden bg-success-50/30">
-                      <div className="bg-success-100/50 px-4 py-3 border-b border-success-200 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Check className="w-4 h-4 text-success-600" /> 
-                          <h4 className="font-semibold text-sm text-success-700">Xem trước kết quả trích xuất</h4>
-                        </div>
-                        {parsedData.length > 1 && (
-                          <span className="text-xs bg-success-200 text-success-800 px-2 py-0.5 rounded-full font-medium">
-                            {parsedData.length} công thức
-                          </span>
+              {/* TAB 2: DÁN KẾT QUẢ & ĐIỀN FORM */}
+              {activeTab === 'result' && (
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <ClipboardPaste className="w-4 h-4 text-primary" />
+                        Dán kết quả từ Gemini Web:
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="flat"
+                          color="secondary"
+                          className="h-8 text-xs font-semibold rounded-lg shadow-none"
+                          startContent={<ClipboardPaste className="w-3.5 h-3.5" />}
+                          onPress={handlePasteClipboard}
+                        >
+                          Dán Clipboard
+                        </Button>
+                        {resultText && (
+                          <Button
+                            size="sm"
+                            variant="light"
+                            color="danger"
+                            className="h-8 text-xs font-semibold rounded-lg"
+                            onPress={() => {
+                              setResultText('');
+                              setParsedData(null);
+                            }}
+                          >
+                            Xóa
+                          </Button>
                         )}
                       </div>
-                      
-                      {/* Tabs */}
+                    </div>
+
+                    <Textarea
+                      placeholder="Dán toàn bộ kết quả phản hồi từ Gemini vào đây..."
+                      value={resultText}
+                      onValueChange={(val) => {
+                        setResultText(val);
+                        if (val.trim().startsWith('{') || val.includes('"recipes"') || val.includes('```json')) {
+                          handleParse(val);
+                        }
+                      }}
+                      minRows={6}
+                      maxRows={10}
+                      variant="flat"
+                      classNames={{
+                        inputWrapper: "bg-default-100 hover:bg-default-200/70 dark:bg-default-100/20 border border-divider/50 rounded-2xl shadow-none p-3.5 font-mono",
+                        input: "text-xs font-mono leading-relaxed"
+                      }}
+                    />
+
+                    {!parsedData && (
+                      <Button
+                        color="primary"
+                        variant="flat"
+                        className="w-full h-12 rounded-xl font-semibold shadow-none mt-1"
+                        startContent={<Sparkles className="w-4 h-4" />}
+                        onPress={() => handleParse()}
+                      >
+                        Trích xuất dữ liệu
+                      </Button>
+                    )}
+                  </div>
+
+                  {error && (
+                    <div className="p-3 bg-danger-50 dark:bg-danger-950/30 border border-danger-200 dark:border-danger-900/50 text-danger-700 dark:text-danger-300 rounded-xl flex items-start gap-2.5 text-xs">
+                      <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                      <div className="flex-1">{error}</div>
+                    </div>
+                  )}
+
+                  {/* PREVIEW KẾT QUẢ */}
+                  {parsedData && parsedData.length > 0 && (
+                    <div className="flex flex-col border border-success-200 dark:border-success-900/50 rounded-2xl overflow-hidden bg-success-50/20 dark:bg-success-950/10">
+                      <div className="bg-success-100/60 dark:bg-success-900/30 px-4 py-2.5 border-b border-success-200 dark:border-success-900/50 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Check className="w-4 h-4 text-success-600 dark:text-success-400" />
+                          <h4 className="font-bold text-sm text-success-800 dark:text-success-200">
+                            Đã trích xuất thành công
+                          </h4>
+                        </div>
+                        {parsedData.length > 1 && (
+                          <Chip size="sm" color="success" variant="flat" className="font-semibold text-xs">
+                            {parsedData.length} món ăn
+                          </Chip>
+                        )}
+                      </div>
+
+                      {/* Selector nếu có nhiều công thức */}
                       {parsedData.length > 1 && (
-                        <div className="flex overflow-x-auto border-b border-success-200 bg-success-50/50">
+                        <div className="flex overflow-x-auto border-b border-success-200/60 bg-success-50/40 dark:bg-success-950/30 p-1.5 gap-1.5">
                           {parsedData.map((recipe, idx) => (
                             <button
                               key={idx}
-                              onClick={() => setActiveTabIndex(idx)}
-                              className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                                activeTabIndex === idx 
-                                  ? 'border-success-500 text-success-700 bg-success-100/50' 
-                                  : 'border-transparent text-success-600 hover:text-success-800 hover:bg-success-100/30'
+                              onClick={() => setActiveRecipeIndex(idx)}
+                              className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                                activeRecipeIndex === idx 
+                                  ? 'bg-success text-white' 
+                                  : 'text-success-700 dark:text-success-300 hover:bg-success-100 dark:hover:bg-success-900/40'
                               }`}
                             >
-                              {recipe.title || `Công thức ${idx + 1}`}
+                              {recipe.title || `Món ${idx + 1}`}
                             </button>
                           ))}
                         </div>
                       )}
-                      
-                      <div className="max-h-[400px] overflow-y-auto custom-scrollbar p-4 text-sm flex-1">
-                        <div className="space-y-4">
-                          {/* Thông tin cơ bản */}
-                          <div>
-                            <h5 className="font-bold text-base mb-1">{parsedData[activeTabIndex].title || <span className="italic text-default-400">Không có tên</span>}</h5>
-                            {parsedData[activeTabIndex].description && <p className="text-default-600 mb-2">{parsedData[activeTabIndex].description}</p>}
-                            {parsedData[activeTabIndex].notes && (
-                              <div className="mt-2 text-default-600 prose prose-sm max-w-none prose-p:my-1" dangerouslySetInnerHTML={{ __html: parsedData[activeTabIndex].notes }} />
-                            )}
-                            
-                            <div className="flex flex-wrap gap-3 mt-2 text-xs text-default-600">
-                              {parsedData[activeTabIndex].difficulty && <span className="flex items-center gap-1"><ChefHat className="w-3.5 h-3.5" /> {parsedData[activeTabIndex].difficulty}</span>}
-                              {parsedData[activeTabIndex].prep_time_minutes && <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> CB: {parsedData[activeTabIndex].prep_time_minutes}p</span>}
-                              {parsedData[activeTabIndex].cook_time_minutes && <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> Nấu: {parsedData[activeTabIndex].cook_time_minutes}p</span>}
-                              {parsedData[activeTabIndex].servings && <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {parsedData[activeTabIndex].servings} người</span>}
-                              {parsedData[activeTabIndex].calories && <span className="flex items-center gap-1"><Flame className="w-3.5 h-3.5" /> {parsedData[activeTabIndex].calories} kcal</span>}
-                            </div>
-                          </div>
 
-                          {/* Tags */}
-                          {parsedData[activeTabIndex].tags && parsedData[activeTabIndex].tags.length > 0 && (
-                            <div>
-                              <span className="font-semibold text-xs uppercase tracking-wider text-default-500 block mb-1">Tags</span>
-                              <div className="flex flex-wrap gap-1">
-                                {parsedData[activeTabIndex].tags.map(t => (
-                                  <span key={t.name} className="px-2 py-0.5 bg-default-100 rounded-md text-xs">
-                                    {t.name} {t.is_new && <span className="text-[10px] text-primary ml-1">(Mới)</span>}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Linked & Suggested Tips */}
-                          {((parsedData[activeTabIndex].linked_tips && parsedData[activeTabIndex].linked_tips.length > 0) || parsedData[activeTabIndex].suggested_tip) && (
-                            <div className="bg-primary-50 p-3 rounded-lg border border-primary-100">
-                              <span className="font-semibold text-xs uppercase tracking-wider text-primary-700 block mb-2 flex items-center gap-1">
-                                <Sparkles className="w-3.5 h-3.5" /> Mẹo Nhà Bếp
-                              </span>
-                              
-                              {parsedData[activeTabIndex].linked_tips && parsedData[activeTabIndex].linked_tips.length > 0 && (
-                                <div className="mb-2">
-                                  <span className="text-xs text-primary-600 block mb-1">Mẹo đã liên kết:</span>
-                                  <ul className="list-disc list-inside text-xs text-primary-800 ml-1">
-                                    {parsedData[activeTabIndex].linked_tips.map(id => {
-                                      const t = tips.find(tip => tip.id === id);
-                                      return t ? <li key={id}>{t.title}</li> : null;
-                                    })}
-                                  </ul>
-                                </div>
-                              )}
-
-                              {parsedData[activeTabIndex].suggested_tip && (
-                                <div className="mt-2 bg-white/60 p-2 rounded border border-primary-100">
-                                  <span className="text-xs font-semibold text-primary-600 block mb-1">Gợi ý mẹo mới: {parsedData[activeTabIndex].suggested_tip.title}</span>
-                                  <div className="text-xs text-default-600 mb-2 prose prose-sm prose-p:my-0 max-w-none" dangerouslySetInnerHTML={{ __html: parsedData[activeTabIndex].suggested_tip.content }} />
-                                  <Button 
-                                    size="sm" 
-                                    color="primary" 
-                                    variant="flat" 
-                                    onPress={() => handleExportTip(activeTabIndex, parsedData[activeTabIndex].suggested_tip!)}
-                                  >
-                                    Xuất sang Mẹo nhà bếp
-                                  </Button>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Ingredients */}
-                          {parsedData[activeTabIndex].ingredientSections && parsedData[activeTabIndex].ingredientSections.length > 0 && (
-                            <div>
-                              <span className="font-semibold text-xs uppercase tracking-wider text-default-500 block mb-1">
-                                Nguyên liệu ({parsedData[activeTabIndex].ingredientSections.reduce((acc, sec) => acc + sec.ingredients.length, 0)})
-                              </span>
-                              <div className="space-y-3">
-                                {parsedData[activeTabIndex].ingredientSections.map((section, idx) => (
-                                  <div key={idx}>
-                                    {section.name && <h6 className="font-semibold text-sm mb-1">{section.name}</h6>}
-                                    <ul className="list-disc list-inside space-y-0.5 ml-1">
-                                      {section.ingredients.map((ing, i) => (
-                                        <li key={i}>
-                                          <span className="font-medium">{ing.name}</span>
-                                          {(ing.amount || ing.unit) && (
-                                            <span className="text-default-500"> - {ing.amount} {ing.unit}</span>
-                                          )}
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Steps */}
-                          {parsedData[activeTabIndex].stepSections && parsedData[activeTabIndex].stepSections.length > 0 && (
-                            <div>
-                              <span className="font-semibold text-xs uppercase tracking-wider text-default-500 block mb-1">
-                                Các bước làm ({parsedData[activeTabIndex].stepSections.reduce((acc, sec) => acc + sec.steps.length, 0)})
-                              </span>
-                              <div className="space-y-3">
-                                {parsedData[activeTabIndex].stepSections.map((section, idx) => (
-                                  <div key={idx}>
-                                    {section.name && <h6 className="font-semibold text-sm mb-1">{section.name}</h6>}
-                                    <ol className="list-decimal list-inside space-y-1 ml-1">
-                                      {section.steps.map((step, i) => (
-                                        <li key={i} className="pl-1">
-                                          <div 
-                                            className="inline-block prose prose-sm max-w-none prose-p:my-0 prose-p:inline" 
-                                            dangerouslySetInnerHTML={{ __html: step.content }} 
-                                          />
-                                        </li>
-                                      ))}
-                                    </ol>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
+                      <div className="p-4 space-y-3 max-h-[260px] overflow-y-auto">
+                        <div>
+                          <h5 className="font-bold text-base text-foreground">
+                            {parsedData[activeRecipeIndex].title || 'Chưa đặt tên'}
+                          </h5>
+                          {parsedData[activeRecipeIndex].description && (
+                            <p className="text-xs text-default-500 mt-0.5 line-clamp-2">
+                              {parsedData[activeRecipeIndex].description}
+                            </p>
                           )}
                         </div>
+
+                        <div className="flex flex-wrap gap-2 text-xs text-default-600">
+                          {parsedData[activeRecipeIndex].difficulty && (
+                            <span className="inline-flex items-center gap-1 bg-content1 px-2.5 py-1 rounded-lg border border-divider text-xs">
+                              <ChefHat className="w-3.5 h-3.5 text-primary" /> {parsedData[activeRecipeIndex].difficulty}
+                            </span>
+                          )}
+                          {parsedData[activeRecipeIndex].prep_time_minutes !== undefined && (
+                            <span className="inline-flex items-center gap-1 bg-content1 px-2.5 py-1 rounded-lg border border-divider text-xs">
+                              <Clock className="w-3.5 h-3.5 text-warning-500" /> Sơ chế: {parsedData[activeRecipeIndex].prep_time_minutes}p
+                            </span>
+                          )}
+                          {parsedData[activeRecipeIndex].cook_time_minutes !== undefined && (
+                            <span className="inline-flex items-center gap-1 bg-content1 px-2.5 py-1 rounded-lg border border-divider text-xs">
+                              <Clock className="w-3.5 h-3.5 text-success-500" /> Nấu: {parsedData[activeRecipeIndex].cook_time_minutes}p
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Tóm tắt nguyên liệu */}
+                        {parsedData[activeRecipeIndex].ingredientSections && (
+                          <div className="text-xs text-default-600">
+                            <span className="font-semibold text-default-500">Nguyên liệu: </span>
+                            {parsedData[activeRecipeIndex].ingredientSections
+                              ?.flatMap(s => s.ingredients.map(i => i.name))
+                              .slice(0, 6)
+                              .join(', ')}
+                            {parsedData[activeRecipeIndex].ingredientSections?.reduce((acc, s) => acc + s.ingredients.length, 0) > 6 && '...'}
+                          </div>
+                        )}
                       </div>
                     </div>
-                  ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center text-default-400 border border-dashed border-default-200 rounded-xl bg-default-50/50 p-8 text-center h-full">
-                       <Sparkles className="w-10 h-10 mb-3 opacity-20" />
-                       <p className="text-sm">Kết quả trích xuất sẽ hiển thị tại đây</p>
-                    </div>
                   )}
                 </div>
-              </div>
-            </ModalBody>
-            <ModalFooter>
-              <Button color="danger" variant="light" onPress={onClose} isDisabled={isLoading}>
-                Hủy
+              )}
+            </DrawerBody>
+
+            <DrawerFooter className="px-5 py-3.5 border-t border-divider/40 flex items-center gap-3 bg-content1 shrink-0">
+              <Button 
+                variant="flat" 
+                className="flex-1 rounded-xl font-semibold h-12 border border-divider/60 text-foreground bg-default-100 hover:bg-default-200 shadow-none"
+                onPress={onClose}
+              >
+                Đóng
               </Button>
-              {parsedData && parsedData.length > 0 ? (
-                <div className="flex gap-2">
-                  <Button className="bg-green-600 text-white font-medium" onPress={handleApply} startContent={<Check className="w-4 h-4" />}>
-                    {parsedData.length > 1 ? `Áp dụng ${parsedData[activeTabIndex]?.title || `Công thức ${activeTabIndex + 1}`}` : 'Áp dụng vào Form'}
-                  </Button>
-                  {parsedData.length > 1 && onApplyBulk && (
-                    <Button 
-                      color="primary" 
-                      className="font-medium"
-                      onPress={() => {
-                        onApplyBulk(parsedData);
-                        onOpenChange(false);
-                        setInputText('');
-                        setParsedData(null);
-                        setActiveTabIndex(0);
-                      }} 
-                      startContent={<Sparkles className="w-4 h-4" />}
-                    >
-                      Áp dụng tất cả ({parsedData.length})
-                    </Button>
-                  )}
-                </div>
+
+              {activeTab === 'prompt' ? (
+                <Button 
+                  color="primary" 
+                  className="flex-1 rounded-xl font-bold h-12 shadow-none text-white"
+                  endContent={<ArrowRight className="w-4 h-4" />}
+                  onPress={() => setActiveTab('result')}
+                >
+                  Nhập kết quả →
+                </Button>
               ) : (
                 <Button 
                   color="primary" 
-                  onPress={handleAnalyze} 
-                  isDisabled={(!inputText.trim() && selectedImages.length === 0) || !isConfigured || isLoading}
-                  startContent={isLoading ? <Spinner size="sm" color="white" /> : <Sparkles className="w-4 h-4" />}
+                  className="flex-1 rounded-xl font-bold h-12 shadow-none text-white"
+                  isDisabled={!parsedData || parsedData.length === 0}
+                  onPress={() => handleApply(onClose)}
+                  startContent={<Check className="w-4 h-4" />}
                 >
-                  {isLoading ? 'Đang phân tích...' : 'Phân tích'}
+                  Áp dụng vào Form
                 </Button>
               )}
-            </ModalFooter>
+            </DrawerFooter>
           </>
         )}
-      </ModalContent>
-    </Modal>
+      </DrawerContent>
+    </Drawer>
   );
 }

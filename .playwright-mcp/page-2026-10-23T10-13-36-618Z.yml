@@ -1,0 +1,74 @@
+- main [ref=f16e30]:
+  - generic [ref=f16e32]:
+    - generic [ref=f16e34]:
+      - button "Quay lại" [ref=f16e430] [cursor=pointer]
+      - heading "Tạo công thức mới" [level=1] [ref=f16e431]
+    - generic "Các phần của công thức" [ref=f16e432]:
+      - tablist "Các phần của công thức" [ref=f16e433]:
+        - tab "Thông tin" [selected] [ref=f16e434] [cursor=pointer]
+        - tab "Nguyên liệu" [ref=f16e435] [cursor=pointer]
+        - tab "Cách làm" [ref=f16e436] [cursor=pointer]
+    - generic [ref=f16e66]:
+      - generic [ref=f16e67]:
+        - generic [ref=f16e68]: Ảnh đại diện
+        - generic [ref=f16e75]:
+          - generic [ref=f16e76] [cursor=pointer]:
+            - paragraph [ref=f16e82]: Tải ảnh đại diện
+            - paragraph [ref=f16e83]: Kéo thả file hoặc bấm để chọn ảnh/video
+          - generic [ref=f16e85]:
+            - button "Thêm ảnh" [ref=f16e437] [cursor=pointer]
+            - button "Thêm ảnh" [ref=f16e438] [cursor=pointer]
+            - button "Thêm ảnh mới" [ref=f16e439] [cursor=pointer]:
+              - generic [ref=f16e101]: Thêm
+      - generic [ref=f16e102]:
+        - generic [ref=f16e104]:
+          - generic [ref=f16e105]: Tên món ăn
+          - 'textbox "Ví dụ: Phở bò Hà Nội" [ref=f16e440]': Canh Sườn Hầm Rau Củ
+        - generic [ref=f16e113]:
+          - generic [ref=f16e114]:
+            - generic [ref=f16e119]: Độ khó
+            - generic [ref=f16e120]:
+              - combobox [ref=f16e123]
+              - button "Dễ Độ khó" [ref=f16e441]:
+                - generic [ref=f16e126]: Dễ
+          - generic [ref=f16e128]:
+            - generic [ref=f16e132]: Calories
+            - generic [ref=f16e133]:
+              - generic [ref=f16e134]: "380"
+              - generic [ref=f16e135]: kcal
+          - generic [ref=f16e136]:
+            - generic [ref=f16e141]: Sơ chế
+            - generic [ref=f16e142]:
+              - generic [ref=f16e143]: "15"
+              - generic [ref=f16e144]: phút
+          - generic [ref=f16e145]:
+            - generic [ref=f16e150]: Nấu
+            - generic [ref=f16e151]:
+              - generic [ref=f16e152]: "45"
+              - generic [ref=f16e153]: phút
+        - generic [ref=f16e154]:
+          - generic [ref=f16e155]: Ghi chú & Mẹo
+          - paragraph [ref=f16e162]: Ghi chú thêm về công thức, mẹo nấu nướng, hoặc lưu ý...
+      - generic [ref=f16e163]:
+        - generic [ref=f16e164]:
+          - generic [ref=f16e165]: Tags (Phân cấp)
+          - generic [ref=f16e171] [cursor=pointer]: Thịt heo
+        - generic [ref=f16e173]:
+          - generic [ref=f16e174]:
+            - generic [ref=f16e175]: Video URL (YouTube/Tiktok)
+            - textbox "https://..." [ref=f16e444]
+          - generic [ref=f16e184]:
+            - generic [ref=f16e185]: Nguồn tham khảo
+            - textbox "Tên tác giả, trang web..." [ref=f16e445]
+        - generic [ref=f16e195]:
+          - generic [ref=f16e202]:
+            - generic [ref=f16e203]: Biến thể?
+            - checkbox [ref=f16e205] [cursor=pointer]
+          - button "Tìm kiếm công thức gốc..." [disabled]
+        - generic [ref=f16e207]:
+          - generic [ref=f16e208]: Công thức và mẹo liên kết
+          - button "Tìm kiếm công thức hoặc mẹo..." [ref=f16e446] [cursor=pointer]
+    - generic [ref=f16e217]:
+      - button "AI Nhập" [active] [ref=f16e447] [cursor=pointer]
+      - button "Quay lại" [disabled]
+      - button "Tiếp tục" [ref=f16e448] [cursor=pointer]

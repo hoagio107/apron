@@ -1,0 +1,27 @@
+- main [ref=e8]:
+  - generic [ref=e9]:
+    - generic [ref=e10]:
+      - generic [ref=e11]:
+        - button "Quay lại" [ref=e14] [cursor=pointer]
+        - button "Tùy chọn" [ref=e18] [cursor=pointer]
+      - generic [ref=e23]:
+        - heading "Canh Chua Cá Lóc Nam Bộ" [level=1] [ref=e24]
+        - generic [ref=e25]:
+          - generic [ref=e26]: Dễ
+          - generic [ref=e31]: "- kcal"
+          - generic [ref=e35]: 0p
+          - generic [ref=e40]: 0p
+          - generic [ref=e45]: N/A
+    - generic [ref=e49]:
+      - generic "Mobile Tabs" [ref=e50]:
+        - tablist "Mobile Tabs" [ref=e51]:
+          - tab "Nguyên liệu" [ref=e53] [cursor=pointer]
+          - tab "Cách làm" [ref=e61] [cursor=pointer]
+          - tab "Khác" [active] [selected] [ref=e67] [cursor=pointer]
+      - tabpanel "Khác" [ref=e95]:
+        - generic [ref=e97]:
+          - heading "Lịch sử nấu" [level=3] [ref=e99]
+          - generic [ref=e104]: Chưa có lịch sử nấu nào.Nhấn "Bắt đầu nấu" để lưu lại!
+    - generic [ref=e88]:
+      - button "Hỏi AI" [ref=e89] [cursor=pointer]
+      - button "Bắt đầu nấu" [ref=e92] [cursor=pointer]

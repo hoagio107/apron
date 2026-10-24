@@ -1,5 +1,5 @@
-import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
-import { DEFAULT_TAGS } from '@apron/core';
+import { DEFAULT_TAGS, TIP_CATEGORIES } from '@apron/core';
+const tauriFetch = window.fetch;
 
 export interface AiModel {
   name: string;
@@ -7,9 +7,10 @@ export interface AiModel {
 }
 
 export const GEMINI_MODELS: AiModel[] = [
-  { name: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash (Nhanh)' },
-  { name: 'gemini-3.5-flash-8b', label: 'Gemini 3.5 Flash 8B (Rất nhanh)' },
-  { name: 'gemini-3.5-pro', label: 'Gemini 3.5 Pro (Thông minh)' },
+  { name: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash (Nhanh, Tiết kiệm)' },
+  { name: 'gemini-1.5-flash-8b', label: 'Gemini 1.5 Flash 8B (Rất nhanh)' },
+  { name: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash (Mới nhất, Cực nhanh)' },
+  { name: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro (Thông minh, Chi tiết)' },
 ];
 
 export interface ParseRecipeResult {
@@ -58,6 +59,178 @@ function isValidHttpUrl(string: string) {
   return url.protocol === "http:" || url.protocol === "https:";
 }
 
+export function buildRecipePrompt(
+  text: string, 
+  existingIngredients: string[] = [],
+  existingTips: { id: string, title: string }[] = []
+): string {
+  const tagNames = DEFAULT_TAGS.filter(t => t.parent_id !== null).map(t => t.name).join(', ');
+  const ingredientNames = existingIngredients.length > 0 ? existingIngredients.join(', ') : 'Không có';
+  const tipsStr = existingTips.length > 0 ? existingTips.map(t => `[${t.id}] ${t.title}`).join(', ') : 'Không có';
+
+  return `Bạn là một chuyên gia ẩm thực và trợ lý phân tích dữ liệu xuất sắc.
+Nhiệm vụ: Trích xuất và chuẩn hóa thông tin công thức nấu ăn từ nội dung dưới đây thành MỘT ĐỐI TƯỢNG JSON DUY NHẤT để nhập vào ứng dụng Apron.
+Nếu nội dung chứa nhiều công thức khác nhau, hãy tách chúng vào mảng "recipes".
+
+NỘI DUNG ĐẦU VÀO:
+"""
+${text.trim() || '(Phân tích theo hình ảnh đính kèm nếu có)'}
+"""
+
+HÃY TRẢ VỀ DUY NHẤT MỘT KHỐI JSON HỢP LỆ VỚI CẤU TRÚC CHÍNH XÁC NHƯ SAU (KHÔNG KÈM BẤT KỲ VĂN BẢN GIẢI THÍCH NÀO NGOÀI JSON):
+{
+  "recipes": [
+    {
+      "title": "Tên món ăn (Viết hoa chữ cái đầu)",
+      "description": "Mô tả ngắn gọn, hấp dẫn về món ăn",
+      "difficulty": "Dễ", // Chỉ được chọn 1 trong 3: "Dễ", "Vừa", "Khó"
+      "prep_time_minutes": 15, // Thời gian chuẩn bị/sơ chế (số phút, số nguyên)
+      "cook_time_minutes": 30, // Thời gian nấu (số phút, số nguyên)
+      "servings": 4, // Khẩu phần (số người, số nguyên)
+      "calories": 450, // Lượng calo ước tính (kcal, số nguyên). Tự ước lượng nếu không có sẵn
+      "notes": "<p>Ghi chú thêm, mẹo vặt, lưu ý (dùng thẻ HTML cơ bản như &lt;p&gt;, &lt;strong&gt;, &lt;ul&gt;, &lt;li&gt;)</p>",
+      "tags": [
+        { "name": "Bữa sáng", "is_new": false },
+        { "name": "Món canh", "is_new": false }
+      ],
+      "ingredientSections": [
+        {
+          "name": "Nguyên liệu chính", // Tên nhóm (ví dụ: "Nguyên liệu chính", "Phần sốt", "Gia vị ướp"...)
+          "ingredients": [
+            { "name": "Thịt bò", "amount": "300", "unit": "g" },
+            { "name": "Hành tây", "amount": "1", "unit": "củ" }
+          ]
+        }
+      ],
+      "stepSections": [
+        {
+          "name": "Thực hiện", // Tên giai đoạn (ví dụ: "Sơ chế", "Chế biến", "Hoàn thiện"...)
+          "steps": [
+            { "content": "<p>Sơ chế nguyên liệu sạch sẽ, cắt miếng vừa ăn.</p>" },
+            { "content": "<p>Đun sôi nước, nêm gia vị vừa miệng và hoàn thành món ăn.</p>" }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+QUY TẮC BẮT BUỘC:
+1. Đối với Calories, Độ khó và Thời gian: nếu nguồn không có, BẠN BẮT BUỘC PHẢI TỰ DỰ ĐOÁN VÀ ĐIỀN SỐ THỰC TẾ dựa trên chuyên môn ẩm thực.
+2. Tên nguyên liệu và các bước làm: BẮT BUỘC viết hoa chữ cái đầu tiên (Ví dụ: "Thịt bò", "Hành lá", "Nước mắm").
+3. Ưu tiên sử dụng tên nguyên liệu có sẵn trong từ điển sau: ${ingredientNames}. Hãy tự map từ đồng nghĩa về tên chuẩn.
+4. Ưu tiên chọn thẻ tag có sẵn từ danh sách: ${tagNames}. (Nếu dùng tag có sẵn, đặt "is_new": false; nếu tag mới chưa có, đặt "is_new": true và gán "category_id" bằng 1 trong các giá trị: "root-meal", "root-cooking", "root-ingredient", "root-cuisine", "root-diet", "root-time-difficulty").
+${existingTips.length > 0 ? `5. Dò tìm trong danh sách mẹo: ${tipsStr}. Nếu có mẹo liên quan, trả về mảng linked_tips chứa ID của mẹo đó.` : ''}
+6. TUYỆT ĐỐI CHỈ TRẢ VỀ MÃ JSON, KHÔNG CÓ BẤT KỲ LỜI CHÀO HAY VĂN BẢN NÀO BÊN NGOÀI KHỐI JSON.`;
+}
+
+export function parseGeminiResponse(rawText: string): ParseRecipeResult[] {
+  if (!rawText || !rawText.trim()) {
+    throw new Error('Vui lòng dán kết quả từ Gemini.');
+  }
+
+  let text = rawText.trim();
+  
+  // Loại bỏ markdown code block: ```json ... ``` hoặc ``` ... ```
+  const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (codeBlockMatch && codeBlockMatch[1]) {
+    text = codeBlockMatch[1].trim();
+  }
+
+  // Tìm vị trí mở { hoặc [ đầu tiên và } hoặc ] cuối cùng
+  const firstBrace = text.indexOf('{');
+  const firstBracket = text.indexOf('[');
+  let startIdx = -1;
+  let isArray = false;
+
+  if (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
+    startIdx = firstBrace;
+    isArray = false;
+  } else if (firstBracket !== -1) {
+    startIdx = firstBracket;
+    isArray = true;
+  }
+
+  if (startIdx !== -1) {
+    const endChar = isArray ? ']' : '}';
+    const endIdx = text.lastIndexOf(endChar);
+    if (endIdx > startIdx) {
+      text = text.substring(startIdx, endIdx + 1);
+    }
+  }
+
+  let parsedJSON: any;
+  try {
+    parsedJSON = JSON.parse(text);
+  } catch (err: any) {
+    console.error('Lỗi parse JSON từ Gemini:', err, 'Nội dung:', text);
+    throw new Error('Không thể phân tích mã JSON từ Gemini. Vui lòng đảm bảo bạn đã copy toàn bộ khối JSON trả về từ Gemini Web.');
+  }
+
+  const recipesRaw = parsedJSON.recipes || (Array.isArray(parsedJSON) ? parsedJSON : [parsedJSON]);
+
+  const formatString = (str: string) => {
+    if (!str || typeof str !== 'string') return str;
+    let clean = str.trim();
+    if (clean.length > 0 && clean === clean.toUpperCase()) {
+      clean = clean.toLowerCase();
+    }
+    return clean.charAt(0).toUpperCase() + clean.slice(1);
+  };
+
+  const results: ParseRecipeResult[] = recipesRaw.map((result: any) => {
+    if (result.title) result.title = formatString(result.title);
+    
+    if (result.ingredientSections && Array.isArray(result.ingredientSections)) {
+      result.ingredientSections = result.ingredientSections.map((section: any) => ({
+        ...section,
+        name: formatString(section.name || 'Nguyên liệu'),
+        ingredients: Array.isArray(section.ingredients) 
+          ? section.ingredients.map((ing: any) => ({
+              ...ing,
+              name: formatString(typeof ing === 'string' ? ing : ing.name || ''),
+              amount: typeof ing === 'object' && ing.amount !== undefined ? String(ing.amount) : '',
+              unit: typeof ing === 'object' ? ing.unit || '' : ''
+            }))
+          : []
+      }));
+    } else if (result.ingredients && Array.isArray(result.ingredients)) {
+      result.ingredientSections = [{
+        name: 'Nguyên liệu chính',
+        ingredients: result.ingredients.map((ing: any) => ({
+          name: formatString(typeof ing === 'string' ? ing : ing.name || ''),
+          amount: typeof ing === 'object' && ing.amount !== undefined ? String(ing.amount) : '',
+          unit: typeof ing === 'object' ? ing.unit || '' : ''
+        }))
+      }];
+    }
+
+    if (result.stepSections && Array.isArray(result.stepSections)) {
+      result.stepSections = result.stepSections.map((section: any) => ({
+        ...section,
+        name: formatString(section.name || 'Thực hiện'),
+        steps: Array.isArray(section.steps)
+          ? section.steps.map((step: any) => ({
+              ...step,
+              content: typeof step === 'string' ? step : step.content || ''
+            }))
+          : []
+      }));
+    } else if (result.steps && Array.isArray(result.steps)) {
+      result.stepSections = [{
+        name: 'Thực hiện',
+        steps: result.steps.map((step: any) => ({
+          content: typeof step === 'string' ? step : step.content || step.instruction || ''
+        }))
+      }];
+    }
+
+    return result as ParseRecipeResult;
+  });
+
+  return results;
+}
+
 export async function parseRecipeWithGemini(
   model: string, 
   text: string, 
@@ -80,97 +253,23 @@ export async function parseRecipeWithGemini(
         throw new Error(`Failed to fetch URL: ${response.statusText}`);
       }
       const html = await response.text();
-      
-      // Basic HTML to Text parsing (loại bỏ các script, style, html tags)
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
-      
-      // Xoá các thẻ không cần thiết
       doc.querySelectorAll('script, style, nav, footer, header, noscript, iframe').forEach(el => el.remove());
-      
       contentToProcess = doc.body.textContent || doc.body.innerText || text;
     } catch (e) {
       console.warn('Lỗi khi fetch URL, fallback về raw text', e);
       throw new Error('Không thể đọc dữ liệu từ URL này. Vui lòng kiểm tra lại hoặc thử copy/paste văn bản trực tiếp.');
     }
   }
-  
-  const tagNames = DEFAULT_TAGS.filter(t => t.parent_id !== null).map(t => t.name).join(', ');
-  const ingredientNames = existingIngredients.length > 0 ? existingIngredients.join(', ') : 'Không có';
 
-  const prompt = `
-Bạn là một chuyên gia ẩm thực và một trợ lý ảo phân tích dữ liệu xuất sắc. Nhiệm vụ của bạn là trích xuất và tính toán thông tin công thức nấu ăn từ đoạn văn bản (hoặc trang web, hoặc hình ảnh) dưới đây. 
-Nếu nội dung chứa nhiều công thức khác nhau, hãy tách chúng ra.
-Hãy trả về DUY NHẤT một đối tượng JSON với cấu trúc chính xác như sau:
-{
-  "recipes": [
-    {
-      "title": "Tên món ăn (chuỗi)",
-      "description": "Mô tả ngắn gọn (chuỗi)",
-      "difficulty": "Dễ", // Chỉ được chọn 1 trong 3: Dễ, Vừa, Khó. Hãy tự đánh giá dựa trên thời gian và các bước nếu không có sẵn.
-      "prep_time_minutes": 15, // Thời gian chuẩn bị (số)
-      "cook_time_minutes": 30, // Thời gian nấu (số)
-      "servings": 4, // Số người ăn (số)
-      "calories": 500, // Lượng calo ước tính (số). Hãy tự tính toán và ước lượng tổng calo hoặc calo/khẩu phần nếu bài không đề cập.
-      "notes": "<p>Ghi chú thêm, mẹo vặt, lưu ý (SỬ DỤNG ĐỊNH DẠNG HTML CƠ BẢN NHƯ &lt;p&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;strong&gt;, &lt;em&gt;)</p>",
-      "tags": [
-        { "name": "Bữa sáng", "is_new": false },
-        { "name": "Giải nhiệt mùa hè", "is_new": true, "category_id": "root-meal" }
-      ],
-      "ingredientSections": [
-        {
-          "name": "Tên nhóm (ví dụ: Phần vỏ bánh, Phần nhân, hoặc Mặc định nếu không chia nhóm)",
-          "ingredients": [
-            { "name": "Tên nguyên liệu (PHẢI VIẾT HOA CHỮ CÁI ĐẦU TIÊN)", "amount": "Số lượng", "unit": "Đơn vị (g, ml, muỗng, v.v)" }
-          ]
-        }
-      ],
-      "stepSections": [
-        {
-          "name": "Tên giai đoạn (ví dụ: Sơ chế, Chế biến, hoặc Thực hiện nếu không chia nhóm)",
-          "steps": [
-            { "content": "<p>Nội dung hướng dẫn chi tiết của bước này (SỬ DỤNG ĐỊNH DẠNG HTML CƠ BẢN NHƯ &lt;p&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;strong&gt;)</p>" }
-          ]
-        }
-      ]
-    }
-  ]
-}
-
-QUY TẮC QUAN TRỌNG:
-1. Đối với Lượng Calories, Độ khó và Tags (Thẻ), nếu dữ liệu không có sẵn, BẠN PHẢI TỰ DỰ ĐOÁN VÀ ĐIỀN VÀO dựa trên kiến thức ẩm thực của bạn.
-2. Tại trường "ingredients" và "steps", BẮT BUỘC phải viết hoa chữ cái đầu tiên của câu/nguyên liệu.
-3. Trường "tags" PHẢI có ít nhất 3 thẻ.
-4. QUY TẮC SINH TAG:
-   - Ưu tiên sử dụng tag đã có trong danh sách sau: ${tagNames}. (Nếu dùng tag có sẵn, đặt "is_new": false và bỏ qua category_id)
-   - Lưu ý hiểu từ đồng nghĩa: Ví dụ "Ăn sáng" và "Bữa sáng" là giống nhau, hãy dùng tag "Bữa sáng" có sẵn thay vì tạo mới.
-   - CHỈ CHO PHÉP TỰ SINH TAG MỚI nếu danh sách trên chưa có khái niệm đó. Nếu tạo tag mới, đặt "is_new": true và BẮT BUỘC cung cấp "category_id" bằng một trong các ID sau:
-     + "root-meal": Dành cho Cấu trúc thực đơn, Dịp và sự kiện
-     + "root-cooking": Dành cho Phương pháp chế biến
-     + "root-ingredient": Dành cho Nguyên liệu chính
-     + "root-cuisine": Dành cho Ẩm thực vùng miền và quốc gia
-      + "root-diet": Dành cho Chế độ ăn uống và sức khỏe
-     + "root-time-difficulty": Dành cho Thời gian và độ khó
-5. QUY TẮC SINH NGUYÊN LIỆU:
-   - Tại trường "ingredients", ƯU TIÊN TUYỆT ĐỐI sử dụng tên nguyên liệu đã có trong danh sách từ điển sau: ${ingredientNames}.
-   - Bạn PHẢI tự động hiểu từ đồng nghĩa để map đúng tên nguyên liệu trong từ điển. Ví dụ: Nếu bài viết ghi "Đường kính trắng" nhưng từ điển có "Đường", BẠN PHẢI TRẢ VỀ "Đường".
-6. QUY TẮC MẸO NHÀ BẾP:
-   - Dò tìm trong danh sách Mẹo có sẵn sau đây: ${existingTips.length > 0 ? existingTips.map(t => '[' + t.id + '] ' + t.title).join(', ') : 'Không có'}.
-   - Nếu có bất kỳ mẹo nào trong danh sách trên RẤT CÓ ÍCH cho công thức này, hãy trả về mảng \`linked_tips\` chứa ID của chúng.
-   - Nếu chưa có mẹo nào liên quan nhưng bạn có 1 mẹo thực sự hữu ích (ví dụ: mẹo sơ chế, cách chữa cháy nếu làm hỏng), hãy trả về \`suggested_tip: { "title": "Tiêu đề mẹo", "content": "Nội dung mẹo chi tiết" }\`.
-7. TUYỆT ĐỐI không thêm bất kỳ văn bản giải thích nào bên ngoài khối JSON. Phải đảm bảo chuẩn định dạng JSON hợp lệ để máy có thể đọc được.
-
-Văn bản đầu vào:
-${contentToProcess || '(Không có văn bản, hãy phân tích dựa trên hình ảnh)'}
-  `;
+  const prompt = buildRecipePrompt(contentToProcess, existingIngredients, existingTips);
 
   try {
     const parts: any[] = [{ text: prompt }];
 
-    // Thêm hình ảnh nếu có
     if (images && images.length > 0) {
       images.forEach(base64Webp => {
-        // base64Webp có dạng "data:image/webp;base64,UklGR..."
         const base64Data = base64Webp.split(',')[1];
         if (base64Data) {
           parts.push({
@@ -208,62 +307,7 @@ ${contentToProcess || '(Không có văn bản, hãy phân tích dựa trên hìn
     const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
     
     if (resultText) {
-      try {
-        let cleanResultText = resultText.trim();
-        if (cleanResultText.startsWith('```json')) {
-          cleanResultText = cleanResultText.replace(/^```json\n?/, '');
-        }
-        if (cleanResultText.endsWith('```')) {
-          cleanResultText = cleanResultText.replace(/```$/, '');
-        }
-        cleanResultText = cleanResultText.trim();
-
-        const parsedJSON = JSON.parse(cleanResultText);
-        const recipesRaw = parsedJSON.recipes || (Array.isArray(parsedJSON) ? parsedJSON : [parsedJSON]);
-        
-        const formatString = (str: string) => {
-          if (!str) return str;
-          let clean = str.trim();
-          // Nếu chuỗi đang bị viết HOA TÀN BỘ, chuyển về chữ thường để fix
-          if (clean.length > 0 && clean === clean.toUpperCase()) {
-            clean = clean.toLowerCase();
-          }
-          // Viết hoa chữ cái đầu tiên
-          return clean.charAt(0).toUpperCase() + clean.slice(1);
-        };
-
-        const results: ParseRecipeResult[] = recipesRaw.map((result: any) => {
-          if (result.title) result.title = formatString(result.title);
-          
-          if (result.ingredientSections) {
-            result.ingredientSections = result.ingredientSections.map((section: any) => ({
-              ...section,
-              ingredients: section.ingredients.map((ing: any) => ({
-                ...ing,
-                name: formatString(ing.name)
-              }))
-            }));
-          }
-
-          if (result.stepSections) {
-            result.stepSections = result.stepSections.map((section: any) => ({
-              ...section,
-              steps: section.steps.map((step: any) => ({
-                ...step,
-                content: formatString(step.content)
-              }))
-            }));
-          }
-
-          return result as ParseRecipeResult;
-        });
-
-        return results;
-      } catch (parseError) {
-        console.error('Lỗi parse JSON từ Gemini:', parseError);
-        console.log('Raw output:', resultText);
-        throw new Error('Dữ liệu AI trả về quá dài hoặc không đúng định dạng. Vui lòng chia nhỏ nội dung và thử lại.');
-      }
+      return parseGeminiResponse(resultText);
     }
     throw new Error('No response content from Gemini');
   } catch (error) {
@@ -367,5 +411,75 @@ Lưu ý: "cookbook_recipe_id" CHỈ ĐIỀN nếu bạn lấy công thức từ 
     console.error('Error suggesting recipes with Gemini:', error);
     throw error;
   }
+}
+
+export interface ParseTipResult {
+  title: string;
+  category_id: string;
+  content: string;
+}
+
+export function buildTipPrompt(text: string): string {
+  const categoriesStr = TIP_CATEGORIES.map(c => `"${c.id}" (${c.name}: ${c.description})`).join(', ');
+
+  return `Bạn là chuyên gia khoa học thực phẩm và ẩm thực gia đình.
+Nhiệm vụ: Tạo một mẹo vặt nhà bếp chuẩn xác, hữu ích từ yêu cầu dưới đây dưới dạng MỘT ĐỐI TƯỢNG JSON DUY NHẤT để nhập vào ứng dụng Apron.
+
+NỘI DUNG / CHỦ ĐỀ ĐẦU VÀO:
+"""
+${text.trim() || 'Một mẹo vặt nhà bếp khoa học, thông dụng và thiết thực nhất'}
+"""
+
+DANH SÁCH CHUYÊN MỤC HỢP LỆ (chọn 1 ID phù hợp nhất):
+${categoriesStr}
+
+YÊU CẦU VĂN PHONG & NỘI DUNG (CỰC KỲ QUAN TRỌNG):
+1. **Phong cách khoa học, ngắn gọn, súc tích**: Đi thẳng vào vấn đề, không lan man, không viết lời chào hay văn vẻ hoa mỹ.
+2. **Giải thích cơ chế khoa học dễ hiểu, đơn giản**: Luôn có phần giải thích ngắn gọn (1 - 2 câu) bản chất khoa học vì sao mẹo này lại hiệu quả. Dùng ngôn từ bình dân, trực quan, gần gũi trong đời sống; TUYỆT ĐỐI TRÁNH từ ngữ quá học thuật, hàn lâm hay công thức chuyên môn phức tạp.
+3. **Cấu trúc phần "content"** (sử dụng định dạng HTML chuẩn: <p>, <strong>, <ul>, <li>):
+   - **Cách thực hiện:** Các bước thao tác ngắn gọn, gạch đầu dòng rõ ràng.
+   - **Cơ chế khoa học:** Giải thích cơ chế đơn giản, dễ hiểu vì sao cách này hiệu quả.
+   - **Lưu ý:** (Nếu có, tối đa 1 câu ngắn gọn).
+
+HÃY TRẢ VỀ DUY NHẤT MỘT KHỐI JSON HỢP LỆ VỚI CẤU TRÚC CHÍNH XÁC NHƯ SAU (KHÔNG KÈM BẤT KỲ VĂN BẢN GIẢI THÍCH NÀO NGOÀI JSON):
+{
+  "title": "Tiêu đề mẹo vặt ngắn gọn, rõ ràng (VD: Cách ướp thịt nướng mềm mọng không khô)",
+  "category_id": "cooking", // Chọn chính xác 1 ID trong danh sách chuyên mục trên
+  "content": "<p><strong>Cách thực hiện:</strong></p><ul><li>Thêm 1 thìa sữa đặc hoặc nước ép lê/táo vào sốt ướp thịt.</li><li>Trộn đều và ướp khoảng 30 - 45 phút trước khi nướng.</li></ul><p><strong>Cơ chế khoa học:</strong> Enzyme tự nhiên trong hoa quả bẻ gãy nhẹ các sợi protein, giúp thịt giữ nước và mềm mọng từ bên trong thay vì bị khô cứng dưới nhiệt độ cao.</p>"
+}
+
+QUY TẮC BẮT BUỘC:
+1. "category_id" BẮT BUỘC phải là một trong các id: ${TIP_CATEGORIES.map(c => `"${c.id}"`).join(', ')}.
+2. TUYỆT ĐỐI CHỈ TRẢ VỀ MÃ JSON, KHÔNG CÓ BẤT KỲ LỜI CHÀO HAY VĂN BẢN NÀO BÊN NGOÀI KHỐI JSON.`;
+}
+
+export function parseTipGeminiResponse(rawText: string): ParseTipResult {
+  if (!rawText || !rawText.trim()) {
+    throw new Error('Vui lòng dán kết quả từ Gemini.');
+  }
+
+  let text = rawText.trim();
+  const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (codeBlockMatch && codeBlockMatch[1]) {
+    text = codeBlockMatch[1].trim();
+  }
+
+  const firstBrace = text.indexOf('{');
+  const lastBrace = text.lastIndexOf('}');
+  if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+    throw new Error('Không tìm thấy định dạng JSON hợp lệ trong nội dung.');
+  }
+
+  const jsonStr = text.substring(firstBrace, lastBrace + 1);
+  const data = JSON.parse(jsonStr);
+
+  const validCatIds = TIP_CATEGORIES.map(c => c.id);
+  const categoryId = validCatIds.includes(data.category_id) ? data.category_id : 'cooking';
+
+  return {
+    title: data.title || '',
+    category_id: categoryId,
+    content: data.content || ''
+  };
 }
 

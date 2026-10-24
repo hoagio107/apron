@@ -84,7 +84,7 @@
     color: hsl(var(--heroui-foreground));
     border-radius: 1rem; /* 16px - rounded-2xl */
     border: none;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+    box-shadow: none;
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
   }
 
@@ -112,6 +112,19 @@
   .app-card-interactive:active {
     transform: scale(0.98);
     opacity: 0.92;
+  }
+
+  /* Khử triệt để lỗi viền trắng subpixel ở các góc bo cong trên nền tối (WebKit & Chromium) */
+  .card-media-root {
+    isolation: isolate;
+    background-color: #000000;
+  }
+
+  .card-media-img {
+    bottom: 1.75rem !important;
+    height: calc(100% - 1.75rem) !important;
+    -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 1.5rem), transparent 100%);
+    mask-image: linear-gradient(to bottom, black calc(100% - 1.5rem), transparent 100%);
   }
 
   /* Bề mặt nổi chuẩn */
@@ -285,4 +298,25 @@ button[data-slot="button"].bg-transparent[data-hover="true"]:not([data-pressed="
 button.border-medium.bg-transparent[data-hover="true"]:not([data-pressed="true"]):not(:active) {
   background-color: transparent !important;
 }
+
+/* ==========================================================================
+   6. Flat Design: Loại bỏ toàn bộ shadows ở các button và component trong app
+   Bảo toàn độ nổi (drop-shadow) duy nhất cho các thành phần overflow / overlay:
+   Modals, Popovers, Dropdowns, Drawers, Tooltips, Toasts.
+   ========================================================================== */
+button:not([data-slot="popover"]):not([data-slot="modal"]):not([data-slot="drawer"]):not([data-slot="tooltip"]),
+[role="button"]:not([data-slot="popover"]):not([data-slot="modal"]):not([data-slot="drawer"]):not([data-slot="tooltip"]),
+[data-slot="button"],
+.app-card,
+[data-slot="card"],
+[data-slot="chip"],
+[data-slot="badge"],
+[data-slot="input-wrapper"],
+[data-slot="inner-wrapper"],
+[data-slot="cursor"],
+[data-slot="tab"],
+.card-media-root {
+  box-shadow: none !important;
+}
+
 

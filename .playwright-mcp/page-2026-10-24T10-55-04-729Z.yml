@@ -1,0 +1,109 @@
+- generic [ref=f16e7]:
+  - main [ref=f16e8]:
+    - generic [ref=f16e9]:
+      - generic [ref=f16e10]:
+        - heading "Cài đặt hệ thống" [level=1] [ref=f16e11]
+        - paragraph [ref=f16e12]: Tuỳ biến giao diện, trí tuệ nhân tạo & dữ liệu ứng dụng
+      - generic [ref=f16e13]:
+        - generic [ref=f16e14]:
+          - generic [ref=f16e23]:
+            - heading "Giao diện & Ngôn ngữ" [level=2] [ref=f16e24]
+            - paragraph [ref=f16e25]: Chủ đề hiển thị và ngôn ngữ ứng dụng
+          - generic [ref=f16e26]:
+            - generic [ref=f16e27]: Chế độ hiển thị
+            - generic [ref=f16e28]:
+              - button "Sáng" [ref=f16e29]
+              - button "Tối" [ref=f16e37]
+              - button "Hệ thống" [ref=f16e41]
+          - generic [ref=f16e45]:
+            - generic [ref=f16e46]: Ngôn ngữ (Language)
+            - generic [ref=f16e47]:
+              - button "🇻🇳 Tiếng Việt" [ref=f16e48]:
+                - generic [ref=f16e49]: 🇻🇳
+                - generic [ref=f16e50]: Tiếng Việt
+              - button "🇺🇸 English" [ref=f16e51]:
+                - generic [ref=f16e52]: 🇺🇸
+                - generic [ref=f16e53]: English
+        - generic [ref=f16e54]:
+          - generic [ref=f16e55]:
+            - generic [ref=f16e60]:
+              - heading "Trí tuệ nhân tạo (AI)" [level=2] [ref=f16e61]
+              - paragraph [ref=f16e62]: Google Gemini API & Văn phong khoa học
+            - link "Lấy Key" [ref=f16e63] [cursor=pointer]:
+              - /url: https://aistudio.google.com/apikey
+          - generic [ref=f16e68]:
+            - generic [ref=f16e69]: Mô hình Gemini mặc định
+            - generic [ref=f16e70]:
+              - combobox [ref=f16e73]
+              - button "Gemini 1.5 Flash (Nhanh, Tiết kiệm) Chọn mô hình Gemini" [ref=f16e75]:
+                - generic [ref=f16e76]: Gemini 1.5 Flash (Nhanh, Tiết kiệm)
+          - generic [ref=f16e80]:
+            - generic [ref=f16e81]: Gemini API Key
+            - generic [ref=f16e85]:
+              - textbox "AIzaSy..." [ref=f16e90]
+              - button [ref=f16e91]
+            - generic [ref=f16e95]: 🔒 Key lưu cục bộ an toàn trong thiết bị của bạn, không gửi qua bất kỳ máy chủ trung gian nào.
+          - generic [ref=f16e101]:
+            - generic [ref=f16e102]: "Phong cách AI: Khoa học & Súc tích"
+            - paragraph [ref=f16e103]: Các tính năng trợ lý công thức, mẹo vặt và gợi ý món từ tủ lạnh được cấu hình theo văn phong khoa học - ngắn gọn, tập trung cơ chế thực phẩm dễ hiểu, không lan man.
+          - generic [ref=f16e104]:
+            - button "Kiểm tra kết nối" [ref=f16e105] [cursor=pointer]
+            - button "Lưu cấu hình AI" [ref=f16e106] [cursor=pointer]
+        - generic [ref=f16e109]:
+          - generic [ref=f16e116]:
+            - heading "Dữ liệu & Bộ nhớ" [level=2] [ref=f16e117]
+            - paragraph [ref=f16e118]: Thống kê lưu trữ, sao lưu & khôi phục
+          - generic [ref=f16e119]:
+            - generic [ref=f16e120]:
+              - generic [ref=f16e123]: "0"
+              - generic [ref=f16e124]: Công thức
+            - generic [ref=f16e125]:
+              - generic [ref=f16e128]: "5"
+              - generic [ref=f16e129]: Tủ lạnh
+            - generic [ref=f16e130]:
+              - generic [ref=f16e133]: "8"
+              - generic [ref=f16e134]: Nguyên liệu
+            - generic [ref=f16e135]:
+              - generic [ref=f16e138]: "0"
+              - generic [ref=f16e139]: Mẹo vặt
+          - generic [ref=f16e140]:
+            - button "Xuất tệp sao lưu dữ liệu (JSON)" [ref=f16e141] [cursor=pointer]
+            - button "Khôi phục dữ liệu từ tệp JSON" [ref=f16e145] [cursor=pointer]
+            - button "Nạp lại dữ liệu mẫu ban đầu" [ref=f16e149] [cursor=pointer]
+            - button "Xoá sạch dữ liệu ứng dụng" [ref=f16e155] [cursor=pointer]
+        - generic [ref=f16e159]:
+          - generic [ref=f16e160]:
+            - generic [ref=f16e161]: A
+            - generic [ref=f16e162]:
+              - heading "Apron Mobile" [level=3] [ref=f16e163]
+              - paragraph [ref=f16e164]: Trợ lý nhà bếp thông minh • v1.0.0
+          - generic [ref=f16e165]: Build 2026.10
+  - generic:
+    - navigation:
+      - generic [ref=f16e166]:
+        - link [ref=f16e167] [cursor=pointer]:
+          - /url: /
+        - link [ref=f16e171] [cursor=pointer]:
+          - /url: /recipes
+        - link [ref=f16e174] [cursor=pointer]:
+          - /url: /tips
+        - button [active] [ref=f16e177]
+    - button [ref=f16e180]
+    - generic [ref=f16e183]:
+      - generic [ref=f16e186]:
+        - generic [ref=f16e187]: Danh mục
+        - button [ref=f16e188]
+      - generic [ref=f16e192]:
+        - link "Đã lưu" [ref=f16e193] [cursor=pointer]:
+          - /url: /saved
+        - link "Khoá học" [ref=f16e197] [cursor=pointer]:
+          - /url: /courses
+        - link "Tủ lạnh" [ref=f16e202] [cursor=pointer]:
+          - /url: /smart-fridge
+        - link "Mẹo hay" [ref=f16e206] [cursor=pointer]:
+          - /url: /tips
+        - link "Nguyên liệu" [ref=f16e210] [cursor=pointer]:
+          - /url: /catalog
+        - link "Đơn vị" [ref=f16e214] [cursor=pointer]:
+          - /url: /units
+      - button "Cài đặt" [ref=f16e221]

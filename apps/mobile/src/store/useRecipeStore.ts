@@ -9,7 +9,7 @@ interface RecipeState {
   
   // Actions
   fetchRecipes: () => Promise<void>;
-  addRecipe: (recipe: Recipe) => Promise<void>;
+  addRecipe: (recipe: Recipe) => Promise<Recipe>;
   updateRecipe: (recipe: Recipe) => Promise<void>;
   deleteRecipe: (id: string) => Promise<void>;
   addBulkRecipes: (recipes: Recipe[]) => Promise<void>;
@@ -30,12 +30,7 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const data = await RecipeRepository.getAll();
-      // Tự động lọc trùng trong database và xoá bỏ các bản sao cũ thừa
-      const { uniqueRecipes, redundantRecipeIds } = deduplicateRecipes(data);
-      if (redundantRecipeIds.length > 0) {
-        await RecipeRepository.deleteBulk(redundantRecipeIds);
-      }
-      set({ recipes: uniqueRecipes, isLoading: false });
+      set({ recipes: data, isLoading: false });
     } catch (e: any) {
       set({ error: e.message || 'Failed to fetch recipes', isLoading: false });
     }
@@ -48,6 +43,7 @@ export const useRecipeStore = create<RecipeState>((set, get) => ({
       // Nếu có id rồi thì dùng luôn
       const newRecipe = { ...recipe, id: recipe.id || crypto.randomUUID() };
       set((state) => ({ recipes: [newRecipe, ...state.recipes] }));
+      return newRecipe;
     } catch (e: any) {
       set({ error: e.message || 'Failed to add recipe' });
       throw e;

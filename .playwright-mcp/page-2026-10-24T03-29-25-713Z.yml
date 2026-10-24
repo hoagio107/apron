@@ -1,0 +1,42 @@
+- main [ref=f14e8]:
+  - generic [ref=f14e313]:
+    - generic [ref=f14e314]:
+      - generic [ref=f14e315]:
+        - button "Quay lại" [ref=f14e628] [cursor=pointer]
+        - button "Tùy chọn" [ref=f14e629] [cursor=pointer]
+      - generic [ref=f14e327]:
+        - heading [level=1] [ref=f14e630]:
+          - text: Cá Hồi Nướng Nồi Chiên Không Dầu
+          - button "Danh sách biến thể" [ref=f14e631]
+        - generic [ref=f14e334]:
+          - generic [ref=f14e335]: Dễ
+          - generic [ref=f14e340]: 380 kcal
+          - generic [ref=f14e344]: 10p
+          - generic [ref=f14e349]: 12p
+          - generic [ref=f14e354]: "5"
+    - generic [ref=f14e358]:
+      - generic "Mobile Tabs" [ref=f14e632]:
+        - tablist "Mobile Tabs" [ref=f14e633]:
+          - tab "Nguyên liệu" [ref=f14e634] [cursor=pointer]
+          - tab "Cách làm" [ref=f14e635] [cursor=pointer]
+          - tab "Khác" [selected] [ref=f14e636] [cursor=pointer]
+      - tabpanel "Khác" [ref=f14e637]:
+        - generic [ref=f14e455]:
+          - generic [ref=f14e456]:
+            - heading "Ghi chú" [level=3] [ref=f14e638]
+            - generic [ref=f14e460]: Lưu ý khi nướng bằng nồi chiên:• Không nướng quá lâu trên 12 phút để tránh cá bị khô bở.• Lót giấy nến có đục lỗ thoát khí để da cá giòn đều.
+          - generic [ref=f14e461]:
+            - heading "Tags" [level=3] [ref=f14e639]
+            - generic [ref=f14e466]:
+              - generic [ref=f14e467]: món âu
+              - generic [ref=f14e468]: hải sản
+              - generic [ref=f14e469]: Eat Clean / Healthy
+              - generic [ref=f14e470]: nồi chiên không dầu
+          - generic [ref=f14e471]:
+            - generic [ref=f14e472]:
+              - heading "Lịch sử nấu" [level=3] [ref=f14e640]
+              - generic [ref=f14e641]: 1 lần
+            - generic [ref=f14e642] [cursor=pointer]:
+              - generic [ref=f14e643]: 10:29 24/10/2026
+              - paragraph [ref=f14e656]: Cá hồi nướng rất thơm và giòn da, lần sau thử thêm chút tiêu chanh.
+    - button "Bắt đầu nấu" [active] [ref=f14e657] [cursor=pointer]

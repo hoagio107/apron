@@ -1,0 +1,36 @@
+- main [ref=f12e5]:
+  - generic [ref=f12e6]:
+    - generic [ref=f12e7]:
+      - generic [ref=f12e8]:
+        - button "Quay lại" [ref=f12e11] [cursor=pointer]
+        - button "Tùy chọn" [ref=f12e15] [cursor=pointer]
+      - generic [ref=f12e20]:
+        - heading "Canh Chua Cá Lóc Nam Bộ" [level=1] [ref=f12e21]
+        - generic [ref=f12e22]:
+          - generic [ref=f12e23]: Dễ
+          - generic [ref=f12e28]: "- kcal"
+          - generic [ref=f12e32]: 0p
+          - generic [ref=f12e37]: 0p
+          - generic [ref=f12e42]: N/A
+    - generic [ref=f12e46]:
+      - generic "Mobile Tabs" [ref=f12e47]:
+        - tablist "Mobile Tabs" [ref=f12e48]:
+          - tab "Nguyên liệu" [selected] [ref=f12e50] [cursor=pointer]
+          - tab "Cách làm" [ref=f12e58] [cursor=pointer]
+          - tab "Khác" [ref=f12e64] [cursor=pointer]
+      - tabpanel "Nguyên liệu" [ref=f12e70]:
+        - generic [ref=f12e71]:
+          - generic [ref=f12e72]:
+            - heading "Nguyên liệu" [level=2] [ref=f12e73]
+            - generic [ref=f12e78]:
+              - generic [ref=f12e79] [cursor=pointer]
+              - spinbutton [ref=f12e81]: "1"
+              - generic [ref=f12e82] [cursor=pointer]
+          - generic [ref=f12e85]:
+            - heading "Nguyên liệu chính" [level=3] [ref=f12e86]
+            - generic [ref=f12e90] [cursor=pointer]:
+              - generic [ref=f12e91]: Cá lóc đồng
+              - generic [ref=f12e92]: 1 g
+    - generic [ref=f12e93]:
+      - button "Hỏi AI" [ref=f12e94] [cursor=pointer]
+      - button "Bắt đầu nấu" [ref=f12e97] [cursor=pointer]

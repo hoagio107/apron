@@ -1,0 +1,105 @@
+- generic [ref=f1e7]:
+  - main [ref=f1e8]:
+    - generic [ref=f1e293]:
+      - generic [ref=f1e294]:
+        - generic [ref=f1e296]:
+          - heading "Sổ tay Khoá học" [level=1] [ref=f1e297]
+          - paragraph [ref=f1e298]: 5 khoá học đã lưu
+        - generic [ref=f1e300]:
+          - textbox "Tìm kiếm khoá học..." [ref=f1e308]
+          - generic [ref=f1e309]:
+            - button [ref=f1e310] [cursor=pointer]
+            - button [ref=f1e314] [cursor=pointer]
+            - button "Thêm mới" [ref=f1e319] [cursor=pointer]
+      - generic [ref=f1e321]:
+        - button "Khoá học làm bánh mì Artisan local_user Cơ bản 2 chương 2 bài Xem nội dung khoá học" [ref=f1e322] [cursor=pointer]:
+          - generic [ref=f1e327]:
+            - button [ref=f1e328]
+            - button [ref=f1e331]
+          - generic [ref=f1e335]:
+            - heading "Khoá học làm bánh mì Artisan" [level=3] [ref=f1e336]
+            - generic [ref=f1e337]: local_user
+            - generic [ref=f1e343]:
+              - generic [ref=f1e344]: Cơ bản
+              - generic [ref=f1e346]: 2 chương
+              - generic [ref=f1e350]: 2 bài
+            - button "Xem nội dung khoá học" [ref=f1e352]
+        - button "Kỹ năng Dao Thớt & Sơ Chế Chuyên Nghiệp Kỹ năng Dao Thớt & Sơ Chế Chuyên Nghiệp Nắm vững kỹ thuật cầm dao chuẩn đầu bếp Pháp, các kiểu thái hạt lựu, thái sợi đồng đều và bí quyết sơ chế khử tanh thịt cá giữ trọn dinh dưỡng. Apron Academy Chef Alain Nguyễn Cơ bản 4.9 2 chương 4 bài Xem nội dung khoá học" [ref=f1e353] [cursor=pointer]:
+          - img "Kỹ năng Dao Thớt & Sơ Chế Chuyên Nghiệp" [ref=f1e354]
+          - generic [ref=f1e355]:
+            - button [ref=f1e356]
+            - button [ref=f1e359]
+          - generic [ref=f1e363]:
+            - heading "Kỹ năng Dao Thớt & Sơ Chế Chuyên Nghiệp" [level=3] [ref=f1e364]
+            - paragraph [ref=f1e365]: Nắm vững kỹ thuật cầm dao chuẩn đầu bếp Pháp, các kiểu thái hạt lựu, thái sợi đồng đều và bí quyết sơ chế khử tanh thịt cá giữ trọn dinh dưỡng.
+            - generic [ref=f1e366]:
+              - generic [ref=f1e367]: Apron Academy
+              - generic [ref=f1e372]: Chef Alain Nguyễn
+            - generic [ref=f1e377]:
+              - generic [ref=f1e378]: Cơ bản
+              - generic [ref=f1e380]: "4.9"
+              - generic [ref=f1e383]: 2 chương
+              - generic [ref=f1e387]: 4 bài
+            - button "Xem nội dung khoá học" [ref=f1e389]
+        - button "Nghệ Thuật Nấu Nước Dùng & Món Nước Truyền Thống Nghệ Thuật Nấu Nước Dùng & Món Nước Truyền Thống Bí quyết ninh xương trong veo thanh ngọt, nướng thảo mộc hoa hồi quế thảo quả thơm lừng và công thức cân bằng gia vị nước phở bò, bún bò chuẩn vị truyền thống. Tinh Hoa Ẩm Thực Bếp trưởng Tuấn Hải Nâng cao 5 2 chương 3 bài Xem nội dung khoá học" [ref=f1e390] [cursor=pointer]:
+          - img "Nghệ Thuật Nấu Nước Dùng & Món Nước Truyền Thống" [ref=f1e391]
+          - generic [ref=f1e392]:
+            - button [ref=f1e393]
+            - button [ref=f1e396]
+          - generic [ref=f1e400]:
+            - heading "Nghệ Thuật Nấu Nước Dùng & Món Nước Truyền Thống" [level=3] [ref=f1e401]
+            - paragraph [ref=f1e402]: Bí quyết ninh xương trong veo thanh ngọt, nướng thảo mộc hoa hồi quế thảo quả thơm lừng và công thức cân bằng gia vị nước phở bò, bún bò chuẩn vị truyền thống.
+            - generic [ref=f1e403]:
+              - generic [ref=f1e404]: Tinh Hoa Ẩm Thực
+              - generic [ref=f1e409]: Bếp trưởng Tuấn Hải
+            - generic [ref=f1e414]:
+              - generic [ref=f1e415]: Nâng cao
+              - generic [ref=f1e417]: "5"
+              - generic [ref=f1e420]: 2 chương
+              - generic [ref=f1e424]: 3 bài
+            - button "Xem nội dung khoá học" [ref=f1e426]
+        - button "Eat Clean & Meal Prep Cho Người Bận Rộn Eat Clean & Meal Prep Cho Người Bận Rộn Chỉ với 2 giờ cuối tuần, chuẩn bị trọn gói bữa ăn lành mạnh cho 5 ngày làm việc. Tiết kiệm 40% chi phí chợ búa, kiểm soát calo và tràn đầy năng lượng. Healthy Kitchen HLV Emma Phạm Cơ bản 4.8 2 chương 2 bài Xem nội dung khoá học" [ref=f1e427] [cursor=pointer]:
+          - img "Eat Clean & Meal Prep Cho Người Bận Rộn" [ref=f1e428]
+          - generic [ref=f1e429]:
+            - button [ref=f1e430]
+            - button [ref=f1e433]
+          - generic [ref=f1e437]:
+            - heading "Eat Clean & Meal Prep Cho Người Bận Rộn" [level=3] [ref=f1e438]
+            - paragraph [ref=f1e439]: Chỉ với 2 giờ cuối tuần, chuẩn bị trọn gói bữa ăn lành mạnh cho 5 ngày làm việc. Tiết kiệm 40% chi phí chợ búa, kiểm soát calo và tràn đầy năng lượng.
+            - generic [ref=f1e440]:
+              - generic [ref=f1e441]: Healthy Kitchen
+              - generic [ref=f1e446]: HLV Emma Phạm
+            - generic [ref=f1e451]:
+              - generic [ref=f1e452]: Cơ bản
+              - generic [ref=f1e454]: "4.8"
+              - generic [ref=f1e457]: 2 chương
+              - generic [ref=f1e461]: 2 bài
+            - button "Xem nội dung khoá học" [ref=f1e463]
+        - button "Nghệ Thuật Bánh Mì Men Tự Nhiên (Sourdough) Nghệ Thuật Bánh Mì Men Tự Nhiên (Sourdough) Tự nuôi men tự nhiên từ táo và bột mì, hiểu sâu về mạng lưới gluten, kỹ thuật gấp bột coil fold và nướng bánh vỏ giòn rụm với thớ ruột rỗng tổ ong xốp mềm. Baking Masterclass Pastry Chef Lan Vy Chuyên gia 4.9 1 chương 1 bài Xem nội dung khoá học" [ref=f1e464] [cursor=pointer]:
+          - img "Nghệ Thuật Bánh Mì Men Tự Nhiên (Sourdough)" [ref=f1e465]
+          - generic [ref=f1e466]:
+            - button [ref=f1e467]
+            - button [ref=f1e470]
+          - generic [ref=f1e474]:
+            - heading "Nghệ Thuật Bánh Mì Men Tự Nhiên (Sourdough)" [level=3] [ref=f1e475]
+            - paragraph [ref=f1e476]: Tự nuôi men tự nhiên từ táo và bột mì, hiểu sâu về mạng lưới gluten, kỹ thuật gấp bột coil fold và nướng bánh vỏ giòn rụm với thớ ruột rỗng tổ ong xốp mềm.
+            - generic [ref=f1e477]:
+              - generic [ref=f1e478]: Baking Masterclass
+              - generic [ref=f1e483]: Pastry Chef Lan Vy
+            - generic [ref=f1e488]:
+              - generic [ref=f1e489]: Chuyên gia
+              - generic [ref=f1e491]: "4.9"
+              - generic [ref=f1e494]: 1 chương
+              - generic [ref=f1e498]: 1 bài
+            - button "Xem nội dung khoá học" [ref=f1e500]
+  - generic:
+    - navigation:
+      - generic [ref=f1e501]:
+        - link [ref=f1e502] [cursor=pointer]:
+          - /url: /
+        - link [ref=f1e506] [cursor=pointer]:
+          - /url: /recipes
+        - link [ref=f1e509] [cursor=pointer]:
+          - /url: /tips
+        - button [ref=f1e512]
+    - button [ref=f1e515]

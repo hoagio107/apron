@@ -1,0 +1,56 @@
+- main [ref=f17e8]:
+  - generic [ref=f17e10]:
+    - button "Quay lại danh sách mẹo" [ref=f17e12] [cursor=pointer]
+    - generic [ref=f17e15]:
+      - generic [ref=f17e16]:
+        - generic [ref=f17e17]:
+          - generic [ref=f17e19] [cursor=pointer]:
+            - img "Mẹo ướp thịt nướng mềm mọng không bị khô" [ref=f17e20]
+            - generic [ref=f17e21]: Bấm để phóng to
+          - generic [ref=f17e28]:
+            - generic [ref=f17e29]:
+              - generic [ref=f17e30]:
+                - generic [ref=f17e31]: 23 tháng 10, 2026
+                - generic [ref=f17e35]: ~1 phút đọc
+              - heading "Mẹo ướp thịt nướng mềm mọng không bị khô" [level=1] [ref=f17e40]
+              - paragraph [ref=f17e41]: Thêm một thìa sữa đặc hoặc nước ép lê/táo vào sốt ướp. Enzyme tự nhiên trong hoa quả sẽ làm mềm thớ thịt mà không làm bở nát.
+            - generic [ref=f17e42]:
+              - button "Sao chép nội dung" [ref=f17e43] [cursor=pointer]
+              - button "Chia sẻ" [ref=f17e47] [cursor=pointer]
+              - button "Chỉnh sửa" [ref=f17e51] [cursor=pointer]
+              - button "Xóa mẹo" [ref=f17e55] [cursor=pointer]
+        - generic [ref=f17e59]:
+          - generic [ref=f17e60]:
+            - generic [ref=f17e65]:
+              - heading "Chi tiết hướng dẫn" [level=2] [ref=f17e66]
+              - paragraph [ref=f17e67]: Các bước và lưu ý quan trọng để thực hiện mẹo này
+            - button "Sao chép" [ref=f17e68] [cursor=pointer]
+          - generic [ref=f17e72]: Thêm một thìa sữa đặc hoặc nước ép lê/táo vào sốt ướp. Enzyme tự nhiên trong hoa quả sẽ làm mềm thớ thịt mà không làm bở nát.
+          - generic [ref=f17e77]:
+            - heading "Bí quyết cho người yêu bếp" [level=3] [ref=f17e78]
+            - paragraph [ref=f17e79]: Hãy lưu mẹo này vào sổ tay của bạn hoặc chia sẻ ngay cho bạn bè và người thân để cùng tối ưu hóa công việc nội trợ hàng ngày nhé!
+      - generic [ref=f17e81]:
+        - generic [ref=f17e82]:
+          - heading "Mẹo cùng chuyên mục" [level=3] [ref=f17e83]
+          - generic [ref=f17e87]: "4"
+        - generic [ref=f17e88]:
+          - generic [ref=f17e89] [cursor=pointer]:
+            - img "Cách giữ bơ sáp không bị thâm" [ref=f17e91]
+            - generic [ref=f17e92]:
+              - heading "Cách giữ bơ sáp không bị thâm" [level=4] [ref=f17e93]
+              - generic [ref=f17e94]: khoảng 23 giờ trước
+          - generic [ref=f17e95] [cursor=pointer]:
+            - img "Bí quyết chọn xương bò nấu phở ngon" [ref=f17e97]
+            - generic [ref=f17e98]:
+              - heading "Bí quyết chọn xương bò nấu phở ngon" [level=4] [ref=f17e99]
+              - generic [ref=f17e100]: khoảng 23 giờ trước
+          - generic [ref=f17e101] [cursor=pointer]:
+            - img "Bí quyết chọn xương bò nấu phở ngon" [ref=f17e103]
+            - generic [ref=f17e104]:
+              - heading "Bí quyết chọn xương bò nấu phở ngon" [level=4] [ref=f17e105]
+              - generic [ref=f17e106]: khoảng 23 giờ trước
+          - generic [ref=f17e107] [cursor=pointer]:
+            - img "Cách giữ bơ sáp không bị thâm" [ref=f17e109]
+            - generic [ref=f17e110]:
+              - heading "Cách giữ bơ sáp không bị thâm" [level=4] [ref=f17e111]
+              - generic [ref=f17e112]: khoảng 23 giờ trước

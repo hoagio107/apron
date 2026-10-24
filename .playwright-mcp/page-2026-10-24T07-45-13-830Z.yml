@@ -1,0 +1,47 @@
+- generic [ref=f16e1]:
+  - main [ref=f16e8]:
+    - generic [ref=f16e131]:
+      - generic [ref=f16e132] [cursor=pointer]:
+        - button [ref=f16e225]
+        - button [ref=f16e226]
+        - generic: Xem ảnh
+      - generic [ref=f16e144]:
+        - generic [ref=f16e145]:
+          - generic [ref=f16e146]: 23/10/2026
+          - generic [ref=f16e150]: ~1 phút đọc
+        - heading [level=1] [ref=f16e227]: Cách giữ bơ sáp không bị thâm
+      - generic [ref=f16e156]:
+        - generic [ref=f16e157]:
+          - generic [ref=f16e158]:
+            - generic [ref=f16e159]: Chi tiết hướng dẫn
+            - button [ref=f16e228] [cursor=pointer]: Sao chép
+          - generic [ref=f16e167]: Khi cắt bơ mà dùng không hết, hãy quét một lớp dầu oliu mỏng hoặc vắt chút chanh lên bề mặt bơ rồi bọc kín bằng màng bọc thực phẩm, để tủ lạnh.
+        - generic [ref=f16e172]:
+          - heading [level=3] [ref=f16e229]: Gợi ý áp dụng hiệu quả
+          - paragraph [ref=f16e174]: Áp dụng đều đặn trong quá trình chuẩn bị và nấu nướng sẽ giúp bạn tiết kiệm thời gian, tối ưu hương vị nguyên liệu và giữ gian bếp luôn ngăn nắp!
+        - generic [ref=f16e175]:
+          - generic [ref=f16e176]:
+            - heading [level=3] [ref=f16e230]: Mẹo hay khác cho bạn
+            - generic [ref=f16e181]: 4 gợi ý
+          - generic [ref=f16e182]:
+            - generic [ref=f16e186] [cursor=pointer]:
+              - heading [level=4] [ref=f16e232]: Mẹo ướp thịt nướng mềm mọng không bị khô
+              - paragraph [ref=f16e188]: Thêm một thìa sữa đặc hoặc nước ép lê/táo vào sốt ướp. Enzyme tự nhiên trong hoa quả sẽ làm mềm thớ thịt mà không làm bở nát.
+            - generic [ref=f16e194] [cursor=pointer]:
+              - heading [level=4] [ref=f16e234]: Bí quyết chọn xương bò nấu phở ngon
+              - paragraph [ref=f16e196]: Nên chọn xương ống bò, có màu đỏ tươi, tủy bên trong còn màu hồng. Tránh xương có mùi hôi lạ hoặc màu xỉn.
+            - generic [ref=f16e202] [cursor=pointer]:
+              - heading [level=4] [ref=f16e236]: Bí quyết chọn xương bò nấu phở ngon
+              - paragraph [ref=f16e204]: Nên chọn xương ống bò, có màu đỏ tươi, tủy bên trong còn màu hồng. Tránh xương có mùi hôi lạ hoặc màu xỉn.
+            - generic [ref=f16e210] [cursor=pointer]:
+              - heading [level=4] [ref=f16e238]: Cách giữ bơ sáp không bị thâm
+              - paragraph [ref=f16e212]: Khi cắt bơ mà dùng không hết, hãy quét một lớp dầu oliu mỏng hoặc vắt chút chanh lên bề mặt bơ rồi bọc kín bằng màng bọc thực phẩm, để tủ lạnh.
+      - generic [ref=f16e215]:
+        - button [ref=f16e239] [cursor=pointer]: Chia sẻ mẹo
+        - button [ref=f16e240] [cursor=pointer]: Chỉnh sửa
+  - dialog [active] [ref=f16e243]:
+    - button "Dismiss" [ref=f16e245]
+    - generic [ref=f16e246]:
+      - button "Đóng ảnh" [ref=f16e247] [cursor=pointer]
+      - img "Cách giữ bơ sáp không bị thâm" [ref=f16e251]
+    - button "Dismiss" [ref=f16e253]

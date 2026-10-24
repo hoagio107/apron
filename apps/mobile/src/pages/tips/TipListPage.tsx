@@ -1,10 +1,11 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { Button, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Badge } from '@/ui';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { BulkActionBar } from '../../components/shared/BulkActionBar';
 import { ConfirmModal } from '../../components/shared/ConfirmModal';
-import { Plus, Trash2, Search, Filter, CheckCircle2 } from 'lucide-react';
+import { Plus, Trash2, Search, Filter, CheckCircle2, LayoutGrid, RectangleHorizontal } from 'lucide-react';
 import { useTipStore } from '../../store/useTipStore';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { TipCard } from '../../components/tips/TipCard';
@@ -13,10 +14,21 @@ import { TipDetailPanel } from './components/TipDetailPanel';
 import { TIP_CATEGORIES } from '@apron/core';
 
 export function TipListPage() {
+  const navigate = useNavigate();
   const { tips, fetchTips, deleteBulkTips, deleteTip } = useTipStore();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  
+  // Chế độ hiển thị: 'grid' (lưới 2 cột) hoặc 'single' (1 cột tỷ lệ 4:3)
+  const [viewMode, setViewMode] = useState<'grid' | 'single'>(() => {
+    return (localStorage.getItem('tip_view_mode') as 'grid' | 'single') || 'grid';
+  });
+
+  const handleViewModeChange = (mode: 'grid' | 'single') => {
+    setViewMode(mode);
+    localStorage.setItem('tip_view_mode', mode);
+  };
   
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -117,16 +129,6 @@ export function TipListPage() {
       <PageHeader
         title="Mẹo nhà bếp"
         description={`${tips.length} mẹo đã lưu`}
-        prefix={
-          <Button 
-            isIconOnly
-            color="primary" 
-            className="hidden md:flex w-14 h-14 rounded-2xl shadow-sm shrink-0"
-            onPress={() => setIsFormModalOpen(true)}
-          >
-            <Plus className="w-6 h-6" />
-          </Button>
-        }
         actions={
           <div className="flex flex-col md:flex-row justify-end gap-3 w-full">
             <Input
@@ -146,8 +148,8 @@ export function TipListPage() {
               <Button 
                 isIconOnly
                 color="primary"
-                className="md:hidden"
                 onPress={() => setIsFormModalOpen(true)}
+                aria-label="Thêm mẹo mới"
               >
                 <Plus className="w-5 h-5" />
               </Button>
@@ -188,9 +190,38 @@ export function TipListPage() {
                 variant="flat" 
                 color={isSelectMode ? "primary" : "default"}
                 onPress={toggleSelectMode}
+                aria-label="Chọn nhiều"
               >
                 <CheckCircle2 className="w-5 h-5" />
               </Button>
+
+              <div className="w-px h-6 bg-default-200 dark:bg-default-100 mx-0.5 shrink-0" />
+
+              {/* View Mode Toggle: Lưới 2 cột vs 1 cột tỷ lệ 4:3 */}
+              <div className="flex items-center bg-default-100 dark:bg-default-50/10 rounded-xl p-0.5 shrink-0 border border-default-200/50">
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant={viewMode === 'grid' ? 'solid' : 'light'}
+                  color={viewMode === 'grid' ? 'primary' : 'default'}
+                  className={`w-8 h-8 min-w-8 ${viewMode === 'grid' ? 'shadow-xs' : 'text-default-500'}`}
+                  onPress={() => handleViewModeChange('grid')}
+                  aria-label="Lưới 2 cột"
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </Button>
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant={viewMode === 'single' ? 'solid' : 'light'}
+                  color={viewMode === 'single' ? 'primary' : 'default'}
+                  className={`w-8 h-8 min-w-8 ${viewMode === 'single' ? 'shadow-xs' : 'text-default-500'}`}
+                  onPress={() => handleViewModeChange('single')}
+                  aria-label="1 cột tỷ lệ 4:3"
+                >
+                  <RectangleHorizontal className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
         }
@@ -217,15 +248,20 @@ export function TipListPage() {
           description="Thử thay đổi từ khóa tìm kiếm hoặc xóa bớt bộ lọc để xem kết quả khác."
         />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div className={
+          viewMode === 'single'
+            ? "grid grid-cols-1 gap-4 max-w-xl mx-auto w-full"
+            : "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5"
+        }>
           {filteredTips.map(t => (
             <TipCard 
               key={t.id!} 
               tip={t} 
+              viewMode={viewMode}
               selectable={isSelectMode}
               isSelected={selectedIds.has(t.id!)}
               onSelect={() => toggleSelect(t.id!)}
-              onClick={() => setViewingTipId(t.id!)}
+              onClick={() => navigate('/tips/' + t.id)}
               onEdit={() => {
                 setEditingTipId(t.id!);
                 setIsFormModalOpen(true);

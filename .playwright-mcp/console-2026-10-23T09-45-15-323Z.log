@@ -1,0 +1,8 @@
+[     210ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:14333
+[     276ms] [INFO] Đang chạy ở môi trường Web thuần, Storage sử dụng BrowserStorageProvider (IndexedDB) @ http://localhost:5173/@fs/C:/apron/packages/core/src/storage/index.ts?t=1792747142923:18
+[ 1498971ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5173/src/lib/gemini.ts?t=1792750214008:0
+[ 1498972ms] [ERROR] [vite] Failed to reload /src/components/settings/SettingsModal.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5173/@vite/client:528
+[ 1498973ms] [ERROR] [vite] Failed to reload /src/components/recipes/form/AiAssistModal.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5173/@vite/client:528
+[ 1498973ms] [ERROR] [vite] Failed to reload /src/pages/smart-fridge/components/AiSuggestionPanel.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5173/@vite/client:528
+[ 1498973ms] [ERROR] [vite] Failed to reload /src/components/recipes/RecipeFloatingChat.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5173/@vite/client:528
+[ 1548738ms] [ERROR] [vite] Failed to reload /src/components/recipes/form/AiAssistModal.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5173/@vite/client:528

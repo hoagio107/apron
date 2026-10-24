@@ -10,4 +10,8 @@ export type { SectionTitleProps } from "./components/SectionTitle";
 export { EmptyState } from "./components/EmptyState";
 export type { EmptyStateProps } from "./components/EmptyState";
 export { PageHeader } from "../components/layout/PageHeader";
+export { ListToolbar } from "../components/shared/ListToolbar";
+export type { ListToolbarProps, ToolbarFilterItem, ToolbarSortItem } from "../components/shared/ListToolbar";
 export * from "./UIProvider";
+export { toast, addToast, closeToast, closeAll } from "./toast";
+export type { ToastProps } from "./toast";

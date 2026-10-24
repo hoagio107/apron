@@ -1,0 +1,19 @@
+- generic [ref=f9e7]:
+  - main [ref=f9e8]:
+    - generic [ref=f9e9]:
+      - generic [ref=f9e10]: 😵
+      - generic [ref=f9e11]:
+        - heading "Đã xảy ra lỗi không mong muốn" [level=2] [ref=f9e12]
+        - paragraph [ref=f9e13]: Plus is not defined
+      - button "Thử lại" [ref=f9e14]
+  - generic:
+    - navigation:
+      - generic [ref=f9e15]:
+        - link [ref=f9e16] [cursor=pointer]:
+          - /url: /
+        - link [ref=f9e20] [cursor=pointer]:
+          - /url: /recipes
+        - link [ref=f9e23] [cursor=pointer]:
+          - /url: /tips
+        - button [ref=f9e26]
+    - button [ref=f9e29]

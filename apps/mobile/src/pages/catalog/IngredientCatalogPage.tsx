@@ -1,252 +1,381 @@
-import { useState, useRef } from 'react';
-import { PageHeader } from '../../components/layout/PageHeader';
-import { EmptyState } from '../../components/shared/EmptyState';
-import { useIngredientCatalogStore } from '../../store/useIngredientCatalogStore';
-import { Button, Avatar, Input, Select, SelectItem, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@/ui';
-import { Trash2, Plus, ImagePlus, BookOpen } from 'lucide-react';
-import { CATEGORIES } from '@apron/core';
-import { useUnitStore } from '../../store/useUnitStore';
+import { useState, useMemo } from 'react';
+import { 
+  Button, 
+  PageHeader, 
+  ListToolbar, 
+  EmptyState, 
+  toast 
+} from '@/ui';
+import type { ToolbarFilterItem } from '@/ui';
+import {
+  Plus,
+  BookOpen,
+  X,
+  UtensilsCrossed
+} from 'lucide-react';
+import { CATEGORIES, autoCategorizeIngredient } from '@apron/core';
+import { getCategoryTheme } from '../../lib/categoryTheme';
+import {
+  useIngredientCatalogStore,
+  type IngredientMeta
+} from '../../store/useIngredientCatalogStore';
 import { useRecipeStore } from '../../store/useRecipeStore';
+import { IngredientCard } from './components/IngredientCard';
+import { IngredientModal } from './components/IngredientModal';
+import { CascadeDeleteModal } from './components/CascadeDeleteModal';
 
 export function IngredientCatalogPage() {
-  const { getAllIngredients, updateIngredientMeta, addIngredientMeta, removeIngredientMeta } = useIngredientCatalogStore();
-  const { recipes, updateIngredientInRecipes, removeIngredientFromRecipes, detachIngredientFromRecipes } = useRecipeStore();
-  const { units } = useUnitStore();
+  const {
+    getAllIngredients,
+    updateIngredientMeta,
+    addIngredientMeta,
+    removeIngredientMeta
+  } = useIngredientCatalogStore();
+
+  const {
+    recipes,
+    updateIngredientInRecipes,
+    removeIngredientFromRecipes,
+    detachIngredientFromRecipes
+  } = useRecipeStore();
+
   const items = getAllIngredients();
-  
-  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
-  
-  const [editingId, setEditingId] = useState('');
-  const [name, setName] = useState('');
-  const [unit, setUnit] = useState('');
-  const [group, setGroup] = useState('');
-  const [image, setImage] = useState<string | undefined>();
-  
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleOpen = (existingItem?: any) => {
-    if (existingItem) {
-      setEditingId(existingItem.id);
-      setName(existingItem.name);
-      setUnit(existingItem.default_unit || '');
-      setGroup(existingItem.default_category || '');
-      setImage(existingItem.image_url);
-    } else {
-      setEditingId('');
-      setName('');
-      setUnit('');
-      setGroup('');
-      setImage(undefined);
-    }
-    onOpen();
-  };
+  // Filters & Search
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [usageFilter, setUsageFilter] = useState<'all' | 'used' | 'unused'>('all');
+  const [sortBy, setSortBy] = useState<'name-asc' | 'name-desc' | 'most-used'>('name-asc');
 
-  const handleSave = async () => {
-    if (!name.trim()) return;
-    
-    if (editingId) {
-      // If we rename it, cascade to recipes
-      const oldItem = items.find(i => i.id === editingId);
-      if (oldItem && oldItem.name !== name.trim()) {
-        await updateIngredientInRecipes(editingId, name.trim());
-      }
-      
-      updateIngredientMeta(editingId, {
-        name: name.trim(),
-        default_category: group || undefined,
-        default_unit: unit || undefined,
-        image_url: image
-      });
-    } else {
-      addIngredientMeta(name.trim(), {
-        default_category: group || undefined,
-        default_unit: unit || undefined,
-        image_url: image
-      });
-    }
-    
-    onClose();
-  };
+  // Modal states
+  const [isAddEditOpen, setIsAddEditOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<IngredientMeta | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deletingItem, setDeletingItem] = useState<IngredientMeta | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleDelete = async (itemId: string, itemName: string) => {
-    const affectedRecipes = recipes.filter(r => r.ingredients?.some(i => i.ingredient_id === itemId));
-    
-    if (affectedRecipes.length > 0) {
-      const choice = window.prompt(
-        `Nguyên liệu "${itemName}" đang được dùng trong ${affectedRecipes.length} công thức.\n` +
-        `Bạn muốn làm gì?\n` +
-        `1: Xóa hoàn toàn khỏi các công thức.\n` +
-        `2: Giữ lại trong công thức dưới dạng chữ (mất liên kết).`
+  // Map each ingredient to the recipes that use it
+  const usageMap = useMemo(() => {
+    const map = new Map<string, Array<{ id?: string; title: string }>>();
+    for (const item of items) {
+      const affected = recipes.filter(r =>
+        r.ingredients?.some(i => i.ingredient_id === item.id)
       );
-      
-      if (choice === '1') {
-        await removeIngredientFromRecipes(itemId);
-      } else if (choice === '2') {
-        await detachIngredientFromRecipes(itemId);
-      } else {
-        return; // Cancel
-      }
-    } else {
-      if (!window.confirm(`Bạn có chắc muốn xóa "${itemName}" khỏi từ điển?`)) return;
+      map.set(item.id, affected);
     }
-    
-    removeIngredientMeta(itemId);
+    return map;
+  }, [items, recipes]);
+
+  // Category counts
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const item of items) {
+      const cat = item.default_category || autoCategorizeIngredient(item.name);
+      counts[cat] = (counts[cat] || 0) + 1;
+    }
+    return counts;
+  }, [items]);
+
+  // Usage statistics
+  const usedCount = useMemo(() => {
+    let count = 0;
+    for (const item of items) {
+      if ((usageMap.get(item.id)?.length || 0) > 0) count++;
+    }
+    return count;
+  }, [items, usageMap]);
+
+  const unusedCount = items.length - usedCount;
+
+  // Filter options for standard ListToolbar
+  const filterItems = useMemo(() => {
+    const list: ToolbarFilterItem[] = [
+      { key: 'all', label: 'Tất cả nguyên liệu', count: items.length },
+      { key: 'usage:used', label: '🍳 Đang dùng', count: usedCount },
+      { key: 'usage:unused', label: 'Chưa dùng', count: unusedCount }
+    ];
+
+    Object.values(CATEGORIES).forEach(cat => {
+      const count = categoryCounts[cat] || 0;
+      if (count > 0) {
+        list.push({
+          key: `cat:${cat}`,
+          label: cat,
+          count
+        });
+      }
+    });
+
+    return list;
+  }, [items.length, usedCount, unusedCount, categoryCounts]);
+
+  const selectedFilterKey = useMemo(() => {
+    if (usageFilter === 'used') return 'usage:used';
+    if (usageFilter === 'unused') return 'usage:unused';
+    if (selectedCategory) return `cat:${selectedCategory}`;
+    return 'all';
+  }, [usageFilter, selectedCategory]);
+
+  const handleFilterChange = (key: string) => {
+    if (key === 'usage:used') {
+      setUsageFilter('used');
+      setSelectedCategory(null);
+    } else if (key === 'usage:unused') {
+      setUsageFilter('unused');
+      setSelectedCategory(null);
+    } else if (key.startsWith('cat:')) {
+      setSelectedCategory(key.replace('cat:', ''));
+      setUsageFilter('all');
+    } else {
+      setSelectedCategory(null);
+      setUsageFilter('all');
+    }
+  };
+
+  const sortItems = [
+    { key: 'name-asc', label: 'Tên A-Z' },
+    { key: 'name-desc', label: 'Tên Z-A' },
+    { key: 'most-used', label: 'Dùng nhiều' }
+  ];
+
+  // Filtered and sorted ingredients
+  const filteredItems = useMemo(() => {
+    let result = [...items];
+
+    // 1. Search Query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(item => {
+        const cat = item.default_category || autoCategorizeIngredient(item.name);
+        return (
+          item.name.toLowerCase().includes(q) ||
+          cat.toLowerCase().includes(q) ||
+          (item.default_unit && item.default_unit.toLowerCase().includes(q))
+        );
+      });
+    }
+
+    // 2. Category Filter
+    if (selectedCategory) {
+      result = result.filter(item => {
+        const cat = item.default_category || autoCategorizeIngredient(item.name);
+        return cat === selectedCategory;
+      });
+    }
+
+    // 3. Usage Filter
+    if (usageFilter === 'used') {
+      result = result.filter(item => (usageMap.get(item.id)?.length || 0) > 0);
+    } else if (usageFilter === 'unused') {
+      result = result.filter(item => (usageMap.get(item.id)?.length || 0) === 0);
+    }
+
+    // 4. Sort
+    return result.sort((a, b) => {
+      if (sortBy === 'name-asc') {
+        return a.name.localeCompare(b.name, 'vi');
+      }
+      if (sortBy === 'name-desc') {
+        return b.name.localeCompare(a.name, 'vi');
+      }
+      if (sortBy === 'most-used') {
+        const countA = usageMap.get(a.id)?.length || 0;
+        const countB = usageMap.get(b.id)?.length || 0;
+        if (countB !== countA) return countB - countA;
+        return a.name.localeCompare(b.name, 'vi');
+      }
+      return 0;
+    });
+  }, [items, searchQuery, selectedCategory, usageFilter, sortBy, usageMap]);
+
+  // Handlers
+  const handleOpenAdd = () => {
+    setEditingItem(null);
+    setIsAddEditOpen(true);
+  };
+
+  const handleOpenEdit = (item: IngredientMeta) => {
+    setEditingItem(item);
+    setIsAddEditOpen(true);
+  };
+
+  const handleSaveIngredient = async (
+    data: { name: string; default_category?: string; default_unit?: string; image_url?: string },
+    id?: string
+  ) => {
+    if (id) {
+      // Editing
+      const oldItem = items.find(i => i.id === id);
+      if (oldItem && oldItem.name !== data.name) {
+        await updateIngredientInRecipes(id, data.name);
+      }
+      updateIngredientMeta(id, data);
+      toast.success(`Đã cập nhật nguyên liệu "${data.name}"`);
+    } else {
+      // Adding new
+      addIngredientMeta(data.name, data);
+      toast.success(`Đã thêm nguyên liệu "${data.name}" vào từ điển`);
+    }
+  };
+
+  const handleDeleteRequest = (item: IngredientMeta) => {
+    setDeletingItem(item);
+    setIsDeleteOpen(true);
+    setIsAddEditOpen(false); // Close edit drawer if open
+  };
+
+  const handleDirectDelete = async () => {
+    if (!deletingItem) return;
+    try {
+      setIsDeleting(true);
+      removeIngredientMeta(deletingItem.id);
+      toast.success(`Đã xoá "${deletingItem.name}" khỏi từ điển`);
+    } finally {
+      setIsDeleting(false);
+      setDeletingItem(null);
+    }
+  };
+
+  const handleDetachDelete = async () => {
+    if (!deletingItem) return;
+    try {
+      setIsDeleting(true);
+      await detachIngredientFromRecipes(deletingItem.id);
+      removeIngredientMeta(deletingItem.id);
+      toast.success(
+        `Đã gỡ liên kết và giữ tên "${deletingItem.name}" trong các công thức`
+      );
+    } finally {
+      setIsDeleting(false);
+      setDeletingItem(null);
+    }
+  };
+
+  const handleCascadeRemove = async () => {
+    if (!deletingItem) return;
+    try {
+      setIsDeleting(true);
+      await removeIngredientFromRecipes(deletingItem.id);
+      removeIngredientMeta(deletingItem.id);
+      toast.success(
+        `Đã xoá hoàn toàn "${deletingItem.name}" khỏi từ điển và các công thức`
+      );
+    } finally {
+      setIsDeleting(false);
+      setDeletingItem(null);
+    }
+  };
+
+  const activeFiltersCount =
+    (selectedCategory ? 1 : 0) +
+    (usageFilter !== 'all' ? 1 : 0) +
+    (searchQuery.trim() ? 1 : 0);
+
+  const resetFilters = () => {
+    setSearchQuery('');
+    setSelectedCategory(null);
+    setUsageFilter('all');
   };
 
   return (
-    <div className="h-full flex flex-col pt-6 bg-default-50/50">
-      <PageHeader 
-        title="Từ điển nguyên liệu" 
-        description="Quản lý toàn bộ danh mục nguyên liệu, hình ảnh và phân loại"
-        className="pt-0"
-        showBackButton={false}
+    <div className="flex flex-col min-h-full gap-6 w-full pt-6 pb-28 px-4 md:px-8">
+      {/* 1. Header & Toolbar chuẩn hệ thống */}
+      <PageHeader
+        title="Từ điển nguyên liệu"
+        description={
+          filteredItems.length === items.length
+            ? `${items.length} nguyên liệu đã lưu trữ`
+            : `Hiển thị ${filteredItems.length} / ${items.length} nguyên liệu`
+        }
         actions={
-          <Button isIconOnly color="primary" onPress={() => handleOpen()}>
-            <Plus className="w-5 h-5" />
-          </Button>
+          <ListToolbar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            searchPlaceholder="Tìm kiếm nguyên liệu..."
+            filterItems={filterItems}
+            selectedFilter={selectedFilterKey}
+            onFilterChange={handleFilterChange}
+            sortItems={sortItems}
+            selectedSort={sortBy}
+            onSortChange={(key) => setSortBy(key as any)}
+            onAdd={handleOpenAdd}
+            addLabel="Thêm mới"
+          />
         }
       />
-      
-      <div className="flex-1 overflow-auto p-4 md:p-6">
+
+      {/* 2. Grid List Content */}
+      <div className="flex-1 w-full">
         {items.length === 0 ? (
           <EmptyState
-            icon={<BookOpen className="w-10 h-10 text-default-300" />}
+            icon={<BookOpen className="w-12 h-12 text-default-300" />}
             title="Từ điển đang trống"
-            description="Bấm 'Thêm nguyên liệu' để bắt đầu xây dựng từ điển của bạn."
+            description="Bắt đầu thêm nguyên liệu đầu tiên để xây dựng từ điển bếp của bạn."
             action={
-              <Button color="primary" onPress={() => handleOpen()} startContent={<Plus className="w-4 h-4" />}>
+              <Button
+                color="primary"
+                onPress={handleOpenAdd}
+                startContent={<Plus className="w-4 h-4" />}
+                className="h-11 rounded-xl px-5 font-semibold text-sm shadow-xs"
+              >
                 Thêm nguyên liệu
               </Button>
             }
           />
+        ) : filteredItems.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center py-12 px-4">
+            <div className="w-12 h-12 rounded-2xl bg-default-100 flex items-center justify-center text-default-400 mb-3">
+              <Search className="w-6 h-6" />
+            </div>
+            <h3 className="font-bold text-base text-foreground">Không tìm thấy nguyên liệu</h3>
+            <p className="text-xs text-default-500 max-w-xs mt-1 mb-4">
+              Không có nguyên liệu nào khớp với từ khoá hoặc nhóm phân loại đang chọn.
+            </p>
+            <Button
+              variant="flat"
+              size="sm"
+              onPress={resetFilters}
+              className="rounded-xl h-9 text-xs"
+            >
+              Xoá bộ lọc tìm kiếm
+            </Button>
+          </div>
         ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-4 md:gap-6">
-            {items.map(item => (
-              <div 
-                key={item.name} 
-                onClick={() => handleOpen(item)} 
-                className="cursor-pointer group flex flex-col gap-2 hover:-translate-y-1 transition-transform"
-              >
-                <div className="w-full aspect-square bg-default-100 rounded-2xl overflow-hidden relative">
-                  {item.image_url ? (
-                    <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-4xl text-default-400">
-                      {item.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </div>
-                <div className="text-center px-1">
-                  <h3 className="font-bold text-sm line-clamp-1" title={item.name}>{item.name}</h3>
-                  <p className="text-xs text-default-500 mt-1">
-                    {item.default_category || 'Chưa phân loại'}
-                    {item.default_unit ? ` • ${item.default_unit}` : ''}
-                  </p>
-                </div>
-              </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3">
+            {filteredItems.map(item => (
+              <IngredientCard
+                key={item.id}
+                item={item}
+                usageCount={usageMap.get(item.id)?.length || 0}
+                onEdit={handleOpenEdit}
+                onDelete={handleDeleteRequest}
+              />
             ))}
           </div>
         )}
       </div>
 
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-        <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">
-            {editingId ? 'Sửa nguyên liệu' : 'Thêm nguyên liệu mới'}
-          </ModalHeader>
-          <ModalBody>
-            <div className="flex flex-col items-center gap-4 mb-4">
-              <div 
-                className="relative cursor-pointer group w-24 h-24"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                {image ? (
-                  <Avatar src={image} className="w-24 h-24 text-large" radius="lg" />
-                ) : (
-                  <div className="w-24 h-24 rounded-lg bg-default-100 flex items-center justify-center text-default-400 group-hover:bg-default-200 transition-colors">
-                    <ImagePlus className="w-8 h-8" />
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-white text-xs font-medium">Đổi ảnh</span>
-                </div>
-              </div>
-              <input 
-                type="file" 
-                accept="image/*" 
-                className="hidden" 
-                ref={fileInputRef}
-                onChange={handleImageUpload}
-              />
-            </div>
-            
-            <div className="flex flex-col gap-4">
-              <Input 
-                label="Tên nguyên liệu" 
-                placeholder="VD: Thịt bò" 
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                isRequired
-              />
-              
-              <Select
-                label="Nhóm phân loại (Mặc định)"
-                selectedKeys={group ? [group] : []}
-                onSelectionChange={(keys) => {
-                  const val = Array.from(keys)[0] as string;
-                  setGroup(val);
-                }}
-              >
-                {Object.values(CATEGORIES).map(cat => (
-                  <SelectItem key={cat}>{cat}</SelectItem>
-                ))}
-              </Select>
-              
-              <Select
-                label="Đơn vị (Mặc định)"
-                selectedKeys={unit ? [unit] : []}
-                onSelectionChange={(keys) => {
-                  const val = Array.from(keys)[0] as string;
-                  setUnit(val);
-                }}
-              >
-                {units.map(u => (
-                  <SelectItem key={u.name}>{u.name}</SelectItem>
-                ))}
-              </Select>
-            </div>
-          </ModalBody>
-          <ModalFooter className="flex justify-between">
-            {editingId ? (
-              <Button isIconOnly color="danger" variant="light" size="md" onPress={() => {
-                handleDelete(editingId, name);
-                onClose();
-              }}>
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            ) : <div></div>}
-            <div className="flex gap-2">
-              <Button color="default" variant="light" onPress={onClose}>
-                Hủy
-              </Button>
-              <Button color="primary" onPress={handleSave}>
-                Lưu
-              </Button>
-            </div>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      {/* 4. Add / Edit Modal Drawer */}
+      <IngredientModal
+        isOpen={isAddEditOpen}
+        onOpenChange={setIsAddEditOpen}
+        item={editingItem}
+        affectedRecipesCount={editingItem ? usageMap.get(editingItem.id)?.length || 0 : 0}
+        onSave={handleSaveIngredient}
+        onDeleteRequest={handleDeleteRequest}
+      />
+
+      {/* 5. Safe Cascade Delete Modal */}
+      <CascadeDeleteModal
+        isOpen={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+        item={deletingItem}
+        affectedRecipes={deletingItem ? usageMap.get(deletingItem.id) || [] : []}
+        onConfirmDeleteDirect={handleDirectDelete}
+        onDetachFromRecipes={handleDetachDelete}
+        onRemoveFromRecipes={handleCascadeRemove}
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

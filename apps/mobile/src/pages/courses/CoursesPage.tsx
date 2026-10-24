@@ -8,6 +8,7 @@ import { useCourseStore } from '../../store/useCourseStore';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { CourseCard } from '../../components/courses/CourseCard';
 import { ConfirmModal } from '../../components/shared/ConfirmModal';
+import { CourseFormModal } from './components/CourseFormModal';
 
 export function CoursesPage() {
   const navigate = useNavigate();
@@ -15,6 +16,10 @@ export function CoursesPage() {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Modal state
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
+
   // Selection and filter state
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -123,7 +128,10 @@ export function CoursesPage() {
 
               <Button 
                 color="primary"
-                onPress={() => navigate('/courses/add')}
+                onPress={() => {
+                  setEditingCourseId(null);
+                  setIsFormModalOpen(true);
+                }}
                 startContent={<Plus className="w-5 h-5" />}
                 className="shrink-0"
               >
@@ -148,7 +156,10 @@ export function CoursesPage() {
                 color="primary" 
                 variant="flat"
                 startContent={<Plus className="w-4 h-4" />}
-                onPress={() => navigate('/courses/add')}
+                onPress={() => {
+                  setEditingCourseId(null);
+                  setIsFormModalOpen(true);
+                }}
               >
                 Tạo khoá học đầu tiên
               </Button>
@@ -216,6 +227,13 @@ export function CoursesPage() {
           ]}
         />
       )}
+
+      <CourseFormModal
+        isOpen={isFormModalOpen}
+        onOpenChange={setIsFormModalOpen}
+        courseId={editingCourseId}
+        onSuccess={() => fetchCourses()}
+      />
     </div>
   );
 }

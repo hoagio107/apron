@@ -1,0 +1,14 @@
+{
+  "java.jdt.ls.java.home": "C:\\Program Files\\Microsoft\\jdk-17.0.20.101-hotspot",
+  "gradle.autoDetect": "off",
+  "java.gradle.buildServer.enabled": "off",
+  "java.import.gradle.enabled": false,
+  "java.autobuild.enabled": false,
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.gradle/**": true,
+    "**/apps/mobile/android/**": true
+  }
+}

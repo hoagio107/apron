@@ -33,40 +33,28 @@ export function TipCard({ tip, onClick, onEdit, onDelete, isSelected, onSelect, 
   // To avoid breaking layout, we wrap it in a line-clamp-2 container.
 
   return (
-    <Card 
-      isPressable 
-      onPress={handleClick}
-      radius="lg"
-      className={`group w-full aspect-[3/4] sm:aspect-[4/5] relative overflow-hidden transition-all duration-300 shadow-lg border-none
+    <div 
+      onClick={handleClick}
+      className={`group w-full aspect-[3/4] sm:aspect-[4/5] relative overflow-hidden transition-all duration-300 rounded-2xl bg-black border-none shadow-none cursor-pointer card-media-root
         ${isSelected ? 'ring-4 ring-primary' : 'hover:scale-[1.02]'}
       `}
     >
-      {/* Background Image */}
+      {/* Background Image: dừng lại trước 2 góc dưới và fade mask để triệt tiêu hoàn toàn viền trắng subpixel */}
       {tip.image_url ? (
         <img 
           src={ImageManager.getAssetUrl(tip.image_url)} 
           alt={tip.title}
-          className="absolute inset-0 w-full h-full object-cover z-0"
+          className="card-media-img absolute inset-x-0 top-0 bottom-7 w-full h-[calc(100%-1.75rem)] object-cover z-0"
         />
       ) : (
-        <div className="absolute inset-0 w-full h-full bg-default-200 flex items-center justify-center z-0">
+        <div className="card-media-img absolute inset-x-0 top-0 bottom-7 w-full h-[calc(100%-1.75rem)] bg-default-200 flex items-center justify-center z-0">
           <Lightbulb className="w-16 h-16 text-default-500" />
         </div>
       )}
 
-      {/* Gradient Blur Overlay */}
-      <div 
-        className="absolute inset-0 z-0 bg-black/30 backdrop-blur-md"
-        style={{ 
-          borderRadius: 'inherit',
-          WebkitMaskImage: 'linear-gradient(to top, black 0%, black 30%, transparent 60%)', 
-          maskImage: 'linear-gradient(to top, black 0%, black 30%, transparent 60%)' 
-        }}
-      ></div>
       {/* Additional dark gradient for text readability */}
       <div 
-        className="absolute inset-0 z-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"
-        style={{ borderRadius: 'inherit' }}
+        className="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/50 via-50% to-transparent pointer-events-none"
       ></div>
 
       {/* Action Buttons (Top Right) */}
@@ -146,6 +134,6 @@ export function TipCard({ tip, onClick, onEdit, onDelete, isSelected, onSelect, 
           Xem chi tiết
         </Button>
       </div>
-    </Card>
+    </div>
   );
 }

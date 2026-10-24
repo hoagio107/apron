@@ -14,3 +14,4 @@ export * from './types/pantry';
 export * from './types/tip';
 
 export * from './utils/ingredientParser';
+export * from './data/seedMockData';

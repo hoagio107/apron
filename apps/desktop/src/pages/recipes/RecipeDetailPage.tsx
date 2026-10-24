@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Modal, ModalContent, ModalBody, useDisclosure, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tabs, Tab } from '@/ui';
-import { ArrowLeft, Edit, Clock, Star, Flame, Play, Info, Share, Check, Image as ImageIcon, Plus, Gauge, Timer, Minus, Carrot, ChefHat, Link as LinkIcon, Video, Tag, X, Calendar, ShoppingCart, Printer, Download, ImageDown, ChevronDown, ChevronUp } from 'lucide-react';
+import { Button, Modal, ModalContent, ModalBody, useDisclosure, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tabs, Tab, Chip } from '@/ui';
+import { ArrowLeft, Edit, Clock, Star, Flame, Play, Info, Share, Check, Image as ImageIcon, Plus, Gauge, Timer, Minus, Carrot, ChefHat, Link as LinkIcon, Video, Tag, X, Calendar, ShoppingCart, Printer, Download, ImageDown, ChevronDown, ChevronUp, GitFork, Layers, ArrowRight, Sparkles } from 'lucide-react';
 import { useRecipeStore } from '../../store/useRecipeStore';
 import { useShoppingListStore } from '../../store/useShoppingListStore';
 import { useMealPlanStore } from '../../store/useMealPlanStore';
@@ -11,14 +11,19 @@ import { exportToPdf, exportToPng } from '../../lib/exportUtils';
 import { CookingModeModal } from '../../components/recipes/CookingModeModal';
 import { CookingRatingModal } from '../../components/recipes/CookingRatingModal';
 import { RecipeSnapshotModal } from '../../components/recipes/RecipeSnapshotModal';
-import { RecipeFloatingChat } from '../../components/recipes/RecipeFloatingChat';
 import { MealPlannerSelectModal } from './components/MealPlannerSelectModal';
 
 export function RecipeDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { recipes, updateRecipe } = useRecipeStore();
+  const { recipes, updateRecipe, fetchRecipes } = useRecipeStore();
   
+  useEffect(() => {
+    if (recipes.length === 0 && fetchRecipes) {
+      fetchRecipes();
+    }
+  }, [recipes.length, fetchRecipes]);
+
   const recipe = useMemo(() => {
     if (!id) return null;
     return recipes.find(r => r.id === id) || null;
@@ -197,12 +202,30 @@ export function RecipeDetailPage() {
     if (recipe.parent_id) {
       const parent = recipes.find(r => r.id === recipe.parent_id);
       const siblings = recipes.filter(r => r.parent_id === recipe.parent_id);
-      return [parent, ...siblings].filter(Boolean) as typeof recipes;
+      const list = [parent, ...siblings].filter(Boolean) as typeof recipes;
+      const seen = new Set<string>();
+      return list.filter(item => {
+        if (!item?.id || seen.has(item.id)) return false;
+        seen.add(item.id);
+        return true;
+      });
     } else {
       const children = recipes.filter(r => r.parent_id === recipe.id);
       if (children.length === 0) return [];
       return [recipe, ...children];
     }
+  }, [recipe, recipes]);
+
+  const parentRecipe = useMemo(() => {
+    if (!recipe?.parent_id) return null;
+    return recipes.find(r => r.id === recipe.parent_id) || null;
+  }, [recipe?.parent_id, recipes]);
+
+  const isVariant = !!recipe?.parent_id;
+
+  const childVariants = useMemo(() => {
+    if (!recipe) return [];
+    return recipes.filter(r => r.parent_id === recipe.id);
   }, [recipe, recipes]);
 
   if (!recipe) {
@@ -238,7 +261,12 @@ export function RecipeDetailPage() {
             {variants.map(v => (
               <Tab 
                 key={v.id!} 
-                title={!v.parent_id ? "Bản gốc" : v.title}
+                title={
+                  <div className="flex items-center gap-1.5">
+                    {!v.parent_id ? <Sparkles className="w-3.5 h-3.5 text-amber-500" /> : <GitFork className="w-3.5 h-3.5 text-secondary-500" />}
+                    <span>{!v.parent_id ? `⭐ Bản gốc (${v.title})` : `Biến thể: ${v.title}`}</span>
+                  </div>
+                }
               />
             ))}
           </Tabs>
@@ -292,7 +320,7 @@ export function RecipeDetailPage() {
             
             {/* Details */}
             <div className="flex flex-col flex-1 gap-5">
-               <div className="flex flex-col gap-2">
+               <div className="flex flex-col gap-2.5">
                  <div 
                    className="flex items-center gap-1 text-sm font-semibold text-default-500 hover:text-foreground cursor-pointer w-fit transition-colors -ml-1 px-1 py-0.5 rounded-lg hover:bg-default-100"
                    onClick={() => navigate(-1)}
@@ -300,6 +328,60 @@ export function RecipeDetailPage() {
                    <ArrowLeft className="w-4 h-4" />
                    Quay lại
                  </div>
+
+                 {/* Variant Notice Banner */}
+                 {isVariant && (
+                   <div className="flex items-center justify-between gap-3 p-3 bg-secondary-50 dark:bg-secondary-900/20 border border-secondary-200 dark:border-secondary-800/40 rounded-xl text-sm">
+                     <div className="flex items-center gap-2.5 min-w-0">
+                       <div className="w-8 h-8 rounded-lg bg-secondary-100 dark:bg-secondary-800/60 flex items-center justify-center shrink-0 text-secondary-600 dark:text-secondary-300">
+                         <GitFork className="w-4 h-4" />
+                       </div>
+                       <div className="flex flex-col min-w-0">
+                         <span className="text-xs text-secondary-600 dark:text-secondary-400 font-medium">Công thức này là biến thể của món:</span>
+                         <span className="text-sm font-bold text-foreground truncate">
+                           {parentRecipe ? parentRecipe.title : 'Công thức gốc'}
+                         </span>
+                       </div>
+                     </div>
+                     {parentRecipe && (
+                       <Button
+                         size="sm"
+                         variant="flat"
+                         color="secondary"
+                         className="shrink-0 font-semibold h-8 text-xs px-3"
+                         endContent={<ArrowRight className="w-3.5 h-3.5" />}
+                         onPress={() => navigate(`/recipes/${parentRecipe.id}`)}
+                       >
+                         Xem bản gốc
+                       </Button>
+                     )}
+                   </div>
+                 )}
+
+                 <div className="flex items-center gap-2 flex-wrap">
+                   {isVariant ? (
+                     <Chip 
+                       size="sm" 
+                       variant="flat" 
+                       color="secondary" 
+                       startContent={<GitFork className="w-3.5 h-3.5 ml-1" />}
+                       className="font-semibold text-xs"
+                     >
+                       Biến thể
+                     </Chip>
+                   ) : childVariants.length > 0 ? (
+                     <Chip 
+                       size="sm" 
+                       variant="flat" 
+                       color="primary" 
+                       startContent={<Layers className="w-3.5 h-3.5 ml-1" />}
+                       className="font-semibold text-xs"
+                     >
+                       Bản gốc ({childVariants.length} biến thể)
+                     </Chip>
+                   ) : null}
+                 </div>
+
                  <h1 className="text-3xl lg:text-4xl font-extrabold leading-tight text-foreground">{recipe.title}</h1>
                </div>
                
@@ -643,7 +725,7 @@ export function RecipeDetailPage() {
                     <div className="py-5 first:pt-2 last:pb-0 flex flex-col gap-3">
                        <h3 className="font-bold text-base flex items-center gap-2"><Info className="w-5 h-5 text-warning-500" /> Ghi chú</h3>
                        <div 
-                         className="text-sm leading-relaxed text-default-700 bg-warning-50 p-4 rounded-2xl border border-warning-100 prose prose-sm prose-warning max-w-none prose-p:my-1 prose-ul:my-1"
+                         className="text-sm leading-relaxed text-amber-950 dark:text-amber-100 bg-amber-500/10 dark:bg-amber-500/15 p-4 rounded-2xl border border-amber-500/30 prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 [&_*]:text-amber-950 dark:[&_*]:text-amber-100 [&_strong]:text-amber-950 dark:[&_strong]:text-amber-50 [&_b]:text-amber-950 dark:[&_b]:text-amber-50 [&_li]:text-amber-950/90 dark:[&_li]:text-amber-100/90"
                          dangerouslySetInnerHTML={{ __html: recipe.notes }}
                        />
                     </div>
@@ -786,8 +868,6 @@ export function RecipeDetailPage() {
         notes={snapshotData?.notes}
       />
       
-      {/* Floating AI Chat */}
-      <RecipeFloatingChat recipe={recipe} />
       <MealPlannerSelectModal 
         isOpen={isMealPlannerModalOpen} 
         onOpenChange={setIsMealPlannerModalOpen} 

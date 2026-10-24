@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { getStorageProvider } from '@apron/core';
+import { getStorageProvider, seedMockData } from '@apron/core';
 import { Button } from '@/ui';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { MainSidebar } from './components/layout/MainSidebar';
@@ -35,10 +35,13 @@ function App() {
         const storage = getStorageProvider();
         const success = await storage.initialize();
         if (success) {
+          await seedMockData();
           setIsStorageReady(true);
         }
       } catch (e) {
         console.error('Failed to init storage', e);
+      } finally {
+        setIsStorageReady(true);
       }
     };
     initStorage();

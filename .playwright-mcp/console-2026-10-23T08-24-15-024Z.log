@@ -1,3 +1,0 @@
-[    1159ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=af9c0910:14333
-[    1376ms] [WARNING] Đang chạy ở môi trường Web thuần, Storage sẽ tạm dùng BrowserStorageProvider (localStorage) @ http://localhost:5173/@vite/client:528
-[   69260ms] [LOG] Validation errors: {ingredientSections: Array(1), stepSections: Array(1)} @ http://localhost:5173/src/components/recipes/form/RecipeForm.tsx?t=1792742066493:370

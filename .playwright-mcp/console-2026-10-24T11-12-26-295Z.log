@@ -1,8 +1,0 @@
-[     151ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=2d688066:14333
-[     197ms] [INFO] Đang chạy ở môi trường Web thuần, Storage sử dụng BrowserStorageProvider (IndexedDB) @ http://localhost:5173/@fs/C:/apron/packages/core/src/storage/index.ts:18
-[  214814ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5173/src/pages/smart-fridge/SmartFridgePage.tsx?t=1792840561097:0
-[  214814ms] [ERROR] [vite] Failed to reload /src/pages/smart-fridge/SmartFridgePage.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5173/@vite/client:931
-[  233277ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5173/src/pages/catalog/IngredientCatalogPage.tsx?t=1792840579563:0
-[  233278ms] [ERROR] [vite] Failed to reload /src/pages/catalog/IngredientCatalogPage.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5173/@vite/client:931
-[  248751ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5173/src/pages/catalog/IngredientCatalogPage.tsx?t=1792840595035:0
-[  248751ms] [ERROR] [vite] Failed to reload /src/pages/catalog/IngredientCatalogPage.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5173/@vite/client:931

@@ -1,2 +1,0 @@
-[      64ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5173/src/pages/smart-fridge/SmartFridgePage.tsx?t=1792840561097:0
-[      81ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5173/src/pages/catalog/IngredientCatalogPage.tsx?t=1792840595035:0

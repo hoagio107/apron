@@ -1,2 +1,0 @@
-[     108ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5173/src/pages/courses/CourseDetailPage.tsx?t=1792855217286:0
-[   13341ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5173/src/pages/courses/CourseDetailPage.tsx?t=1792855279157:0

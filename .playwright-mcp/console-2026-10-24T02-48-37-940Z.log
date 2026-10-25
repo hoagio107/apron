@@ -1,8 +1,0 @@
-[     187ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=a4de0c19:14333
-[     242ms] [INFO] Đang chạy ở môi trường Web thuần, Storage sử dụng BrowserStorageProvider (IndexedDB) @ http://localhost:5173/@fs/C:/apron/packages/core/src/storage/index.ts:18
-[  734479ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:5173/@vite/client:998
-[  738284ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ae135a9b:14333
-[  738406ms] [INFO] Đang chạy ở môi trường Web thuần, Storage sử dụng BrowserStorageProvider (IndexedDB) @ http://localhost:5173/@fs/C:/apron/packages/core/src/storage/index.ts:18
-[ 1247684ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:5173/@vite/client:998
-[ 1399780ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=b27a9c53:14333
-[ 1399904ms] [INFO] Đang chạy ở môi trường Web thuần, Storage sử dụng BrowserStorageProvider (IndexedDB) @ http://localhost:5173/@fs/C:/apron/packages/core/src/storage/index.ts:18

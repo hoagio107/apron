@@ -11,7 +11,6 @@ import {
 } from '@/ui';
 import { 
   Filter, 
-  RotateCcw, 
   Check, 
   Clock, 
   Star, 
@@ -48,7 +47,15 @@ export const defaultFilterState: RecipeFilterState = {
   ingredientIds: []
 };
 
-const DEFAULT_INACTIVE_BUTTON_CLASS = 'bg-default-100/70 hover:bg-default-200/70 text-default-600 border-transparent';
+const DEFAULT_INACTIVE_BUTTON_CLASS = 'bg-default-100 hover:bg-default-200/80 text-default-700 dark:text-default-300 border-transparent';
+
+function FilterDivider() {
+  return (
+    <div className="px-3 py-1" aria-hidden="true">
+      <div className="h-px bg-divider/50" />
+    </div>
+  );
+}
 
 interface RecipeFilterDrawerProps {
   isOpen: boolean;
@@ -176,15 +183,16 @@ export function RecipeFilterDrawer({
       onOpenChange={onOpenChange} 
       size="md" 
       placement="right"
+      hideCloseButton
       classNames={{
         base: "max-w-md w-full bg-background dark:bg-background border-l border-divider/60 shadow-2xl flex flex-col",
       }}
     >
       <DrawerContent>
-        {() => (
+        {(onClose) => (
           <>
             {/* 1. Header */}
-            <DrawerHeader className="flex items-center justify-between px-5 py-4 border-b border-divider/50 bg-background/90 backdrop-blur-md sticky top-0 z-30">
+            <DrawerHeader className="flex items-center justify-between px-5 py-3.5 border-b border-divider/50 bg-background/90 backdrop-blur-md sticky top-0 z-30">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-teal-500/10 text-primary flex items-center justify-center border border-primary/20 shadow-xs">
                   <Filter className="w-4 h-4" />
@@ -193,40 +201,38 @@ export function RecipeFilterDrawer({
                   <div className="flex items-center gap-2">
                     <span className="text-base font-bold text-foreground">Bộ lọc công thức</span>
                     {activeFilterCount > 0 && (
-                      <span className="px-2 py-0.5 text-[11px] font-bold bg-primary text-primary-foreground rounded-full shadow-xs animate-in fade-in zoom-in-95">
+                      <span className="px-2 py-0.5 text-xs font-bold bg-primary text-primary-foreground rounded-full shadow-xs animate-in fade-in zoom-in-95">
                         {activeFilterCount}
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-default-400 font-normal">
+                  <p className="text-xs text-default-400 font-normal">
                     Tùy chỉnh tiêu chí tìm kiếm món ăn
                   </p>
                 </div>
               </div>
 
-              {activeFilterCount > 0 && (
-                <Button
-                  size="sm"
-                  variant="flat"
-                  color="danger"
-                  startContent={<RotateCcw className="w-3.5 h-3.5" />}
-                  onPress={handleClear}
-                  className="h-8 px-2.5 rounded-xl text-xs font-semibold"
-                >
-                  Đặt lại
-                </Button>
-              )}
+              <Button
+                isIconOnly
+                variant="light"
+                size="sm"
+                className="rounded-full text-default-400 hover:text-foreground"
+                onPress={onClose}
+                aria-label="Đóng"
+              >
+                <X className="w-5 h-5" />
+              </Button>
             </DrawerHeader>
 
             {/* 2. Scrollable Body */}
-            <DrawerBody className="p-4 sm:p-5 overflow-y-auto space-y-5">
+            <DrawerBody className="p-4 sm:p-5 overflow-y-auto flex flex-col gap-3">
               
               {/* 1. LỌC THEO NGUYÊN LIỆU (COMBOBOX DROPDOWN) */}
-              <div ref={comboboxRef} className="space-y-3">
+              <div ref={comboboxRef} className="space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-foreground flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                      <UtensilsCrossed className="w-3.5 h-3.5" />
+                  <span className="text-sm font-bold text-foreground flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-xs">
+                      <UtensilsCrossed className="w-4 h-4" />
                     </div>
                     <span>Lọc theo nguyên liệu</span>
                   </span>
@@ -234,7 +240,7 @@ export function RecipeFilterDrawer({
                     <button
                       type="button"
                       onClick={() => onFilterChange({ ...filters, ingredientIds: [] })}
-                      className="text-[11px] text-danger font-semibold hover:underline cursor-pointer transition-colors"
+                      className="text-xs text-danger font-semibold hover:underline cursor-pointer transition-colors"
                     >
                       Xóa tất cả ({filters.ingredientIds.length})
                     </button>
@@ -245,7 +251,7 @@ export function RecipeFilterDrawer({
                 <div className="relative">
                   <div 
                     onClick={() => setIsComboboxOpen(true)}
-                    className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-default-100 hover:bg-default-200/70 border cursor-pointer transition-all ${
+                    className={`flex items-center gap-2.5 h-11 px-3.5 rounded-xl bg-default-100 hover:bg-default-200/70 border cursor-pointer transition-all ${
                       isComboboxOpen 
                         ? 'border-primary ring-2 ring-primary/20 bg-background' 
                         : 'border-transparent'
@@ -261,7 +267,7 @@ export function RecipeFilterDrawer({
                       }}
                       onFocus={() => setIsComboboxOpen(true)}
                       placeholder="Tìm và chọn nguyên liệu..."
-                      className="w-full bg-transparent text-xs font-medium text-foreground placeholder:text-default-400 outline-none cursor-text"
+                      className="w-full bg-transparent text-sm font-medium text-foreground placeholder:text-default-400 outline-none cursor-text"
                     />
                     {ingredientSearch ? (
                       <button
@@ -272,7 +278,7 @@ export function RecipeFilterDrawer({
                         }}
                         className="text-default-400 hover:text-foreground shrink-0 p-0.5"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="w-4 h-4" />
                       </button>
                     ) : (
                       <ChevronDown className={`w-4 h-4 text-default-400 shrink-0 transition-transform ${isComboboxOpen ? 'rotate-180' : ''}`} />
@@ -288,10 +294,10 @@ export function RecipeFilterDrawer({
                         <button
                           type="button"
                           onClick={() => setSelectedIngredientCategory(null)}
-                          className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors shrink-0 ${
+                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0 ${
                             selectedIngredientCategory === null
                               ? 'bg-primary text-primary-foreground shadow-xs'
-                              : 'text-default-500 hover:bg-default-100'
+                              : 'text-default-600 hover:bg-default-100'
                           }`}
                         >
                           Tất cả
@@ -301,10 +307,10 @@ export function RecipeFilterDrawer({
                             key={cat}
                             type="button"
                             onClick={() => setSelectedIngredientCategory(cat === selectedIngredientCategory ? null : cat)}
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors shrink-0 ${
+                            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors shrink-0 ${
                               selectedIngredientCategory === cat
                                 ? 'bg-primary text-primary-foreground shadow-xs'
-                                : 'text-default-500 hover:bg-default-100'
+                                : 'text-default-600 hover:bg-default-100'
                             }`}
                           >
                             {cat}
@@ -315,7 +321,7 @@ export function RecipeFilterDrawer({
                       {/* Ingredients List */}
                       <div className="overflow-y-auto divide-y divide-divider/30 p-1 flex-1">
                         {filteredCatalogIngredients.length === 0 ? (
-                          <div className="py-6 text-center text-xs text-default-400">
+                          <div className="py-6 text-center text-sm text-default-400">
                             Không tìm thấy nguyên liệu phù hợp
                           </div>
                         ) : (
@@ -330,29 +336,29 @@ export function RecipeFilterDrawer({
                                 key={item.id}
                                 type="button"
                                 onClick={() => handleToggleIngredient(item.id)}
-                                className={`w-full flex items-center justify-between px-3 py-2 text-left rounded-xl transition-all cursor-pointer ${
+                                className={`w-full flex items-center justify-between px-3 py-2.5 text-left rounded-xl transition-all cursor-pointer ${
                                   isSelected 
                                     ? 'bg-primary/10 dark:bg-primary/20 text-foreground' 
                                     : 'hover:bg-default-100/70 text-default-700'
                                 }`}
                               >
-                                <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="flex items-center gap-3 min-w-0">
                                   {item.image_url ? (
                                     <Avatar
                                       src={item.image_url}
                                       size="sm"
-                                      className="w-7 h-7 shrink-0 rounded-lg"
+                                      className="w-8 h-8 shrink-0 rounded-xl"
                                     />
                                   ) : (
-                                    <div className={`w-7 h-7 rounded-lg shrink-0 flex items-center justify-center ${theme.bg} ${theme.text}`}>
-                                      <Icon className="w-3.5 h-3.5" />
+                                    <div className={`w-8 h-8 rounded-xl shrink-0 flex items-center justify-center ${theme.bg} ${theme.text}`}>
+                                      <Icon className="w-4 h-4" />
                                     </div>
                                   )}
                                   <div className="flex flex-col min-w-0">
-                                    <span className={`text-xs font-semibold truncate ${isSelected ? 'text-primary font-bold' : 'text-foreground'}`}>
+                                    <span className={`text-sm font-semibold truncate ${isSelected ? 'text-primary font-bold' : 'text-foreground'}`}>
                                       {item.name}
                                     </span>
-                                    <span className="text-[10px] text-default-400">
+                                    <span className="text-xs text-default-400">
                                       {category}
                                     </span>
                                   </div>
@@ -372,15 +378,15 @@ export function RecipeFilterDrawer({
                       </div>
 
                       {/* Dropdown Footer */}
-                      <div className="p-2 border-t border-divider/40 bg-default-50/50 flex items-center justify-between">
-                        <span className="text-[11px] text-default-400 font-medium px-1">
+                      <div className="p-2.5 border-t border-divider/40 bg-default-50/50 flex items-center justify-between">
+                        <span className="text-xs text-default-500 font-medium px-1">
                           Đã chọn {filters.ingredientIds.length} nguyên liệu
                         </span>
                         <Button
                           size="sm"
                           color="primary"
                           onPress={() => setIsComboboxOpen(false)}
-                          className="h-7 px-3 text-xs font-bold rounded-lg"
+                          className="h-8 px-3.5 text-xs font-bold rounded-lg"
                         >
                           Xong
                         </Button>
@@ -391,8 +397,8 @@ export function RecipeFilterDrawer({
 
                 {/* Selected Ingredients Chips Cloud */}
                 {filters.ingredientIds.length > 0 && (
-                  <div className="space-y-1.5 pt-1">
-                    <span className="text-[11px] font-semibold text-default-400">
+                  <div className="space-y-2 pt-1">
+                    <span className="text-xs font-semibold text-default-500">
                       Nguyên liệu đã chọn ({filters.ingredientIds.length}):
                     </span>
                     <div className="flex flex-wrap gap-1.5">
@@ -406,9 +412,9 @@ export function RecipeFilterDrawer({
                         return (
                           <span
                             key={id}
-                            className={`inline-flex items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-xl text-xs font-semibold border ${theme.bg} ${theme.text} border-primary/20 shadow-xs animate-in fade-in zoom-in-95`}
+                            className={`inline-flex items-center gap-1.5 pl-2.5 pr-2 py-1 rounded-xl text-xs font-semibold border ${theme.bg} ${theme.text} border-primary/20 shadow-xs animate-in fade-in zoom-in-95`}
                           >
-                            <Icon className="w-3 h-3 shrink-0" />
+                            <Icon className="w-3.5 h-3.5 shrink-0" />
                             <span>{item.name}</span>
                             <button
                               type="button"
@@ -426,14 +432,14 @@ export function RecipeFilterDrawer({
                 )}
               </div>
 
-              {/* Phân cách */}
-              <div className="h-px bg-divider/40" />
+              {/* Phân cách có padding hai bên */}
+              <FilterDivider />
 
               {/* 2. ĐỘ KHÓ */}
-              <div className="space-y-2">
-                <span className="text-xs font-bold text-foreground flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-warning/15 text-warning flex items-center justify-center">
-                    <Flame className="w-3.5 h-3.5" />
+              <div className="space-y-2.5">
+                <span className="text-sm font-bold text-foreground flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-xl bg-warning/15 text-warning flex items-center justify-center shrink-0 shadow-xs">
+                    <Flame className="w-4 h-4" />
                   </div>
                   <span>Độ khó</span>
                 </span>
@@ -445,13 +451,13 @@ export function RecipeFilterDrawer({
                         key={diff.label}
                         type="button"
                         onClick={() => toggleDifficulty(diff.label)}
-                        className={`flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                        className={`h-10 px-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-all border cursor-pointer ${
                           isSelected
                             ? diff.colorClass + ' shadow-xs'
                             : DEFAULT_INACTIVE_BUTTON_CLASS
                         }`}
                       >
-                        {isSelected && <Check className="w-3.5 h-3.5" />}
+                        {isSelected && <Check className="w-4 h-4" />}
                         <span>{diff.label}</span>
                       </button>
                     );
@@ -459,14 +465,14 @@ export function RecipeFilterDrawer({
                 </div>
               </div>
 
-              {/* Phân cách */}
-              <div className="h-px bg-divider/40" />
+              {/* Phân cách có padding hai bên */}
+              <FilterDivider />
 
               {/* 3. THỜI GIAN NẤU */}
-              <div className="space-y-2">
-                <span className="text-xs font-bold text-foreground flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
-                    <Clock className="w-3.5 h-3.5" />
+              <div className="space-y-2.5">
+                <span className="text-sm font-bold text-foreground flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-xl bg-primary/15 text-primary flex items-center justify-center shrink-0 shadow-xs">
+                    <Clock className="w-4 h-4" />
                   </div>
                   <span>Thời gian nấu tối đa</span>
                 </span>
@@ -478,13 +484,13 @@ export function RecipeFilterDrawer({
                         key={opt.label}
                         type="button"
                         onClick={() => onFilterChange({ ...filters, maxTime: opt.value })}
-                        className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                        className={`h-10 px-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-all border cursor-pointer ${
                           isSelected
                             ? 'bg-primary text-primary-foreground border-primary shadow-xs'
                             : DEFAULT_INACTIVE_BUTTON_CLASS
                         }`}
                       >
-                        {isSelected && <Check className="w-3.5 h-3.5" />}
+                        {isSelected && <Check className="w-4 h-4" />}
                         <span>{opt.label}</span>
                       </button>
                     );
@@ -492,14 +498,14 @@ export function RecipeFilterDrawer({
                 </div>
               </div>
 
-              {/* Phân cách */}
-              <div className="h-px bg-divider/40" />
+              {/* Phân cách có padding hai bên */}
+              <FilterDivider />
 
               {/* 4. TRẠNG THÁI THỰC HIỆN */}
-              <div className="space-y-2">
-                <span className="text-xs font-bold text-foreground flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-success/15 text-success flex items-center justify-center">
-                    <ChefHat className="w-3.5 h-3.5" />
+              <div className="space-y-2.5">
+                <span className="text-sm font-bold text-foreground flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-xl bg-success/15 text-success flex items-center justify-center shrink-0 shadow-xs">
+                    <ChefHat className="w-4 h-4" />
                   </div>
                   <span>Trạng thái thực hiện</span>
                 </span>
@@ -511,13 +517,13 @@ export function RecipeFilterDrawer({
                         key={opt.value}
                         type="button"
                         onClick={() => onFilterChange({ ...filters, cookedStatus: opt.value as 'all' | 'cooked' | 'uncooked' })}
-                        className={`flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                        className={`h-10 px-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-all border cursor-pointer ${
                           isSelected
                             ? 'bg-primary text-primary-foreground border-primary shadow-xs'
                             : DEFAULT_INACTIVE_BUTTON_CLASS
                         }`}
                       >
-                        {isSelected && <Check className="w-3.5 h-3.5" />}
+                        {isSelected && <Check className="w-4 h-4" />}
                         <span className="truncate">{opt.label}</span>
                       </button>
                     );
@@ -525,14 +531,14 @@ export function RecipeFilterDrawer({
                 </div>
               </div>
 
-              {/* Phân cách */}
-              <div className="h-px bg-divider/40" />
+              {/* Phân cách có padding hai bên */}
+              <FilterDivider />
 
               {/* 5. ĐÁNH GIÁ TỐI THIỂU */}
-              <div className="space-y-2">
-                <span className="text-xs font-bold text-foreground flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-amber-500/15 text-amber-500 flex items-center justify-center">
-                    <Star className="w-3.5 h-3.5 fill-amber-500" />
+              <div className="space-y-2.5">
+                <span className="text-sm font-bold text-foreground flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0 shadow-xs">
+                    <Star className="w-4 h-4 fill-amber-500" />
                   </div>
                   <span>Đánh giá tối thiểu</span>
                 </span>
@@ -544,13 +550,13 @@ export function RecipeFilterDrawer({
                         key={opt.value}
                         type="button"
                         onClick={() => onFilterChange({ ...filters, minRating: opt.value })}
-                        className={`flex items-center justify-center gap-1 py-2 px-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                        className={`h-10 px-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-1 transition-all border cursor-pointer ${
                           isSelected
                             ? 'bg-primary text-primary-foreground border-primary shadow-xs'
                             : DEFAULT_INACTIVE_BUTTON_CLASS
                         }`}
                       >
-                        {opt.value > 0 && <Star className="w-3 h-3 fill-amber-400 text-amber-400" />}
+                        {opt.value > 0 && <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />}
                         <span>{opt.label}</span>
                       </button>
                     );
@@ -558,24 +564,24 @@ export function RecipeFilterDrawer({
                 </div>
               </div>
 
-              {/* Phân cách */}
-              <div className="h-px bg-divider/40" />
+              {/* Phân cách có padding hai bên */}
+              <FilterDivider />
 
               {/* 6. MÓN BIẾN THỂ */}
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-secondary" />
-                    Bao gồm món biến thể
+              <div className="flex items-center justify-between py-1">
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-secondary" />
+                    <span>Bao gồm món biến thể</span>
                   </span>
-                  <span className="text-[11px] text-default-400">
+                  <span className="text-xs text-default-400">
                     Hiển thị các phiên bản công thức con
                   </span>
                 </div>
                 <Switch
                   isSelected={!filters.hideVariants}
                   onValueChange={(val) => onFilterChange({ ...filters, hideVariants: !val })}
-                  size="sm"
+                  size="md"
                   color="primary"
                 />
               </div>
@@ -583,15 +589,16 @@ export function RecipeFilterDrawer({
               {/* 7. THẺ CÔNG THỨC */}
               {availableTags && availableTags.length > 0 && (
                 <>
-                  <div className="h-px bg-divider/40" />
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-foreground flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
-                        <Layers className="w-3.5 h-3.5" />
+                  {/* Phân cách có padding hai bên */}
+                  <FilterDivider />
+                  <div className="space-y-2.5">
+                    <label className="text-sm font-bold text-foreground flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-xl bg-primary/15 text-primary flex items-center justify-center shrink-0 shadow-xs">
+                        <Layers className="w-4 h-4" />
                       </div>
                       <span>Thẻ công thức ({availableTags.length})</span>
                     </label>
-                    <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto pr-1">
+                    <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-1">
                       {availableTags.map(tag => {
                         const isSelected = (filters.tags || []).includes(tag);
                         return (
@@ -604,13 +611,13 @@ export function RecipeFilterDrawer({
                                 : [...(filters.tags || []), tag];
                               onFilterChange({ ...filters, tags: newTags });
                             }}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer border ${
+                            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer border ${
                               isSelected
-                                ? 'bg-primary text-primary-foreground border-primary shadow-xs font-bold'
+                                ? 'bg-primary text-primary-foreground border-primary shadow-xs font-semibold'
                                 : 'bg-default-100/70 hover:bg-default-200/70 text-default-600 border-transparent'
                             }`}
                           >
-                            {isSelected && <Check className="w-3 h-3" />}
+                            {isSelected && <Check className="w-3.5 h-3.5" />}
                             #{tag}
                           </button>
                         );
@@ -627,14 +634,14 @@ export function RecipeFilterDrawer({
                 variant="flat"
                 color="default"
                 onPress={handleClear}
-                className="flex-1 font-semibold rounded-xl h-11 text-xs"
+                className="flex-1 font-semibold rounded-xl h-11 text-sm"
               >
                 Đặt lại
               </Button>
               <Button
                 color="primary"
                 onPress={() => onOpenChange(false)}
-                className="flex-1 font-bold rounded-xl h-11 text-xs shadow-md"
+                className="flex-1 font-bold rounded-xl h-11 text-sm shadow-md"
               >
                 Áp dụng bộ lọc
               </Button>

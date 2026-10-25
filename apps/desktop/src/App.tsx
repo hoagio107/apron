@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { getStorageProvider, seedMockData } from '@apron/core';
-import { Button } from '@/ui';
+import { getStorageProvider, purgeAllLegacyMockData } from '@apron/core';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { MainSidebar } from './components/layout/MainSidebar';
 import { Titlebar } from './components/layout/Titlebar';
@@ -35,7 +34,7 @@ function App() {
         const storage = getStorageProvider();
         const success = await storage.initialize();
         if (success) {
-          await seedMockData();
+          await purgeAllLegacyMockData();
           setIsStorageReady(true);
         }
       } catch (e) {

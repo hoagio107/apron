@@ -1,5 +1,5 @@
 import { appDataDir, join } from '@tauri-apps/api/path';
-import { mkdir, writeFile, readFile, remove, exists } from '@tauri-apps/plugin-fs';
+import { mkdir, writeFile, remove, exists } from '@tauri-apps/plugin-fs';
 import { convertFileSrc } from '@tauri-apps/api/core';
 
 export class FileManager {
@@ -30,7 +30,6 @@ export class FileManager {
     const baseDir = await this.getBaseDir();
     
     // Create a safe unique filename to avoid collisions
-    const ext = file.name.split('.').pop() || 'tmp';
     const safeOriginalName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
     const filename = `${crypto.randomUUID().substring(0, 8)}_${safeOriginalName}`;
     const filePath = await join(baseDir, 'attachments', filename);

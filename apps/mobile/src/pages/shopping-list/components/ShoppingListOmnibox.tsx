@@ -92,10 +92,10 @@ export function ShoppingListOmnibox() {
           listboxWrapper: "max-h-[400px]",
           selectorButton: "hidden"
         }}
-        itemClasses={{
-          base: "data-[hover=true]:bg-default-100/40 transition-colors"
-        }}
         listboxProps={{
+          itemClasses: {
+            base: "data-[hover=true]:bg-default-100/40 transition-colors"
+          },
           topContent: (
             <div className="sticky top-0 z-20 bg-content1 pb-2 pt-1 px-1">
               <Tabs 

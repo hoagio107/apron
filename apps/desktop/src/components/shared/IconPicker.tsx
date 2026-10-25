@@ -47,7 +47,6 @@ export function IconPicker({ value, onChange, className = '' }: IconPickerProps)
 
   // Check if value is a custom SVG or a lucide icon name
   const isCustomSvg = value?.trim().startsWith('<svg');
-  const SelectedIcon = !isCustomSvg && value && (LucideIcons as any)[value] ? (LucideIcons as any)[value] : LucideIcons.BookOpen;
 
   const handleSelectIcon = (iconName: string) => {
     onChange(iconName);

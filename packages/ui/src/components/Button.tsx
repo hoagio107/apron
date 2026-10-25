@@ -1,6 +1,6 @@
 import { extendVariants, Button as HeroButton } from "@heroui/react";
 
-export const Button = extendVariants(HeroButton, {
+export const Button = (extendVariants as any)(HeroButton, {
   base: "data-[hover=true]:opacity-100",
   variants: {
     weight: {

@@ -11,7 +11,6 @@ import {
   Laptop,
   Download,
   Upload,
-  RefreshCw,
   Trash2,
   ChevronRight,
   Languages,
@@ -26,7 +25,6 @@ import { usePantryStore } from '../../store/usePantryStore';
 import { useIngredientCatalogStore } from '../../store/useIngredientCatalogStore';
 import { useTipStore } from '../../store/useTipStore';
 import { useUnitStore } from '../../store/useUnitStore';
-import { seedMockData } from '../../lib/seedMockData';
 import { ConfirmModal } from '../../components/shared/ConfirmModal';
 import { FEEDBACK_RESET_DELAY_MS, RESET_APP_RELOAD_DELAY_MS } from '../../constants';
 
@@ -137,15 +135,6 @@ export function SettingsPage() {
     };
     reader.readAsText(file);
     e.target.value = '';
-  };
-
-  const handleSeedData = async () => {
-    try {
-      await seedMockData();
-      toast.success('Đã nạp lại dữ liệu mẫu thành công!');
-    } catch {
-      toast.error('Có lỗi khi nạp dữ liệu mẫu');
-    }
   };
 
   const handleResetData = () => {
@@ -354,23 +343,6 @@ export function SettingsPage() {
               onChange={handleImportFile}
               className="hidden"
             />
-
-            <button
-              type="button"
-              onClick={handleSeedData}
-              className="flex items-center justify-between p-3.5 hover:bg-default-100/30 transition-colors w-full text-left"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-sky-500/10 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
-                  <RefreshCw className="w-4 h-4" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-foreground">Nạp lại dữ liệu mẫu ban đầu</span>
-                  <span className="text-[11px] text-default-400">Khôi phục các công thức, khoá học và mẹo mẫu</span>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 text-default-400 shrink-0" />
-            </button>
 
             <button
               type="button"

@@ -15,17 +15,17 @@ export function BottomNav() {
         Container for the nav bar. 
         We use an SVG in the center to create a perfect rounded cutout (shoulders) and drop-shadow on the parent.
       */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 h-[64px] safe-area-inset-bottom pointer-events-none transition-transform duration-300 [.multi-select-open_&]:translate-y-full">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 h-[calc(64px+env(safe-area-inset-bottom,0px))] pb-[env(safe-area-inset-bottom,0px)] pointer-events-none transition-transform duration-300 [.multi-select-open_&]:translate-y-full">
         
         {/* Background with cutout - single continuous SVG for perfection */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1920px] h-[200px] pointer-events-none filter drop-shadow-[0_-4px_12px_rgba(0,0,0,0.06)] dark:drop-shadow-[0_-4px_16px_rgba(0,0,0,0.4)] text-content1 fill-current">
-          <svg width="1920" height="200" viewBox="0 0 1920 200" className="w-full h-full block">
-            <path d="M0,0 L915,0 C930,0 930,40 960,40 C990,40 990,0 1005,0 L1920,0 L1920,200 L0,200 Z" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1920px] h-[300px] pointer-events-none filter drop-shadow-[0_-4px_12px_rgba(0,0,0,0.06)] dark:drop-shadow-[0_-4px_16px_rgba(0,0,0,0.4)] text-content1 fill-current">
+          <svg width="1920" height="300" viewBox="0 0 1920 300" className="w-full h-full block">
+            <path d="M0,0 L915,0 C930,0 930,40 960,40 C990,40 990,0 1005,0 L1920,0 L1920,300 L0,300 Z" />
           </svg>
         </div>
 
         {/* Nav Items */}
-        <div className="relative h-full flex items-center px-2 pointer-events-auto">
+        <div className="relative h-[64px] flex items-center px-2 pointer-events-auto">
           <NavLink
             to="/"
             end
@@ -81,7 +81,7 @@ export function BottomNav() {
       </nav>
 
       {/* Center Floating Button */}
-      <div className="fixed bottom-[32px] left-1/2 -translate-x-1/2 z-50 safe-area-inset-bottom transition-transform duration-300 [.multi-select-open_&]:translate-y-[200%]">
+      <div className="fixed bottom-[calc(32px+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-50 transition-transform duration-300 [.multi-select-open_&]:translate-y-[200%]">
         <button 
           onClick={() => navigate('/recipes/new')}
           className="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"

@@ -10,6 +10,7 @@ export interface SwipeAction {
 }
 
 interface SwipeableRowProps {
+  id?: string;
   children: React.ReactNode;
   actions: SwipeAction[];
   className?: string;
@@ -185,6 +186,7 @@ export function SwipeableRow({
   return (
     <div
       ref={containerRef}
+      data-swipeable-row="true"
       className={`relative overflow-hidden select-none touch-pan-y ${className}`}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}

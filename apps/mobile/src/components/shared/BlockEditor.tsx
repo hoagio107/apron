@@ -63,7 +63,6 @@ export function BlockEditor({ value, onChange, placeholder = 'Bắt đầu bài 
       {editor && (
         <BubbleMenu 
           editor={editor} 
-          tippyOptions={{ duration: 100 }}
           className="flex items-center gap-1 p-1 bg-content1 shadow-md border border-default-200 rounded-lg"
         >
           <Button

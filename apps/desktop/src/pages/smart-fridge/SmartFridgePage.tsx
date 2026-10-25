@@ -1,19 +1,12 @@
 import { useState, useMemo } from 'react';
-import { Button, Input, Autocomplete, AutocompleteItem, Avatar, Chip, EmptyState } from '@/ui';
-import { Plus, Search, AlertTriangle, Layers, Calendar } from 'lucide-react';
+import { Button, Autocomplete, AutocompleteItem, Avatar, EmptyState } from '@/ui';
+import { Plus, Search, AlertTriangle, Layers } from 'lucide-react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { usePantryStore } from '../../store/usePantryStore';
 import { useIngredientCatalogStore } from '../../store/useIngredientCatalogStore';
 import { CATEGORIES, autoCategorizeIngredient } from '@apron/core';
-import type { PantryItem } from '@apron/core';
 import { getCategoryTheme } from '../../lib/categoryTheme';
 import { PantryItemCard } from './components/PantryItemCard';
-
-const isExpiredOrNear = (date?: string) => {
-  if (!date) return false;
-  const daysUntil = (new Date(date).getTime() - new Date().getTime()) / (1000 * 3600 * 24);
-  return daysUntil <= 3;
-};
 
 const isExpired = (date?: string) => {
   if (!date) return false;
@@ -46,6 +39,31 @@ export function SmartFridgePage() {
         // Can optionally auto-add on blur or just let them use the combobox options
     }
   };
+
+  const autocompleteOptions = useMemo(() => {
+    const filtered = catalogItems
+      .filter(ci => !newItemName || ci.name.toLowerCase().includes(newItemName.toLowerCase()))
+      .slice(0, 5)
+      .map(item => ({
+        key: item.name,
+        label: item.name,
+        sublabel: item.default_category || 'Chưa phân loại',
+        imageUrl: item.image_url,
+        isAddNew: false,
+      }));
+
+    if (newItemName.trim() && !catalogItems.some(i => i.name.toLowerCase() === newItemName.trim().toLowerCase())) {
+      filtered.push({
+        key: '__add_new__',
+        label: `Thêm "${newItemName}" vào tủ`,
+        sublabel: '',
+        imageUrl: undefined,
+        isAddNew: true,
+      });
+    }
+
+    return filtered;
+  }, [catalogItems, newItemName]);
 
   // Derived state
   const activeItems = useMemo(() => items.filter(i => !isExpired(i.expiry_date)), [items]);
@@ -158,44 +176,38 @@ export function SmartFridgePage() {
               allowsCustomValue
               size="lg"
               classNames={{
-                base: "w-full",
-                inputWrapper: "bg-default-50 hover:bg-default-100 border border-default-200 rounded-xl"
+                base: "w-full"
+              }}
+              inputProps={{
+                classNames: {
+                  inputWrapper: "bg-default-50 hover:bg-default-100 border border-default-200 rounded-xl"
+                }
               }}
               startContent={<Search className="w-5 h-5 text-default-400" />}
             >
-              {catalogItems
-                .filter(ci => !newItemName || ci.name.toLowerCase().includes(newItemName.toLowerCase()))
-                .slice(0, 5)
-                .map((item) => (
-                  <AutocompleteItem
-                    key={item.name}
-                    textValue={item.name}
-                    startContent={
-                      item.image_url
-                        ? <Avatar alt={item.name} size="sm" src={item.image_url} className="shrink-0" />
-                        : <div className="w-8 h-8 rounded-full bg-default-100 flex items-center justify-center shrink-0">🥩</div>
-                    }
-                  >
-                    <div className="flex flex-col">
-                      <span className="text-small font-medium">{item.name}</span>
-                      <span className="text-tiny text-default-400">{item.default_category || 'Chưa phân loại'}</span>
-                    </div>
-                  </AutocompleteItem>
-                ))}
-              {newItemName.trim() && (
+              {autocompleteOptions.map((item) => (
                 <AutocompleteItem
-                  key="__add_new__"
-                  textValue={`Thêm "${newItemName}" vào tủ`}
+                  key={item.key}
+                  textValue={item.label}
                   startContent={
-                    <div className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center shrink-0">
-                      <Plus className="w-4 h-4 text-primary-500" />
-                    </div>
+                    item.isAddNew ? (
+                      <div className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center shrink-0">
+                        <Plus className="w-4 h-4 text-primary-500" />
+                      </div>
+                    ) : item.imageUrl ? (
+                      <Avatar alt={item.label} size="sm" src={item.imageUrl} className="shrink-0" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-default-100 flex items-center justify-center shrink-0">🥩</div>
+                    )
                   }
-                  className="text-primary"
+                  className={item.isAddNew ? "text-primary" : ""}
                 >
-                  Thêm "{newItemName}" vào tủ
+                  <div className="flex flex-col">
+                    <span className="text-small font-medium">{item.label}</span>
+                    {item.sublabel && <span className="text-tiny text-default-400">{item.sublabel}</span>}
+                  </div>
                 </AutocompleteItem>
-              )}
+              ))}
             </Autocomplete>
 
             <div className="flex items-center justify-between">

@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Card, CardBody, Button, Avatar, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Input } from '@/ui';
+import { Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Input } from '@/ui';
 import { Trash2, MoreHorizontal, Check, X, Pencil } from 'lucide-react';
 import type { PantryItem } from '@apron/core';
 import { useIngredientCatalogStore } from '../../../store/useIngredientCatalogStore';

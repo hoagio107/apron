@@ -28,3 +28,7 @@ export function getStorageProvider(): StorageProvider {
 
   return cachedProvider;
 }
+
+export function setStorageProvider(provider: StorageProvider | null): void {
+  cachedProvider = provider;
+}

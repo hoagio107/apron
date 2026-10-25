@@ -489,7 +489,7 @@ export function RecipeDetailPage() {
                        } else {
                          window.open(`https://www.google.com/search?q=${encodeURIComponent(recipe.source!)}`, '_blank');
                        }
-                     } catch (e) {}
+                     } catch {}
                    }}>
                      {recipe.source}
                    </span>

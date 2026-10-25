@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
-  Card, CardBody, CardHeader, Input, Button, Select, SelectItem,
-  Accordion, AccordionItem, Divider, Autocomplete, AutocompleteItem, Avatar,
-  Modal, ModalContent, ModalHeader, ModalBody, ModalFooter
+  Input, Button, 
+  Autocomplete, AutocompleteItem, 
+  Modal, ModalContent
 } from '@/ui';
-import { Save, Plus, Trash2, BookOpen, ListOrdered, ImagePlus, Type, Info, Gauge, Link as LinkIcon, User, Star, ChevronRight, Video, FileText, Link2, X, Search, Utensils, Flame, Settings, Clock, Paperclip, StickyNote, BarChart } from 'lucide-react';
+import { Save, Plus, Trash2, ListOrdered, ImagePlus, Type, Info, Gauge, Link as LinkIcon, User, Star, ChevronRight, Video, X, Search, Utensils, Flame, Settings, Clock, Paperclip, StickyNote, BarChart } from 'lucide-react';
 import { useCourseStore } from '../../store/useCourseStore';
 import type { Course, Lesson } from '@apron/core';
 import { BlockEditor } from '../../components/shared/BlockEditor';
@@ -15,7 +15,6 @@ import { FileUploader } from '../../components/shared/FileUploader';
 import { ImagePickerModal } from '../../components/recipes/form/ImagePickerModal';
 import { StarRatingInput } from '../../components/shared/StarRatingInput';
 import { IconPicker } from '../../components/shared/IconPicker';
-import { RecipeCard } from '../../components/recipes/list/RecipeCard';
 import { RecipeForm } from '../../components/recipes/form/RecipeForm';
 import { useRecipeStore } from '../../store/useRecipeStore';
 import { ImageManager } from '../../lib/image-manager';
@@ -30,7 +29,6 @@ export function CourseFormPage() {
   
   const isEditing = Boolean(id);
   const [imageUploadTarget, setImageUploadTarget] = useState<string | null>(null);
-  const [isRecipeSelectionOpen, setIsRecipeSelectionOpen] = useState(false);
   const [isNewRecipeModalOpen, setIsNewRecipeModalOpen] = useState(false);
   const [recipeSearch, setRecipeSearch] = useState('');
 
@@ -80,7 +78,7 @@ export function CourseFormPage() {
   }, [formData, isEditing]);
 
   const handleTitleChange = (title: string) => {
-    const slug = title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
+    const slug = title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
     setFormData(prev => ({ ...prev, title, slug }));
   };
 
@@ -235,7 +233,7 @@ export function CourseFormPage() {
                         color="danger" 
                         variant="flat" 
                         className="bg-white/90 backdrop-blur-md shadow-sm" 
-                        onPress={(e) => {
+                        onClick={(e) => {
                           e.stopPropagation();
                           setFormData(prev => ({ ...prev, thumbnail_url: '' }));
                         }}
@@ -378,7 +376,7 @@ export function CourseFormPage() {
                     </div>
 
                     <div className="flex flex-col gap-1 ml-6 border-l-2 border-default-100 pl-2">
-                      {module.lessons.map((lesson, lIdx) => {
+                      {module.lessons.map((lesson) => {
                         const isActive = activeLessonId === lesson.id;
                         return (
                           <div 

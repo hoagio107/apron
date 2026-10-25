@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button, AppCard, StatCard, SectionTitle, EmptyState } from '@/ui';
 import { 
   ChefHat, Calendar, BookOpen, 
-  Lightbulb, TrendingUp, Plus, 
-  ArrowRight, Clock, Star, Flame,
+  Lightbulb, Plus, 
+  Flame,
   Utensils, Sunrise, Sun, Moon
 } from 'lucide-react';
 import type { Recipe, MealPlan, Tip, Course } from '@apron/core';

@@ -141,7 +141,7 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
     }
   };
 
-  const handleApplyAll = (onClose: () => void) => {
+  const _handleApplyAll = (onClose: () => void) => {
     if (parsedData && parsedData.length > 0 && onApplyBulk) {
       onApplyBulk(parsedData);
       toast.success(`Đã lưu ${parsedData.length} công thức!`);

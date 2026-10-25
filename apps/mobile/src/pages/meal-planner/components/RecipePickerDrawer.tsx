@@ -87,7 +87,7 @@ export function RecipePickerDrawer({
         body: 'p-0 flex-1 overflow-y-auto',
       }}
     >
-      <DrawerContent hideCloseButton>
+      <DrawerContent>
         {/* Header */}
         <DrawerHeader className="flex flex-col gap-1 border-b border-divider/40 px-4 pt-3 pb-3 shrink-0">
           <div className="w-10 h-1 rounded-full bg-default-300 mx-auto mb-2" />

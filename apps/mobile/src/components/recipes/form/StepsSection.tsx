@@ -214,7 +214,7 @@ function StepRow({
             const hasImages = images.length > 0;
 
             // Ẩn hoàn toàn khu vực ảnh nếu chưa có ảnh nào và người dùng không focus vào ô input
-            if (!hasImages && !isFocused) return null;
+            if (!hasImages && !isFocused) return <></>;
 
             return (
               <div className="flex gap-2 flex-wrap mt-1 animate-in fade-in duration-200">

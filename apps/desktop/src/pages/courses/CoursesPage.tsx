@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardBody, Button, Spinner, Image } from '@/ui';
+import { Button, Spinner } from '@/ui';
 import { Plus, BookOpen, Trash2, User, Link as LinkIcon, Star } from 'lucide-react';
 import { useCourseStore } from '../../store/useCourseStore';
 import { EmptyState } from '../../components/shared/EmptyState';

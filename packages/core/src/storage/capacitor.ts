@@ -12,11 +12,11 @@ export class CapacitorStorageProvider implements StorageProvider {
 
   async initialize(): Promise<boolean> {
     try {
-      // Yêu cầu quyền truy cập bộ nhớ
-      const status = await Filesystem.requestPermissions();
-      if (status.publicStorage !== 'granted') {
-        console.warn('Cần quyền truy cập bộ nhớ để hoạt động Local-First');
-        return false;
+      // Yêu cầu quyền truy cập bộ nhớ qua Capacitor Filesystem
+      try {
+        await Filesystem.requestPermissions();
+      } catch (permErr) {
+        console.warn('Filesystem.requestPermissions warning:', permErr);
       }
 
       // Đảm bảo thư mục gốc tồn tại
@@ -26,11 +26,15 @@ export class CapacitorStorageProvider implements StorageProvider {
           directory: Directory.Documents
         });
       } catch {
-        await Filesystem.mkdir({
-          path: APP_FOLDER_NAME,
-          directory: Directory.Documents,
-          recursive: true
-        });
+        try {
+          await Filesystem.mkdir({
+            path: APP_FOLDER_NAME,
+            directory: Directory.Documents,
+            recursive: true
+          });
+        } catch (mkdirErr) {
+          console.warn('Could not create CookbookData directory:', mkdirErr);
+        }
       }
       return true;
     } catch (error) {
@@ -60,15 +64,20 @@ export class CapacitorStorageProvider implements StorageProvider {
   }
 
   async readDir(path: string): Promise<FileInfo[]> {
-    const result = await Filesystem.readdir({
-      path: this.resolvePath(path),
-      directory: Directory.Documents
-    });
-    return result.files.map(f => ({
-      name: f.name,
-      isDirectory: f.type === 'directory',
-      size: f.size
-    }));
+    try {
+      const result = await Filesystem.readdir({
+        path: this.resolvePath(path),
+        directory: Directory.Documents
+      });
+      return result.files.map(f => ({
+        name: f.name,
+        isDirectory: f.type === 'directory',
+        size: f.size
+      }));
+    } catch (e) {
+      console.warn(`readDir failed for ${path}:`, e);
+      return [];
+    }
   }
 
   async mkdir(path: string): Promise<void> {

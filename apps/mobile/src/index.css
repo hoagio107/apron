@@ -28,6 +28,33 @@
   height: 0px !important;
 }
 
+:root {
+  --sat-fallback: 0px;
+}
+
+body.is-native {
+  --sat-fallback: 32px;
+}
+
+:root {
+  --sat: max(var(--sat-native, var(--sat-fallback, 0px)), env(safe-area-inset-top, 0px));
+  --sab: max(var(--sab-native, 0px), env(safe-area-inset-bottom, 0px));
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
+.safe-area-inset-bottom {
+  padding-bottom: var(--sab);
+}
+
+.pb-safe {
+  padding-bottom: var(--sab);
+}
+
+.pt-safe {
+  padding-top: var(--sat);
+}
+
 .keyboard-open .bottom-nav-container,
 .multi-select-open .bottom-nav-container {
   display: none !important;

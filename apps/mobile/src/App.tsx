@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { getStorageProvider } from '@apron/core';
-import { seedMockData } from './lib/seedMockData';
+import { getStorageProvider, purgeAllLegacyMockData } from '@apron/core';
+import { Capacitor } from '@capacitor/core';
 import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import { BottomNav } from './components/layout/BottomNav';
 import { NewRecipePage } from './pages/recipes/NewRecipePage';
@@ -23,6 +23,7 @@ import { CourseDetailPage } from './pages/courses/CourseDetailPage';
 import { OnboardingScreen } from './components/onboarding/OnboardingScreen';
 import { DashboardPage } from './pages/DashboardPage';
 import { useKeyboard } from './hooks/useKeyboard';
+import { SwipeBackHandler } from './components/layout/SwipeBackHandler';
 
 function AppLayout() {
   useKeyboard(); // Kích hoạt lắng nghe bàn phím toàn cục
@@ -36,9 +37,12 @@ function AppLayout() {
   const hideNav = isRecipeDetailPageOrForm || isCourseDetailPageOrForm || isTipDetailPage;
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
+    <div className="flex flex-col h-[100dvh] w-full bg-background text-foreground overflow-hidden pt-safe">
+      {/* Cử chỉ vuốt để quay lại toàn cục */}
+      <SwipeBackHandler />
+
       {/* Main Content */}
-      <main className={`flex-1 overflow-y-auto no-scrollbar ${hideNav ? 'pb-0' : 'pb-16'}`}>
+      <main className={`flex-1 overflow-y-auto no-scrollbar ${hideNav ? 'pb-safe' : 'pb-[calc(76px+var(--sab,0px))]'}`}>
         <ErrorBoundary>
           <Routes>
             <Route path="/" element={<DashboardPage />} />
@@ -83,11 +87,16 @@ function App() {
   const [isStorageReady, setIsStorageReady] = useState(false);
 
   useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      document.body.classList.add('is-native');
+    }
+
     const initStorage = async () => {
       try {
         const storage = getStorageProvider();
         await storage.initialize();
-        await seedMockData();
+        // Quét sạch triệt để toàn bộ dữ liệu mẫu cũ từng sinh ra trên máy
+        await purgeAllLegacyMockData();
       } catch (e) {
         console.error('Failed to init storage', e);
       } finally {

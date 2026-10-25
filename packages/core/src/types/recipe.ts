@@ -75,6 +75,13 @@ export interface Recipe {
   created_at?: string;
   updated_at?: string;
   is_favorite?: boolean;
+  category?: string;
+  nutrition?: {
+    calories?: number;
+    protein?: number;
+    carbs?: number;
+    fat?: number;
+  };
 }
 
 // Shopping List Types
@@ -100,7 +107,7 @@ export interface MealSlotConfig {
 
 export interface MealPlanEntry {
   id: string;
-  recipe_id: string;
+  recipe_id?: string;
   meal_type: MealType; // references MealSlotConfig.id
   notes?: string;
 }

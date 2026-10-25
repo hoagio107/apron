@@ -3,7 +3,18 @@ import type { Recipe } from '../types/recipe';
 
 const RECIPES_DIR = 'recipes';
 
+export type RecipeDeleteHook = (recipes: Recipe[]) => Promise<void> | void;
+
 export class RecipeRepository {
+  private static deleteHooks: RecipeDeleteHook[] = [];
+
+  static addDeleteHook(hook: RecipeDeleteHook): () => void {
+    this.deleteHooks.push(hook);
+    return () => {
+      this.deleteHooks = this.deleteHooks.filter(h => h !== hook);
+    };
+  }
+
   /**
    * Khởi tạo thư mục chứa recipes nếu chưa có
    */
@@ -147,9 +158,19 @@ export class RecipeRepository {
   static async delete(id: string): Promise<void> {
     const storage = getStorageProvider();
     try {
+      const existing = await this.getById(id);
       const path = `${RECIPES_DIR}/${id}.json`;
       if (await storage.exists(path)) {
         await storage.deleteFile(path);
+      }
+      if (existing && this.deleteHooks.length > 0) {
+        for (const hook of this.deleteHooks) {
+          try {
+            await hook([existing]);
+          } catch (hookErr) {
+            console.error('Error executing recipe delete hook:', hookErr);
+          }
+        }
       }
     } catch (e) {
       console.error(`Failed to delete recipe ${id}`, e);

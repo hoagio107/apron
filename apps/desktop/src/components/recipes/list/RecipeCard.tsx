@@ -1,9 +1,10 @@
+import React, { memo } from 'react';
 import type { Recipe } from '@apron/core';
 import { Clock, Star, Flame, Image as ImageIcon, MoreVertical, Heart, Trash2, CalendarDays, Edit2 } from 'lucide-react';
 import { Checkbox, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from '@/ui';
 import { ImageManager } from '../../../lib/image-manager';
 
-export type RecipeViewType = 'grid-portrait' | 'grid-square' | 'grid-landscape';
+export type RecipeViewType = 'grid-portrait' | 'grid-square' | 'grid-landscape' | 'grid-portrait-out';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -20,7 +21,7 @@ interface RecipeCardProps {
   onActionClick?: (e: React.MouseEvent, recipe: Recipe) => void;
 }
 
-export function RecipeCard({ 
+function RecipeCardComponent({ 
   recipe, 
   viewType, 
   selectable = false, 
@@ -277,3 +278,5 @@ export function RecipeCard({
     </div>
   );
 }
+
+export const RecipeCard = memo(RecipeCardComponent);

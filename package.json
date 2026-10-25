@@ -12,12 +12,21 @@
     "dev:mobile": "pnpm --filter mobile dev",
     "build:desktop": "pnpm --filter desktop build",
     "build:mobile": "pnpm --filter mobile build",
-    "lint": "pnpm -r run lint"
+    "build:apk": "pnpm build:mobile && cd apps/mobile && npx cap sync android && cd android && .\\gradlew.bat assembleDebug",
+    "lint": "pnpm -r run lint",
+    "test": "pnpm --filter @apron/core test"
   },
   "devDependencies": {
     "turbo": "^2.0.0",
     "typescript": "^5.0.0",
     "eslint": "^8.57.0",
     "prettier": "^3.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "dompurify": "^3.4.17",
+      "vite": ">=8.2.4",
+      "prosemirror-view": ">=1.42.3"
+    }
   }
 }

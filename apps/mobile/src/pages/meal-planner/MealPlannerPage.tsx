@@ -215,7 +215,7 @@ export function MealPlannerPage() {
       return;
     }
 
-    const itemsToAdd: { name: string; quantity?: number; unit?: string }[] = [];
+    const itemsToAdd: { name: string; quantity?: number | string; unit?: string }[] = [];
     activePlan.meals.forEach((entry) => {
       if (entry.recipe_id) {
         const r = recipes.find((rec) => rec.id === entry.recipe_id);
@@ -246,7 +246,7 @@ export function MealPlannerPage() {
 
   // Thêm toàn bộ nguyên liệu của cả tuần vào Đi chợ
   const handleAddWeekToShopping = async () => {
-    const weekItems: { name: string; quantity?: number; unit?: string }[] = [];
+    const weekItems: { name: string; quantity?: number | string; unit?: string }[] = [];
 
     mealPlans.forEach((plan) => {
       plan.meals.forEach((entry) => {

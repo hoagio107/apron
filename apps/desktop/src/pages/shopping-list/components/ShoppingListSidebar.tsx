@@ -1,7 +1,6 @@
 import { Sparkles, RefreshCw, List, Circle, CheckCircle2, ShoppingCart, Smartphone, Printer, Plus, ChevronRight } from 'lucide-react';
 import { Button } from '@/ui';
 import { useShoppingListStore } from '../../../store/useShoppingListStore';
-import { ImageManager } from '../../../lib/image-manager';
 
 // MOCK DATA for AI suggestions
 const MOCK_AI_SUGGESTIONS = [

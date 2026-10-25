@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Spinner } from '@/ui';
 import { Plus, Search, Trash2, CalendarDays, Tags } from 'lucide-react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { EmptyState } from '../../components/shared/EmptyState';
 import type { RecipeViewType } from '../../components/recipes/list/RecipeCard';
 import { RecipeCard } from '../../components/recipes/list/RecipeCard';
@@ -10,7 +11,6 @@ import { RecipeFilterDrawer, defaultFilterState } from '../../components/recipes
 import type { RecipeFilterState } from '../../components/recipes/list/RecipeFilterDrawer';
 import { useRecipeStore } from '../../store/useRecipeStore';
 import type { Recipe } from '@apron/core';
-import { useEffect } from 'react';
 import { MealPlannerSelectModal } from './components/MealPlannerSelectModal';
 import { TagSelectModal } from './components/TagSelectModal';
 import { ParentRecipeSelectModal } from './components/ParentRecipeSelectModal';
@@ -80,7 +80,7 @@ export function RecipeListPage() {
       result = result.filter(r => 
         filters.difficulties.includes(r.difficulty) ||
         (filters.difficulties.includes('Trung bình') && r.difficulty === 'Vừa') ||
-        (filters.difficulties.includes('Vừa') && r.difficulty === 'Trung bình')
+        (filters.difficulties.includes('Vừa') && (r.difficulty as string) === 'Trung bình')
       );
     }
     
@@ -143,15 +143,87 @@ export function RecipeListPage() {
     return result;
   }, [recipes, searchQuery, sortOption, filters]);
 
-  const toggleSelect = (id: string) => {
-    const newSelected = new Set(selectedIds);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
+  const variantCountsMap = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const r of recipes) {
+      if (r.parent_id) {
+        map.set(r.parent_id, (map.get(r.parent_id) || 0) + 1);
+      }
     }
-    setSelectedIds(newSelected);
-  };
+    return map;
+  }, [recipes]);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(1200);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const el = containerRef.current;
+    const updateWidth = () => {
+      setContainerWidth(el.clientWidth || window.innerWidth);
+    };
+    updateWidth();
+    const ro = new ResizeObserver(() => updateWidth());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const columnsCount = useMemo(() => {
+    if (viewType === 'grid-landscape') {
+      if (containerWidth >= 1024) return 4;
+      if (containerWidth >= 768) return 3;
+      if (containerWidth >= 640) return 2;
+      return 1;
+    }
+    if (viewType === 'grid-portrait-out') {
+      if (containerWidth >= 1024) return 5;
+      if (containerWidth >= 768) return 4;
+      if (containerWidth >= 640) return 3;
+      return 2;
+    }
+    if (containerWidth >= 1280) return 6;
+    if (containerWidth >= 1024) return 5;
+    if (containerWidth >= 768) return 4;
+    if (containerWidth >= 640) return 3;
+    return 2;
+  }, [containerWidth, viewType]);
+
+  const rows = useMemo(() => {
+    const chunks: Recipe[][] = [];
+    for (let i = 0; i < filteredAndSortedRecipes.length; i += columnsCount) {
+      chunks.push(filteredAndSortedRecipes.slice(i, i + columnsCount));
+    }
+    return chunks;
+  }, [filteredAndSortedRecipes, columnsCount]);
+
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => containerRef.current?.closest('.overflow-y-auto') as HTMLElement | null,
+    estimateSize: () => {
+      if (viewType === 'grid-landscape') return 260;
+      if (viewType === 'grid-square') return 320;
+      return 380;
+    },
+    overscan: 2,
+  });
+
+  const gridClass = useMemo(() => {
+    if (viewType === 'grid-landscape') return 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6';
+    if (viewType === 'grid-portrait-out') return 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6';
+    return 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6';
+  }, [viewType]);
+
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds(prev => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(id)) {
+        newSelected.delete(id);
+      } else {
+        newSelected.add(id);
+      }
+      return newSelected;
+    });
+  }, []);
 
   const selectAll = () => {
     if (selectedIds.size === filteredAndSortedRecipes.length) {
@@ -168,13 +240,13 @@ export function RecipeListPage() {
     setIsSelectMode(!isSelectMode);
   };
 
-  const handleCardClick = (id: string) => {
+  const handleCardClick = useCallback((id: string) => {
     if (isSelectMode) {
       toggleSelect(id);
     } else {
       navigate(`/recipes/${id}`);
     }
-  };
+  }, [isSelectMode, navigate, toggleSelect]);
 
   const handleRecipeAction = async (action: string, recipe: Recipe) => {
     switch (action) {
@@ -375,26 +447,32 @@ export function RecipeListPage() {
           description="Thử thay đổi từ khóa tìm kiếm hoặc xóa bớt bộ lọc để xem các công thức khác."
         />
       ) : (
-        <div className={`
-          ${viewType === 'grid-portrait' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6' : ''}
-          ${viewType === 'grid-square' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6' : ''}
-          ${viewType === 'grid-landscape' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6' : ''}
-          ${viewType === 'grid-portrait-out' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6' : ''}
-        `}>
-          {filteredAndSortedRecipes.map(r => {
-            const variantCount = recipes.filter(child => child.parent_id === r.id).length;
+        <div ref={containerRef} className="w-full relative" style={{ minHeight: `${rowVirtualizer.getTotalSize()}px` }}>
+          {rowVirtualizer.getVirtualItems().map(virtualRow => {
+            const rowRecipes = rows[virtualRow.index];
+            if (!rowRecipes) return null;
             return (
-              <RecipeCard 
-                key={r.id!} 
-                recipe={r} 
-                viewType={viewType}
-                selectable={isSelectMode}
-                isSelected={selectedIds.has(r.id!)}
-                onSelectChange={() => toggleSelect(r.id!)}
-                onClick={() => handleCardClick(r.id!)}
-                onAction={handleRecipeAction}
-                variantCount={variantCount}
-              />
+              <div
+                key={virtualRow.index}
+                className={`absolute top-0 left-0 w-full ${gridClass}`}
+                style={{
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                {rowRecipes.map(r => (
+                  <RecipeCard 
+                    key={r.id!} 
+                    recipe={r} 
+                    viewType={viewType}
+                    selectable={isSelectMode}
+                    isSelected={selectedIds.has(r.id!)}
+                    onSelectChange={() => toggleSelect(r.id!)}
+                    onClick={() => handleCardClick(r.id!)}
+                    onAction={handleRecipeAction}
+                    variantCount={variantCountsMap.get(r.id!) || 0}
+                  />
+                ))}
+              </div>
             );
           })}
         </div>

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/ui';
 import { CloudUpload, X, File as FileIcon, Loader2 } from 'lucide-react';
 import { FileManager } from '../../lib/file-manager';
@@ -52,13 +52,13 @@ export function FileUploader({ value = [], onChange, label = "Kéo thả file v�
     }, 1500);
   };
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleFiles(e.dataTransfer.files);
     }
-  }, [value]);
+  };
 
   const removeFile = (indexToRemove: number) => {
     const newUrls = (value || []).filter((_, idx) => idx !== indexToRemove);

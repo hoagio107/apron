@@ -12,7 +12,6 @@ import {
   Plus, 
   Refrigerator, 
   ShoppingCart, 
-  PackagePlus,
   LayoutGrid,
   List
 } from 'lucide-react';
@@ -201,61 +200,6 @@ export function SmartFridgePage() {
     }
   };
 
-  const handleSeedSampleItems = () => {
-    const sampleItems: Omit<PantryItem, 'id'>[] = [
-      {
-        name: 'Thịt bò xay',
-        quantity: 500,
-        unit: 'gam',
-        group: CATEGORIES.MEAT_SEAFOOD,
-        added_date: new Date().toISOString().split('T')[0],
-        expiry_date: new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0]
-      },
-      {
-        name: 'Trứng gà ta',
-        quantity: 10,
-        unit: 'quả',
-        group: CATEGORIES.DAIRY_EGGS,
-        added_date: new Date().toISOString().split('T')[0],
-        expiry_date: new Date(Date.now() + 10 * 86400000).toISOString().split('T')[0]
-      },
-      {
-        name: 'Cà chua bi',
-        quantity: 300,
-        unit: 'gam',
-        group: CATEGORIES.VEGGIES,
-        added_date: new Date().toISOString().split('T')[0],
-        expiry_date: new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0]
-      },
-      {
-        name: 'Hành tây',
-        quantity: 2,
-        unit: 'củ',
-        group: CATEGORIES.VEGGIES,
-        added_date: new Date().toISOString().split('T')[0],
-        expiry_date: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0]
-      },
-      {
-        name: 'Sữa tươi không đường',
-        quantity: 1,
-        unit: 'hộp',
-        group: CATEGORIES.DAIRY_EGGS,
-        added_date: new Date().toISOString().split('T')[0],
-        expiry_date: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0]
-      },
-      {
-        name: 'Nước mắm Phú Quốc',
-        quantity: 1,
-        unit: 'chai',
-        group: CATEGORIES.SPICES_SAUCES,
-        added_date: new Date().toISOString().split('T')[0]
-      }
-    ];
-
-    sampleItems.forEach(item => addItem(item));
-    toast.success('Đã nạp 6 nguyên liệu mẫu vào tủ lạnh!');
-  };
-
   return (
     <div className="flex flex-col min-h-full gap-6 w-full pt-6 pb-28 px-4 md:px-8">
       {/* 1. Header & Toolbar chuẩn hệ thống */}
@@ -324,17 +268,6 @@ export function SmartFridgePage() {
                 >
                   Thêm nguyên liệu
                 </Button>
-                {isPantryEmpty && (
-                  <Button
-                    variant="flat"
-                    color="secondary"
-                    startContent={<PackagePlus className="w-4 h-4" />}
-                    onPress={handleSeedSampleItems}
-                    className="font-semibold h-11 px-4 rounded-xl"
-                  >
-                    Nạp dữ liệu mẫu
-                  </Button>
-                )}
               </div>
             }
           />

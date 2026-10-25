@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Input, Tabs, Tab, EmptyState } from '@/ui';
-import { Plus, Search, ArrowDownUp, Share2, ListTodo, ShoppingCart } from 'lucide-react';
+import { Button, Tabs, Tab, EmptyState } from '@/ui';
+import { Plus, ArrowDownUp, Share2, ListTodo, ShoppingCart } from 'lucide-react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { useShoppingListStore } from '../../store/useShoppingListStore';
 import { CATEGORIES } from '@apron/core';
@@ -13,7 +13,7 @@ import { RecipeCard } from '../../components/recipes/list/RecipeCard';
 
 export function ShoppingListPage() {
   const navigate = useNavigate();
-  const { items, fetchItems, addItem, toggleItem, removeItems, updateItem } = useShoppingListStore();
+  const { items, fetchItems, addItems, toggleItem, removeItems, updateItem } = useShoppingListStore();
   const { recipes, fetchRecipes } = useRecipeStore();
   
   const [activeTab, setActiveTab] = useState('pending');
@@ -190,8 +190,15 @@ export function ShoppingListPage() {
                       actionIcon={<Plus className="w-5 h-5 text-white" />}
                       onActionClick={(e, recipe) => {
                         e.stopPropagation();
-                        // TODO: Implement adding recipe ingredients to shopping list
-                        console.log('Add recipe to shopping list', recipe.title);
+                        if (recipe.ingredients && recipe.ingredients.length > 0) {
+                          const newItems = recipe.ingredients.map((ing: any) => ({
+                            name: ing.name,
+                            quantity: typeof ing.quantity === 'number' ? ing.quantity : 1,
+                            unit: ing.unit || 'đơn vị',
+                            group: ing.group
+                          }));
+                          addItems(newItems);
+                        }
                       }}
                       onClick={() => navigate(`/recipes/${recipe.id}`)}
                     />

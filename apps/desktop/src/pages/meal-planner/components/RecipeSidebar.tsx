@@ -1,9 +1,6 @@
-import { useDraggable } from '@dnd-kit/core';
-import { Search, ChefHat, Clock, Flame, BookOpen, Star, ChevronDown, ChevronUp, LayoutList, LayoutGrid } from 'lucide-react';
-import type { Recipe } from '@apron/core';
+import { Search, BookOpen, LayoutList, LayoutGrid } from 'lucide-react';
 import { useRecipeStore } from '../../../store/useRecipeStore';
 import { useEffect, useState } from 'react';
-import { ImageManager } from '../../../lib/image-manager';
 import { Input } from '@/ui';
 
 import { DraggableRecipe } from './DraggableRecipe';

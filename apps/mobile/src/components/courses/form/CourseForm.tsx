@@ -324,7 +324,7 @@ export function CourseForm({
         title: formData.title.trim(),
         slug: formData.slug || formData.title.trim().toLowerCase().replace(/\s+/g, '-'),
         description: formData.description,
-        thumbnail_url: finalThumbnail,
+        thumbnail_url: finalThumbnail || '',
         level: formData.level,
         author_id: formData.author_id || 'local_user',
         teacher: formData.teacher,

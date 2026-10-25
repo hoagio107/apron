@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Recipe } from '@apron/core';
 import { RecipeRepository } from '@apron/core';
@@ -25,7 +25,7 @@ interface RecipeCardProps {
   onActionClick?: (e: React.MouseEvent, recipe: Recipe) => void;
 }
 
-export function RecipeCard({ 
+function RecipeCardComponent({ 
   recipe, 
   viewType, 
   selectable = false, 
@@ -371,3 +371,5 @@ export function RecipeCard({
     </div>
   );
 }
+
+export const RecipeCard = memo(RecipeCardComponent);

@@ -75,7 +75,7 @@ export function BottomNavMore({ isOpen, onClose }: BottomNavMoreProps) {
         </div>
 
         {/* Settings */}
-        <div className="px-4 pb-8 border-t border-divider pt-3 mt-2">
+        <div className="px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] border-t border-divider pt-3 mt-2">
           <button
             onClick={() => {
               navigate('/settings');

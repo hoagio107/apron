@@ -2,7 +2,6 @@ import { Checkbox, Button, Autocomplete, AutocompleteItem } from '@/ui';
 import { Minus, Plus, MoreVertical, Trash2 } from 'lucide-react';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
 import { useIngredientCatalogStore } from '../../../store/useIngredientCatalogStore';
-import { CATEGORIES } from '@apron/core';
 import { Avatar } from '@/ui';
 import { ImageManager } from '../../../lib/image-manager';
 import { getCategoryTheme } from '../../../lib/categoryTheme';
@@ -128,7 +127,7 @@ export function ShoppingListItemCard({ item, onToggle, onRemove, onUpdateQuantit
           }}
         >
           {units.map((u) => (
-            <AutocompleteItem key={u.name} value={u.name}>
+            <AutocompleteItem key={u.name}>
               {u.name}
             </AutocompleteItem>
           ))}

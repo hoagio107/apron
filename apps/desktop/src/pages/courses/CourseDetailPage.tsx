@@ -1,17 +1,16 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
-  Card, CardBody, Button, Accordion, AccordionItem, Divider, Avatar,
+  Card, CardBody, Button, Accordion, AccordionItem, Divider,
   Tabs, Tab, Checkbox, Textarea, Tooltip, Progress
 } from '@/ui';
 import { BookOpen, ChevronLeft, Clock, PlayCircle, Star, FileText, ChevronRight, Plus, Trash2, ChevronDown, ChevronUp, ChefHat, StickyNote, Flame, BarChart, Edit, Paperclip } from 'lucide-react';
 import { useCourseStore } from '../../store/useCourseStore';
 import { useRecipeStore } from '../../store/useRecipeStore';
-import type { Course, Lesson } from '@apron/core';
+import type { Lesson } from '@apron/core';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { ImageManager } from '../../lib/image-manager';
 import { IconRenderer } from '../../components/shared/IconPicker';
-import { RecipeCard } from '../../components/recipes/list/RecipeCard';
 
 export function CourseDetailPage() {
   const { id } = useParams();
@@ -56,15 +55,17 @@ export function CourseDetailPage() {
   let activeLessonIndex = 0;
   let activeLesson: Lesson | null = null;
   
-  if (activeLessonId) {
-    course.modules?.forEach((module, mIdx) => {
-      const lIdx = module.lessons?.findIndex(l => l.id === activeLessonId);
-      if (lIdx !== undefined && lIdx !== -1) {
+  if (activeLessonId && course.modules) {
+    for (let mIdx = 0; mIdx < course.modules.length; mIdx++) {
+      const module = course.modules[mIdx];
+      const lIdx = module.lessons?.findIndex(l => l.id === activeLessonId) ?? -1;
+      if (lIdx !== -1 && module.lessons) {
         activeModuleIndex = mIdx;
         activeLessonIndex = lIdx;
-        activeLesson = module.lessons![lIdx];
+        activeLesson = module.lessons[lIdx];
+        break;
       }
-    });
+    }
   }
 
   const totalLessons = course.modules?.reduce((acc, m) => acc + (m.lessons?.length || 0), 0) || 0;
@@ -426,7 +427,7 @@ export function CourseDetailPage() {
                               Công thức thực hành
                             </h4>
                             <div className="grid grid-cols-1 gap-3">
-                              {activeLesson.attached_recipe_ids.map(recipeId => {
+                              {activeLesson.attached_recipe_ids.map((recipeId: string) => {
                                 const recipe = recipes.find(r => r.id === recipeId);
                                 if (!recipe) return null;
                                 return (
@@ -503,7 +504,7 @@ export function CourseDetailPage() {
                         Tài liệu đính kèm
                       </h4>
                       <div className="flex flex-col gap-2">
-                        {activeLesson.attachments.map((url, i) => (
+                        {activeLesson.attachments.map((url: string, i: number) => (
                           <a 
                             key={i} 
                             href={url}

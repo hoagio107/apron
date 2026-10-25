@@ -232,7 +232,6 @@ export function SmartFridgePage() {
                 variant="flat"
                 aria-label={viewMode === 'grid' ? 'Chuyển sang dạng danh sách' : 'Chuyển sang dạng lưới'}
                 onPress={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                className="w-10 h-10 min-w-10 rounded-xl"
               >
                 {viewMode === 'grid' ? (
                   <List className="w-5 h-5 text-default-600" />

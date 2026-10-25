@@ -14,6 +14,7 @@ interface IngredientCatalogState {
   
   // Hành động
   addIngredientMeta: (name: string, data?: Partial<IngredientMeta>) => IngredientMeta;
+  bulkAddIngredients: (items: (Partial<IngredientMeta> & { name: string })[]) => number;
   updateIngredientMeta: (id: string, data: Partial<IngredientMeta>) => void;
   getIngredientMeta: (id: string) => IngredientMeta | undefined;
   getIngredientMetaByName: (name: string) => IngredientMeta | undefined;
@@ -45,6 +46,44 @@ export const useIngredientCatalogStore = create<IngredientCatalogState>()(
           catalog: { ...state.catalog, [id]: newIngredient }
         }));
         return newIngredient;
+      },
+
+      bulkAddIngredients: (items) => {
+        let addedCount = 0;
+        set((state) => {
+          const currentByName = new Map<string, string>();
+          for (const [id, item] of Object.entries(state.catalog)) {
+            currentByName.set(normalizeName(item.name), id);
+          }
+          const newCatalog = { ...state.catalog };
+
+          for (const item of items) {
+            if (!item.name || !item.name.trim()) continue;
+            const norm = normalizeName(item.name);
+            const existingId = currentByName.get(norm);
+            if (existingId) {
+              newCatalog[existingId] = {
+                ...newCatalog[existingId],
+                ...item,
+                id: existingId,
+                name: newCatalog[existingId].name,
+                default_category: item.default_category || newCatalog[existingId].default_category,
+                default_unit: item.default_unit || newCatalog[existingId].default_unit,
+              };
+            } else {
+              const id = item.id || generateId();
+              newCatalog[id] = {
+                ...item,
+                id,
+                name: item.name.trim()
+              };
+              currentByName.set(norm, id);
+              addedCount++;
+            }
+          }
+          return { catalog: newCatalog };
+        });
+        return addedCount;
       },
 
       updateIngredientMeta: (id, data) => {

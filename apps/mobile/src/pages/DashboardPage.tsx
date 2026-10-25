@@ -121,13 +121,18 @@ export function DashboardPage() {
     <div className="flex flex-col gap-8 w-full pt-6 pb-28 px-4 md:px-8">
       
       {/* 1. Welcome Banner */}
-      <div>
-        <h1 className="app-page-title mb-1">
-          {getGreeting()}, Chef! 👨‍🍳
-        </h1>
-        <p className="app-page-subtitle">
-          Hôm nay bạn muốn nấu món gì? Hãy khám phá tủ lạnh hoặc lên thực đơn nhé.
-        </p>
+      <div className="flex items-center gap-3.5 sm:gap-4">
+        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white dark:bg-default-100 p-2 shadow-sm border border-default-200/60 dark:border-default-700/50 shrink-0 flex items-center justify-center">
+          <img src="/logo.svg" alt="apron logo" className="w-full h-full object-contain" />
+        </div>
+        <div className="flex flex-col">
+          <h1 className="app-page-title mb-0.5">
+            {getGreeting()}, Chef!
+          </h1>
+          <p className="app-page-subtitle">
+            Hôm nay bạn muốn nấu món gì? Hãy khám phá tủ lạnh hoặc lên thực đơn nhé.
+          </p>
+        </div>
       </div>
 
       {/* 2. Overview Statistics — 4 Columns Full-Width */}

@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { type ParseRecipeResult, buildRecipePrompt, parseGeminiResponse } from '../../../lib/gemini';
 import { useIngredientCatalogStore } from '../../../store/useIngredientCatalogStore';
+import { useUnitStore } from '../../../store/useUnitStore';
 import { useTipStore } from '../../../store/useTipStore';
 
 interface AiAssistModalProps {
@@ -46,6 +47,7 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
   const [activeRecipeIndex, setActiveRecipeIndex] = useState(0);
   
   const catalog = useIngredientCatalogStore(state => state.catalog);
+  const units = useUnitStore(state => state.units);
   const { tips, fetchTips } = useTipStore();
 
   useEffect(() => {
@@ -63,13 +65,17 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
     return Object.values(catalog).map(ing => ing.name);
   }, [catalog]);
 
+  const existingUnits = useMemo(() => {
+    return units.map(u => u.name);
+  }, [units]);
+
   const existingTips = useMemo(() => {
     return tips.map(t => ({ id: t.id, title: t.title }));
   }, [tips]);
 
   const generatedPrompt = useMemo(() => {
-    return buildRecipePrompt(inputText, existingIngredients, existingTips);
-  }, [inputText, existingIngredients, existingTips]);
+    return buildRecipePrompt(inputText, existingIngredients, existingTips, existingUnits);
+  }, [inputText, existingIngredients, existingTips, existingUnits]);
 
   const handleCopyPrompt = async () => {
     try {

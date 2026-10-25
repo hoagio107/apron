@@ -102,26 +102,26 @@ export function CookingModeModal({
                       return (
                         <div 
                           key={idx} 
-                          className={`flex items-center justify-between py-2.5 px-3.5 rounded-xl transition-all cursor-pointer border ${
+                          className={`flex items-start justify-between py-2.5 px-3.5 rounded-xl transition-all cursor-pointer border ${
                             isChecked 
                               ? 'bg-default-100/40 dark:bg-content2/30 border-divider/40 opacity-60' 
                               : 'bg-content1 dark:bg-content2/60 border-divider/60 shadow-2xs hover:border-primary/40'
                           }`}
                           onClick={() => toggleIngredient(idx)}
                         >
-                          <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
-                            <div className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-colors ${
+                          <div className="flex items-start gap-3 min-w-0 flex-1 mr-2">
+                            <div className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
                               isChecked 
                                 ? 'bg-primary border-primary text-white' 
                                 : 'border-default-300 dark:border-default-600'
                             }`}>
                               {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                             </div>
-                            <span className={`text-sm font-medium truncate ${isChecked ? 'line-through text-default-400' : 'text-foreground'}`}>
+                            <span className={`text-base font-medium leading-snug break-words flex-1 ${isChecked ? 'line-through text-default-400' : 'text-foreground'}`}>
                               {ing.name}
                             </span>
                           </div>
-                          <div className={`text-sm font-semibold shrink-0 ${isChecked ? 'text-default-400' : 'text-primary'}`}>
+                          <div className={`text-base font-semibold shrink-0 ml-2 whitespace-nowrap mt-0.5 ${isChecked ? 'text-default-400' : 'text-primary'}`}>
                             {scaleQuantity(ing.quantity)} {ing.unit}
                           </div>
                         </div>

@@ -27,16 +27,16 @@ export function MainSidebar({ isExpanded }: MainSidebarProps) {
   }, []);
 
   const navItems: NavItem[] = [
-    { name: t('Home'), icon: Home, path: '/' },
-    { name: 'Tất cả công thức', icon: ChefHat, path: '/recipes' },
-    { name: t('Saved'), icon: Heart, path: '/saved' },
-    { name: t('Shopping List'), icon: ShoppingCart, path: '/shopping-list' },
-    { name: t('Courses'), icon: GraduationCap, path: '/courses' },
-    { name: t('Smart Fridge'), icon: Refrigerator, path: '/smart-fridge' },
-    { name: 'Từ điển nguyên liệu', icon: NotebookTabs, path: '/catalog' },
-    { name: t('Meal Planner'), icon: CalendarDays, path: '/meal-planner' },
-    { name: t('Tips'), icon: Lightbulb, path: '/tips' },
-    { name: t('Units'), icon: Scale, path: '/units' },
+    { name: t('nav.home'), icon: Home, path: '/' },
+    { name: t('nav.recipes'), icon: ChefHat, path: '/recipes' },
+    { name: t('nav.saved'), icon: Heart, path: '/saved' },
+    { name: t('nav.shoppingList'), icon: ShoppingCart, path: '/shopping-list' },
+    { name: t('nav.courses'), icon: GraduationCap, path: '/courses' },
+    { name: t('nav.smartFridge'), icon: Refrigerator, path: '/smart-fridge' },
+    { name: t('recipes.detail.ingredients'), icon: NotebookTabs, path: '/catalog' },
+    { name: t('nav.mealPlanner'), icon: CalendarDays, path: '/meal-planner' },
+    { name: t('nav.kitchenTips'), icon: Lightbulb, path: '/tips' },
+    { name: t('nav.units'), icon: Scale, path: '/units' },
     { name: 'Design System', icon: Palette, path: '/design-system' },
   ];
 

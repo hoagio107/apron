@@ -17,3 +17,4 @@ export * from './utils/ingredientParser';
 export * from './data/seedMockData';
 export * from './data/purgeMockData';
 export * from './store';
+export * from './i18n';

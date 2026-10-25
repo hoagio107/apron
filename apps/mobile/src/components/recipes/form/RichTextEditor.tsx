@@ -31,7 +31,7 @@ export function RichTextEditor({
       StarterKit,
       Placeholder.configure({
         placeholder: placeholder || 'Nhập nội dung...',
-        emptyEditorClass: 'cursor-text before:content-[attr(data-placeholder)] before:absolute before:left-3 before:top-2 before:text-default-400 before:pointer-events-none',
+        emptyEditorClass: 'cursor-text before:content-[attr(data-placeholder)] before:absolute before:left-3 before:top-2 before:text-default-400 dark:before:text-default-400 before:pointer-events-none',
       }),
     ],
     content: value,
@@ -51,7 +51,7 @@ export function RichTextEditor({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm prose-primary max-w-none focus:outline-none min-h-[72px] px-3 py-2 text-sm leading-relaxed relative [&_p]:my-0',
+        class: 'prose prose-sm dark:prose-invert text-foreground dark:text-foreground max-w-none focus:outline-none min-h-[72px] px-3 py-2 text-sm leading-relaxed relative [&_p]:my-0 [&_*]:text-foreground',
       },
     },
   });
@@ -68,7 +68,7 @@ export function RichTextEditor({
 
   return (
     <>
-    <div className={`flex flex-col border rounded-xl bg-default-100 transition-colors focus-within:bg-default-50 ${isInvalid ? 'border-danger' : 'border-transparent hover:bg-default-200'}`}>
+    <div className={`flex flex-col border rounded-xl bg-default-100 dark:bg-default-50/20 text-foreground transition-colors focus-within:bg-default-50 dark:focus-within:bg-default-100/30 ${isInvalid ? 'border-danger' : 'border-transparent hover:bg-default-200 dark:hover:bg-default-100/40'}`}>
       
       {/* Sticky Bottom Bar on Mobile */}
       {editor && (

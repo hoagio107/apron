@@ -41,7 +41,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Bắt đầu so
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[150px] p-4 bg-default-100 rounded-xl',
+        class: 'prose prose-sm dark:prose-invert text-foreground dark:text-foreground [&_*]:text-foreground max-w-none focus:outline-none min-h-[150px] p-4 bg-default-100 dark:bg-default-50/20 rounded-xl',
       },
     },
   });

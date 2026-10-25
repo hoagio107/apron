@@ -3,25 +3,27 @@ import {
   CalendarDays, ShoppingCart, Refrigerator, GraduationCap,
   Heart, Lightbulb, NotebookTabs, Scale, Settings, X
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface BottomNavMoreProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const moreItems = [
-  { name: 'Thực đơn', icon: CalendarDays, path: '/meal-planner' },
-  { name: 'Đi chợ', icon: ShoppingCart, path: '/shopping-list' },
-  { name: 'Tủ lạnh', icon: Refrigerator, path: '/smart-fridge' },
-  { name: 'Khoá học', icon: GraduationCap, path: '/courses' },
-  { name: 'Đã lưu', icon: Heart, path: '/saved' },
-  { name: 'Mẹo hay', icon: Lightbulb, path: '/tips' },
-  { name: 'Nguyên liệu', icon: NotebookTabs, path: '/catalog' },
-  { name: 'Đơn vị', icon: Scale, path: '/units' },
-];
-
 export function BottomNavMore({ isOpen, onClose }: BottomNavMoreProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const moreItems = [
+    { name: t('nav.mealPlanner'), icon: CalendarDays, path: '/meal-planner' },
+    { name: t('nav.shoppingList'), icon: ShoppingCart, path: '/shopping-list' },
+    { name: t('nav.smartFridge'), icon: Refrigerator, path: '/smart-fridge' },
+    { name: t('nav.courses'), icon: GraduationCap, path: '/courses' },
+    { name: t('nav.saved'), icon: Heart, path: '/saved' },
+    { name: t('nav.kitchenTips'), icon: Lightbulb, path: '/tips' },
+    { name: t('recipes.detail.ingredients'), icon: NotebookTabs, path: '/catalog' },
+    { name: t('nav.units'), icon: Scale, path: '/units' },
+  ];
 
   if (!isOpen) return null;
 
@@ -39,7 +41,7 @@ export function BottomNavMore({ isOpen, onClose }: BottomNavMoreProps) {
         <div className="sticky top-0 bg-content1 z-10 pt-3 pb-2 px-4 flex flex-col items-center border-b border-divider">
           <div className="w-10 h-1 rounded-full bg-default-300 mb-2" />
           <div className="w-full flex items-center justify-between">
-            <span className="text-base font-semibold text-foreground">Danh mục</span>
+            <span className="text-base font-semibold text-foreground">{t('nav.categories')}</span>
             <button onClick={onClose} className="p-2 rounded-full active:bg-content2 transition-colors">
               <X className="w-5 h-5 text-default-400" />
             </button>
@@ -58,15 +60,15 @@ export function BottomNavMore({ isOpen, onClose }: BottomNavMoreProps) {
                 className={({ isActive }) =>
                   `flex items-center gap-4 px-4 py-3 rounded-2xl transition-colors ${
                     isActive
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-default-700 active:bg-content2'
+                      ? 'bg-primary/10 text-primary font-semibold'
+                      : 'hover:bg-content2 text-default-700'
                   }`
                 }
               >
                 {({ isActive }) => (
                   <>
                     <Icon className={`w-6 h-6 ${isActive ? 'text-primary' : 'text-default-500'}`} />
-                    <span className="text-base font-medium leading-tight">{item.name}</span>
+                    <span className="text-base">{item.name}</span>
                   </>
                 )}
               </NavLink>
@@ -84,7 +86,7 @@ export function BottomNavMore({ isOpen, onClose }: BottomNavMoreProps) {
             className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl active:bg-content2 text-default-700 transition-colors"
           >
             <Settings className="w-6 h-6 text-default-500" />
-            <span className="text-base font-medium">Cài đặt</span>
+            <span className="text-base font-medium">{t('nav.settings')}</span>
           </button>
         </div>
       </div>

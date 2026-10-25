@@ -198,30 +198,18 @@ export function TipListPage() {
               <div className="w-px h-6 bg-default-200 dark:bg-default-100 mx-0.5 shrink-0" />
 
               {/* View Mode Toggle: Lưới 2 cột vs 1 cột tỷ lệ 4:3 */}
-              <div className="flex items-center bg-default-100 dark:bg-default-50/10 rounded-xl p-0.5 shrink-0 border border-default-200/50">
-                <Button
-                  isIconOnly
-                  size="sm"
-                  variant={viewMode === 'grid' ? 'solid' : 'light'}
-                  color={viewMode === 'grid' ? 'primary' : 'default'}
-                  className={`w-8 h-8 min-w-8 ${viewMode === 'grid' ? 'shadow-xs' : 'text-default-500'}`}
-                  onPress={() => handleViewModeChange('grid')}
-                  aria-label="Lưới 2 cột"
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                </Button>
-                <Button
-                  isIconOnly
-                  size="sm"
-                  variant={viewMode === 'single' ? 'solid' : 'light'}
-                  color={viewMode === 'single' ? 'primary' : 'default'}
-                  className={`w-8 h-8 min-w-8 ${viewMode === 'single' ? 'shadow-xs' : 'text-default-500'}`}
-                  onPress={() => handleViewModeChange('single')}
-                  aria-label="1 cột tỷ lệ 4:3"
-                >
-                  <RectangleHorizontal className="w-4 h-4" />
-                </Button>
-              </div>
+              <Button
+                isIconOnly
+                variant="flat"
+                aria-label={viewMode === 'grid' ? 'Chuyển sang dạng 1 cột' : 'Chuyển sang dạng lưới 2 cột'}
+                onPress={() => handleViewModeChange(viewMode === 'grid' ? 'single' : 'grid')}
+              >
+                {viewMode === 'grid' ? (
+                  <RectangleHorizontal className="w-5 h-5 text-default-600" />
+                ) : (
+                  <LayoutGrid className="w-5 h-5 text-default-600" />
+                )}
+              </Button>
             </div>
           </div>
         }

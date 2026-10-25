@@ -29,13 +29,13 @@ import { ConfirmModal } from '../../components/shared/ConfirmModal';
 import { FEEDBACK_RESET_DELAY_MS, RESET_APP_RELOAD_DELAY_MS } from '../../constants';
 
 export function SettingsPage() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [copied, setCopied] = useState(false);
 
   // Store statistics
-  const { recipes } = useRecipeStore();
+  const { recipes, addBulkRecipes, fetchRecipes } = useRecipeStore();
   const { items: pantryItems } = usePantryStore();
   const { getAllIngredients } = useIngredientCatalogStore();
   const { tips } = useTipStore();
@@ -117,19 +117,114 @@ export function SettingsPage() {
     }
   };
 
-  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const parsed = JSON.parse(event.target?.result as string);
-        if (!parsed.version && !parsed.recipes) {
+        let recipesToImport: any[] = [];
+        let unitsToImport: any[] = [];
+        let catalogToImport: any[] = [];
+
+        if (Array.isArray(parsed)) {
+          recipesToImport = parsed;
+        } else if (parsed && typeof parsed === 'object') {
+          if (Array.isArray(parsed.recipes)) {
+            recipesToImport = parsed.recipes;
+          } else if (parsed.title || parsed.name) {
+            recipesToImport = [parsed];
+          }
+
+          if (Array.isArray(parsed.units)) {
+            unitsToImport = parsed.units;
+          }
+          if (Array.isArray(parsed.catalog)) {
+            catalogToImport = parsed.catalog;
+          } else if (parsed.catalog && typeof parsed.catalog === 'object') {
+            catalogToImport = Object.values(parsed.catalog);
+          }
+        } else {
           throw new Error('Định dạng tệp sao lưu không hợp lệ.');
         }
-        toast.success('Đã đọc tệp dữ liệu hợp lệ! (Đang đồng bộ)');
-      } catch {
+
+        // Auto-extract any units and ingredients from recipes
+        recipesToImport.forEach((r: any) => {
+          if (Array.isArray(r.ingredients)) {
+            r.ingredients.forEach((ing: any) => {
+              if (ing && ing.name) {
+                const name = String(ing.name).trim();
+                const unit = ing.unit ? String(ing.unit).trim() : '';
+                if (name) {
+                  catalogToImport.push({
+                    name,
+                    default_unit: unit || undefined,
+                  });
+                }
+                if (unit && !['g', 'kg', 'ml', 'lít', 'muỗng canh', 'muỗng cà phê'].includes(unit.toLowerCase())) {
+                  unitsToImport.push({
+                    name: unit,
+                    symbol: unit,
+                    type: 'other',
+                    is_custom: true
+                  });
+                }
+              }
+            });
+          }
+        });
+
+        // 1. Bulk import units
+        let addedUnitsCount = 0;
+        if (unitsToImport.length > 0) {
+          addedUnitsCount = useUnitStore.getState().bulkAddUnits(unitsToImport);
+        }
+
+        // 2. Bulk import ingredient catalog
+        let addedCatalogCount = 0;
+        if (catalogToImport.length > 0) {
+          addedCatalogCount = useIngredientCatalogStore.getState().bulkAddIngredients(catalogToImport);
+        }
+
+        // 3. Import recipes
+        if (recipesToImport.length > 0) {
+          const normalized = recipesToImport.map(r => ({
+            ...r,
+            title: r.title || r.name || 'Không có tiêu đề',
+            slug: r.slug || (r.title || r.name || 'recipe').toLowerCase().replace(/\s+/g, '-'),
+            id: r.id || `recipe-${crypto.randomUUID()}`,
+            image_url: r.image_url || r.image || '',
+            taste_score: 0,
+            cooking_history: [],
+            difficulty: r.difficulty || 'Vừa',
+            servings: Number(r.servings) || 2,
+            prep_time: Number(r.prep_time) || 0,
+            cook_time: Number(r.cook_time) || 0,
+            calories: Number(r.calories) || (r.nutrition?.calories ? Number(r.nutrition.calories) : 0),
+            ingredients: Array.isArray(r.ingredients) ? r.ingredients : [],
+            steps: Array.isArray(r.steps) ? r.steps : [],
+            author_id: r.author_id || 'user',
+            created_at: r.created_at || new Date().toISOString(),
+            updated_at: r.updated_at || new Date().toISOString()
+          }));
+
+          await addBulkRecipes(normalized);
+          await fetchRecipes();
+
+          const details: string[] = [`${normalized.length} công thức`];
+          if (addedUnitsCount > 0) details.push(`${addedUnitsCount} đơn vị`);
+          if (addedCatalogCount > 0) details.push(`${addedCatalogCount} nguyên liệu`);
+
+          toast.success(`Đã nạp thành công: ${details.join(', ')}!`);
+        } else if (addedUnitsCount > 0 || addedCatalogCount > 0) {
+          toast.success(`Đã nạp thành công: ${addedUnitsCount} đơn vị, ${addedCatalogCount} nguyên liệu!`);
+        } else {
+          toast.warning('Tệp không chứa công thức nào.');
+        }
+      } catch (err: any) {
+        console.error('Import error:', err);
         toast.error('Tệp không đúng định dạng sao lưu Apron JSON.');
       }
     };
@@ -152,10 +247,10 @@ export function SettingsPage() {
       {/* 1. Header chuẩn đồng nhất */}
       <div className="px-4 pt-4 pb-2 shrink-0">
         <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-          Cài đặt hệ thống
+          {t('settings.title')}
         </h1>
         <p className="text-xs text-default-500 mt-0.5 font-medium">
-          Tuỳ biến giao diện, ngôn ngữ & dữ liệu ứng dụng
+          {t('settings.subtitle')}
         </p>
       </div>
 
@@ -163,7 +258,7 @@ export function SettingsPage() {
         {/* SECTION 1: Giao diện & Ngôn ngữ */}
         <div className="flex flex-col gap-2">
           <span className="text-xs font-bold uppercase tracking-wider text-default-400 px-1">
-            Giao diện & Ngôn ngữ
+            {t('settings.appearance.sectionTitle')} & {t('settings.language.sectionTitle')}
           </span>
           <div className="bg-content1/60 dark:bg-default-50/15 rounded-2xl overflow-hidden divide-y divide-divider/25 border-none shadow-none">
             {/* Theme row */}
@@ -173,9 +268,9 @@ export function SettingsPage() {
                   <Palette className="w-4 h-4" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-foreground">Chế độ hiển thị</span>
+                  <span className="text-sm font-semibold text-foreground">{t('settings.appearance.theme')}</span>
                   <span className="text-[11px] text-default-400">
-                    {theme === 'light' ? 'Giao diện sáng' : theme === 'dark' ? 'Giao diện tối' : 'Theo hệ thống'}
+                    {theme === 'light' ? t('settings.appearance.light') : theme === 'dark' ? t('settings.appearance.dark') : t('settings.appearance.system')}
                   </span>
                 </div>
               </div>
@@ -183,9 +278,9 @@ export function SettingsPage() {
               {/* Segmented Control */}
               <div className="flex items-center p-1 bg-default-100 dark:bg-default-50/30 rounded-xl gap-0.5">
                 {[
-                  { key: 'light', label: 'Sáng', icon: Sun },
-                  { key: 'dark', label: 'Tối', icon: Moon },
-                  { key: 'system', label: 'Tự động', icon: Laptop }
+                  { key: 'light', label: t('settings.appearance.light'), icon: Sun },
+                  { key: 'dark', label: t('settings.appearance.dark'), icon: Moon },
+                  { key: 'system', label: t('settings.appearance.system'), icon: Laptop }
                 ].map((item) => {
                   const isSelected = theme === item.key;
                   const ItemIcon = item.icon;
@@ -215,9 +310,9 @@ export function SettingsPage() {
                   <Languages className="w-4 h-4" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-foreground">Ngôn ngữ</span>
+                  <span className="text-sm font-semibold text-foreground">{t('settings.language.current')}</span>
                   <span className="text-[11px] text-default-400">
-                    {i18n.language.startsWith('vi') ? 'Tiếng Việt' : 'English'}
+                    {i18n.language.startsWith('vi') ? t('settings.language.vi') : t('settings.language.en')}
                   </span>
                 </div>
               </div>
@@ -225,8 +320,8 @@ export function SettingsPage() {
               {/* Segmented Control */}
               <div className="flex items-center p-1 bg-default-100 dark:bg-default-50/30 rounded-xl gap-0.5">
                 {[
-                  { code: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
-                  { code: 'en', label: 'English', flag: '🇺🇸' }
+                  { code: 'vi', label: t('settings.language.vi'), flag: '🇻🇳' },
+                  { code: 'en', label: t('settings.language.en'), flag: '🇺🇸' }
                 ].map((item) => {
                   const isSelected = i18n.language.startsWith(item.code);
                   return (
@@ -253,26 +348,26 @@ export function SettingsPage() {
         {/* SECTION 2: Quản lý Dữ liệu & Sao lưu */}
         <div className="flex flex-col gap-2">
           <span className="text-xs font-bold uppercase tracking-wider text-default-400 px-1">
-            Dữ liệu & Bộ nhớ
+            {t('settings.data.sectionTitle')}
           </span>
           <div className="bg-content1/60 dark:bg-default-50/15 rounded-2xl overflow-hidden divide-y divide-divider/25 border-none shadow-none">
-            {/* Stats Row - Dải metric phẳng liền mạch không đóng khung */}
+            {/* Stats Row */}
             <div className="grid grid-cols-4 p-3 bg-default-100/40 dark:bg-default-50/10 divide-x divide-divider/20 text-center">
               <div className="flex flex-col items-center py-1">
                 <span className="text-base font-bold text-foreground">{recipes.length}</span>
-                <span className="text-[10px] text-default-400 font-medium mt-0.5">Công thức</span>
+                <span className="text-[10px] text-default-400 font-medium mt-0.5">{t('nav.recipes')}</span>
               </div>
               <div className="flex flex-col items-center py-1">
                 <span className="text-base font-bold text-foreground">{pantryItems.length}</span>
-                <span className="text-[10px] text-default-400 font-medium mt-0.5">Tủ lạnh</span>
+                <span className="text-[10px] text-default-400 font-medium mt-0.5">{t('fridge.title')}</span>
               </div>
               <div className="flex flex-col items-center py-1">
                 <span className="text-base font-bold text-foreground">{catalogItems.length}</span>
-                <span className="text-[10px] text-default-400 font-medium mt-0.5">Nguyên liệu</span>
+                <span className="text-[10px] text-default-400 font-medium mt-0.5">{t('recipes.detail.ingredients')}</span>
               </div>
               <div className="flex flex-col items-center py-1">
                 <span className="text-base font-bold text-foreground">{tips.length}</span>
-                <span className="text-[10px] text-default-400 font-medium mt-0.5">Mẹo vặt</span>
+                <span className="text-[10px] text-default-400 font-medium mt-0.5">{t('nav.kitchenTips')}</span>
               </div>
             </div>
 
@@ -283,7 +378,7 @@ export function SettingsPage() {
                   <Database className="w-4 h-4" />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-sm font-semibold text-foreground">Vị trí database</span>
+                  <span className="text-sm font-semibold text-foreground">{t('settings.data.dbLocation')}</span>
                   <span className="text-[11px] text-default-400 truncate max-w-[220px] sm:max-w-md font-mono" title={dbLocation}>
                     {dbLocation}
                   </span>
@@ -293,7 +388,7 @@ export function SettingsPage() {
                 isIconOnly
                 size="sm"
                 variant="light"
-                aria-label="Sao chép vị trí database"
+                aria-label={t('settings.data.copyLocation')}
                 onPress={handleCopyDbLocation}
                 onClick={handleCopyDbLocation}
                 className="shrink-0 text-default-500 hover:text-foreground"
@@ -313,8 +408,8 @@ export function SettingsPage() {
                   <Download className="w-4 h-4" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-foreground">Xuất tệp sao lưu dữ liệu</span>
-                  <span className="text-[11px] text-default-400">Tải về tệp JSON chứa toàn bộ dữ liệu</span>
+                  <span className="text-sm font-semibold text-foreground">{t('settings.data.exportBackup')}</span>
+                  <span className="text-[11px] text-default-400">JSON Backup</span>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-default-400 shrink-0" />
@@ -330,8 +425,8 @@ export function SettingsPage() {
                   <Upload className="w-4 h-4" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-foreground">Khôi phục từ tệp JSON</span>
-                  <span className="text-[11px] text-default-400">Nhập dữ liệu sao lưu trước đó</span>
+                  <span className="text-sm font-semibold text-foreground">{t('settings.data.importBackup')}</span>
+                  <span className="text-[11px] text-default-400">JSON Restore</span>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-default-400 shrink-0" />
@@ -354,8 +449,8 @@ export function SettingsPage() {
                   <Trash2 className="w-4 h-4" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-danger">Xoá sạch dữ liệu ứng dụng</span>
-                  <span className="text-[11px] text-default-400">Đặt lại thiết bị về trạng thái ban đầu</span>
+                  <span className="text-sm font-semibold text-danger">{t('settings.data.resetApp')}</span>
+                  <span className="text-[11px] text-default-400">{t('settings.data.dangerZone')}</span>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-default-400 group-hover:text-danger shrink-0" />
@@ -366,7 +461,7 @@ export function SettingsPage() {
         {/* SECTION 3: Thông tin ứng dụng */}
         <div className="flex flex-col gap-2">
           <span className="text-xs font-bold uppercase tracking-wider text-default-400 px-1">
-            Thông tin ứng dụng
+            {t('settings.about.sectionTitle')}
           </span>
           <div className="bg-content1/60 dark:bg-default-50/15 rounded-2xl overflow-hidden p-3.5 flex items-center justify-between border-none shadow-none">
             <div className="flex items-center gap-3">
@@ -374,12 +469,12 @@ export function SettingsPage() {
                 <img src="/logo.svg" alt="Apron Logo" className="w-full h-full object-contain" />
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-bold text-foreground">Apron Mobile</span>
-                <span className="text-[11px] text-default-400">Trợ lý nhà bếp thông minh • v1.0.0</span>
+                <span className="text-sm font-bold text-foreground">apron</span>
+                <span className="text-[11px] text-default-400">{t('settings.about.description')}</span>
               </div>
             </div>
             <span className="text-[11px] font-semibold text-primary bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-md">
-              Build 2026.10
+              v1.0.0
             </span>
           </div>
         </div>
@@ -389,9 +484,9 @@ export function SettingsPage() {
       <ConfirmModal
         isOpen={isResetConfirmOpen}
         onOpenChange={setIsResetConfirmOpen}
-        title="Xoá sạch dữ liệu"
-        description="Bạn có chắc chắn muốn xoá toàn bộ dữ liệu trên thiết bị? Thao tác này sẽ xoá tất cả công thức, nguyên liệu và cài đặt của bạn."
-        confirmLabel="Xoá tất cả"
+        title={t('settings.data.resetConfirmTitle')}
+        description={t('settings.data.resetConfirmMsg')}
+        confirmLabel={t('common.actions.delete')}
         confirmColor="danger"
         onConfirm={handleResetData}
       />

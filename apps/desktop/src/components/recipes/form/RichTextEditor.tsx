@@ -19,7 +19,7 @@ export function RichTextEditor({ value, onChange, placeholder, isInvalid, errorM
       StarterKit,
       Placeholder.configure({
         placeholder: placeholder || 'Nhập nội dung...',
-        emptyEditorClass: 'cursor-text before:content-[attr(data-placeholder)] before:absolute before:text-default-400 before:pointer-events-none',
+        emptyEditorClass: 'cursor-text before:content-[attr(data-placeholder)] before:absolute before:text-default-400 dark:before:text-default-400 before:pointer-events-none',
       }),
     ],
     content: value,
@@ -28,7 +28,7 @@ export function RichTextEditor({ value, onChange, placeholder, isInvalid, errorM
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm prose-primary max-w-none focus:outline-none min-h-[120px] p-4',
+        class: 'prose prose-sm dark:prose-invert text-foreground dark:text-foreground max-w-none focus:outline-none min-h-[120px] p-4 [&_*]:text-foreground',
       },
     },
   });
@@ -39,11 +39,11 @@ export function RichTextEditor({ value, onChange, placeholder, isInvalid, errorM
 
   return (
     <>
-    <div className={`flex flex-col border rounded-xl bg-default-100 transition-colors focus-within:bg-default-50 ${isInvalid ? 'border-danger' : 'border-transparent hover:bg-default-200'}`}>
+    <div className={`flex flex-col border rounded-xl bg-default-100 dark:bg-default-50/20 text-foreground transition-colors focus-within:bg-default-50 dark:focus-within:bg-default-100/30 ${isInvalid ? 'border-danger' : 'border-transparent hover:bg-default-200 dark:hover:bg-default-100/40'}`}>
       {/* BubbleMenu appended to body avoids overflow clipping */}
       {editor && (
         // @ts-expect-error tippyOptions is valid but types might be outdated
-        <BubbleMenu editor={editor} tippyOptions={{ appendTo: document.body, zIndex: 99999 }} className="flex items-center gap-1 p-1.5 bg-white border border-default-200 shadow-xl rounded-xl">
+        <BubbleMenu editor={editor} tippyOptions={{ appendTo: document.body, zIndex: 99999 }} className="flex items-center gap-1 p-1.5 bg-content1 border border-divider shadow-xl rounded-xl">
           <Button
             isIconOnly
             size="sm"

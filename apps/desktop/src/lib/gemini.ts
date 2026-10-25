@@ -62,10 +62,12 @@ function isValidHttpUrl(string: string) {
 export function buildRecipePrompt(
   text: string, 
   existingIngredients: string[] = [],
-  existingTips: { id: string, title: string }[] = []
+  existingTips: { id: string, title: string }[] = [],
+  existingUnits: string[] = []
 ): string {
   const tagNames = DEFAULT_TAGS.filter(t => t.parent_id !== null).map(t => t.name).join(', ');
   const ingredientNames = existingIngredients.length > 0 ? existingIngredients.join(', ') : 'Không có';
+  const unitNames = existingUnits.length > 0 ? existingUnits.join(', ') : 'muỗng canh, muỗng cà phê, g, kg, ml, lít, quả, trái, củ, cái, bó, nhánh, tép, lát, miếng, lon, hộp, gói, chén, bát, chút, xíu';
   const tipsStr = existingTips.length > 0 ? existingTips.map(t => `[${t.id}] ${t.title}`).join(', ') : 'Không có';
 
   return `Bạn là một chuyên gia ẩm thực và trợ lý phân tích dữ liệu xuất sắc.
@@ -116,12 +118,26 @@ HÃY TRẢ VỀ DUY NHẤT MỘT KHỐI JSON HỢP LỆ VỚI CẤU TRÚC CHÍNH
 }
 
 QUY TẮC BẮT BUỘC:
-1. Đối với Calories, Độ khó và Thời gian: nếu nguồn không có, BẠN BẮT BUỘC PHẢI TỰ DỰ ĐOÁN VÀ ĐIỀN SỐ THỰC TẾ dựa trên chuyên môn ẩm thực.
-2. Tên nguyên liệu và các bước làm: BẮT BUỘC viết hoa chữ cái đầu tiên (Ví dụ: "Thịt bò", "Hành lá", "Nước mắm").
-3. Ưu tiên sử dụng tên nguyên liệu có sẵn trong từ điển sau: ${ingredientNames}. Hãy tự map từ đồng nghĩa về tên chuẩn.
-4. Ưu tiên chọn thẻ tag có sẵn từ danh sách: ${tagNames}. (Nếu dùng tag có sẵn, đặt "is_new": false; nếu tag mới chưa có, đặt "is_new": true và gán "category_id" bằng 1 trong các giá trị: "root-meal", "root-cooking", "root-ingredient", "root-cuisine", "root-diet", "root-time-difficulty").
-${existingTips.length > 0 ? `5. Dò tìm trong danh sách mẹo: ${tipsStr}. Nếu có mẹo liên quan, trả về mảng linked_tips chứa ID của mẹo đó.` : ''}
-6. TUYỆT ĐỐI CHỈ TRẢ VỀ MÃ JSON, KHÔNG CÓ BẤT KỲ LỜI CHÀO HAY VĂN BẢN NÀO BÊN NGOÀI KHỐI JSON.`;
+1. Đối với Calories, Độ khó và Thời gian (prep_time_minutes, cook_time_minutes): nếu nguồn không có, BẠN BẮT BUỘC PHẢI TỰ DỰ ĐOÁN VÀ ĐIỀN SỐ THỰC TẾ dựa trên chuyên môn ẩm thực.
+2. Tên nguyên liệu và các bước làm: BẮT BUỘC viết hoa chữ cái đầu tiên (Ví dụ: "Thịt ức gà", "Thịt bò", "Hành lá", "Nước mắm").
+3. BẮT BUỘC CHUẨN HOÁ TÊN NGUYÊN LIỆU THUẦN TÚY (QUAN TRỌNG NHẤT):
+   - Trường "name" CHỈ ĐƯỢC CHỨA DANH TỪ TÊN NGUYÊN LIỆU THUẦN TÚY (Ví dụ ĐÚNG: "Thịt ba chỉ heo", "Hành tím", "Tỏi", "Cà chua", "Nấm đông cô", "Tôm khô").
+   - TUYỆT ĐỐI KHÔNG ĐƯỢC để hành động sơ chế, hình dáng cắt thái, kích thước hay tình trạng vào tên nguyên liệu (Ví dụ SAI: "Ba chỉ heo, cắt miếng dài, dày khoảng 3 ngón tay", "Hành khô thái lát", "Nấm đông cô ngâm mềm thái sợi", "Tôm khô rửa sạch để ráo", "Thịt heo xay nhuyễn").
+   - NẾU NGUYÊN LIỆU GỐC CÓ MÔ TẢ SƠ CHẾ/CẮT THÁI: BẠN BẮT BUỘC PHẢI TÁCH thông tin sơ chế đó (ví dụ: "cắt miếng dài dày khoảng 3 ngón tay") và ĐƯA VÀO BƯỚC SƠ CHẾ TRONG MẢNG CÁC BƯỚC LÀM ("stepSections" / "steps")! Tuyệt đối không để lại trong trường "name".
+   - Ưu tiên sử dụng tên nguyên liệu có sẵn trong từ điển sau: ${ingredientNames}. Phải gọi tên phân loại đầy đủ, ví dụ: "Thịt gà", "Thịt ức gà", "Thịt đùi gà", "Thịt ba chỉ heo", "Thịt heo xay", "Thịt bò" (KHÔNG ghi cộc lốc là "Gà", "Ức gà", "Heo", "Bò" để kho nguyên liệu lọc chính xác).
+   - TUYỆT ĐỐI KHÔNG GỘP NHIỀU NGUYÊN LIỆU: Không ghi gộp dạng "Gia vị: muối, đường, tiêu, mắm" hay "Hành tỏi băm". Phải tách từng loại nguyên liệu riêng biệt thành từng dòng trong mảng ingredients.
+4. BẮT BUỘC CHUẨN HOÁ ĐƠN VỊ ĐO LƯỜNG: Bắt buộc chọn đơn vị có trong danh sách chuẩn sau: ${unitNames}.
+   - Phải map từ viết tắt hoặc từ địa phương về đơn vị chuẩn:
+     * "mc", "thìa canh", "thìa súp", "tbsp" -> "muỗng canh"
+     * "mcf", "cf", "thìa cà phê", "thìa cf", "tsp" -> "muỗng cà phê"
+     * "gr", "gram" -> "g"
+     * "kilo", "kilogram" -> "kg"
+     * "l", "lit" -> "lít"
+   - CHỈ bổ sung đơn vị mới nếu đơn vị đó thực sự cần thiết và chưa hề có trong danh sách chuẩn ở trên.
+   - Tuyệt đối tách riêng số lượng ("amount") và đơn vị ("unit"), không để lẫn số hoặc đơn vị vào trường tên nguyên liệu ("name").
+5. Ưu tiên chọn thẻ tag có sẵn từ danh sách: ${tagNames}. (Nếu dùng tag có sẵn, đặt "is_new": false; nếu tag mới chưa có, đặt "is_new": true và gán "category_id" bằng 1 trong các giá trị: "root-meal", "root-cooking", "root-ingredient", "root-cuisine", "root-diet", "root-time-difficulty").
+${existingTips.length > 0 ? `6. Dò tìm trong danh sách mẹo: ${tipsStr}. Nếu có mẹo liên quan, trả về mảng linked_tips chứa ID của mẹo đó.` : ''}
+7. TUYỆT ĐỐI CHỈ TRẢ VỀ MÃ JSON, KHÔNG CÓ BẤT KỲ LỜI CHÀO HAY VĂN BẢN NÀO BÊN NGOÀI KHỐI JSON.`;
 }
 
 export function parseGeminiResponse(rawText: string): ParseRecipeResult[] {
@@ -178,30 +194,71 @@ export function parseGeminiResponse(rawText: string): ParseRecipeResult[] {
     return clean.charAt(0).toUpperCase() + clean.slice(1);
   };
 
+  const sanitizeIngredient = (rawName: string) => {
+    let name = formatString(rawName);
+    let prepNote = '';
+    
+    // Tách phần mô tả sơ chế sau dấu phẩy nếu có
+    const commaIdx = name.indexOf(',');
+    if (commaIdx !== -1) {
+      const before = name.slice(0, commaIdx).trim();
+      const after = name.slice(commaIdx + 1).trim();
+      if (/cắt|thái|băm|xay|nạo|rửa|luộc|ngâm|bóc|lột|đập|ướp|chia|rang|nướng|vắt|khoanh|lát|khúc|sợi/i.test(after)) {
+        name = before;
+        prepNote = `${before} ${after}`;
+      }
+    }
+
+    // Tách phần ngoặc đơn mô tả sơ chế
+    const parenMatch = name.match(/^(.*?)\((.*?)\)$/);
+    if (parenMatch) {
+      const before = parenMatch[1].trim();
+      const inside = parenMatch[2].trim();
+      if (/cắt|thái|băm|xay|nạo|rửa|luộc|ngâm|bóc|lột|đập|ướp|chia|rang|nướng|vắt|khoanh|lát|khúc|sợi/i.test(inside)) {
+        name = before;
+        prepNote = `${before} ${inside}`;
+      }
+    }
+
+    return { name, prepNote };
+  };
+
   const results: ParseRecipeResult[] = recipesRaw.map((result: any) => {
     if (result.title) result.title = formatString(result.title);
     
+    const extractedPreps: string[] = [];
+
     if (result.ingredientSections && Array.isArray(result.ingredientSections)) {
       result.ingredientSections = result.ingredientSections.map((section: any) => ({
         ...section,
         name: formatString(section.name || 'Nguyên liệu'),
         ingredients: Array.isArray(section.ingredients) 
-          ? section.ingredients.map((ing: any) => ({
-              ...ing,
-              name: formatString(typeof ing === 'string' ? ing : ing.name || ''),
-              amount: typeof ing === 'object' && ing.amount !== undefined ? String(ing.amount) : '',
-              unit: typeof ing === 'object' ? ing.unit || '' : ''
-            }))
+          ? section.ingredients.map((ing: any) => {
+              const rawName = typeof ing === 'string' ? ing : ing.name || '';
+              const { name, prepNote } = sanitizeIngredient(rawName);
+              if (prepNote) extractedPreps.push(prepNote);
+              return {
+                ...ing,
+                name,
+                amount: typeof ing === 'object' && ing.amount !== undefined ? String(ing.amount) : '',
+                unit: typeof ing === 'object' ? ing.unit || '' : ''
+              };
+            })
           : []
       }));
     } else if (result.ingredients && Array.isArray(result.ingredients)) {
       result.ingredientSections = [{
         name: 'Nguyên liệu chính',
-        ingredients: result.ingredients.map((ing: any) => ({
-          name: formatString(typeof ing === 'string' ? ing : ing.name || ''),
-          amount: typeof ing === 'object' && ing.amount !== undefined ? String(ing.amount) : '',
-          unit: typeof ing === 'object' ? ing.unit || '' : ''
-        }))
+        ingredients: result.ingredients.map((ing: any) => {
+          const rawName = typeof ing === 'string' ? ing : ing.name || '';
+          const { name, prepNote } = sanitizeIngredient(rawName);
+          if (prepNote) extractedPreps.push(prepNote);
+          return {
+            name,
+            amount: typeof ing === 'object' && ing.amount !== undefined ? String(ing.amount) : '',
+            unit: typeof ing === 'object' ? ing.unit || '' : ''
+          };
+        })
       }];
     }
 
@@ -223,6 +280,16 @@ export function parseGeminiResponse(rawText: string): ParseRecipeResult[] {
           content: typeof step === 'string' ? step : step.content || step.instruction || ''
         }))
       }];
+    }
+
+    // Nếu có ghi chú sơ chế tách ra từ nguyên liệu, chèn vào bước đầu tiên nếu chưa có
+    if (extractedPreps.length > 0 && result.stepSections && result.stepSections.length > 0) {
+      const firstSection = result.stepSections[0];
+      const prepText = `Sơ chế: ${extractedPreps.join('; ')}.`;
+      const alreadyHas = firstSection.steps.some((s: any) => (s.content || '').includes(extractedPreps[0]));
+      if (!alreadyHas) {
+        firstSection.steps.unshift({ content: `<p>${prepText}</p>` });
+      }
     }
 
     return result as ParseRecipeResult;

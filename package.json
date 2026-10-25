@@ -17,10 +17,13 @@
     "test": "pnpm --filter @apron/core test"
   },
   "devDependencies": {
-    "turbo": "^2.0.0",
-    "typescript": "^5.0.0",
+    "@types/js-yaml": "^4.0.9",
     "eslint": "^8.57.0",
-    "prettier": "^3.0.0"
+    "js-yaml": "^5.5.0",
+    "prettier": "^3.0.0",
+    "sharp": "^0.35.5",
+    "turbo": "^2.0.0",
+    "typescript": "^5.0.0"
   },
   "pnpm": {
     "overrides": {

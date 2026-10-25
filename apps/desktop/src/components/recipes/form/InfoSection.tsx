@@ -30,7 +30,7 @@ function EditableMetric({
         className="min-h-8 h-8 px-1 flex items-center justify-center cursor-text w-full hover:bg-default-100 rounded-lg transition-colors"
         onClick={() => setIsFocused(true)}
       >
-        <span className="font-semibold text-default-700">{value}</span>
+        <span className="font-semibold text-foreground">{value}</span>
         <span className="text-default-400 text-xs ml-1">{unit}</span>
       </div>
     );
@@ -46,7 +46,7 @@ function EditableMetric({
       classNames={{ 
         base: "w-full",
         inputWrapper: "bg-transparent shadow-none border-none min-h-8 h-8 px-0",
-        input: "text-center font-semibold text-default-700"
+        input: "text-center font-semibold text-foreground"
       }}
       min={0}
       value={value !== undefined && value !== null ? value.toString() : ''}
@@ -104,7 +104,7 @@ export function InfoSection({ currentRecipeId: _currentRecipeId }: { currentReci
                 variant="flat"
                 classNames={{ 
                   trigger: "bg-transparent shadow-none border-none min-h-8 h-8 px-0 data-[hover=true]:bg-default-100 transition-colors",
-                  value: "text-center font-semibold text-default-700 !text-default-700",
+                  value: "text-center font-semibold text-foreground !text-foreground",
                   innerWrapper: "w-full flex justify-center",
                   selectorIcon: "hidden"
                 }}

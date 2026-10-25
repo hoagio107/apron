@@ -41,7 +41,7 @@ export function BlockEditor({ value, onChange, placeholder = 'Bắt đầu bài 
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[150px] h-full',
+        class: 'prose prose-lg dark:prose-invert text-foreground dark:text-foreground [&_*]:text-foreground max-w-none focus:outline-none min-h-[150px] h-full',
       },
     },
   });

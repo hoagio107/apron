@@ -82,29 +82,19 @@ export function RecipeListToolbar({
 
         <div className="w-px h-6 bg-default-200 mx-1 shrink-0" />
 
-        {/* View toggles */}
-        <div className="flex items-center bg-default-100 rounded-lg p-1 shrink-0">
-          <Button
-            isIconOnly
-            size="sm"
-            variant={viewType === 'grid-portrait' ? 'solid' : 'light'}
-            color={viewType === 'grid-portrait' ? 'primary' : 'default'}
-            onPress={() => onViewTypeChange('grid-portrait')}
-            className={viewType === 'grid-portrait' ? 'shadow-sm' : ''}
-          >
-            <LayoutGrid className="w-4 h-4" />
-          </Button>
-          <Button
-            isIconOnly
-            size="sm"
-            variant={viewType === 'grid-square' ? 'solid' : 'light'}
-            color={viewType === 'grid-square' ? 'primary' : 'default'}
-            onPress={() => onViewTypeChange('grid-square')}
-            className={viewType === 'grid-square' ? 'shadow-sm' : ''}
-          >
-            <Grip className="w-4 h-4" />
-          </Button>
-        </div>
+        {/* View toggle */}
+        <Button
+          isIconOnly
+          variant="flat"
+          aria-label={viewType === 'grid-portrait' ? 'Chuyển sang dạng lưới vuông' : 'Chuyển sang dạng thẻ dọc'}
+          onPress={() => onViewTypeChange(viewType === 'grid-portrait' ? 'grid-square' : 'grid-portrait')}
+        >
+          {viewType === 'grid-portrait' ? (
+            <Grip className="w-5 h-5 text-default-600" />
+          ) : (
+            <LayoutGrid className="w-5 h-5 text-default-600" />
+          )}
+        </Button>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import type { Unit } from '../types/recipe';
 interface UnitState {
   units: Unit[];
   addUnit: (unit: Omit<Unit, 'id'>) => void;
+  bulkAddUnits: (units: (Omit<Unit, 'id'> | Unit)[]) => number;
   updateUnit: (id: string, updates: Partial<Omit<Unit, 'id'>>) => void;
   removeUnit: (id: string) => void;
   setUnits: (units: Unit[]) => void;
@@ -18,6 +19,27 @@ export const useUnitStore = create<UnitState>()(
         set((state) => ({
           units: [...state.units, { ...unit, id: crypto.randomUUID() }]
         })),
+      bulkAddUnits: (incoming) => {
+        let addedCount = 0;
+        set((state) => {
+          const existingNames = new Set(state.units.map(u => u.name.trim().toLowerCase()));
+          const newUnits = [...state.units];
+          for (const u of incoming) {
+            if (!u.name || !u.name.trim()) continue;
+            const norm = u.name.trim().toLowerCase();
+            if (!existingNames.has(norm)) {
+              existingNames.add(norm);
+              newUnits.push({
+                ...u,
+                id: ('id' in u && u.id) ? (u as Unit).id : crypto.randomUUID()
+              });
+              addedCount++;
+            }
+          }
+          return { units: newUnits };
+        });
+        return addedCount;
+      },
       updateUnit: (id, updates) =>
         set((state) => ({
           units: state.units.map(u => u.id === id ? { ...u, ...updates } : u)

@@ -21,8 +21,8 @@ async function generate() {
   for (const m of mipmaps) {
     const targetDir = path.join(resDir, m.folder);
 
-    // 1. ic_launcher_foreground.png (transparent background, logo in center 65%)
-    const fgLogoSize = Math.round(m.fgSize * 0.65);
+    // 1. ic_launcher_foreground.png (transparent background, logo in safe center 56%)
+    const fgLogoSize = Math.round(m.fgSize * 0.56);
     const fgLogo = await sharp(svgBuffer)
       .resize(fgLogoSize, fgLogoSize, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
       .toBuffer();

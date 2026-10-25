@@ -446,4 +446,89 @@ button:not([data-slot="popover"]):not([data-slot="modal"]):not([data-slot="drawe
   box-shadow: none !important;
 }
 
+/* ==========================================================================
+   7. INPUTS, TEXTAREAS & TIPTAP EDITOR DARK MODE CONTRAST STANDARDIZATION
+   Đảm bảo toàn bộ chữ trong các ô nhập liệu, ghi chú và các bước làm
+   luôn hiển thị sắc nét, tương phản cao trong chế độ Dark Mode.
+   ========================================================================== */
+
+/* Input, Textarea & Select dark mode text color */
+input,
+textarea,
+select,
+[contenteditable="true"] {
+  color: hsl(var(--heroui-foreground));
+}
+
+.dark input,
+.dark textarea,
+.dark select,
+.dark [contenteditable="true"],
+.dark [data-slot="input"],
+.dark [data-slot="value"] {
+  color: hsl(var(--heroui-foreground)) !important;
+}
+
+/* Tiptap content editable container & elements */
+.tiptap {
+  color: hsl(var(--heroui-foreground));
+  outline: none;
+}
+
+.dark .tiptap,
+.dark .tiptap * {
+  color: hsl(var(--heroui-foreground));
+}
+
+.dark .tiptap p,
+.dark .tiptap span,
+.dark .tiptap strong,
+.dark .tiptap em,
+.dark .tiptap li,
+.dark .tiptap h1,
+.dark .tiptap h2,
+.dark .tiptap h3,
+.dark .tiptap h4 {
+  color: hsl(var(--heroui-foreground)) !important;
+}
+
+/* Ghi đè biến CSS của @tailwindcss/typography trong Dark Mode */
+.dark .prose,
+.dark .prose-sm,
+.dark .prose-lg {
+  --tw-prose-body: hsl(var(--heroui-foreground)) !important;
+  --tw-prose-headings: hsl(var(--heroui-foreground)) !important;
+  --tw-prose-lead: hsl(var(--heroui-default-400)) !important;
+  --tw-prose-links: hsl(var(--heroui-primary)) !important;
+  --tw-prose-bold: hsl(var(--heroui-foreground)) !important;
+  --tw-prose-counters: hsl(var(--heroui-default-400)) !important;
+  --tw-prose-bullets: hsl(var(--heroui-default-400)) !important;
+  --tw-prose-hr: hsl(var(--heroui-divider)) !important;
+  --tw-prose-quotes: hsl(var(--heroui-foreground)) !important;
+  --tw-prose-quote-borders: hsl(var(--heroui-divider)) !important;
+  --tw-prose-captions: hsl(var(--heroui-default-400)) !important;
+  --tw-prose-code: hsl(var(--heroui-foreground)) !important;
+  --tw-prose-pre-code: hsl(var(--heroui-foreground)) !important;
+  --tw-prose-pre-bg: hsl(var(--heroui-content2)) !important;
+  --tw-prose-th-borders: hsl(var(--heroui-divider)) !important;
+  --tw-prose-td-borders: hsl(var(--heroui-divider)) !important;
+  --tw-prose-invert-body: hsl(var(--heroui-foreground)) !important;
+  --tw-prose-invert-headings: hsl(var(--heroui-foreground)) !important;
+  color: hsl(var(--heroui-foreground)) !important;
+}
+
+/* Placeholder contrast in Dark Mode */
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: hsl(var(--heroui-default-400)) !important;
+  opacity: 1;
+}
+
+.dark .tiptap p.is-editor-empty:first-child::before,
+.dark .tiptap.is-editor-empty::before,
+.dark .tiptap .is-empty::before {
+  color: hsl(var(--heroui-default-400)) !important;
+}
+
+
 

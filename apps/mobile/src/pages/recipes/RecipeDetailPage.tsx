@@ -507,11 +507,11 @@ export function RecipeDetailPage() {
                           const globalIndex = gIndex * 100 + i;
                           const isChecked = checkedIngredients.has(globalIndex);
                           return (
-                            <div key={globalIndex} className="flex items-center gap-3 group cursor-pointer py-1" onClick={() => toggleIngredient(globalIndex)}>
-                              <div className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors ${isChecked ? 'bg-primary border-primary text-white' : 'border-default-300 dark:border-default-600 group-hover:border-primary'}`}>{isChecked && <Check className="w-3 h-3" />}</div>
-                              <div className={`flex items-center justify-between flex-1 gap-2 min-w-0 transition-opacity ${isChecked ? 'opacity-50 line-through' : ''}`}>
-                                <span className="font-medium text-foreground text-sm truncate">{ing.name}</span>
-                                <span className="text-sm font-semibold text-default-500 dark:text-default-400 shrink-0 text-right">
+                            <div key={globalIndex} className="flex items-start gap-3.5 group cursor-pointer py-2 border-b border-default-100/50 dark:border-default-800/40 last:border-b-0" onClick={() => toggleIngredient(globalIndex)}>
+                              <div className={`w-6 h-6 rounded-lg border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${isChecked ? 'bg-primary border-primary text-white' : 'border-default-300 dark:border-default-600 group-hover:border-primary'}`}>{isChecked && <Check className="w-3.5 h-3.5 stroke-[2.5]" />}</div>
+                              <div className={`flex items-start justify-between flex-1 gap-3 min-w-0 transition-opacity ${isChecked ? 'opacity-50 line-through' : ''}`}>
+                                <span className="font-semibold text-foreground text-base sm:text-lg leading-snug break-words flex-1">{ing.name}</span>
+                                <span className="text-base sm:text-lg font-bold text-default-600 dark:text-default-300 shrink-0 text-right ml-2 whitespace-nowrap mt-0.5">
                                   {scaleQuantity(ing.quantity)} {ing.unit}
                                 </span>
                               </div>
@@ -534,7 +534,7 @@ export function RecipeDetailPage() {
             }
           >
              <div className="p-4 pt-3">
-                <h2 className="text-lg font-bold flex items-center gap-2 mb-4">
+                <h2 className="text-xl font-bold flex items-center gap-2 mb-4">
                   <ChefHat className="w-5 h-5 text-success" /> Cách làm
                 </h2>
                 <div className="flex flex-col gap-2">
@@ -550,11 +550,11 @@ export function RecipeDetailPage() {
                         {steps.map((step, i) => (
                           <div key={i} className="flex gap-4">
                             <div className="flex flex-col items-center">
-                              <div className="w-8 h-8 rounded-full bg-primary/15 dark:bg-primary/25 text-primary dark:text-primary-300 border border-primary/20 font-bold flex items-center justify-center shrink-0 text-sm shadow-2xs">{i + 1}</div>
-                              {i < steps.length - 1 && <div className="w-0.5 flex-1 bg-default-200 dark:bg-divider my-1.5" />}
+                              <div className="w-9 h-9 rounded-full bg-primary/15 dark:bg-primary/25 text-primary dark:text-primary-300 border border-primary/20 font-bold flex items-center justify-center shrink-0 text-base shadow-2xs">{i + 1}</div>
+                              {i < steps.length - 1 && <div className="w-0.5 flex-1 bg-default-200 dark:bg-divider my-2" />}
                             </div>
-                            <div className="flex flex-col gap-3 pb-6 pt-1">
-                              <div className="text-foreground text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1" dangerouslySetInnerHTML={{ __html: step.instruction }} />
+                            <div className="flex flex-col gap-3 pb-7 pt-1 flex-1">
+                              <div className="text-foreground text-base sm:text-lg leading-relaxed prose prose-base dark:prose-invert max-w-none prose-p:my-1.5 prose-p:text-base sm:prose-p:text-lg prose-ul:my-1 font-normal" dangerouslySetInnerHTML={{ __html: step.instruction }} />
                               {((step.images && step.images.length > 0) || step.image_url) && (
                                 <div className="mt-1">
                                   {step.images && step.images.length > 0 ? (
@@ -917,15 +917,15 @@ export function RecipeDetailPage() {
                         return (
                           <div 
                             key={globalIndex}
-                            className="flex items-center gap-3 group cursor-pointer py-1"
+                            className="flex items-start gap-3.5 group cursor-pointer py-2 border-b border-default-100/50 dark:border-default-800/40 last:border-b-0"
                             onClick={() => toggleIngredient(globalIndex)}
                           >
-                            <div className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors ${isChecked ? 'bg-primary border-primary text-white' : 'border-default-300 dark:border-default-600 group-hover:border-primary'}`}>
-                              {isChecked && <Check className="w-3 h-3" />}
+                            <div className={`w-6 h-6 rounded-lg border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${isChecked ? 'bg-primary border-primary text-white' : 'border-default-300 dark:border-default-600 group-hover:border-primary'}`}>
+                              {isChecked && <Check className="w-3.5 h-3.5 stroke-[2.5]" />}
                             </div>
-                            <div className={`flex items-center justify-between flex-1 gap-3 min-w-0 transition-opacity ${isChecked ? 'opacity-50 line-through' : ''}`}>
-                              <span className="font-medium text-foreground truncate">{ing.name}</span>
-                              <span className="text-sm font-semibold text-default-500 dark:text-default-400 shrink-0 text-right">
+                            <div className={`flex items-start justify-between flex-1 gap-3 min-w-0 transition-opacity ${isChecked ? 'opacity-50 line-through' : ''}`}>
+                              <span className="font-semibold text-foreground text-base lg:text-lg leading-snug break-words flex-1">{ing.name}</span>
+                              <span className="text-base lg:text-lg font-bold text-default-600 dark:text-default-300 shrink-0 text-right ml-2 whitespace-nowrap mt-0.5">
                                 {scaleQuantity(ing.quantity)} {ing.unit}
                               </span>
                             </div>
@@ -959,14 +959,14 @@ export function RecipeDetailPage() {
                        {steps.map((step, i) => (
                          <div key={i} className="flex gap-4">
                            <div className="flex flex-col items-center">
-                             <div className="w-8 h-8 rounded-full bg-primary/15 dark:bg-primary/25 text-primary dark:text-primary-300 border border-primary/20 font-bold flex items-center justify-center shrink-0">
+                             <div className="w-9 h-9 rounded-full bg-primary/15 dark:bg-primary/25 text-primary dark:text-primary-300 border border-primary/20 font-bold flex items-center justify-center shrink-0 text-base">
                                {i + 1}
                              </div>
-                             {i < steps.length - 1 && <div className="w-0.5 flex-1 bg-default-200 dark:bg-divider my-1.5" />}
+                             {i < steps.length - 1 && <div className="w-0.5 flex-1 bg-default-200 dark:bg-divider my-2" />}
                            </div>
-                           <div className="flex flex-col gap-3 pb-6 pt-1">
+                           <div className="flex flex-col gap-3 pb-7 pt-1 flex-1">
                              <div 
-                               className="text-foreground leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1"
+                               className="text-foreground leading-relaxed prose prose-base dark:prose-invert max-w-none prose-p:my-1.5 prose-p:text-base lg:prose-p:text-lg prose-ul:my-1 prose-ol:my-1 font-normal text-base lg:text-lg"
                                dangerouslySetInnerHTML={{ __html: step.instruction }}
                              />
                              

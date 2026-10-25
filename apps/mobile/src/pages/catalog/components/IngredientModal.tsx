@@ -10,8 +10,7 @@ import {
   Select,
   SelectItem,
   Autocomplete,
-  AutocompleteItem,
-  Avatar
+  AutocompleteItem
 } from '@/ui';
 import {
   Trash2,
@@ -20,7 +19,6 @@ import {
   Tag,
   Layers,
   Scale,
-  UtensilsCrossed,
   X
 } from 'lucide-react';
 import { CATEGORIES, autoCategorizeIngredient } from '@apron/core';
@@ -33,7 +31,6 @@ interface IngredientModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   item: IngredientMeta | null;
-  affectedRecipesCount?: number;
   onSave: (
     data: { name: string; default_category?: string; default_unit?: string; image_url?: string },
     id?: string
@@ -68,7 +65,6 @@ export function IngredientModal({
   isOpen,
   onOpenChange,
   item,
-  affectedRecipesCount = 0,
   onSave,
   onDeleteRequest
 }: IngredientModalProps) {
@@ -172,13 +168,6 @@ export function IngredientModal({
                 </div>
                 <span>{isEditing ? 'Chỉnh sửa nguyên liệu' : 'Thêm nguyên liệu mới'}</span>
               </div>
-
-              {isEditing && affectedRecipesCount > 0 && (
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary bg-primary-50 dark:bg-primary-950/40 px-2 py-0.5 rounded-lg border border-primary/20">
-                  <UtensilsCrossed className="w-3 h-3" />
-                  {affectedRecipesCount} công thức
-                </span>
-              )}
             </ModalHeader>
 
             <ModalBody className="flex flex-col gap-4">

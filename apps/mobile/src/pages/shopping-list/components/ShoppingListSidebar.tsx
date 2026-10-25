@@ -1,7 +1,6 @@
 import { Sparkles, RefreshCw, List, Circle, CheckCircle2, ShoppingCart, Smartphone, Printer, Plus, ChevronRight } from 'lucide-react';
 import { Button } from '@/ui';
 import { useShoppingListStore } from '../../../store/useShoppingListStore';
-import { ImageManager } from '../../../lib/image-manager';
 
 // MOCK DATA for AI suggestions
 const MOCK_AI_SUGGESTIONS = [
@@ -80,7 +79,7 @@ export function ShoppingListSidebar() {
         </div>
         
         <div className="p-4 grid grid-cols-3 gap-2">
-          <div className="flex flex-col items-center justify-center bg-primary-50 rounded-xl py-3 border border-primary-100">
+          <div className="flex flex-col items-center justify-center bg-primary/10 dark:bg-primary/20 rounded-xl py-3 border border-primary/20">
             <div className="flex flex-col items-center">
               <span className="text-xs text-primary font-medium flex items-center gap-1 mb-1">
                 <List className="w-3 h-3" /> {totalItems}
@@ -88,15 +87,15 @@ export function ShoppingListSidebar() {
               <span className="text-[10px] text-default-500">Tổng mục</span>
             </div>
           </div>
-          <div className="flex flex-col items-center justify-center bg-warning-50 rounded-xl py-3 border border-warning-100">
+          <div className="flex flex-col items-center justify-center bg-warning/10 dark:bg-warning/20 rounded-xl py-3 border border-warning/20">
             <div className="flex flex-col items-center">
-              <span className="text-xs text-warning-600 font-medium flex items-center gap-1 mb-1">
+              <span className="text-xs text-warning font-medium flex items-center gap-1 mb-1">
                 <Circle className="w-3 h-3" /> {pendingItems}
               </span>
               <span className="text-[10px] text-default-500">Chưa mua</span>
             </div>
           </div>
-          <div className="flex flex-col items-center justify-center bg-success-50 rounded-xl py-3 border border-success-100">
+          <div className="flex flex-col items-center justify-center bg-success/10 dark:bg-success/20 rounded-xl py-3 border border-success/20">
             <div className="flex flex-col items-center">
               <span className="text-xs text-success font-medium flex items-center gap-1 mb-1">
                 <CheckCircle2 className="w-3 h-3" /> {completedItems}

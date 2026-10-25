@@ -13,6 +13,7 @@ import {
   Spinner, 
   toast 
 } from '@/ui';
+import { FEEDBACK_RESET_DELAY_MS } from '../../constants';
 import { 
   ArrowLeft, 
   Edit, 
@@ -123,7 +124,7 @@ export function TipDetailPage() {
       await navigator.clipboard.writeText(shareText);
       setIsCopied(true);
       toast.success('Đã sao chép nội dung mẹo vào bộ nhớ tạm!');
-      setTimeout(() => setIsCopied(false), 2000);
+      setTimeout(() => setIsCopied(false), FEEDBACK_RESET_DELAY_MS);
     } catch {
       toast.error('Không thể sao chép văn bản.');
     }
@@ -139,7 +140,7 @@ export function TipDetailPage() {
       url: window.location.href
     };
 
-    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+    if (navigator.share && navigator.canShare?.(shareData)) {
       try {
         await navigator.share(shareData);
         return;
@@ -170,7 +171,7 @@ export function TipDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3 text-default-500 bg-white">
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3 text-default-500 bg-background">
         <Spinner size="lg" color="primary" />
         <p className="text-sm">Đang tải nội dung mẹo...</p>
       </div>
@@ -179,7 +180,7 @@ export function TipDetailPage() {
 
   if (!tip) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center bg-white text-zinc-900">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center bg-background text-foreground">
         <div className="w-16 h-16 rounded-3xl bg-default-100 flex items-center justify-center text-default-400 mb-4">
           <Lightbulb className="w-8 h-8" />
         </div>
@@ -193,7 +194,7 @@ export function TipDetailPage() {
   }
 
   return (
-    <div className="light flex flex-col w-full min-h-screen bg-white text-foreground animate-in fade-in duration-300 pb-28 xl:pb-16" id="tip-detail-root">
+    <div className="app-page animate-in fade-in duration-300 pb-28 xl:pb-16" id="tip-detail-root">
       
       {/* ========================================================= */}
       {/* MOBILE VIEW (Dưới xl)                                     */}
@@ -222,7 +223,7 @@ export function TipDetailPage() {
           <div className="absolute top-4 left-4 z-10" onClick={(e) => e.stopPropagation()}>
             <Button 
               isIconOnly 
-              className="bg-white/85 backdrop-blur-md text-foreground rounded-full w-10 h-10 min-w-0 p-0 flex items-center justify-center border border-black/10 hover:bg-white active:scale-95 transition-all shadow-none"
+              className="bg-background/80 backdrop-blur-md text-foreground rounded-full w-10 h-10 min-w-0 p-0 flex items-center justify-center border border-divider hover:bg-content1 active:scale-95 transition-all shadow-none"
               onPress={() => navigate('/tips')}
               aria-label="Quay lại danh sách"
             >
@@ -236,7 +237,7 @@ export function TipDetailPage() {
               <DropdownTrigger>
                 <Button 
                   isIconOnly 
-                  className="bg-white/85 backdrop-blur-md text-foreground rounded-full w-10 h-10 min-w-0 p-0 flex items-center justify-center border border-black/10 hover:bg-white active:scale-95 transition-all shadow-none"
+                  className="bg-background/80 backdrop-blur-md text-foreground rounded-full w-10 h-10 min-w-0 p-0 flex items-center justify-center border border-divider hover:bg-content1 active:scale-95 transition-all shadow-none"
                   aria-label="Tùy chọn mẹo"
                 >
                   <MoreVertical className="w-5 h-5 text-foreground" />
@@ -305,7 +306,7 @@ export function TipDetailPage() {
         </div>
 
         {/* Mobile Sticky Bottom Action Bar */}
-        <div className="flex xl:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-divider/60 z-40 safe-area-inset-bottom items-center gap-3 animate-appearance-in pb-6">
+        <div className="flex xl:hidden fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t border-divider/60 z-40 safe-area-inset-bottom items-center gap-3 animate-appearance-in pb-6">
           <Button 
             variant="flat"
             className="flex-1 rounded-xl font-semibold h-12 border border-divider/60 text-foreground bg-default-100 hover:bg-default-200 shadow-none"

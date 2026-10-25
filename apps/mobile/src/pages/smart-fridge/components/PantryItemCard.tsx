@@ -1,6 +1,5 @@
-import { useState } from 'react';
-import { Button } from '@/ui';
-import { Trash2, Pencil, Clock, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
+import { Trash2, Edit3, MoreVertical } from 'lucide-react';
 import type { PantryItem } from '@apron/core';
 import { useIngredientCatalogStore } from '../../../store/useIngredientCatalogStore';
 import { getCategoryTheme } from '../../../lib/categoryTheme';
@@ -36,12 +35,12 @@ export function PantryItemCard({ item, onRemove, onEdit }: PantryItemCardProps) 
   return (
     <div
       onClick={() => onEdit(item)}
-      className={`group relative flex flex-col bg-content1 dark:bg-default-50/20 rounded-2xl border p-3 cursor-pointer transition-all active:scale-[0.98] select-none shadow-none ${
+      className={`group relative flex flex-col bg-content1 dark:bg-default-50/20 rounded-2xl border-none p-3 cursor-pointer transition-all active:scale-[0.98] select-none shadow-none ${
         expired
-          ? 'border-danger-300 dark:border-danger-500/40 bg-danger-50/20'
+          ? 'bg-danger/10 dark:bg-danger/15'
           : nearExpiry
-          ? 'border-warning-300 dark:border-warning-500/40 bg-warning-50/20'
-          : 'border-divider/50 hover:border-primary/50'
+          ? 'bg-warning/10 dark:bg-warning/15'
+          : ''
       }`}
     >
       {/* Top Media: Image or Category Icon */}
@@ -77,35 +76,34 @@ export function PantryItemCard({ item, onRemove, onEdit }: PantryItemCardProps) 
           </div>
         )}
 
-        {/* Action Buttons (Top Right) - Always visible on mobile */}
-        <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
-          <Button
-            isIconOnly
-            size="sm"
-            variant="flat"
-            className="w-7 h-7 min-w-0 bg-background/85 backdrop-blur-md rounded-lg text-default-600 shadow-xs"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(item);
-            }}
-            aria-label="Sửa nguyên liệu"
-          >
-            <Pencil className="w-3.5 h-3.5" />
-          </Button>
-          <Button
-            isIconOnly
-            size="sm"
-            color="danger"
-            variant="flat"
-            className="w-7 h-7 min-w-0 bg-background/85 backdrop-blur-md rounded-lg text-danger shadow-xs"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove(item.id);
-            }}
-            aria-label="Xoá nguyên liệu"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </Button>
+        {/* Action Menu (Top Right) - Single 3-dot button */}
+        <div className="absolute top-2 right-2 z-10">
+          <Dropdown placement="bottom-end">
+            <DropdownTrigger>
+              <button
+                type="button"
+                onClick={(e) => e.stopPropagation()}
+                aria-label="Thao tác"
+                className="w-7 h-7 rounded-lg bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-sm transition-colors opacity-90 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer"
+              >
+                <MoreVertical className="w-3.5 h-3.5" />
+              </button>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label="Thao tác nguyên liệu tủ lạnh"
+              onAction={(key) => {
+                if (key === 'edit') onEdit(item);
+                if (key === 'delete') onRemove(item.id);
+              }}
+            >
+              <DropdownItem key="edit" startContent={<Edit3 className="w-4 h-4" />}>
+                Chỉnh sửa
+              </DropdownItem>
+              <DropdownItem key="delete" color="danger" className="text-danger" startContent={<Trash2 className="w-4 h-4" />}>
+                Xoá nguyên liệu
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
         </div>
       </div>
 

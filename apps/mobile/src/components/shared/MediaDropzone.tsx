@@ -19,9 +19,9 @@ export function MediaDropzone({
     <div className={twMerge("w-full aspect-[4/3] flex items-center justify-center", className)}>
       <div 
         onClick={onPress}
-        className="w-full h-full border-2 border-dashed border-primary/50 rounded-2xl flex flex-col items-center justify-center bg-primary-50/50 text-primary-600 hover:bg-primary-50 hover:border-primary transition-all cursor-pointer group"
+        className="w-full h-full border-2 border-dashed border-primary/50 rounded-2xl flex flex-col items-center justify-center bg-primary/10 dark:bg-primary/15 text-primary hover:bg-primary/20 hover:border-primary transition-all cursor-pointer group"
       >
-        <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+        <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
           <ImagePlus className="w-8 h-8 text-primary" />
         </div>
         <p className="font-bold text-xl mb-1 text-center">{title}</p>

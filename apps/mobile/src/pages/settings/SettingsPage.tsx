@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Button,
   toast
@@ -13,13 +13,14 @@ import {
   Upload,
   RefreshCw,
   Trash2,
-  ChefHat,
-  Refrigerator,
-  Lightbulb,
-  NotebookTabs
+  ChevronRight,
+  Languages,
+  Copy,
+  Check
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from 'next-themes';
+import { Capacitor } from '@capacitor/core';
 import { useRecipeStore } from '../../store/useRecipeStore';
 import { usePantryStore } from '../../store/usePantryStore';
 import { useIngredientCatalogStore } from '../../store/useIngredientCatalogStore';
@@ -27,11 +28,13 @@ import { useTipStore } from '../../store/useTipStore';
 import { useUnitStore } from '../../store/useUnitStore';
 import { seedMockData } from '../../lib/seedMockData';
 import { ConfirmModal } from '../../components/shared/ConfirmModal';
+import { FEEDBACK_RESET_DELAY_MS, RESET_APP_RELOAD_DELAY_MS } from '../../constants';
 
 export function SettingsPage() {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Store statistics
   const { recipes } = useRecipeStore();
@@ -48,6 +51,47 @@ export function SettingsPage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const dbLocation = useMemo(() => {
+    const customPath = localStorage.getItem('byos_base_dir');
+    if (customPath) {
+      return customPath;
+    }
+    const isTauri = typeof window !== 'undefined' && (window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__ !== undefined;
+    if (isTauri) {
+      return 'Tauri Local File System';
+    }
+    if (Capacitor.isNativePlatform()) {
+      return 'Documents/CookbookData (Bộ nhớ máy)';
+    }
+    return 'IndexedDB: apron_browser_storage (Trình duyệt)';
+  }, []);
+
+  const handleCopyDbLocation = async () => {
+    try {
+      if (navigator.clipboard?.writeText && window.isSecureContext) {
+        await navigator.clipboard.writeText(dbLocation);
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = dbLocation;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        textArea.remove();
+      }
+      setCopied(true);
+      toast.success('Đã sao chép vị trí database vào clipboard!');
+      setTimeout(() => {
+        setCopied(false);
+      }, FEEDBACK_RESET_DELAY_MS);
+    } catch {
+      toast.error('Không thể sao chép vị trí database');
+    }
+  };
 
   const handleExportData = () => {
     try {
@@ -70,7 +114,7 @@ export function SettingsPage() {
       a.click();
       URL.revokeObjectURL(url);
       toast.success('Đã xuất tệp sao lưu dữ liệu JSON thành công!');
-    } catch (e: any) {
+    } catch {
       toast.error('Có lỗi xảy ra khi xuất dữ liệu');
     }
   };
@@ -87,7 +131,7 @@ export function SettingsPage() {
           throw new Error('Định dạng tệp sao lưu không hợp lệ.');
         }
         toast.success('Đã đọc tệp dữ liệu hợp lệ! (Đang đồng bộ)');
-      } catch (err: any) {
+      } catch {
         toast.error('Tệp không đúng định dạng sao lưu Apron JSON.');
       }
     };
@@ -99,7 +143,7 @@ export function SettingsPage() {
     try {
       await seedMockData();
       toast.success('Đã nạp lại dữ liệu mẫu thành công!');
-    } catch (e) {
+    } catch {
       toast.error('Có lỗi khi nạp dữ liệu mẫu');
     }
   };
@@ -109,7 +153,7 @@ export function SettingsPage() {
     toast.success('Đã đặt lại dữ liệu ứng dụng.');
     setTimeout(() => {
       window.location.reload();
-    }, 1000);
+    }, RESET_APP_RELOAD_DELAY_MS);
   };
 
   if (!mounted) return null;
@@ -126,137 +170,183 @@ export function SettingsPage() {
         </p>
       </div>
 
-      <div className="px-4 py-2 flex flex-col gap-4 max-w-xl mx-auto w-full">
+      <div className="px-4 py-2 flex flex-col gap-6 max-w-xl mx-auto w-full">
         {/* SECTION 1: Giao diện & Ngôn ngữ */}
-        <div className="p-4 rounded-2xl bg-content1 dark:bg-default-50/20 border border-divider/60 shadow-none flex flex-col gap-4">
-          <div className="flex items-center gap-2.5 pb-2 border-b border-divider/40">
-            <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <Palette className="w-4 h-4" />
+        <div className="flex flex-col gap-2">
+          <span className="text-xs font-bold uppercase tracking-wider text-default-400 px-1">
+            Giao diện & Ngôn ngữ
+          </span>
+          <div className="bg-content1/60 dark:bg-default-50/15 rounded-2xl overflow-hidden divide-y divide-divider/25 border-none shadow-none">
+            {/* Theme row */}
+            <div className="flex items-center justify-between p-3.5 hover:bg-default-100/30 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <Palette className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold text-foreground">Chế độ hiển thị</span>
+                  <span className="text-[11px] text-default-400">
+                    {theme === 'light' ? 'Giao diện sáng' : theme === 'dark' ? 'Giao diện tối' : 'Theo hệ thống'}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Segmented Control */}
+              <div className="flex items-center p-1 bg-default-100 dark:bg-default-50/30 rounded-xl gap-0.5">
+                {[
+                  { key: 'light', label: 'Sáng', icon: Sun },
+                  { key: 'dark', label: 'Tối', icon: Moon },
+                  { key: 'system', label: 'Tự động', icon: Laptop }
+                ].map((item) => {
+                  const isSelected = theme === item.key;
+                  const ItemIcon = item.icon;
+                  return (
+                    <button
+                      key={item.key}
+                      type="button"
+                      onClick={() => setTheme(item.key)}
+                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                        isSelected
+                          ? 'bg-background text-primary font-bold shadow-xs'
+                          : 'text-default-500 hover:text-foreground'
+                      }`}
+                    >
+                      <ItemIcon className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <div>
-              <h2 className="text-sm font-bold text-foreground">Giao diện & Ngôn ngữ</h2>
-              <p className="text-[11px] text-default-500">Chủ đề hiển thị và ngôn ngữ ứng dụng</p>
-            </div>
-          </div>
 
-          {/* Theme Selector */}
-          <div>
-            <label className="text-xs font-semibold text-default-700 block mb-2">
-              Chế độ hiển thị
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { key: 'light', label: 'Sáng', icon: Sun },
-                { key: 'dark', label: 'Tối', icon: Moon },
-                { key: 'system', label: 'Hệ thống', icon: Laptop }
-              ].map((item) => {
-                const isSelected = theme === item.key;
-                const ItemIcon = item.icon;
-                return (
-                  <button
-                    key={item.key}
-                    type="button"
-                    onClick={() => setTheme(item.key)}
-                    className={`flex flex-col items-center justify-center p-3 rounded-xl border text-xs font-medium transition-all ${
-                      isSelected
-                        ? 'border-primary bg-primary/10 text-primary font-bold shadow-xs'
-                        : 'border-divider/60 bg-default-50 hover:bg-default-100 text-default-600'
-                    }`}
-                  >
-                    <ItemIcon className="w-5 h-5 mb-1.5" />
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+            {/* Language row */}
+            <div className="flex items-center justify-between p-3.5 hover:bg-default-100/30 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <Languages className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold text-foreground">Ngôn ngữ</span>
+                  <span className="text-[11px] text-default-400">
+                    {i18n.language.startsWith('vi') ? 'Tiếng Việt' : 'English'}
+                  </span>
+                </div>
+              </div>
 
-          {/* Language Selector */}
-          <div>
-            <label className="text-xs font-semibold text-default-700 block mb-2">
-              Ngôn ngữ (Language)
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { code: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
-                { code: 'en', label: 'English', flag: '🇺🇸' }
-              ].map((item) => {
-                const isSelected = i18n.language.startsWith(item.code);
-                return (
-                  <button
-                    key={item.code}
-                    type="button"
-                    onClick={() => i18n.changeLanguage(item.code)}
-                    className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-xs font-medium transition-all ${
-                      isSelected
-                        ? 'border-primary bg-primary/10 text-primary font-bold shadow-xs'
-                        : 'border-divider/60 bg-default-50 hover:bg-default-100 text-default-600'
-                    }`}
-                  >
-                    <span className="text-base">{item.flag}</span>
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
+              {/* Segmented Control */}
+              <div className="flex items-center p-1 bg-default-100 dark:bg-default-50/30 rounded-xl gap-0.5">
+                {[
+                  { code: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
+                  { code: 'en', label: 'English', flag: '🇺🇸' }
+                ].map((item) => {
+                  const isSelected = i18n.language.startsWith(item.code);
+                  return (
+                    <button
+                      key={item.code}
+                      type="button"
+                      onClick={() => i18n.changeLanguage(item.code)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                        isSelected
+                          ? 'bg-background text-primary font-bold shadow-xs'
+                          : 'text-default-500 hover:text-foreground'
+                      }`}
+                    >
+                      <span className="text-sm leading-none">{item.flag}</span>
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
 
         {/* SECTION 2: Quản lý Dữ liệu & Sao lưu */}
-        <div className="p-4 rounded-2xl bg-content1 dark:bg-default-50/20 border border-divider/60 shadow-none flex flex-col gap-4">
-          <div className="flex items-center gap-2.5 pb-2 border-b border-divider/40">
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-              <Database className="w-4 h-4" />
+        <div className="flex flex-col gap-2">
+          <span className="text-xs font-bold uppercase tracking-wider text-default-400 px-1">
+            Dữ liệu & Bộ nhớ
+          </span>
+          <div className="bg-content1/60 dark:bg-default-50/15 rounded-2xl overflow-hidden divide-y divide-divider/25 border-none shadow-none">
+            {/* Stats Row - Dải metric phẳng liền mạch không đóng khung */}
+            <div className="grid grid-cols-4 p-3 bg-default-100/40 dark:bg-default-50/10 divide-x divide-divider/20 text-center">
+              <div className="flex flex-col items-center py-1">
+                <span className="text-base font-bold text-foreground">{recipes.length}</span>
+                <span className="text-[10px] text-default-400 font-medium mt-0.5">Công thức</span>
+              </div>
+              <div className="flex flex-col items-center py-1">
+                <span className="text-base font-bold text-foreground">{pantryItems.length}</span>
+                <span className="text-[10px] text-default-400 font-medium mt-0.5">Tủ lạnh</span>
+              </div>
+              <div className="flex flex-col items-center py-1">
+                <span className="text-base font-bold text-foreground">{catalogItems.length}</span>
+                <span className="text-[10px] text-default-400 font-medium mt-0.5">Nguyên liệu</span>
+              </div>
+              <div className="flex flex-col items-center py-1">
+                <span className="text-base font-bold text-foreground">{tips.length}</span>
+                <span className="text-[10px] text-default-400 font-medium mt-0.5">Mẹo vặt</span>
+              </div>
             </div>
-            <div>
-              <h2 className="text-sm font-bold text-foreground">Dữ liệu & Bộ nhớ</h2>
-              <p className="text-[11px] text-default-500">Thống kê lưu trữ, sao lưu & khôi phục</p>
-            </div>
-          </div>
 
-          {/* Mini Stats 4 items */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <div className="p-2.5 rounded-xl bg-default-50 border border-divider/40 flex flex-col items-center text-center">
-              <ChefHat className="w-4 h-4 text-primary mb-1" />
-              <span className="text-base font-black text-foreground">{recipes.length}</span>
-              <span className="text-[10px] text-default-500 font-medium">Công thức</span>
+            {/* Vị trí database Row */}
+            <div className="flex items-center justify-between p-3.5 hover:bg-default-100/30 transition-colors w-full">
+              <div className="flex items-center gap-3 min-w-0 pr-2">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <Database className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-sm font-semibold text-foreground">Vị trí database</span>
+                  <span className="text-[11px] text-default-400 truncate max-w-[220px] sm:max-w-md font-mono" title={dbLocation}>
+                    {dbLocation}
+                  </span>
+                </div>
+              </div>
+              <Button
+                isIconOnly
+                size="sm"
+                variant="light"
+                aria-label="Sao chép vị trí database"
+                onPress={handleCopyDbLocation}
+                onClick={handleCopyDbLocation}
+                className="shrink-0 text-default-500 hover:text-foreground"
+              >
+                {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
+              </Button>
             </div>
-            <div className="p-2.5 rounded-xl bg-default-50 border border-divider/40 flex flex-col items-center text-center">
-              <Refrigerator className="w-4 h-4 text-emerald-500 mb-1" />
-              <span className="text-base font-black text-foreground">{pantryItems.length}</span>
-              <span className="text-[10px] text-default-500 font-medium">Tủ lạnh</span>
-            </div>
-            <div className="p-2.5 rounded-xl bg-default-50 border border-divider/40 flex flex-col items-center text-center">
-              <NotebookTabs className="w-4 h-4 text-amber-500 mb-1" />
-              <span className="text-base font-black text-foreground">{catalogItems.length}</span>
-              <span className="text-[10px] text-default-500 font-medium">Nguyên liệu</span>
-            </div>
-            <div className="p-2.5 rounded-xl bg-default-50 border border-divider/40 flex flex-col items-center text-center">
-              <Lightbulb className="w-4 h-4 text-purple-500 mb-1" />
-              <span className="text-base font-black text-foreground">{tips.length}</span>
-              <span className="text-[10px] text-default-500 font-medium">Mẹo vặt</span>
-            </div>
-          </div>
 
-          {/* Backup & Import Actions */}
-          <div className="flex flex-col gap-2 pt-1">
-            <Button
-              variant="flat"
-              onPress={handleExportData}
-              startContent={<Download className="w-4 h-4 text-primary" />}
-              className="h-11 rounded-xl text-xs font-semibold justify-start px-4 bg-default-100 hover:bg-default-200 text-foreground"
+            {/* Flat List Action Rows */}
+            <button
+              type="button"
+              onClick={handleExportData}
+              className="flex items-center justify-between p-3.5 hover:bg-default-100/30 transition-colors w-full text-left"
             >
-              Xuất tệp sao lưu dữ liệu (JSON)
-            </Button>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <Download className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold text-foreground">Xuất tệp sao lưu dữ liệu</span>
+                  <span className="text-[11px] text-default-400">Tải về tệp JSON chứa toàn bộ dữ liệu</span>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-default-400 shrink-0" />
+            </button>
 
-            <Button
-              variant="flat"
-              onPress={() => fileImportRef.current?.click()}
-              startContent={<Upload className="w-4 h-4 text-emerald-500" />}
-              className="h-11 rounded-xl text-xs font-semibold justify-start px-4 bg-default-100 hover:bg-default-200 text-foreground"
+            <button
+              type="button"
+              onClick={() => fileImportRef.current?.click()}
+              className="flex items-center justify-between p-3.5 hover:bg-default-100/30 transition-colors w-full text-left"
             >
-              Khôi phục dữ liệu từ tệp JSON
-            </Button>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <Upload className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold text-foreground">Khôi phục từ tệp JSON</span>
+                  <span className="text-[11px] text-default-400">Nhập dữ liệu sao lưu trước đó</span>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-default-400 shrink-0" />
+            </button>
             <input
               type="file"
               accept=".json"
@@ -265,41 +355,61 @@ export function SettingsPage() {
               className="hidden"
             />
 
-            <Button
-              variant="flat"
-              onPress={handleSeedData}
-              startContent={<RefreshCw className="w-4 h-4 text-sky-500" />}
-              className="h-11 rounded-xl text-xs font-semibold justify-start px-4 bg-default-100 hover:bg-default-200 text-foreground"
+            <button
+              type="button"
+              onClick={handleSeedData}
+              className="flex items-center justify-between p-3.5 hover:bg-default-100/30 transition-colors w-full text-left"
             >
-              Nạp lại dữ liệu mẫu ban đầu
-            </Button>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-sky-500/10 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+                  <RefreshCw className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold text-foreground">Nạp lại dữ liệu mẫu ban đầu</span>
+                  <span className="text-[11px] text-default-400">Khôi phục các công thức, khoá học và mẹo mẫu</span>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-default-400 shrink-0" />
+            </button>
 
-            <Button
-              variant="flat"
-              color="danger"
-              onPress={() => setIsResetConfirmOpen(true)}
-              startContent={<Trash2 className="w-4 h-4" />}
-              className="h-11 rounded-xl text-xs font-semibold justify-start px-4 bg-danger-50 hover:bg-danger-100 text-danger"
+            <button
+              type="button"
+              onClick={() => setIsResetConfirmOpen(true)}
+              className="flex items-center justify-between p-3.5 hover:bg-danger/10 transition-colors w-full text-left group"
             >
-              Xoá sạch dữ liệu ứng dụng
-            </Button>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-danger/10 dark:bg-danger/20 text-danger flex items-center justify-center shrink-0">
+                  <Trash2 className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold text-danger">Xoá sạch dữ liệu ứng dụng</span>
+                  <span className="text-[11px] text-default-400">Đặt lại thiết bị về trạng thái ban đầu</span>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-default-400 group-hover:text-danger shrink-0" />
+            </button>
           </div>
         </div>
 
         {/* SECTION 3: Thông tin ứng dụng */}
-        <div className="p-4 rounded-2xl bg-content1 dark:bg-default-50/20 border border-divider/60 shadow-none flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-primary to-emerald-400 flex items-center justify-center text-white font-black text-lg shadow-sm">
-              A
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-foreground">Apron Mobile</h3>
-              <p className="text-[11px] text-default-500">Trợ lý nhà bếp thông minh • v1.0.0</p>
-            </div>
-          </div>
-          <span className="text-[11px] font-semibold text-primary bg-primary-50 dark:bg-primary-950/40 px-2 py-1 rounded-lg">
-            Build 2026.10
+        <div className="flex flex-col gap-2">
+          <span className="text-xs font-bold uppercase tracking-wider text-default-400 px-1">
+            Thông tin ứng dụng
           </span>
+          <div className="bg-content1/60 dark:bg-default-50/15 rounded-2xl overflow-hidden p-3.5 flex items-center justify-between border-none shadow-none">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center p-1.5 shrink-0">
+                <img src="/logo.svg" alt="Apron Logo" className="w-full h-full object-contain" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-bold text-foreground">Apron Mobile</span>
+                <span className="text-[11px] text-default-400">Trợ lý nhà bếp thông minh • v1.0.0</span>
+              </div>
+            </div>
+            <span className="text-[11px] font-semibold text-primary bg-primary/10 dark:bg-primary/20 px-2 py-0.5 rounded-md">
+              Build 2026.10
+            </span>
+          </div>
         </div>
       </div>
 

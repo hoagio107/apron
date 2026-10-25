@@ -1,25 +1,26 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Button, 
   EmptyState, 
-  PageHeader,
-  ListToolbar,
+  PageHeader, 
+  ListToolbar, 
   toast 
 } from '@/ui';
 import type { ToolbarFilterItem } from '@/ui';
 import { 
   Plus, 
   Refrigerator, 
-  X, 
   ShoppingCart, 
-  PackagePlus
+  PackagePlus,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 import { usePantryStore } from '../../store/usePantryStore';
 import { CATEGORIES } from '@apron/core';
 import type { PantryItem } from '@apron/core';
-import { getCategoryTheme } from '../../lib/categoryTheme';
 import { PantryItemCard } from './components/PantryItemCard';
+import { PantryItemListItem } from './components/PantryItemListItem';
 import { PantryItemModal } from './components/PantryItemModal';
 import { ConfirmModal } from '../../components/shared/ConfirmModal';
 
@@ -43,6 +44,15 @@ export function SmartFridgePage() {
   const [freshnessFilter, setFreshnessFilter] = useState<'all' | 'near_expiry' | 'expired'>('all');
   const [sortBy, setSortBy] = useState<'expiry' | 'name' | 'added'>('expiry');
 
+  // View mode (grid vs list)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    return (localStorage.getItem('smart_fridge_view_mode') as 'grid' | 'list') || 'grid';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('smart_fridge_view_mode', viewMode);
+  }, [viewMode]);
+
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<PantryItem | null>(null);
@@ -56,6 +66,8 @@ export function SmartFridgePage() {
       return !isExpired(i.expiry_date) && d !== null && d <= 3 && d >= 0;
     });
   }, [items]);
+
+  const isPantryEmpty = items.length === 0;
 
   // Filtered and sorted items
   const filteredItems = useMemo(() => {
@@ -264,12 +276,27 @@ export function SmartFridgePage() {
             onFilterChange={handleFilterChange}
             sortItems={sortItems}
             selectedSort={sortBy}
-            onSortChange={(key) => setSortBy(key as any)}
+            onSortChange={(key) => setSortBy(key as 'expiry' | 'name' | 'added')}
             onAdd={() => {
               setEditingItem(null);
               setIsModalOpen(true);
             }}
             addLabel="Thêm mới"
+            extraActions={
+              <Button
+                isIconOnly
+                variant="flat"
+                aria-label={viewMode === 'grid' ? 'Chuyển sang dạng danh sách' : 'Chuyển sang dạng lưới'}
+                onPress={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                className="w-10 h-10 min-w-10 rounded-xl"
+              >
+                {viewMode === 'grid' ? (
+                  <List className="w-5 h-5 text-default-600" />
+                ) : (
+                  <LayoutGrid className="w-5 h-5 text-default-600" />
+                )}
+              </Button>
+            }
           />
         }
       />
@@ -278,43 +305,57 @@ export function SmartFridgePage() {
         {filteredItems.length === 0 ? (
           <EmptyState
             icon={<Refrigerator className="w-12 h-12 text-default-300" />}
-            title={items.length === 0 ? 'Tủ lạnh đang trống' : 'Không tìm thấy nguyên liệu'}
+            title={isPantryEmpty ? 'Tủ lạnh đang trống' : 'Không tìm thấy nguyên liệu'}
             description={
-              items.length === 0
+              isPantryEmpty
                 ? 'Thêm nguyên liệu vào tủ để theo dõi hạn sử dụng và chuẩn bị bữa ăn chu đáo!'
                 : 'Thử tìm với từ khoá khác hoặc xoá bộ lọc danh mục.'
             }
-                action={
-                  <div className="flex flex-col sm:flex-row items-center gap-2 mt-2">
-                    <Button
-                      color="primary"
-                      startContent={<Plus className="w-4 h-4" />}
-                      onPress={() => {
-                        setEditingItem(null);
-                        setIsModalOpen(true);
-                      }}
-                      className="font-semibold h-11 px-4 rounded-xl"
-                    >
-                      Thêm nguyên liệu
-                    </Button>
-                    {items.length === 0 && (
-                      <Button
-                        variant="flat"
-                        color="secondary"
-                        startContent={<PackagePlus className="w-4 h-4" />}
-                        onPress={handleSeedSampleItems}
-                        className="font-semibold h-11 px-4 rounded-xl"
-                      >
-                        Nạp dữ liệu mẫu
-                      </Button>
-                    )}
-                  </div>
-                }
-              />
-            ) : (
+            action={
+              <div className="flex flex-col sm:flex-row items-center gap-2 mt-2">
+                <Button
+                  color="primary"
+                  startContent={<Plus className="w-4 h-4" />}
+                  onPress={() => {
+                    setEditingItem(null);
+                    setIsModalOpen(true);
+                  }}
+                  className="font-semibold h-11 px-4 rounded-xl"
+                >
+                  Thêm nguyên liệu
+                </Button>
+                {isPantryEmpty && (
+                  <Button
+                    variant="flat"
+                    color="secondary"
+                    startContent={<PackagePlus className="w-4 h-4" />}
+                    onPress={handleSeedSampleItems}
+                    className="font-semibold h-11 px-4 rounded-xl"
+                  >
+                    Nạp dữ liệu mẫu
+                  </Button>
+                )}
+              </div>
+            }
+          />
+        ) : viewMode === 'grid' ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {filteredItems.map(item => (
                   <PantryItemCard
+                    key={item.id}
+                    item={item}
+                    onRemove={(id) => setDeleteTargetId(id)}
+                    onEdit={(it) => {
+                      setEditingItem(it);
+                      setIsModalOpen(true);
+                    }}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col rounded-2xl bg-content1 border border-divider/60 overflow-hidden divide-y divide-divider/40">
+                {filteredItems.map(item => (
+                  <PantryItemListItem
                     key={item.id}
                     item={item}
                     onRemove={(id) => setDeleteTargetId(id)}
@@ -329,7 +370,7 @@ export function SmartFridgePage() {
 
             {/* Shopping List Card CTA */}
             {items.length > 0 && (
-              <div className="mt-4 p-4 rounded-2xl bg-primary-50/50 dark:bg-primary-950/20 border border-primary/20 flex items-center justify-between gap-3">
+              <div className="mt-4 p-4 rounded-2xl bg-primary/10 dark:bg-primary/20 border border-primary/20 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
                     <ShoppingCart className="w-5 h-5" />

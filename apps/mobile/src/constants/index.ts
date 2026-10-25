@@ -1,4 +1,6 @@
 export const MOCK_FETCH_DELAY_MS = 100;
 export const MOCK_SAVE_DELAY_MS = 1000;
 export const DROPDOWN_CLOSE_DELAY_MS = 80;
+export const FEEDBACK_RESET_DELAY_MS = 2000;
+export const RESET_APP_RELOAD_DELAY_MS = 1000;
 

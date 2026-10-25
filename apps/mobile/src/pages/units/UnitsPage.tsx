@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { 
   Button, 
   PageHeader, 
@@ -17,7 +17,11 @@ import { UnitModal, detectUnitCategory, UNIT_CATEGORIES } from './components/Uni
 
 export function UnitsPage() {
   const { units, addUnit, updateUnit, removeUnit } = useUnitStore();
-  const { recipes } = useRecipeStore();
+  const { recipes, fetchRecipes } = useRecipeStore();
+
+  useEffect(() => {
+    fetchRecipes();
+  }, [fetchRecipes]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -179,6 +183,12 @@ export function UnitsPage() {
     }
   };
 
+  const resetFilters = () => {
+    setSearchQuery('');
+    setSelectedCategory(null);
+    setUsageFilter('all');
+  };
+
   const sortItems = [
     { key: 'name-asc', label: 'Tên A - Z' },
     { key: 'name-desc', label: 'Tên Z - A' },
@@ -249,7 +259,7 @@ export function UnitsPage() {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
+          <div className="bg-content1/60 dark:bg-default-50/15 rounded-2xl overflow-hidden divide-y divide-divider/25 border-none shadow-none max-w-3xl">
             {filteredUnits.map(unit => (
               <UnitCard
                 key={unit.id}

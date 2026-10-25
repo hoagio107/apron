@@ -54,6 +54,8 @@ module.exports = {
     'local-rules/forbid-onclick-on-layout-components': 'warn',
     'local-rules/forbid-custom-classname-on-empty-state': 'off',
     'local-rules/forbid-custom-hw-classes': 'off',
+    'local-rules/forbid-adhoc-dark-classes': 'error',
+    'local-rules/enforce-style-css-components': 'error',
 
     // ─── Console ─────────────────────────────────────────────────────────────
     // Cấm console.log/warn/debug — dùng logger service thay thế
@@ -149,8 +151,14 @@ module.exports = {
   },
   overrides: [
     {
-      // Nới lỏng rules cho các component HeroUI custom (nếu có)
-      files: ['packages/ui/src/components/**/*.tsx'],
+      // Nới lỏng rules cho các component HeroUI custom và các trang hiển thị Rich Text Tiptap
+      files: [
+        '**/packages/ui/src/components/**/*.tsx',
+        '**/src/pages/recipes/**/*.tsx',
+        '**/src/pages/tips/**/*.tsx',
+        '**/src/pages/courses/**/*.tsx',
+        '**/src/components/**/*.tsx'
+      ],
       rules: {
         'react/no-danger': 'off',
       }

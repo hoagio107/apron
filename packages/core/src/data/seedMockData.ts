@@ -584,7 +584,7 @@ export async function seedMockData() {
                   title: 'Tư thế đứng & kỹ thuật giữ thực phẩm an toàn (The Claw Grip)',
                   content: '<p>Luyện tập thế tay <strong>The Claw Grip</strong> (Móng vuốt mèo) để bảo vệ ngón tay tuyệt đối khi thao tác thái nhanh và nhịp nhàng.</p><h4>3 Quy tắc bàn tay móng vuốt:</h4><ol><li>Đầu ngón tay co gập vào trong, móng tay cắm nhẹ giữ bề mặt nguyên liệu.</li><li>Đốt ngón tay giữa tì nhẹ vào thân phẳng của lưỡi dao làm cữ trượt.</li><li>Ngón cái và ngón út khóa chặt hai bên sườn củ quả giữ thăng bằng.</li></ol>',
                   duration_minutes: 20,
-                  video_url: 'https://www.youtube.com/watch?v=20x1e3h9n18',
+                  video_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
                   hero_image_url: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&q=80',
                   notes: 'Tập thao tác chậm rãi với dưa leo hoặc bí ngòi trước khi tăng tốc độ. Khi tư thế tay đã thành phản xạ cơ bắp, tốc độ sẽ tự nhiên tăng lên.',
                   attachments: [
@@ -618,7 +618,7 @@ export async function seedMockData() {
                   title: 'Kỹ thuật lóc xương cá & phi lê gia cầm siêu tốc',
                   content: '<p>Hướng dẫn cách luồn lưỡi dao sát khung xương để tận dụng tối đa thịt mà không làm rách thớ da.</p><h4>Quy trình phi lê cá hồi nguyên con:</h4><ol><li>Dùng dao phi lê lưỡi dẻo rạch một đường sát mang cá xuống xương sống.</li><li>Nghiêng lưỡi dao 10° lướt phẳng men theo xương sống từ mang đến đuôi.</li><li>Lật miếng phi lê, dùng nhíp chuyên dụng nhổ sạch hàng xương dăm (pin bones).</li></ol>',
                   duration_minutes: 30,
-                  video_url: 'https://www.youtube.com/watch?v=q6O2Hh0m4c4',
+                  video_url: 'https://www.youtube.com/watch?v=G-Fg7l7G1zw',
                   hero_image_url: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&q=80',
                   notes: 'Dùng muối hạt bôi lên đầu ngón tay khi giữ đuôi cá lạng da để chống trơn tuột. Lưỡi dao phải bén như dao cạo để không làm nát thớ thịt cá.',
                   attachments: [

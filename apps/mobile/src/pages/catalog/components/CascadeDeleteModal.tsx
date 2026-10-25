@@ -57,11 +57,11 @@ export function CascadeDeleteModal({
             <ModalBody className="pt-1 pb-3 px-4 flex flex-col gap-3">
               {!hasAffectedRecipes ? (
                 <p className="text-sm text-default-600">
-                  Bạn có chắc muốn xoá nguyên liệu <span className="font-semibold text-foreground">"{item.name}"</span> khỏi từ điển? Thao tác này không thể hoàn tác.
+                  Bạn có chắc muốn xoá nguyên liệu <span className="font-semibold text-foreground">&ldquo;{item.name}&rdquo;</span> khỏi từ điển? Thao tác này không thể hoàn tác.
                 </p>
               ) : (
                 <>
-                  <div className="p-3 rounded-xl bg-warning-50 dark:bg-warning-950/30 border border-warning-200 dark:border-warning-800 text-xs text-warning-800 dark:text-warning-300 leading-relaxed">
+                  <div className="p-3 rounded-xl bg-warning/10 dark:bg-warning/20 border border-warning/20 text-xs text-warning leading-relaxed">
                     Nguyên liệu này đang được liên kết trong{' '}
                     <span className="font-bold">{affectedRecipes.length} công thức</span>. Vui lòng chọn cách xử lý để tránh làm hỏng dữ liệu công thức:
                   </div>
@@ -88,7 +88,7 @@ export function CascadeDeleteModal({
                         await onDetachFromRecipes();
                         onClose();
                       }}
-                      className="w-full text-left p-2.5 rounded-xl border border-divider hover:border-primary/60 bg-content2 dark:bg-default-100/50 hover:bg-primary-50/40 dark:hover:bg-primary-950/20 transition-all flex items-start gap-2.5 group"
+                      className="w-full text-left p-2.5 rounded-xl border border-divider hover:border-primary/60 bg-content2 dark:bg-default-100/50 hover:bg-primary/10 dark:hover:bg-primary/20 transition-all flex items-start gap-2.5 group"
                     >
                       <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
                         <Unlink className="w-4 h-4" />
@@ -98,7 +98,7 @@ export function CascadeDeleteModal({
                           Gỡ liên kết & Giữ tên trong món (Khuyên dùng)
                         </div>
                         <div className="text-[11px] text-default-500 mt-0.5 leading-snug">
-                          Tên "{item.name}" vẫn được giữ nguyên trong các món dưới dạng chữ, công thức không bị mất nguyên liệu.
+                          Tên &ldquo;{item.name}&rdquo; vẫn được giữ nguyên trong các món dưới dạng chữ, công thức không bị mất nguyên liệu.
                         </div>
                       </div>
                     </button>
@@ -110,7 +110,7 @@ export function CascadeDeleteModal({
                         await onRemoveFromRecipes();
                         onClose();
                       }}
-                      className="w-full text-left p-2.5 rounded-xl border border-danger/30 hover:border-danger bg-danger-50/20 dark:bg-danger-950/20 hover:bg-danger-50/40 transition-all flex items-start gap-2.5 group"
+                      className="w-full text-left p-2.5 rounded-xl border border-danger/30 hover:border-danger bg-content2 dark:bg-default-100/50 hover:bg-danger/10 dark:hover:bg-danger/20 transition-all flex items-start gap-2.5 group"
                     >
                       <div className="w-7 h-7 rounded-lg bg-danger/10 text-danger flex items-center justify-center shrink-0 mt-0.5">
                         <Trash2 className="w-4 h-4" />

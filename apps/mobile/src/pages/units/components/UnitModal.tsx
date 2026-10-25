@@ -10,7 +10,7 @@ import {
   Select,
   SelectItem
 } from '@/ui';
-import { Trash2, Scale, Tag, Layers, ArrowRightLeft, UtensilsCrossed } from 'lucide-react';
+import { Trash2, Tag, Layers, ArrowRightLeft, UtensilsCrossed } from 'lucide-react';
 import type { Unit } from '@apron/core';
 import { FormField } from '../../../components/shared/form/FormField';
 import { getUnitTheme } from './UnitCard';
@@ -138,7 +138,7 @@ export function UnitModal({
               </div>
 
               {isEditing && usageCount > 0 && (
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary bg-primary-50 dark:bg-primary-950/40 px-2 py-0.5 rounded-lg border border-primary/20">
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
                   <UtensilsCrossed className="w-3 h-3" />
                   {usageCount} món đang dùng
                 </span>
@@ -202,8 +202,8 @@ export function UnitModal({
               </FormField>
 
               {/* Tỷ lệ quy đổi (Tùy chọn) */}
-              <div className="p-3 rounded-2xl bg-default-50 border border-divider/60 flex flex-col gap-3">
-                <div className="flex items-center gap-2 text-xs font-semibold text-default-700">
+              <div className="p-3 rounded-2xl bg-default-50 dark:bg-default-50/10 border border-divider/60 flex flex-col gap-3">
+                <div className="flex items-center gap-2 text-xs font-semibold text-default-700 dark:text-default-300">
                   <ArrowRightLeft className="w-4 h-4 text-primary" />
                   <span>Quy đổi tỷ lệ (Tùy chọn)</span>
                 </div>

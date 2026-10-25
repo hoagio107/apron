@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { 
   Button, 
   PageHeader, 
@@ -10,17 +10,18 @@ import type { ToolbarFilterItem } from '@/ui';
 import {
   Plus,
   BookOpen,
-  X,
-  UtensilsCrossed
+  Search,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 import { CATEGORIES, autoCategorizeIngredient } from '@apron/core';
-import { getCategoryTheme } from '../../lib/categoryTheme';
 import {
   useIngredientCatalogStore,
   type IngredientMeta
 } from '../../store/useIngredientCatalogStore';
 import { useRecipeStore } from '../../store/useRecipeStore';
 import { IngredientCard } from './components/IngredientCard';
+import { IngredientListItem } from './components/IngredientListItem';
 import { IngredientModal } from './components/IngredientModal';
 import { CascadeDeleteModal } from './components/CascadeDeleteModal';
 
@@ -41,11 +42,19 @@ export function IngredientCatalogPage() {
 
   const items = getAllIngredients();
 
+  // View mode (grid vs list)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    return (localStorage.getItem('ingredient_view_mode') as 'grid' | 'list') || 'grid';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('ingredient_view_mode', viewMode);
+  }, [viewMode]);
+
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [usageFilter, setUsageFilter] = useState<'all' | 'used' | 'unused'>('all');
-  const [sortBy, setSortBy] = useState<'name-asc' | 'name-desc' | 'most-used'>('name-asc');
+  const [sortBy, setSortBy] = useState<'name-asc' | 'name-desc' | 'category'>('name-asc');
 
   // Modal states
   const [isAddEditOpen, setIsAddEditOpen] = useState(false);
@@ -53,18 +62,6 @@ export function IngredientCatalogPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deletingItem, setDeletingItem] = useState<IngredientMeta | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  // Map each ingredient to the recipes that use it
-  const usageMap = useMemo(() => {
-    const map = new Map<string, Array<{ id?: string; title: string }>>();
-    for (const item of items) {
-      const affected = recipes.filter(r =>
-        r.ingredients?.some(i => i.ingredient_id === item.id)
-      );
-      map.set(item.id, affected);
-    }
-    return map;
-  }, [items, recipes]);
 
   // Category counts
   const categoryCounts = useMemo(() => {
@@ -76,23 +73,10 @@ export function IngredientCatalogPage() {
     return counts;
   }, [items]);
 
-  // Usage statistics
-  const usedCount = useMemo(() => {
-    let count = 0;
-    for (const item of items) {
-      if ((usageMap.get(item.id)?.length || 0) > 0) count++;
-    }
-    return count;
-  }, [items, usageMap]);
-
-  const unusedCount = items.length - usedCount;
-
-  // Filter options for standard ListToolbar
+  // Filter options for ListToolbar (no usage statistics)
   const filterItems = useMemo(() => {
     const list: ToolbarFilterItem[] = [
-      { key: 'all', label: 'Tất cả nguyên liệu', count: items.length },
-      { key: 'usage:used', label: '🍳 Đang dùng', count: usedCount },
-      { key: 'usage:unused', label: 'Chưa dùng', count: unusedCount }
+      { key: 'all', label: 'Tất cả nguyên liệu', count: items.length }
     ];
 
     Object.values(CATEGORIES).forEach(cat => {
@@ -107,35 +91,25 @@ export function IngredientCatalogPage() {
     });
 
     return list;
-  }, [items.length, usedCount, unusedCount, categoryCounts]);
+  }, [items.length, categoryCounts]);
 
   const selectedFilterKey = useMemo(() => {
-    if (usageFilter === 'used') return 'usage:used';
-    if (usageFilter === 'unused') return 'usage:unused';
     if (selectedCategory) return `cat:${selectedCategory}`;
     return 'all';
-  }, [usageFilter, selectedCategory]);
+  }, [selectedCategory]);
 
   const handleFilterChange = (key: string) => {
-    if (key === 'usage:used') {
-      setUsageFilter('used');
-      setSelectedCategory(null);
-    } else if (key === 'usage:unused') {
-      setUsageFilter('unused');
-      setSelectedCategory(null);
-    } else if (key.startsWith('cat:')) {
+    if (key.startsWith('cat:')) {
       setSelectedCategory(key.replace('cat:', ''));
-      setUsageFilter('all');
     } else {
       setSelectedCategory(null);
-      setUsageFilter('all');
     }
   };
 
   const sortItems = [
     { key: 'name-asc', label: 'Tên A-Z' },
     { key: 'name-desc', label: 'Tên Z-A' },
-    { key: 'most-used', label: 'Dùng nhiều' }
+    { key: 'category', label: 'Nhóm danh mục' }
   ];
 
   // Filtered and sorted ingredients
@@ -150,7 +124,7 @@ export function IngredientCatalogPage() {
         return (
           item.name.toLowerCase().includes(q) ||
           cat.toLowerCase().includes(q) ||
-          (item.default_unit && item.default_unit.toLowerCase().includes(q))
+          Boolean(item.default_unit?.toLowerCase().includes(q))
         );
       });
     }
@@ -163,14 +137,7 @@ export function IngredientCatalogPage() {
       });
     }
 
-    // 3. Usage Filter
-    if (usageFilter === 'used') {
-      result = result.filter(item => (usageMap.get(item.id)?.length || 0) > 0);
-    } else if (usageFilter === 'unused') {
-      result = result.filter(item => (usageMap.get(item.id)?.length || 0) === 0);
-    }
-
-    // 4. Sort
+    // 3. Sort
     return result.sort((a, b) => {
       if (sortBy === 'name-asc') {
         return a.name.localeCompare(b.name, 'vi');
@@ -178,15 +145,16 @@ export function IngredientCatalogPage() {
       if (sortBy === 'name-desc') {
         return b.name.localeCompare(a.name, 'vi');
       }
-      if (sortBy === 'most-used') {
-        const countA = usageMap.get(a.id)?.length || 0;
-        const countB = usageMap.get(b.id)?.length || 0;
-        if (countB !== countA) return countB - countA;
+      if (sortBy === 'category') {
+        const catA = a.default_category || autoCategorizeIngredient(a.name);
+        const catB = b.default_category || autoCategorizeIngredient(b.name);
+        const catDiff = catA.localeCompare(catB, 'vi');
+        if (catDiff !== 0) return catDiff;
         return a.name.localeCompare(b.name, 'vi');
       }
       return 0;
     });
-  }, [items, searchQuery, selectedCategory, usageFilter, sortBy, usageMap]);
+  }, [items, searchQuery, selectedCategory, sortBy]);
 
   // Handlers
   const handleOpenAdd = () => {
@@ -221,8 +189,16 @@ export function IngredientCatalogPage() {
   const handleDeleteRequest = (item: IngredientMeta) => {
     setDeletingItem(item);
     setIsDeleteOpen(true);
-    setIsAddEditOpen(false); // Close edit drawer if open
+    setIsAddEditOpen(false);
   };
+
+  // Safe recipe association check when deleting
+  const deletingItemAffectedRecipes = useMemo(() => {
+    if (!deletingItem) return [];
+    return recipes.filter(r =>
+      r.ingredients?.some(i => i.ingredient_id === deletingItem.id)
+    );
+  }, [deletingItem, recipes]);
 
   const handleDirectDelete = async () => {
     if (!deletingItem) return;
@@ -266,15 +242,9 @@ export function IngredientCatalogPage() {
     }
   };
 
-  const activeFiltersCount =
-    (selectedCategory ? 1 : 0) +
-    (usageFilter !== 'all' ? 1 : 0) +
-    (searchQuery.trim() ? 1 : 0);
-
   const resetFilters = () => {
     setSearchQuery('');
     setSelectedCategory(null);
-    setUsageFilter('all');
   };
 
   return (
@@ -297,14 +267,29 @@ export function IngredientCatalogPage() {
             onFilterChange={handleFilterChange}
             sortItems={sortItems}
             selectedSort={sortBy}
-            onSortChange={(key) => setSortBy(key as any)}
+            onSortChange={(key) => setSortBy(key as 'name-asc' | 'name-desc' | 'category')}
             onAdd={handleOpenAdd}
             addLabel="Thêm mới"
+            extraActions={
+              <Button
+                isIconOnly
+                variant="flat"
+                aria-label={viewMode === 'grid' ? 'Chuyển sang dạng danh sách' : 'Chuyển sang dạng lưới'}
+                onPress={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                className="w-10 h-10 min-w-10 rounded-xl"
+              >
+                {viewMode === 'grid' ? (
+                  <List className="w-5 h-5 text-default-600" />
+                ) : (
+                  <LayoutGrid className="w-5 h-5 text-default-600" />
+                )}
+              </Button>
+            }
           />
         }
       />
 
-      {/* 2. Grid List Content */}
+      {/* 2. Content: Empty / Grid / List */}
       <div className="flex-1 w-full">
         {items.length === 0 ? (
           <EmptyState
@@ -340,13 +325,23 @@ export function IngredientCatalogPage() {
               Xoá bộ lọc tìm kiếm
             </Button>
           </div>
-        ) : (
+        ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3">
             {filteredItems.map(item => (
               <IngredientCard
                 key={item.id}
                 item={item}
-                usageCount={usageMap.get(item.id)?.length || 0}
+                onEdit={handleOpenEdit}
+                onDelete={handleDeleteRequest}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col rounded-2xl bg-content1 border border-divider/60 overflow-hidden divide-y divide-divider/40">
+            {filteredItems.map(item => (
+              <IngredientListItem
+                key={item.id}
+                item={item}
                 onEdit={handleOpenEdit}
                 onDelete={handleDeleteRequest}
               />
@@ -360,7 +355,6 @@ export function IngredientCatalogPage() {
         isOpen={isAddEditOpen}
         onOpenChange={setIsAddEditOpen}
         item={editingItem}
-        affectedRecipesCount={editingItem ? usageMap.get(editingItem.id)?.length || 0 : 0}
         onSave={handleSaveIngredient}
         onDeleteRequest={handleDeleteRequest}
       />
@@ -370,7 +364,7 @@ export function IngredientCatalogPage() {
         isOpen={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
         item={deletingItem}
-        affectedRecipes={deletingItem ? usageMap.get(deletingItem.id) || [] : []}
+        affectedRecipes={deletingItemAffectedRecipes}
         onConfirmDeleteDirect={handleDirectDelete}
         onDetachFromRecipes={handleDetachDelete}
         onRemoveFromRecipes={handleCascadeRemove}

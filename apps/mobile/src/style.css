@@ -53,10 +53,21 @@
   *, ::before, ::after {
     /* Mọi border mặc định đều dùng divider tinh tế 15% opacity, không bao giờ dùng đen đặc */
     border-color: hsl(var(--heroui-divider) / var(--heroui-divider-opacity, 0.15));
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  ::-webkit-scrollbar,
+  *::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
   }
 
   html, body {
-    scrollbar-gutter: stable;
+    scrollbar-gutter: auto;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
   }
 
   body {
@@ -204,6 +215,122 @@
   /* Đường ngăn chia chuẩn */
   .app-divider {
     border-color: hsl(var(--heroui-divider) / var(--heroui-divider-opacity, 0.15));
+  }
+
+  /* 4. Mục lục khoá học chuẩn (Course Syllabus & Lesson Items) */
+  .syllabus-summary-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid hsl(var(--heroui-divider) / var(--heroui-divider-opacity, 0.15));
+    background-color: hsl(var(--heroui-default-100) / 0.4);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: hsl(var(--heroui-default-500));
+  }
+  .dark .syllabus-summary-bar {
+    background-color: hsl(var(--heroui-default-50) / 0.08);
+  }
+
+  .syllabus-module-trigger {
+    padding: 0.75rem 1rem !important;
+    background-color: hsl(var(--heroui-default-100) / 0.5) !important;
+    transition: background-color 0.2s ease;
+  }
+  .dark .syllabus-module-trigger {
+    background-color: hsl(var(--heroui-default-50) / 0.1) !important;
+  }
+
+  .syllabus-lesson-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    cursor: pointer;
+    background-color: transparent;
+  }
+  .syllabus-lesson-row:hover {
+    background-color: hsl(var(--heroui-default-100) / 0.4);
+  }
+  .dark .syllabus-lesson-row:hover {
+    background-color: hsl(var(--heroui-default-50) / 0.08);
+  }
+
+  .syllabus-lesson-row.is-active {
+    background-color: hsl(var(--heroui-primary) / 0.1);
+    border-left: 3px solid hsl(var(--heroui-primary));
+  }
+  .dark .syllabus-lesson-row.is-active {
+    background-color: hsl(var(--heroui-primary) / 0.18);
+    border-left: 3px solid hsl(var(--heroui-primary));
+  }
+
+  .syllabus-status-circle {
+    width: 2rem; /* 32px */
+    height: 2rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.875rem;
+    font-weight: 700;
+    transition: all 0.2s ease;
+  }
+  .syllabus-status-circle.is-done {
+    background-color: hsl(var(--heroui-primary));
+    color: #ffffff;
+    border: 1px solid hsl(var(--heroui-primary));
+  }
+  .syllabus-status-circle.is-active {
+    background-color: hsl(var(--heroui-primary));
+    color: #ffffff;
+    border: 1px solid hsl(var(--heroui-primary));
+  }
+  .syllabus-status-circle.is-pending {
+    background-color: transparent;
+    color: hsl(var(--heroui-default-400));
+    border: 1px solid hsl(var(--heroui-default-300));
+  }
+  .dark .syllabus-status-circle.is-pending {
+    border-color: hsl(var(--heroui-default-600) / 0.4);
+    color: hsl(var(--heroui-default-400));
+  }
+
+  .syllabus-check-btn {
+    width: 2.5rem; /* 40px */
+    height: 2.5rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+  }
+  .syllabus-check-btn.is-done {
+    color: hsl(var(--heroui-primary));
+    background-color: hsl(var(--heroui-primary) / 0.12);
+  }
+  .dark .syllabus-check-btn.is-done {
+    color: hsl(var(--heroui-primary));
+    background-color: hsl(var(--heroui-primary) / 0.22);
+  }
+  .syllabus-check-btn.is-pending {
+    color: hsl(var(--heroui-default-300));
+    background-color: transparent;
+  }
+  .dark .syllabus-check-btn.is-pending {
+    color: hsl(var(--heroui-default-600));
+  }
+  .syllabus-check-btn.is-pending:hover {
+    background-color: hsl(var(--heroui-default-100));
+    color: hsl(var(--heroui-default-500));
+  }
+  .dark .syllabus-check-btn.is-pending:hover {
+    background-color: hsl(var(--heroui-default-50) / 0.15);
   }
 
   /* 4. Standardized Typography Hierarchy (Chuẩn hoá cấp độ font chữ toàn hệ thống) */

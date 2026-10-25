@@ -982,7 +982,7 @@ export function CourseForm({
                         <button
                           type="button"
                           onClick={() => addLesson(mIdx)}
-                          className="flex items-center gap-2 px-2 py-2.5 text-xs font-semibold text-primary hover:bg-primary-50/30 dark:hover:bg-primary-950/20 transition-colors w-full text-left"
+                          className="flex items-center gap-2 px-2 py-2.5 text-xs font-semibold text-primary hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors w-full text-left"
                         >
                           <Plus className="w-4 h-4 shrink-0" />
                           <span>Thêm bài học vào Chương {mIdx + 1}</span>
@@ -998,7 +998,7 @@ export function CourseForm({
                   color="primary"
                   startContent={<Plus className="w-4 h-4" />}
                   onPress={addModule}
-                  className="w-full h-11 rounded-xl font-semibold text-sm bg-primary-50/70 dark:bg-primary-950/40 text-primary border border-primary/20 hover:bg-primary-100"
+                  className="w-full h-11 rounded-xl font-semibold text-sm bg-primary/10 dark:bg-primary/20 text-primary border border-primary/20 hover:bg-primary/20"
                 >
                   Thêm chương mới
                 </Button>

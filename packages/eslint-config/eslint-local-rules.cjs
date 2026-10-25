@@ -1264,4 +1264,102 @@ module.exports = {
       };
     }
   },
+
+  // ─── Rule: Cấm dùng class màu ad-hoc gây lỗi vỡ Dark Mode ──────────────────────
+  'forbid-adhoc-dark-classes': {
+    meta: {
+      type: 'problem',
+      docs: {
+        description: 'Nghiêm cấm dùng class màu tĩnh ad-hoc (bg-*-50, dark:bg-*-950) gây lỗi vỡ giao diện Dark mode.',
+      },
+      schema: [],
+    },
+    create(context) {
+      const filename = (context.getFilename ? context.getFilename() : context.getPhysicalFilename()).replace(/\\/g, '/');
+      if (filename.includes('src/components/ui/')) {
+        return {};
+      }
+
+      return {
+        JSXAttribute(node) {
+          if (node.name.name !== 'className') return;
+
+          const checkString = (str, strNode) => {
+            const classes = str.split(/\s+/);
+            for (const cls of classes) {
+              if (!cls) continue;
+
+              // 1. Cấm bg-*-50 (như bg-primary-50, bg-success-50, bg-danger-50...)
+              if (/^(?:hover:|active:)?bg-(?:primary|success|warning|danger|secondary)-50(?:\/\d+)?$/.test(cls)) {
+                context.report({
+                  node: strNode,
+                  message: `[Quy Tắc Design System] CẤM dùng class màu nền tĩnh '${cls}'. Vui lòng dùng biến opacity ngữ nghĩa: 'bg-primary/10 dark:bg-primary/20' hoặc các component class trong style.css để không gây lỗi vỡ màu Dark mode.`
+                });
+              }
+
+              // 2. Cấm dark:bg-*-950
+              if (/^dark:(?:hover:|active:)?bg-(?:primary|success|warning|danger|secondary)-950(?:\/\d+)?$/.test(cls)) {
+                context.report({
+                  node: strNode,
+                  message: `[Quy Tắc Design System] CẤM dùng class '${cls}'. Hãy sử dụng biến opacity chuẩn: 'dark:bg-.../20' theo Design System.`
+                });
+              }
+
+              // 3. Cấm bg-white trực tiếp cho layout hoặc thẻ
+              if (cls === 'bg-white' && !filename.includes('RecipeFloatingChat') && !filename.includes('CookingModeModal') && !filename.includes('FileUploader') && !filename.includes('MealPlannerPage') && !filename.includes('RecipeSidebar')) {
+                context.report({
+                  node: strNode,
+                  message: `[Quy Tắc Design System] CẤM dùng 'bg-white' trực tiếp. Hãy sử dụng 'bg-background', 'bg-content1' hoặc class '.app-card' trong style.css để tương thích hoàn toàn Dark mode.`
+                });
+              }
+            }
+          };
+
+          if (node.value && node.value.type === 'Literal' && typeof node.value.value === 'string') {
+            checkString(node.value.value, node.value);
+          } else if (node.value && node.value.type === 'JSXExpressionContainer') {
+            const sourceCode = context.getSourceCode().getText(node.value);
+            const stringRegex = /"([^"]+)"|'([^']+)'|`([^`]+)`/g;
+            let match;
+            while ((match = stringRegex.exec(sourceCode)) !== null) {
+              const str = match[1] || match[2] || match[3];
+              if (str) checkString(str, node.value);
+            }
+          }
+        }
+      };
+    }
+  },
+
+  // ─── Rule: Buộc sử dụng class mục lục khoá học chuẩn từ style.css ───────────────
+  'enforce-style-css-components': {
+    meta: {
+      type: 'problem',
+      docs: {
+        description: 'Bắt buộc sử dụng các class component chuẩn từ style.css thay vì viết ad-hoc.',
+      },
+      schema: [],
+    },
+    create(context) {
+      const filename = (context.getFilename ? context.getFilename() : context.getPhysicalFilename()).replace(/\\/g, '/');
+
+      return {
+        JSXAttribute(node) {
+          if (node.name.name !== 'className') return;
+
+          // Trong các trang khoá học (CourseDetailPage, CoursesPage...)
+          if (filename.includes('CourseDetailPage') || filename.includes('courses/')) {
+            const sourceCode = context.getSourceCode().getText(node.value);
+            // Phát hiện viết ad-hoc border-l-3 border-primary cho bài học thay vì syllabus-lesson-row
+            if (sourceCode.includes('border-l-3') && sourceCode.includes('border-primary') && !sourceCode.includes('syllabus-lesson-row')) {
+              context.report({
+                node,
+                message: `[Quy Tắc Design System] Phát hiện chuỗi class bài học ad-hoc. Vui lòng sử dụng class chuẩn đã khai báo trong style.css: '.syllabus-lesson-row' (kèm class '.is-active').`
+              });
+            }
+          }
+        }
+      };
+    }
+  },
 };

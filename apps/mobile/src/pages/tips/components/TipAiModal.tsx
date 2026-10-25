@@ -307,7 +307,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                   </div>
 
                   {error && (
-                    <div className="p-3 bg-danger-50 dark:bg-danger-950/30 border border-danger-200 dark:border-danger-900/50 text-danger-700 dark:text-danger-300 rounded-xl flex items-start gap-2.5 text-xs">
+                    <div className="p-3 bg-danger/10 dark:bg-danger/20 border border-danger/20 text-danger rounded-xl flex items-start gap-2.5 text-xs">
                       <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                       <div className="flex-1">{error}</div>
                     </div>
@@ -315,11 +315,11 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
 
                   {/* PREVIEW KẾT QUẢ */}
                   {parsedData && (
-                    <div className="flex flex-col border border-success-200 dark:border-success-900/50 rounded-2xl overflow-hidden bg-success-50/20 dark:bg-success-950/10">
-                      <div className="bg-success-100/60 dark:bg-success-900/30 px-4 py-2.5 border-b border-success-200 dark:border-success-900/50 flex items-center justify-between">
+                    <div className="flex flex-col border border-success/20 rounded-2xl overflow-hidden bg-success/10 dark:bg-success/20">
+                      <div className="bg-success/15 dark:bg-success/25 px-4 py-2.5 border-b border-success/20 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Check className="w-4 h-4 text-success-600 dark:text-success-400" />
-                          <h4 className="font-bold text-sm text-success-800 dark:text-success-200">
+                          <Check className="w-4 h-4 text-success" />
+                          <h4 className="font-bold text-sm text-success">
                             Đã trích xuất thành công
                           </h4>
                         </div>

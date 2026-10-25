@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
@@ -19,7 +20,6 @@ import {
   BookOpen, 
   Clock, 
   PlayCircle, 
-  Star, 
   FileText, 
   ChevronRight, 
   ChevronLeft, 
@@ -27,7 +27,6 @@ import {
   Trash2, 
   ChefHat, 
   StickyNote, 
-  Flame, 
   Edit, 
   Paperclip, 
   Check, 
@@ -345,12 +344,19 @@ export function CourseDetailPage() {
       </header>
 
       {/* Sleek Top Progress Bar */}
-      <div className="w-full bg-default-100 dark:bg-default-50/20 h-0.5 shrink-0 overflow-hidden">
-        <div 
-          className="bg-primary h-0.5 transition-all duration-300"
-          style={{ width: `${progressPercent}%` }}
-        />
-      </div>
+      <Progress
+        value={progressPercent}
+        aria-label="Tiến độ khoá học"
+        size="sm"
+        radius="none"
+        color="primary"
+        className="w-full h-0.5 shrink-0"
+        classNames={{
+          base: 'h-0.5',
+          track: 'bg-default-100 dark:bg-default-50/20 h-0.5',
+          indicator: 'h-0.5 transition-all duration-300'
+        }}
+      />
 
       {/* 2. MEDIA / VIDEO PLAYER AREA (Flat, thuần túy hình ảnh/video, không đè card nổi) */}
       <div className="w-full bg-black relative shrink-0">
@@ -358,11 +364,14 @@ export function CourseDetailPage() {
           <div className="w-full aspect-video relative overflow-hidden flex items-center justify-center">
             {activeLesson.video_url.includes('youtube.com') || activeLesson.video_url.includes('youtu.be') ? (
               <iframe
-                src={
-                  activeLesson.video_url.includes('watch?v=')
-                    ? activeLesson.video_url.replace('watch?v=', 'embed/').split('&')[0]
-                    : activeLesson.video_url
-                }
+                src={(() => {
+                  try {
+                    const match = activeLesson.video_url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+                    return match ? `https://www.youtube.com/embed/${match[1]}` : activeLesson.video_url;
+                  } catch {
+                    return activeLesson.video_url;
+                  }
+                })()}
                 className="absolute inset-0 w-full h-full border-none"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
@@ -375,7 +384,9 @@ export function CourseDetailPage() {
                 className="absolute inset-0 w-full h-full object-contain"
                 controlsList="nodownload"
                 poster={activeLesson.hero_image_url ? ImageManager.getAssetUrl(activeLesson.hero_image_url) : undefined}
-              />
+              >
+                <track kind="captions" />
+              </video>
             )}
           </div>
         ) : (
@@ -526,8 +537,8 @@ export function CourseDetailPage() {
             }
           >
             <div className="flex flex-col w-full max-w-3xl mx-auto">
-              {/* Dòng tóm tắt tiến độ phẳng */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-divider/40 bg-default-50/50 dark:bg-default-50/10 text-xs font-semibold text-default-500">
+              {/* Dòng tóm tắt tiến độ chuẩn style.css */}
+              <div className="syllabus-summary-bar">
                 <span>{course.modules?.length || 0} chương • {totalLessons} bài học</span>
                 <span className="text-primary font-bold">{progressPercent}% hoàn thành</span>
               </div>
@@ -535,12 +546,12 @@ export function CourseDetailPage() {
               {/* Flat Module Accordion */}
               <Accordion
                 selectionMode="multiple"
-                defaultExpandedKeys={course.modules?.map((_, i) => i.toString())}
+                defaultExpandedKeys="all"
                 className="px-0 gap-0"
                 itemClasses={{
                   base: 'py-0 px-0 outline-none w-full border-b border-divider/40 rounded-none bg-transparent shadow-none',
                   title: 'font-bold text-sm text-foreground',
-                  trigger: 'px-4 py-3 bg-default-100/50 dark:bg-default-50/10 hover:bg-default-100/80 transition-colors',
+                  trigger: 'syllabus-module-trigger',
                   content: 'p-0'
                 }}
               >
@@ -550,7 +561,7 @@ export function CourseDetailPage() {
 
                   return (
                     <AccordionItem
-                      key={mIdx.toString()}
+                      key={module.id || `module-${mIdx}`}
                       title={
                         <div className="flex items-center justify-between w-full pr-2">
                           <div className="flex items-center gap-2.5 min-w-0">
@@ -577,21 +588,13 @@ export function CourseDetailPage() {
                             <div
                               key={lesson.id}
                               onClick={() => handleSelectLesson(lesson.id)}
-                              className={`flex items-center justify-between gap-3 px-4 py-3.5 transition-colors cursor-pointer ${
-                                isActive
-                                  ? 'bg-primary-50/70 dark:bg-primary-950/30 border-l-3 border-primary'
-                                  : 'hover:bg-default-50/80'
-                              }`}
+                              className={`syllabus-lesson-row ${isActive ? 'is-active' : ''}`}
                             >
                               <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                                {/* Status Circle (Chuẩn 32px touch-friendly) */}
+                                {/* Status Circle (Chuẩn 32px chuẩn style.css) */}
                                 <div
-                                  className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border text-xs sm:text-sm font-bold transition-all ${
-                                    isDone
-                                      ? 'bg-success border-success text-white'
-                                      : isActive
-                                      ? 'bg-primary border-primary text-white shadow-xs'
-                                      : 'border-default-300 text-default-400 bg-background'
+                                  className={`syllabus-status-circle ${
+                                    isDone ? 'is-done' : isActive ? 'is-active' : 'is-pending'
                                   }`}
                                 >
                                   {isDone ? (
@@ -603,7 +606,7 @@ export function CourseDetailPage() {
                                   )}
                                 </div>
 
-                                {/* Lesson Info (Text rõ ràng) */}
+                                {/* Lesson Info */}
                                 <div className="flex flex-col min-w-0 flex-1">
                                   <span
                                     className={`font-semibold text-sm sm:text-base line-clamp-2 leading-snug ${
@@ -633,18 +636,14 @@ export function CourseDetailPage() {
                                 </div>
                               </div>
 
-                              {/* Toggle Completion directly in list (Touch target 40px) */}
+                              {/* Toggle Completion directly in list (Chuẩn style.css) */}
                               <button
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   toggleComplete(lesson.id);
                                 }}
-                                className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors ${
-                                  isDone
-                                    ? 'text-success bg-success-50 dark:bg-success-950/40 hover:bg-success-100'
-                                    : 'text-default-300 hover:text-default-500 hover:bg-default-100'
-                                }`}
+                                className={`syllabus-check-btn ${isDone ? 'is-done' : 'is-pending'}`}
                                 aria-label="Đánh dấu hoàn thành bài học"
                               >
                                 <Check className={`w-5 h-5 ${isDone ? 'stroke-[2.5]' : ''}`} />
@@ -681,11 +680,11 @@ export function CourseDetailPage() {
                   <div className="flex flex-col divide-y divide-divider/40 border-y border-divider/40">
                     {activeLesson.attachments.map((url, i) => (
                       <a
-                        key={i}
+                        key={url || `attachment-${i}`}
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3 py-3 px-1 hover:bg-default-50 transition-colors"
+                        className="flex items-center gap-3 py-3 px-1 hover:bg-default-100/50 dark:hover:bg-default-50/10 transition-colors"
                       >
                         <FileText className="w-4 h-4 text-primary shrink-0" />
                         <span className="flex-1 truncate font-medium text-foreground text-sm">
@@ -877,13 +876,17 @@ export function CourseDetailPage() {
           <ChevronLeft className="w-6 h-6" />
         </Button>
 
-        {/* Center: Mark complete button (To rõ, tương phản cao, tự co dãn vừa vặn không truncate) */}
+        {/* Center: Mark complete button (Chuẩn màu primary hệ thống, không dùng success neon) */}
         <Button
-          variant={isCurrentCompleted ? 'solid' : 'flat'}
-          color={isCurrentCompleted ? 'success' : 'default'}
+          variant={isCurrentCompleted ? 'flat' : 'flat'}
+          color={isCurrentCompleted ? 'primary' : 'default'}
           onPress={() => activeLesson && toggleComplete(activeLesson.id)}
-          startContent={<Check className={`w-5 h-5 shrink-0 ${isCurrentCompleted ? 'stroke-[2.5]' : 'opacity-60'}`} />}
-          className="font-bold text-sm sm:text-base h-12 px-3 rounded-xl flex-1 truncate"
+          startContent={<Check className={`w-5 h-5 shrink-0 ${isCurrentCompleted ? 'stroke-[2.5] text-primary' : 'opacity-60'}`} />}
+          className={`font-bold text-sm sm:text-base h-12 px-3 rounded-xl flex-1 truncate ${
+            isCurrentCompleted
+              ? 'bg-primary/15 text-primary border border-primary/20'
+              : 'bg-default-100 dark:bg-default-50/20 text-foreground'
+          }`}
         >
           <span className="truncate">{isCurrentCompleted ? 'Đã hoàn thành' : 'Đánh dấu đã học'}</span>
         </Button>

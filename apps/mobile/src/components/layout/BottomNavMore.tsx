@@ -1,7 +1,7 @@
 import { useNavigate, NavLink } from 'react-router-dom';
 import {
-  Heart, GraduationCap, Lightbulb,
-  Refrigerator, NotebookTabs, Scale, Settings, X
+  CalendarDays, ShoppingCart, Refrigerator, GraduationCap,
+  Heart, Lightbulb, NotebookTabs, Scale, Settings, X
 } from 'lucide-react';
 
 interface BottomNavMoreProps {
@@ -10,9 +10,11 @@ interface BottomNavMoreProps {
 }
 
 const moreItems = [
-  { name: 'Đã lưu', icon: Heart, path: '/saved' },
-  { name: 'Khoá học', icon: GraduationCap, path: '/courses' },
+  { name: 'Thực đơn', icon: CalendarDays, path: '/meal-planner' },
+  { name: 'Đi chợ', icon: ShoppingCart, path: '/shopping-list' },
   { name: 'Tủ lạnh', icon: Refrigerator, path: '/smart-fridge' },
+  { name: 'Khoá học', icon: GraduationCap, path: '/courses' },
+  { name: 'Đã lưu', icon: Heart, path: '/saved' },
   { name: 'Mẹo hay', icon: Lightbulb, path: '/tips' },
   { name: 'Nguyên liệu', icon: NotebookTabs, path: '/catalog' },
   { name: 'Đơn vị', icon: Scale, path: '/units' },

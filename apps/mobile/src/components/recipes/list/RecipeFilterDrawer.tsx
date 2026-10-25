@@ -1,5 +1,32 @@
-import { Drawer, DrawerContent, DrawerHeader, DrawerBody, Button, CheckboxGroup, Checkbox, RadioGroup, Radio } from '@/ui';
-import { Filter, Check } from 'lucide-react';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import { 
+  Drawer, 
+  DrawerContent, 
+  DrawerHeader, 
+  DrawerBody, 
+  DrawerFooter,
+  Button, 
+  Switch,
+  Avatar 
+} from '@/ui';
+import { 
+  Filter, 
+  RotateCcw, 
+  Check, 
+  Clock, 
+  Star, 
+  Sparkles, 
+  ChefHat, 
+  UtensilsCrossed, 
+  Flame,
+  Search,
+  ChevronDown,
+  X,
+  Layers
+} from 'lucide-react';
+import { useIngredientCatalogStore } from '../../../store/useIngredientCatalogStore';
+import { getCategoryTheme } from '../../../lib/categoryTheme';
+import { autoCategorizeIngredient, CATEGORIES } from '@apron/core';
 
 export interface RecipeFilterState {
   difficulties: string[];
@@ -8,6 +35,7 @@ export interface RecipeFilterState {
   cookedStatus?: 'all' | 'cooked' | 'uncooked';
   minRating?: number;
   hideVariants?: boolean;
+  ingredientIds: string[];
 }
 
 export const defaultFilterState: RecipeFilterState = {
@@ -16,8 +44,11 @@ export const defaultFilterState: RecipeFilterState = {
   tags: [],
   cookedStatus: 'all',
   minRating: 0,
-  hideVariants: false
+  hideVariants: false,
+  ingredientIds: []
 };
+
+const DEFAULT_INACTIVE_BUTTON_CLASS = 'bg-default-100/70 hover:bg-default-200/70 text-default-600 border-transparent';
 
 interface RecipeFilterDrawerProps {
   isOpen: boolean;
@@ -34,128 +65,580 @@ export function RecipeFilterDrawer({
   onFilterChange, 
   availableTags = []
 }: RecipeFilterDrawerProps) {
-  
+  const { getAllIngredients } = useIngredientCatalogStore();
+  const allIngredients = getAllIngredients();
+
+  // Combobox state
+  const [isComboboxOpen, setIsComboboxOpen] = useState(false);
+  const [ingredientSearch, setIngredientSearch] = useState('');
+  const [selectedIngredientCategory, setSelectedIngredientCategory] = useState<string | null>(null);
+  const comboboxRef = useRef<HTMLDivElement>(null);
+
+  // Close combobox when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (comboboxRef.current && !comboboxRef.current.contains(e.target as Node)) {
+        setIsComboboxOpen(false);
+      }
+    }
+    if (isComboboxOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isComboboxOpen]);
+
+  // Filtered ingredients for combobox
+  const filteredCatalogIngredients = useMemo(() => {
+    return allIngredients.filter(item => {
+      const cat = item.default_category || autoCategorizeIngredient(item.name);
+      const matchesSearch = !ingredientSearch.trim() || 
+        item.name.toLowerCase().includes(ingredientSearch.toLowerCase().trim()) ||
+        cat.toLowerCase().includes(ingredientSearch.toLowerCase().trim());
+      const matchesCat = !selectedIngredientCategory || cat === selectedIngredientCategory;
+      return matchesSearch && matchesCat;
+    });
+  }, [allIngredients, ingredientSearch, selectedIngredientCategory]);
+
+  // Options
   const timeOptions = [
-    { label: 'Tất cả', value: 'all' },
-    { label: 'Dưới 15 phút', value: '15' },
-    { label: 'Dưới 30 phút', value: '30' },
-    { label: 'Dưới 60 phút', value: '60' },
+    { label: 'Tất cả', value: null },
+    { label: '≤ 15 phút', value: 15 },
+    { label: '≤ 30 phút', value: 30 },
+    { label: '≤ 60 phút', value: 60 },
   ];
+
+  const difficultyOptions = [
+    { label: 'Dễ', colorClass: 'border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold' },
+    { label: 'Trung bình', colorClass: 'border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold' },
+    { label: 'Khó', colorClass: 'border-rose-500/40 bg-rose-500/15 text-rose-600 dark:text-rose-400 font-bold' }
+  ];
+
+  const cookedOptions = [
+    { label: 'Tất cả', value: 'all' },
+    { label: 'Đã nấu', value: 'cooked' },
+    { label: 'Chưa nấu', value: 'uncooked' }
+  ];
+
+  const ratingOptions = [
+    { label: 'Tất cả', value: 0 },
+    { label: '3+ ★', value: 3 },
+    { label: '4+ ★', value: 4 },
+    { label: '5 ★', value: 5 }
+  ];
+
+  const activeFilterCount = 
+    (filters.difficulties.length > 0 ? 1 : 0) + 
+    (filters.maxTime !== null ? 1 : 0) + 
+    ((filters.tags?.length ?? 0) > 0 ? 1 : 0) + 
+    (filters.cookedStatus && filters.cookedStatus !== 'all' ? 1 : 0) + 
+    ((filters.minRating ?? 0) > 0 ? 1 : 0) + 
+    (filters.hideVariants ? 1 : 0) +
+    ((filters.ingredientIds?.length ?? 0) > 0 ? 1 : 0);
 
   const handleClear = () => {
     onFilterChange(defaultFilterState);
   };
 
+  const toggleDifficulty = (diff: string) => {
+    const isSelected = filters.difficulties.includes(diff);
+    const newDiffs = isSelected
+      ? filters.difficulties.filter(d => d !== diff)
+      : [...filters.difficulties, diff];
+    onFilterChange({ ...filters, difficulties: newDiffs });
+  };
+
+  const handleToggleIngredient = (id: string) => {
+    if (filters.ingredientIds.includes(id)) {
+      onFilterChange({
+        ...filters,
+        ingredientIds: filters.ingredientIds.filter(i => i !== id)
+      });
+    } else {
+      onFilterChange({
+        ...filters,
+        ingredientIds: [...filters.ingredientIds, id]
+      });
+    }
+  };
+
+  const handleRemoveIngredient = (id: string) => {
+    onFilterChange({
+      ...filters,
+      ingredientIds: filters.ingredientIds.filter(i => i !== id)
+    });
+  };
+
   return (
-    <Drawer isOpen={isOpen} onOpenChange={onOpenChange} size="sm" placement="right" radius="none">
+    <Drawer 
+      isOpen={isOpen} 
+      onOpenChange={onOpenChange} 
+      size="md" 
+      placement="right"
+      classNames={{
+        base: "max-w-md w-full bg-background dark:bg-background border-l border-divider/60 shadow-2xl flex flex-col",
+      }}
+    >
       <DrawerContent>
         {() => (
           <>
-            <DrawerHeader className="flex justify-between items-center border-b border-divider">
-              <div className="flex gap-2 items-center">
-                <Filter className="w-5 h-5 text-primary" />
-                <span className="text-lg font-bold">Lọc công thức</span>
+            {/* 1. Header */}
+            <DrawerHeader className="flex items-center justify-between px-5 py-4 border-b border-divider/50 bg-background/90 backdrop-blur-md sticky top-0 z-30">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-teal-500/10 text-primary flex items-center justify-center border border-primary/20 shadow-xs">
+                  <Filter className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-base font-bold text-foreground">Bộ lọc công thức</span>
+                    {activeFilterCount > 0 && (
+                      <span className="px-2 py-0.5 text-[11px] font-bold bg-primary text-primary-foreground rounded-full shadow-xs animate-in fade-in zoom-in-95">
+                        {activeFilterCount}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-default-400 font-normal">
+                    Tùy chỉnh tiêu chí tìm kiếm món ăn
+                  </p>
+                </div>
               </div>
-            </DrawerHeader>
-            <DrawerBody className="py-6">
-              <div className="flex flex-col gap-8">
 
-                <CheckboxGroup
-                  label="Độ khó"
-                  value={filters.difficulties}
-                  onValueChange={(val) => onFilterChange({ ...filters, difficulties: val })}
-                  orientation="horizontal"
+              {activeFilterCount > 0 && (
+                <Button
+                  size="sm"
+                  variant="flat"
+                  color="danger"
+                  startContent={<RotateCcw className="w-3.5 h-3.5" />}
+                  onPress={handleClear}
+                  className="h-8 px-2.5 rounded-xl text-xs font-semibold"
                 >
-                  <Checkbox value="Dễ">Dễ</Checkbox>
-                  <Checkbox value="Trung bình">Trung bình</Checkbox>
-                  <Checkbox value="Khó">Khó</Checkbox>
-                </CheckboxGroup>
+                  Đặt lại
+                </Button>
+              )}
+            </DrawerHeader>
 
-                <div className="flex flex-col gap-2">
-                  <span className="text-xs font-semibold text-default-600 uppercase tracking-wider">Món biến thể</span>
-                  <Checkbox 
-                    isSelected={!filters.hideVariants}
-                    onValueChange={(val) => onFilterChange({ ...filters, hideVariants: !val })}
-                  >
-                    Hiển thị cả món biến thể
-                  </Checkbox>
+            {/* 2. Scrollable Body */}
+            <DrawerBody className="p-4 sm:p-5 overflow-y-auto space-y-5">
+              
+              {/* 1. LỌC THEO NGUYÊN LIỆU (COMBOBOX DROPDOWN) */}
+              <div ref={comboboxRef} className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-foreground flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                      <UtensilsCrossed className="w-3.5 h-3.5" />
+                    </div>
+                    <span>Lọc theo nguyên liệu</span>
+                  </span>
+                  {filters.ingredientIds.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => onFilterChange({ ...filters, ingredientIds: [] })}
+                      className="text-[11px] text-danger font-semibold hover:underline cursor-pointer transition-colors"
+                    >
+                      Xóa tất cả ({filters.ingredientIds.length})
+                    </button>
+                  )}
                 </div>
 
-                <RadioGroup
-                  label="Thời gian nấu"
-                  value={filters.maxTime ? filters.maxTime.toString() : 'all'}
-                  onValueChange={(val) => onFilterChange({ 
-                    ...filters, 
-                    maxTime: val === 'all' ? null : parseInt(val) 
-                  })}
-                >
-                  {timeOptions.map(opt => (
-                    <Radio key={opt.value} value={opt.value}>{opt.label}</Radio>
-                  ))}
-                </RadioGroup>
+                {/* Combobox Trigger / Search Input */}
+                <div className="relative">
+                  <div 
+                    onClick={() => setIsComboboxOpen(true)}
+                    className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-default-100 hover:bg-default-200/70 border cursor-pointer transition-all ${
+                      isComboboxOpen 
+                        ? 'border-primary ring-2 ring-primary/20 bg-background' 
+                        : 'border-transparent'
+                    }`}
+                  >
+                    <Search className="w-4 h-4 text-default-400 shrink-0" />
+                    <input
+                      type="text"
+                      value={ingredientSearch}
+                      onChange={(e) => {
+                        setIngredientSearch(e.target.value);
+                        if (!isComboboxOpen) setIsComboboxOpen(true);
+                      }}
+                      onFocus={() => setIsComboboxOpen(true)}
+                      placeholder="Tìm và chọn nguyên liệu..."
+                      className="w-full bg-transparent text-xs font-medium text-foreground placeholder:text-default-400 outline-none cursor-text"
+                    />
+                    {ingredientSearch ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIngredientSearch('');
+                        }}
+                        className="text-default-400 hover:text-foreground shrink-0 p-0.5"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    ) : (
+                      <ChevronDown className={`w-4 h-4 text-default-400 shrink-0 transition-transform ${isComboboxOpen ? 'rotate-180' : ''}`} />
+                    )}
+                  </div>
 
-                <RadioGroup
-                  label="Trạng thái nấu"
-                  value={filters.cookedStatus || 'all'}
-                  onValueChange={(val) => onFilterChange({ ...filters, cookedStatus: val as any })}
-                >
-                  <Radio value="all">Tất cả</Radio>
-                  <Radio value="cooked">Đã nấu</Radio>
-                  <Radio value="uncooked">Chưa nấu</Radio>
-                </RadioGroup>
-
-                <RadioGroup
-                  label="Đánh giá tối thiểu"
-                  value={filters.minRating?.toString() || '0'}
-                  onValueChange={(val) => onFilterChange({ ...filters, minRating: parseInt(val) })}
-                >
-                  <Radio value="0">Tất cả</Radio>
-                  <Radio value="5">5 sao</Radio>
-                  <Radio value="4">Từ 4 sao trở lên</Radio>
-                  <Radio value="3">Từ 3 sao trở lên</Radio>
-                </RadioGroup>
-
-                {availableTags && availableTags.length > 0 && (
-                  <div className="flex flex-col gap-3">
-                    <span className="text-sm font-medium text-foreground">Thẻ (Tags)</span>
-                    <div className="flex flex-wrap gap-2">
-                      {availableTags.map(tag => {
-                        const isSelected = (filters.tags || []).includes(tag);
-                        return (
-                          <div 
-                            key={tag}
-                            onClick={() => {
-                              const newTags = isSelected 
-                                ? (filters.tags || []).filter(t => t !== tag)
-                                : [...(filters.tags || []), tag];
-                              onFilterChange({ ...filters, tags: newTags });
-                            }}
-                            className={`
-                              flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium cursor-pointer transition-all
-                              ${isSelected ? 'bg-primary text-white shadow-md' : 'bg-default-100 text-default-700 hover:bg-default-200'}
-                            `}
+                  {/* Dropdown Menu Container */}
+                  {isComboboxOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-1.5 z-40 bg-content1 border border-divider/70 rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-72">
+                      
+                      {/* Category Quick Filter inside Dropdown */}
+                      <div className="p-2 border-b border-divider/40 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0 bg-default-50/50">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedIngredientCategory(null)}
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors shrink-0 ${
+                            selectedIngredientCategory === null
+                              ? 'bg-primary text-primary-foreground shadow-xs'
+                              : 'text-default-500 hover:bg-default-100'
+                          }`}
+                        >
+                          Tất cả
+                        </button>
+                        {Object.values(CATEGORIES).map(cat => (
+                          <button
+                            key={cat}
+                            type="button"
+                            onClick={() => setSelectedIngredientCategory(cat === selectedIngredientCategory ? null : cat)}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors shrink-0 ${
+                              selectedIngredientCategory === cat
+                                ? 'bg-primary text-primary-foreground shadow-xs'
+                                : 'text-default-500 hover:bg-default-100'
+                            }`}
                           >
-                            {isSelected && <Check className="w-3.5 h-3.5" />}
-                            {tag}
+                            {cat}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Ingredients List */}
+                      <div className="overflow-y-auto divide-y divide-divider/30 p-1 flex-1">
+                        {filteredCatalogIngredients.length === 0 ? (
+                          <div className="py-6 text-center text-xs text-default-400">
+                            Không tìm thấy nguyên liệu phù hợp
                           </div>
+                        ) : (
+                          filteredCatalogIngredients.map(item => {
+                            const isSelected = filters.ingredientIds.includes(item.id);
+                            const category = item.default_category || autoCategorizeIngredient(item.name);
+                            const theme = getCategoryTheme(category);
+                            const Icon = theme.icon;
+
+                            return (
+                              <button
+                                key={item.id}
+                                type="button"
+                                onClick={() => handleToggleIngredient(item.id)}
+                                className={`w-full flex items-center justify-between px-3 py-2 text-left rounded-xl transition-all cursor-pointer ${
+                                  isSelected 
+                                    ? 'bg-primary/10 dark:bg-primary/20 text-foreground' 
+                                    : 'hover:bg-default-100/70 text-default-700'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  {item.image_url ? (
+                                    <Avatar
+                                      src={item.image_url}
+                                      size="sm"
+                                      className="w-7 h-7 shrink-0 rounded-lg"
+                                    />
+                                  ) : (
+                                    <div className={`w-7 h-7 rounded-lg shrink-0 flex items-center justify-center ${theme.bg} ${theme.text}`}>
+                                      <Icon className="w-3.5 h-3.5" />
+                                    </div>
+                                  )}
+                                  <div className="flex flex-col min-w-0">
+                                    <span className={`text-xs font-semibold truncate ${isSelected ? 'text-primary font-bold' : 'text-foreground'}`}>
+                                      {item.name}
+                                    </span>
+                                    <span className="text-[10px] text-default-400">
+                                      {category}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 border transition-all ${
+                                  isSelected 
+                                    ? 'bg-primary border-primary text-white shadow-xs' 
+                                    : 'border-default-300 dark:border-default-600'
+                                }`}>
+                                  {isSelected && <Check className="w-3.5 h-3.5 stroke-[2.5]" />}
+                                </div>
+                              </button>
+                            );
+                          })
+                        )}
+                      </div>
+
+                      {/* Dropdown Footer */}
+                      <div className="p-2 border-t border-divider/40 bg-default-50/50 flex items-center justify-between">
+                        <span className="text-[11px] text-default-400 font-medium px-1">
+                          Đã chọn {filters.ingredientIds.length} nguyên liệu
+                        </span>
+                        <Button
+                          size="sm"
+                          color="primary"
+                          onPress={() => setIsComboboxOpen(false)}
+                          className="h-7 px-3 text-xs font-bold rounded-lg"
+                        >
+                          Xong
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Selected Ingredients Chips Cloud */}
+                {filters.ingredientIds.length > 0 && (
+                  <div className="space-y-1.5 pt-1">
+                    <span className="text-[11px] font-semibold text-default-400">
+                      Nguyên liệu đã chọn ({filters.ingredientIds.length}):
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {filters.ingredientIds.map(id => {
+                        const item = allIngredients.find(i => i.id === id);
+                        if (!item) return null;
+                        const category = item.default_category || autoCategorizeIngredient(item.name);
+                        const theme = getCategoryTheme(category);
+                        const Icon = theme.icon;
+
+                        return (
+                          <span
+                            key={id}
+                            className={`inline-flex items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-xl text-xs font-semibold border ${theme.bg} ${theme.text} border-primary/20 shadow-xs animate-in fade-in zoom-in-95`}
+                          >
+                            <Icon className="w-3 h-3 shrink-0" />
+                            <span>{item.name}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveIngredient(id)}
+                              className="w-4 h-4 rounded-full hover:bg-black/10 dark:hover:bg-white/20 flex items-center justify-center transition-colors ml-0.5 cursor-pointer"
+                              aria-label={`Xoá ${item.name}`}
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </span>
                         );
                       })}
                     </div>
                   </div>
                 )}
+              </div>
 
-                <div className="mt-4">
-                  <Button 
-                    fullWidth 
-                    variant="flat" 
-                    color="danger" 
-                    onPress={handleClear}
-                  >
-                    Xóa tất cả bộ lọc
-                  </Button>
+              {/* Phân cách */}
+              <div className="h-px bg-divider/40" />
+
+              {/* 2. ĐỘ KHÓ */}
+              <div className="space-y-2">
+                <span className="text-xs font-bold text-foreground flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-warning/15 text-warning flex items-center justify-center">
+                    <Flame className="w-3.5 h-3.5" />
+                  </div>
+                  <span>Độ khó</span>
+                </span>
+                <div className="grid grid-cols-3 gap-2">
+                  {difficultyOptions.map(diff => {
+                    const isSelected = filters.difficulties.includes(diff.label);
+                    return (
+                      <button
+                        key={diff.label}
+                        type="button"
+                        onClick={() => toggleDifficulty(diff.label)}
+                        className={`flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                          isSelected
+                            ? diff.colorClass + ' shadow-xs'
+                            : DEFAULT_INACTIVE_BUTTON_CLASS
+                        }`}
+                      >
+                        {isSelected && <Check className="w-3.5 h-3.5" />}
+                        <span>{diff.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
+
+              {/* Phân cách */}
+              <div className="h-px bg-divider/40" />
+
+              {/* 3. THỜI GIAN NẤU */}
+              <div className="space-y-2">
+                <span className="text-xs font-bold text-foreground flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
+                    <Clock className="w-3.5 h-3.5" />
+                  </div>
+                  <span>Thời gian nấu tối đa</span>
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  {timeOptions.map(opt => {
+                    const isSelected = filters.maxTime === opt.value;
+                    return (
+                      <button
+                        key={opt.label}
+                        type="button"
+                        onClick={() => onFilterChange({ ...filters, maxTime: opt.value })}
+                        className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                          isSelected
+                            ? 'bg-primary text-primary-foreground border-primary shadow-xs'
+                            : DEFAULT_INACTIVE_BUTTON_CLASS
+                        }`}
+                      >
+                        {isSelected && <Check className="w-3.5 h-3.5" />}
+                        <span>{opt.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Phân cách */}
+              <div className="h-px bg-divider/40" />
+
+              {/* 4. TRẠNG THÁI THỰC HIỆN */}
+              <div className="space-y-2">
+                <span className="text-xs font-bold text-foreground flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-success/15 text-success flex items-center justify-center">
+                    <ChefHat className="w-3.5 h-3.5" />
+                  </div>
+                  <span>Trạng thái thực hiện</span>
+                </span>
+                <div className="grid grid-cols-3 gap-2">
+                  {cookedOptions.map(opt => {
+                    const isSelected = (filters.cookedStatus ?? 'all') === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => onFilterChange({ ...filters, cookedStatus: opt.value as 'all' | 'cooked' | 'uncooked' })}
+                        className={`flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                          isSelected
+                            ? 'bg-primary text-primary-foreground border-primary shadow-xs'
+                            : DEFAULT_INACTIVE_BUTTON_CLASS
+                        }`}
+                      >
+                        {isSelected && <Check className="w-3.5 h-3.5" />}
+                        <span className="truncate">{opt.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Phân cách */}
+              <div className="h-px bg-divider/40" />
+
+              {/* 5. ĐÁNH GIÁ TỐI THIỂU */}
+              <div className="space-y-2">
+                <span className="text-xs font-bold text-foreground flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-amber-500/15 text-amber-500 flex items-center justify-center">
+                    <Star className="w-3.5 h-3.5 fill-amber-500" />
+                  </div>
+                  <span>Đánh giá tối thiểu</span>
+                </span>
+                <div className="grid grid-cols-4 gap-2">
+                  {ratingOptions.map(opt => {
+                    const isSelected = (filters.minRating ?? 0) === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => onFilterChange({ ...filters, minRating: opt.value })}
+                        className={`flex items-center justify-center gap-1 py-2 px-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                          isSelected
+                            ? 'bg-primary text-primary-foreground border-primary shadow-xs'
+                            : DEFAULT_INACTIVE_BUTTON_CLASS
+                        }`}
+                      >
+                        {opt.value > 0 && <Star className="w-3 h-3 fill-amber-400 text-amber-400" />}
+                        <span>{opt.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Phân cách */}
+              <div className="h-px bg-divider/40" />
+
+              {/* 6. MÓN BIẾN THỂ */}
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-secondary" />
+                    Bao gồm món biến thể
+                  </span>
+                  <span className="text-[11px] text-default-400">
+                    Hiển thị các phiên bản công thức con
+                  </span>
+                </div>
+                <Switch
+                  isSelected={!filters.hideVariants}
+                  onValueChange={(val) => onFilterChange({ ...filters, hideVariants: !val })}
+                  size="sm"
+                  color="primary"
+                />
+              </div>
+
+              {/* 7. THẺ CÔNG THỨC */}
+              {availableTags && availableTags.length > 0 && (
+                <>
+                  <div className="h-px bg-divider/40" />
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-foreground flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
+                        <Layers className="w-3.5 h-3.5" />
+                      </div>
+                      <span>Thẻ công thức ({availableTags.length})</span>
+                    </label>
+                    <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto pr-1">
+                      {availableTags.map(tag => {
+                        const isSelected = (filters.tags || []).includes(tag);
+                        return (
+                          <button
+                            key={tag}
+                            type="button"
+                            onClick={() => {
+                              const newTags = isSelected
+                                ? (filters.tags || []).filter(t => t !== tag)
+                                : [...(filters.tags || []), tag];
+                              onFilterChange({ ...filters, tags: newTags });
+                            }}
+                            className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer border ${
+                              isSelected
+                                ? 'bg-primary text-primary-foreground border-primary shadow-xs font-bold'
+                                : 'bg-default-100/70 hover:bg-default-200/70 text-default-600 border-transparent'
+                            }`}
+                          >
+                            {isSelected && <Check className="w-3 h-3" />}
+                            #{tag}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}
             </DrawerBody>
+
+            {/* 3. Sticky Footer */}
+            <DrawerFooter className="px-5 py-4 border-t border-divider/50 flex items-center gap-3 bg-background/95 backdrop-blur-md sticky bottom-0 z-30">
+              <Button
+                variant="flat"
+                color="default"
+                onPress={handleClear}
+                className="flex-1 font-semibold rounded-xl h-11 text-xs"
+              >
+                Đặt lại
+              </Button>
+              <Button
+                color="primary"
+                onPress={() => onOpenChange(false)}
+                className="flex-1 font-bold rounded-xl h-11 text-xs shadow-md"
+              >
+                Áp dụng bộ lọc
+              </Button>
+            </DrawerFooter>
           </>
         )}
       </DrawerContent>

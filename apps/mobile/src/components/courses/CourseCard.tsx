@@ -142,27 +142,40 @@ export function CourseCard({
           </div>
         )}
 
-        {/* Badges Row */}
-        <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
-          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/10 flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary-400" />
-            {course.level}
-          </span>
+        {/* Metadata Row — Bỏ viền, bỏ nền, ngăn cách nhau bằng dấu chấm giữa dòng (•) */}
+        <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-xs font-medium text-white/90 drop-shadow-sm">
+          {course.level && (
+            <span className="inline-flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary-400 shrink-0" />
+              <span>{course.level}</span>
+            </span>
+          )}
 
           {course.rating ? (
-            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-warning-500/80 backdrop-blur-sm border border-warning-400 text-white flex items-center gap-1">
-              <Star className="w-2.5 h-2.5 fill-current" />
-              {course.rating}
+            <span className="inline-flex items-center gap-2">
+              {course.level && <span className="text-white/40 select-none">•</span>}
+              <span className="inline-flex items-center gap-0.5 text-amber-400">
+                <Star className="w-3 h-3 fill-amber-400" />
+                <span className="text-white/90">{course.rating}</span>
+              </span>
             </span>
           ) : null}
 
-          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/10 flex items-center gap-1">
-            <BookOpen className="w-2.5 h-2.5 shrink-0" />
-            {course.modules?.length || 0} chương
-          </span>
-          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/10">
-            {totalLessons} bài
-          </span>
+          {course.modules && course.modules.length > 0 && (
+            <span className="inline-flex items-center gap-2">
+              {(course.level || course.rating) && <span className="text-white/40 select-none">•</span>}
+              <span>{course.modules.length} chương</span>
+            </span>
+          )}
+
+          {totalLessons > 0 && (
+            <span className="inline-flex items-center gap-2">
+              {(course.level || course.rating || (course.modules && course.modules.length > 0)) && (
+                <span className="text-white/40 select-none">•</span>
+              )}
+              <span>{totalLessons} bài</span>
+            </span>
+          )}
         </div>
       </div>
     </div>

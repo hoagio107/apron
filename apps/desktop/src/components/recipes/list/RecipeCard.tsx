@@ -1,5 +1,5 @@
 import type { Recipe } from '@apron/core';
-import { Clock, Star, Flame, Target, Image as ImageIcon, MoreVertical, Heart, Trash2, CalendarDays, Edit2 } from 'lucide-react';
+import { Clock, Star, Flame, Image as ImageIcon, MoreVertical, Heart, Trash2, CalendarDays, Edit2 } from 'lucide-react';
 import { Checkbox, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from '@/ui';
 import { ImageManager } from '../../../lib/image-manager';
 

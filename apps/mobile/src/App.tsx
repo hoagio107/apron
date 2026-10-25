@@ -38,7 +38,7 @@ function AppLayout() {
   return (
     <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
       {/* Main Content */}
-      <main className={`flex-1 overflow-y-auto ${hideNav ? 'pb-0' : 'pb-16'}`}>
+      <main className={`flex-1 overflow-y-auto no-scrollbar ${hideNav ? 'pb-0' : 'pb-16'}`}>
         <ErrorBoundary>
           <Routes>
             <Route path="/" element={<DashboardPage />} />

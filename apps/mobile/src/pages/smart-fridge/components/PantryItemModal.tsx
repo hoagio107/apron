@@ -16,14 +16,11 @@ import {
 import { 
   Calendar, 
   Trash2, 
-  Plus, 
   Camera, 
-  Check, 
   Layers, 
   Tag, 
   Scale, 
-  Image as ImageIcon,
-  Sparkles
+  Image as ImageIcon
 } from 'lucide-react';
 import { CATEGORIES, autoCategorizeIngredient } from '@apron/core';
 import type { PantryItem } from '@apron/core';
@@ -188,7 +185,7 @@ export function PantryItemModal({
 
             <ModalBody className="flex flex-col gap-4">
               {/* Tên nguyên liệu */}
-              <FormField label="Tên nguyên liệu" icon={Tag} isRequired>
+              <FormField label="Tên nguyên liệu" icon={Tag}>
                 <Autocomplete
                   placeholder="VD: Thịt ba chỉ, Trứng gà, Cà chua..."
                   inputValue={name}
@@ -262,7 +259,7 @@ export function PantryItemModal({
 
               {/* Số lượng & Đơn vị */}
               <div className="grid grid-cols-2 gap-3">
-                <FormField label="Số lượng" icon={Scale} isRequired>
+                <FormField label="Số lượng" icon={Scale}>
                   <Input
                     type="number"
                     step="any"
@@ -319,28 +316,28 @@ export function PantryItemModal({
                     <button
                       type="button"
                       onClick={() => handleQuickAddDays(3)}
-                      className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-default-100 hover:bg-primary-50 hover:text-primary transition-colors shrink-0"
+                      className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-default-100 hover:bg-primary/10 hover:text-primary transition-colors shrink-0"
                     >
                       +3 ngày
                     </button>
                     <button
                       type="button"
                       onClick={() => handleQuickAddDays(7)}
-                      className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-default-100 hover:bg-primary-50 hover:text-primary transition-colors shrink-0"
+                      className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-default-100 hover:bg-primary/10 hover:text-primary transition-colors shrink-0"
                     >
                       +1 tuần
                     </button>
                     <button
                       type="button"
                       onClick={() => handleQuickAddDays(14)}
-                      className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-default-100 hover:bg-primary-50 hover:text-primary transition-colors shrink-0"
+                      className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-default-100 hover:bg-primary/10 hover:text-primary transition-colors shrink-0"
                     >
                       +2 tuần
                     </button>
                     <button
                       type="button"
                       onClick={() => handleQuickAddDays(30)}
-                      className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-default-100 hover:bg-primary-50 hover:text-primary transition-colors shrink-0"
+                      className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-default-100 hover:bg-primary/10 hover:text-primary transition-colors shrink-0"
                     >
                       +1 tháng
                     </button>
@@ -348,7 +345,7 @@ export function PantryItemModal({
                       <button
                         type="button"
                         onClick={() => setExpiryDate('')}
-                        className="px-2 py-1 rounded-lg text-xs font-semibold text-danger bg-danger-50 hover:bg-danger-100 transition-colors shrink-0"
+                        className="px-2 py-1 rounded-lg text-xs font-semibold text-danger bg-danger/10 hover:bg-danger/20 transition-colors shrink-0"
                       >
                         Bỏ HSD
                       </button>

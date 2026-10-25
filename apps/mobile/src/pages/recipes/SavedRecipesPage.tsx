@@ -12,6 +12,7 @@ import { RecipeListToolbar } from '../../components/recipes/list/RecipeListToolb
 import { RecipeFilterDrawer, defaultFilterState } from '../../components/recipes/list/RecipeFilterDrawer';
 import type { RecipeFilterState } from '../../components/recipes/list/RecipeFilterDrawer';
 import { useRecipeStore } from '../../store/useRecipeStore';
+import { useIngredientCatalogStore } from '../../store/useIngredientCatalogStore';
 import type { Recipe } from '@apron/core';
 import { EmptyState } from '../../components/shared/EmptyState';
 
@@ -62,7 +63,11 @@ export function SavedRecipesPage() {
     (filters.maxTime !== null ? 1 : 0) + 
     ((filters.tags?.length || 0) > 0 ? 1 : 0) + 
     (filters.cookedStatus && filters.cookedStatus !== 'all' ? 1 : 0) + 
-    (filters.minRating ? 1 : 0);
+    (filters.minRating ? 1 : 0) +
+    ((filters.ingredientIds?.length || 0) > 0 ? 1 : 0);
+
+  const { getAllIngredients } = useIngredientCatalogStore();
+  const allCatalogIngredients = getAllIngredients();
 
   const filteredAndSortedRecipes = useMemo(() => {
     let result = [...recipes];
@@ -77,6 +82,21 @@ export function SavedRecipesPage() {
     }
     
     // Filters
+    // Lọc theo nguyên liệu
+    if (filters.ingredientIds && filters.ingredientIds.length > 0) {
+      const selectedMetas = allCatalogIngredients.filter(ing => filters.ingredientIds.includes(ing.id));
+      result = result.filter(r =>
+        r.ingredients && r.ingredients.some(ri => {
+          if (ri.ingredient_id && filters.ingredientIds.includes(ri.ingredient_id)) return true;
+          const riName = ri.name?.toLowerCase().trim();
+          return selectedMetas.some(meta => {
+            const mName = meta.name.toLowerCase().trim();
+            return riName && (riName.includes(mName) || mName.includes(riName));
+          });
+        })
+      );
+    }
+
     if (filters.difficulties.length > 0) {
       result = result.filter(r => filters.difficulties.includes(r.difficulty));
     }
@@ -251,8 +271,8 @@ export function SavedRecipesPage() {
                 viewType={viewType}
                 onAction={(action) => handleRecipeAction(action, recipe)}
                 isSelected={selectedIds.has(recipe.id)}
-                isSelectMode={isSelectMode}
-                onSelect={() => toggleSelect(recipe.id)}
+                selectable={isSelectMode}
+                onSelectChange={() => toggleSelect(recipe.id)}
                 onClick={() => handleCardClick(recipe.id)}
               />
             ))}

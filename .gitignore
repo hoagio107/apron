@@ -1,1 +1,6 @@
 node_modules
+.playwright-mcp
+dist
+.turbo
+target
+*.log

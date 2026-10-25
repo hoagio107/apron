@@ -218,21 +218,30 @@ export function DashboardPage() {
                     <div className="relative z-10 flex flex-col justify-end h-full p-4 text-white text-left w-full">
                       <h3 className="font-bold text-base sm:text-lg line-clamp-2 leading-tight mb-3 drop-shadow-md">{course.title}</h3>
                       
-                      {/* Badges */}
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-[10px] font-medium tracking-wide px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/10 flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-primary-400"></span>
-                          {course.level}
-                        </span>
-                        
-                        <span className="text-[10px] font-medium tracking-wide px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/10 flex items-center gap-1.5">
-                          <BookOpen className="w-3 h-3" />
-                          {course.modules?.length || 0} chương
-                        </span>
-                        
-                        <span className="text-[10px] font-medium tracking-wide px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/10">
-                          {course.modules?.reduce((acc: any, m: any) => acc + (m.lessons?.length || 0), 0) || 0} bài
-                        </span>
+                      {/* Metadata Row — Bỏ viền, bỏ nền, ngăn cách nhau bằng dấu chấm giữa dòng (•) */}
+                      <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-xs font-medium text-white/90 drop-shadow-sm">
+                        {course.level && (
+                          <span className="inline-flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary-400 shrink-0" />
+                            <span>{course.level}</span>
+                          </span>
+                        )}
+
+                        {course.modules && course.modules.length > 0 && (
+                          <span className="inline-flex items-center gap-2">
+                            {course.level && <span className="text-white/40 select-none">•</span>}
+                            <span>{course.modules.length} chương</span>
+                          </span>
+                        )}
+
+                        {course.modules?.some((m: any) => m.lessons?.length) && (
+                          <span className="inline-flex items-center gap-2">
+                            {(course.level || (course.modules && course.modules.length > 0)) && (
+                              <span className="text-white/40 select-none">•</span>
+                            )}
+                            <span>{course.modules.reduce((acc: any, m: any) => acc + (m.lessons?.length || 0), 0)} bài</span>
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

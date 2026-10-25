@@ -19,6 +19,7 @@ import { TagSelectModal } from './components/TagSelectModal';
 import { ParentRecipeSelectModal } from './components/ParentRecipeSelectModal';
 import { BatchImageDrawer } from './components/BatchImageDrawer';
 import { useMealPlanStore } from '../../store/useMealPlanStore';
+import { useIngredientCatalogStore } from '../../store/useIngredientCatalogStore';
 import { Link as LinkIcon, Image as ImageIcon } from 'lucide-react';
 
 export function RecipeListPage() {
@@ -70,12 +71,16 @@ export function RecipeListPage() {
     return Array.from(tags).sort();
   }, [recipes]);
 
+  const { getAllIngredients } = useIngredientCatalogStore();
+  const allCatalogIngredients = getAllIngredients();
+
   const activeFilterCount = (filters.difficulties.length > 0 ? 1 : 0) + 
     (filters.maxTime !== null ? 1 : 0) + 
     ((filters.tags?.length || 0) > 0 ? 1 : 0) + 
     (filters.cookedStatus && filters.cookedStatus !== 'all' ? 1 : 0) + 
     (filters.minRating ? 1 : 0) +
-    (filters.hideVariants ? 1 : 0);
+    (filters.hideVariants ? 1 : 0) +
+    ((filters.ingredientIds?.length || 0) > 0 ? 1 : 0);
 
   const filteredAndSortedRecipes = useMemo(() => {
     let result = [...recipes];
@@ -90,13 +95,28 @@ export function RecipeListPage() {
       const q = searchQuery.toLowerCase();
       result = result.filter(r => (r.title || '').toLowerCase().includes(q));
     }
+
+    // Lọc theo nguyên liệu
+    if (filters.ingredientIds && filters.ingredientIds.length > 0) {
+      const selectedMetas = allCatalogIngredients.filter(ing => filters.ingredientIds.includes(ing.id));
+      result = result.filter(r =>
+        r.ingredients && r.ingredients.some(ri => {
+          if (ri.ingredient_id && filters.ingredientIds.includes(ri.ingredient_id)) return true;
+          const riName = ri.name?.toLowerCase().trim();
+          return selectedMetas.some(meta => {
+            const mName = meta.name.toLowerCase().trim();
+            return riName && (riName.includes(mName) || mName.includes(riName));
+          });
+        })
+      );
+    }
     
     // Lọc độ khó (tương thích cả 'Trung bình' và 'Vừa')
     if (filters.difficulties.length > 0) {
       result = result.filter(r => 
         filters.difficulties.includes(r.difficulty) ||
-        (filters.difficulties.includes('Trung bình') && r.difficulty === 'Vừa') ||
-        (filters.difficulties.includes('Vừa') && r.difficulty === 'Trung bình')
+        (filters.difficulties.includes('Trung bình') && (r.difficulty as string) === 'Vừa') ||
+        (filters.difficulties.includes('Vừa') && (r.difficulty as string) === 'Trung bình')
       );
     }
     

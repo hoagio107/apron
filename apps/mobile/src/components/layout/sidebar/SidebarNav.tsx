@@ -32,8 +32,8 @@ export function SidebarNav({ items }: SidebarNavProps) {
               className={cn(
                 "flex items-center justify-center group-[.is-expanded]/sidebar:justify-start gap-0 group-[.is-expanded]/sidebar:gap-3 h-12 px-0 group-[.is-expanded]/sidebar:px-4 rounded-xl transition-all group overflow-hidden",
                 isActive 
-                  ? "bg-primary-50 text-primary font-bold dark:bg-primary-900/30" 
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  ? "bg-primary/10 dark:bg-primary/20 text-primary font-bold" 
+                  : "text-default-600 dark:text-default-400 hover:bg-default-100/50 dark:hover:bg-default-50/10"
               )}
             >
               <item.icon 

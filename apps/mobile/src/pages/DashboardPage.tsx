@@ -295,7 +295,7 @@ export function DashboardPage() {
                 className="p-3.5 sm:p-4 flex flex-row gap-3.5 sm:gap-4 items-center active:scale-95 transition-transform text-left"
               >
                 {/* Ảnh đại diện mẹo bên trái */}
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden shrink-0 bg-warning-50 dark:bg-warning-900/20 flex items-center justify-center relative shadow-sm">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden shrink-0 bg-warning/10 dark:bg-warning/20 flex items-center justify-center relative shadow-sm">
                   <img 
                     src={
                       dailyTip.image_url && !dailyTip.image_url.includes('1603048297172')
@@ -308,7 +308,7 @@ export function DashboardPage() {
                       (e.target as HTMLElement).style.display = 'none';
                     }}
                   />
-                  <div className="absolute inset-0 -z-10 flex flex-col items-center justify-center bg-warning-50 dark:bg-warning-950/30 text-warning-500">
+                  <div className="absolute inset-0 -z-10 flex flex-col items-center justify-center bg-warning/10 dark:bg-warning/20 text-warning">
                     <Lightbulb className="w-8 h-8" />
                   </div>
                 </div>

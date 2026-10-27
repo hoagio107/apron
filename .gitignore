@@ -10,3 +10,4 @@ target
 local.properties
 .DS_Store
 scripts/*.json
+dist_release_v1.0.0

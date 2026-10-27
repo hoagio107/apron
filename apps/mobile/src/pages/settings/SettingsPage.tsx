@@ -21,8 +21,6 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from 'next-themes';
 import { Capacitor } from '@capacitor/core';
 import { useRecipeStore } from '../../store/useRecipeStore';
-import { usePantryStore } from '../../store/usePantryStore';
-import { useIngredientCatalogStore } from '../../store/useIngredientCatalogStore';
 import { useTipStore } from '../../store/useTipStore';
 import { useUnitStore } from '../../store/useUnitStore';
 import { ConfirmModal } from '../../components/shared/ConfirmModal';
@@ -36,11 +34,8 @@ export function SettingsPage() {
 
   // Store statistics
   const { recipes, addBulkRecipes, fetchRecipes } = useRecipeStore();
-  const { items: pantryItems } = usePantryStore();
-  const { getAllIngredients } = useIngredientCatalogStore();
   const { tips } = useTipStore();
   const { units } = useUnitStore();
-  const catalogItems = getAllIngredients();
 
   // Reset modal state
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
@@ -97,8 +92,6 @@ export function SettingsPage() {
         exported_at: new Date().toISOString(),
         version: '1.0.0',
         recipes,
-        pantry: pantryItems,
-        catalog: catalogItems,
         units,
         tips
       };
@@ -127,7 +120,6 @@ export function SettingsPage() {
         const parsed = JSON.parse(event.target?.result as string);
         let recipesToImport: any[] = [];
         let unitsToImport: any[] = [];
-        let catalogToImport: any[] = [];
 
         if (Array.isArray(parsed)) {
           recipesToImport = parsed;
@@ -141,28 +133,16 @@ export function SettingsPage() {
           if (Array.isArray(parsed.units)) {
             unitsToImport = parsed.units;
           }
-          if (Array.isArray(parsed.catalog)) {
-            catalogToImport = parsed.catalog;
-          } else if (parsed.catalog && typeof parsed.catalog === 'object') {
-            catalogToImport = Object.values(parsed.catalog);
-          }
         } else {
           throw new Error('Định dạng tệp sao lưu không hợp lệ.');
         }
 
-        // Auto-extract any units and ingredients from recipes
+        // Auto-extract any custom units from recipes
         recipesToImport.forEach((r: any) => {
           if (Array.isArray(r.ingredients)) {
             r.ingredients.forEach((ing: any) => {
               if (ing && ing.name) {
-                const name = String(ing.name).trim();
                 const unit = ing.unit ? String(ing.unit).trim() : '';
-                if (name) {
-                  catalogToImport.push({
-                    name,
-                    default_unit: unit || undefined,
-                  });
-                }
                 if (unit && !['g', 'kg', 'ml', 'lít', 'muỗng canh', 'muỗng cà phê'].includes(unit.toLowerCase())) {
                   unitsToImport.push({
                     name: unit,
@@ -182,13 +162,7 @@ export function SettingsPage() {
           addedUnitsCount = useUnitStore.getState().bulkAddUnits(unitsToImport);
         }
 
-        // 2. Bulk import ingredient catalog
-        let addedCatalogCount = 0;
-        if (catalogToImport.length > 0) {
-          addedCatalogCount = useIngredientCatalogStore.getState().bulkAddIngredients(catalogToImport);
-        }
-
-        // 3. Import recipes
+        // 2. Import recipes
         if (recipesToImport.length > 0) {
           const normalized = recipesToImport.map(r => ({
             ...r,
@@ -215,11 +189,10 @@ export function SettingsPage() {
 
           const details: string[] = [`${normalized.length} công thức`];
           if (addedUnitsCount > 0) details.push(`${addedUnitsCount} đơn vị`);
-          if (addedCatalogCount > 0) details.push(`${addedCatalogCount} nguyên liệu`);
 
           toast.success(`Đã nạp thành công: ${details.join(', ')}!`);
-        } else if (addedUnitsCount > 0 || addedCatalogCount > 0) {
-          toast.success(`Đã nạp thành công: ${addedUnitsCount} đơn vị, ${addedCatalogCount} nguyên liệu!`);
+        } else if (addedUnitsCount > 0) {
+          toast.success(`Đã nạp thành công: ${addedUnitsCount} đơn vị!`);
         } else {
           toast.warning('Tệp không chứa công thức nào.');
         }
@@ -352,22 +325,18 @@ export function SettingsPage() {
           </span>
           <div className="bg-content1/60 dark:bg-default-50/15 rounded-2xl overflow-hidden divide-y divide-divider/25 border-none shadow-none">
             {/* Stats Row */}
-            <div className="grid grid-cols-4 p-3 bg-default-100/40 dark:bg-default-50/10 divide-x divide-divider/20 text-center">
+            <div className="grid grid-cols-3 p-3 bg-default-100/40 dark:bg-default-50/10 divide-x divide-divider/20 text-center">
               <div className="flex flex-col items-center py-1">
                 <span className="text-base font-bold text-foreground">{recipes.length}</span>
                 <span className="text-[10px] text-default-400 font-medium mt-0.5">{t('nav.recipes')}</span>
               </div>
               <div className="flex flex-col items-center py-1">
-                <span className="text-base font-bold text-foreground">{pantryItems.length}</span>
-                <span className="text-[10px] text-default-400 font-medium mt-0.5">{t('fridge.title')}</span>
-              </div>
-              <div className="flex flex-col items-center py-1">
-                <span className="text-base font-bold text-foreground">{catalogItems.length}</span>
-                <span className="text-[10px] text-default-400 font-medium mt-0.5">{t('recipes.detail.ingredients')}</span>
-              </div>
-              <div className="flex flex-col items-center py-1">
                 <span className="text-base font-bold text-foreground">{tips.length}</span>
                 <span className="text-[10px] text-default-400 font-medium mt-0.5">{t('nav.kitchenTips')}</span>
+              </div>
+              <div className="flex flex-col items-center py-1">
+                <span className="text-base font-bold text-foreground">{units.length}</span>
+                <span className="text-[10px] text-default-400 font-medium mt-0.5">{t('nav.units')}</span>
               </div>
             </div>
 

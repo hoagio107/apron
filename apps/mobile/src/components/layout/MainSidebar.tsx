@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { 
   Home, Heart, GraduationCap, 
   Lightbulb, PlusCircle, ShoppingCart, Scale, 
-  Refrigerator, CalendarDays, Palette, ChefHat, NotebookTabs
+  CalendarDays, Palette, ChefHat,
+  PanelLeftClose, PanelLeft
 } from 'lucide-react';
 import { Button } from '@/ui';
 import { useTranslation } from 'react-i18next';
@@ -13,9 +14,10 @@ import { SidebarProfile } from './sidebar/SidebarProfile';
 
 interface MainSidebarProps {
   isExpanded: boolean;
+  onToggle?: () => void;
 }
 
-export function MainSidebar({ isExpanded }: MainSidebarProps) {
+export function MainSidebar({ isExpanded, onToggle }: MainSidebarProps) {
   const { t } = useTranslation();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -32,8 +34,6 @@ export function MainSidebar({ isExpanded }: MainSidebarProps) {
     { name: t('nav.saved'), icon: Heart, path: '/saved' },
     { name: t('nav.shoppingList'), icon: ShoppingCart, path: '/shopping-list' },
     { name: t('nav.courses'), icon: GraduationCap, path: '/courses' },
-    { name: t('nav.smartFridge'), icon: Refrigerator, path: '/smart-fridge' },
-    { name: t('recipes.detail.ingredients'), icon: NotebookTabs, path: '/catalog' },
     { name: t('nav.mealPlanner'), icon: CalendarDays, path: '/meal-planner' },
     { name: t('nav.kitchenTips'), icon: Lightbulb, path: '/tips' },
     { name: t('nav.units'), icon: Scale, path: '/units' },
@@ -42,26 +42,65 @@ export function MainSidebar({ isExpanded }: MainSidebarProps) {
 
   return (
     <>
-      <aside className={`hidden md:flex flex-col absolute inset-y-0 left-0 bg-content1 border-r border-divider text-foreground z-30 transition-[width] duration-300 ease-in-out overflow-hidden shadow-none group/sidebar ${isExpanded ? 'w-64 is-expanded' : 'w-20'}`}>
-        <nav className="flex-grow pl-4 pr-2 py-4 pt-4 group-[.is-expanded]/sidebar:pr-4 space-y-4 overflow-y-auto custom-scrollbar">
+      <aside 
+        className={`hidden md:flex flex-col absolute inset-y-0 left-0 bg-content1 border-r border-divider text-foreground z-30 transition-[width] duration-300 ease-in-out overflow-hidden shadow-none ${isExpanded ? 'w-64' : 'w-20'}`}
+      >
+        {/* Top Header Row with Expand/Collapse toggle */}
+        <div className={`flex items-center h-12 px-3 pt-2 ${isExpanded ? 'justify-between' : 'justify-center'}`}>
+          {isExpanded ? (
+            <>
+              <span className="font-bold text-xs tracking-wider text-default-400 uppercase px-2">Điều hướng</span>
+              {onToggle && (
+                <Button 
+                  isIconOnly 
+                  variant="light" 
+                  size="sm" 
+                  onPress={onToggle}
+                  title="Thu gọn menu"
+                  className="text-default-500 hover:text-foreground w-8 h-8 rounded-lg"
+                >
+                  <PanelLeftClose className="w-4 h-4" />
+                </Button>
+              )}
+            </>
+          ) : (
+            onToggle && (
+              <Button 
+                isIconOnly 
+                variant="light" 
+                size="sm" 
+                onPress={onToggle}
+                title="Mở rộng menu"
+                className="text-default-500 hover:text-foreground w-8 h-8 rounded-lg"
+              >
+                <PanelLeft className="w-4 h-4" />
+              </Button>
+            )
+          )}
+        </div>
+
+        <nav className={`flex-grow ${isExpanded ? 'px-3' : 'px-2'} py-2 space-y-3 overflow-y-auto custom-scrollbar`}>
           <Button 
             as={Link} 
             to="/recipes/new"
             color="primary" 
             variant="solid"
-            className="w-full font-bold min-w-0 px-0 group-[.is-expanded]/sidebar:px-4 h-12 flex items-center justify-center group-[.is-expanded]/sidebar:justify-start gap-0 group-[.is-expanded]/sidebar:gap-2 rounded-xl overflow-hidden transition-all duration-300"
+            className={`w-full font-bold h-11 flex items-center rounded-xl overflow-hidden transition-all duration-200 ${isExpanded ? 'justify-start px-3.5 gap-2.5' : 'justify-center px-0 gap-0 min-w-0'}`}
+            title={!isExpanded ? t('Add Recipe') : undefined}
           >
             <PlusCircle className="w-5 h-5 flex-shrink-0" />
-            <span className="whitespace-nowrap opacity-0 group-[.is-expanded]/sidebar:opacity-100 w-0 group-[.is-expanded]/sidebar:w-auto transition-all duration-300">{t('Add Recipe')}</span>
+            {isExpanded && (
+              <span className="whitespace-nowrap truncate">{t('Add Recipe')}</span>
+            )}
           </Button>
 
-          <div className="pt-2">
-            <SidebarNav items={navItems} />
+          <div className="pt-1">
+            <SidebarNav items={navItems} isExpanded={isExpanded} />
           </div>
         </nav>
 
-        <div className="ml-4 mr-2 group-[.is-expanded]/sidebar:mr-4 border-t border-gray-200 dark:border-gray-700 py-4">
-          <SidebarProfile onOpenSettings={() => setIsSettingsOpen(true)} />
+        <div className="p-3 border-t border-divider">
+          <SidebarProfile isExpanded={isExpanded} onOpenSettings={() => setIsSettingsOpen(true)} />
         </div>
       </aside>
 

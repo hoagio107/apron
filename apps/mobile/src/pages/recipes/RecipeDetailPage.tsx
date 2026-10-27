@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Modal, ModalContent, ModalBody, useDisclosure, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tabs, Tab, Spinner, toast, Chip } from '@/ui';
-import { ArrowLeft, Edit, Clock, Star, Flame, Play, Info, Share, Check, Image as ImageIcon, Plus, Gauge, Timer, Minus, Carrot, ChefHat, Link as LinkIcon, Video, Tag, X, Calendar, ShoppingCart, Printer, Download, ImageDown, ChevronDown, ChevronUp, History, GitFork, Layers, ArrowRight, Sparkles } from 'lucide-react';
+import { Button, Modal, ModalContent, ModalBody, useDisclosure, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tabs, Tab, Spinner, toast } from '@/ui';
+import { ArrowLeft, Edit, Clock, Star, Flame, Play, Info, Share, Check, Image as ImageIcon, Plus, Gauge, Timer, Minus, Carrot, ChefHat, Link as LinkIcon, Video, Tag, X, Calendar, ShoppingCart, Printer, Download, ImageDown, ChevronDown, ChevronUp, History, GitFork, Sparkles } from 'lucide-react';
 import { useRecipeStore } from '../../store/useRecipeStore';
 import { useShoppingListStore } from '../../store/useShoppingListStore';
 import { useMealPlanStore } from '../../store/useMealPlanStore';
@@ -225,18 +225,6 @@ export function RecipeDetailPage() {
       if (children.length === 0) return [];
       return [recipe, ...children];
     }
-  }, [recipe, recipes]);
-
-  const parentRecipe = useMemo(() => {
-    if (!recipe?.parent_id) return null;
-    return recipes.find(r => r.id === recipe.parent_id) || null;
-  }, [recipe?.parent_id, recipes]);
-
-  const isVariant = !!recipe?.parent_id;
-
-  const childVariants = useMemo(() => {
-    if (!recipe) return [];
-    return recipes.filter(r => r.parent_id === recipe.id);
   }, [recipe, recipes]);
 
   // Danh sách biến thể trong đó Bản gốc LUÔN xếp đầu tiên
@@ -507,7 +495,7 @@ export function RecipeDetailPage() {
                           const globalIndex = gIndex * 100 + i;
                           const isChecked = checkedIngredients.has(globalIndex);
                           return (
-                            <div key={globalIndex} className="flex items-start gap-3.5 group cursor-pointer py-2 border-b border-default-100/50 dark:border-default-800/40 last:border-b-0" onClick={() => toggleIngredient(globalIndex)}>
+                            <div key={globalIndex} className="flex items-start gap-3.5 group cursor-pointer py-2" onClick={() => toggleIngredient(globalIndex)}>
                               <div className={`w-6 h-6 rounded-lg border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${isChecked ? 'bg-primary border-primary text-white' : 'border-default-300 dark:border-default-600 group-hover:border-primary'}`}>{isChecked && <Check className="w-3.5 h-3.5 stroke-[2.5]" />}</div>
                               <div className={`flex items-start justify-between flex-1 gap-3 min-w-0 transition-opacity ${isChecked ? 'opacity-50 line-through' : ''}`}>
                                 <span className="font-semibold text-foreground text-base sm:text-lg leading-snug break-words flex-1">{ing.name}</span>
@@ -854,7 +842,7 @@ export function RecipeDetailPage() {
                        } else {
                          window.open(`https://www.google.com/search?q=${encodeURIComponent(recipe.source!)}`, '_blank');
                        }
-                     } catch (e) {}
+                     } catch {}
                    }}>
                      {recipe.source}
                    </span>
@@ -917,7 +905,7 @@ export function RecipeDetailPage() {
                         return (
                           <div 
                             key={globalIndex}
-                            className="flex items-start gap-3.5 group cursor-pointer py-2 border-b border-default-100/50 dark:border-default-800/40 last:border-b-0"
+                            className="flex items-start gap-3.5 group cursor-pointer py-2"
                             onClick={() => toggleIngredient(globalIndex)}
                           >
                             <div className={`w-6 h-6 rounded-lg border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${isChecked ? 'bg-primary border-primary text-white' : 'border-default-300 dark:border-default-600 group-hover:border-primary'}`}>

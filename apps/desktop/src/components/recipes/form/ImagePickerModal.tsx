@@ -1,11 +1,12 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { 
   Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
   Button, Tabs, Tab, Input, Progress 
 } from '@/ui';
-import { CloudUpload, Link as LinkIcon, Trash2, CheckCircle2, XCircle, FileImage } from 'lucide-react';
+import { CloudUpload, Link as LinkIcon, Trash2, CheckCircle2, XCircle, FileImage, BookOpen, Search, Check } from 'lucide-react';
 import { validateMediaFile, formatBytes, MAX_FILE_SIZE_MB, MAX_VIDEO_SIZE_MB } from '../../../lib/image-utils';
 import { ImageManager } from '../../../lib/image-manager';
+import { useRecipeStore } from '../../../store/useRecipeStore';
 
 interface ImagePickerModalProps {
   isOpen: boolean;
@@ -37,6 +38,60 @@ export function ImagePickerModal({ isOpen, onOpenChange, onSelectMedia }: ImageP
   const [urlInput, setUrlInput] = useState('');
   const [urlList, setUrlList] = useState<string[]>([]);
 
+  // Recipe Library Tab State
+  const [selectedRecipeImageUrls, setSelectedRecipeImageUrls] = useState<string[]>([]);
+  const [recipeImageSearch, setRecipeImageSearch] = useState('');
+  const { recipes, fetchRecipes } = useRecipeStore();
+
+  useEffect(() => {
+    if (recipes.length === 0) {
+      fetchRecipes();
+    }
+  }, [recipes.length, fetchRecipes]);
+
+  const recipePhotoItems = useMemo(() => {
+    const list: { url: string; recipeTitle: string; recipeId: string }[] = [];
+    const seen = new Set<string>();
+
+    recipes.forEach(r => {
+      const urls: string[] = [];
+      if (r.image_url) urls.push(r.image_url);
+      if (r.thumbnail_url && r.thumbnail_url !== r.image_url) urls.push(r.thumbnail_url);
+      if (r.images && Array.isArray(r.images)) {
+        r.images.forEach(img => {
+          if (img && !urls.includes(img)) urls.push(img);
+        });
+      }
+      if (r.steps && Array.isArray(r.steps)) {
+        r.steps.forEach(step => {
+          if (step.image_url && !urls.includes(step.image_url)) urls.push(step.image_url);
+          if (step.images && Array.isArray(step.images)) {
+            step.images.forEach(img => {
+              if (img && !urls.includes(img)) urls.push(img);
+            });
+          }
+        });
+      }
+
+      urls.forEach(u => {
+        if (!seen.has(u)) {
+          seen.add(u);
+          list.push({ url: u, recipeTitle: r.title, recipeId: r.id });
+        }
+      });
+    });
+
+    if (!recipeImageSearch.trim()) return list;
+    const q = recipeImageSearch.toLowerCase();
+    return list.filter(item => item.recipeTitle.toLowerCase().includes(q));
+  }, [recipes, recipeImageSearch]);
+
+  const toggleSelectRecipeImage = (url: string) => {
+    setSelectedRecipeImageUrls(prev => 
+      prev.includes(url) ? prev.filter(u => u !== url) : [...prev, url]
+    );
+  };
+
   // Reset state when closing
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -44,6 +99,8 @@ export function ImagePickerModal({ isOpen, onOpenChange, onSelectMedia }: ImageP
         setUploads([]);
         setUrlInput('');
         setUrlList([]);
+        setSelectedRecipeImageUrls([]);
+        setRecipeImageSearch('');
       }, 300);
     }
     onOpenChange(open);
@@ -137,6 +194,13 @@ export function ImagePickerModal({ isOpen, onOpenChange, onSelectMedia }: ImageP
       }
     });
 
+    // Add selected recipe images
+    selectedRecipeImageUrls.forEach(url => {
+      if (!finalImages.includes(url)) {
+        finalImages.push(url);
+      }
+    });
+
     if (finalImages.length > 0 || finalVideos.length > 0) {
       onSelectMedia(finalImages, finalVideos);
     }
@@ -144,7 +208,7 @@ export function ImagePickerModal({ isOpen, onOpenChange, onSelectMedia }: ImageP
     handleOpenChange(false);
   };
 
-  const hasItems = uploads.length > 0 || urlList.length > 0;
+  const hasItems = uploads.length > 0 || urlList.length > 0 || selectedRecipeImageUrls.length > 0;
 
   return (
     <Modal 
@@ -259,7 +323,7 @@ export function ImagePickerModal({ isOpen, onOpenChange, onSelectMedia }: ImageP
                               isIconOnly 
                               variant="light" 
                               color="danger" 
-                              size="sm"
+                              size="md"
                               onPress={() => handleRemoveUpload(u.id)}
                             >
                               <Trash2 className="w-4 h-4" />
@@ -311,13 +375,79 @@ export function ImagePickerModal({ isOpen, onOpenChange, onSelectMedia }: ImageP
                               isIconOnly 
                               variant="light" 
                               color="danger" 
-                              size="sm"
+                              size="md"
                               onPress={() => handleRemoveUrl(i)}
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
                         ))}
+                      </div>
+                    )}
+                  </div>
+                </Tab>
+
+                <Tab 
+                  key="library" 
+                  title={
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="w-4 h-4" />
+                      <span>Từ công thức khác</span>
+                      {selectedRecipeImageUrls.length > 0 && (
+                        <span className="w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center">
+                          {selectedRecipeImageUrls.length}
+                        </span>
+                      )}
+                    </div>
+                  }
+                >
+                  <div className="flex flex-col gap-3 mt-2">
+                    <Input
+                      placeholder="Tìm theo tên công thức..."
+                      variant="flat"
+                      size="sm"
+                      value={recipeImageSearch}
+                      onChange={(e) => setRecipeImageSearch(e.target.value)}
+                      isClearable
+                      onClear={() => setRecipeImageSearch('')}
+                      startContent={<Search className="w-4 h-4 text-default-400" />}
+                    />
+
+                    {recipePhotoItems.length === 0 ? (
+                      <div className="py-12 text-center text-default-400 text-xs">
+                        {recipeImageSearch ? 'Không tìm thấy ảnh công thức phù hợp' : 'Chưa có ảnh nào từ các công thức khác'}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 max-h-64 overflow-y-auto custom-scrollbar p-1">
+                        {recipePhotoItems.map(item => {
+                          const isSelected = selectedRecipeImageUrls.includes(item.url);
+                          return (
+                            <div
+                              key={item.url}
+                              onClick={() => toggleSelectRecipeImage(item.url)}
+                              className={`relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${
+                                isSelected ? 'border-primary ring-2 ring-primary/30 shadow-md scale-95' : 'border-divider/50 hover:border-primary/50'
+                              }`}
+                            >
+                              <img
+                                src={ImageManager.getAssetUrl(item.url)}
+                                alt={item.recipeTitle}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                              />
+                              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-1.5 pt-3">
+                                <p className="text-[10px] text-white font-medium truncate" title={item.recipeTitle}>
+                                  {item.recipeTitle}
+                                </p>
+                              </div>
+                              {isSelected && (
+                                <div className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center shadow-md">
+                                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

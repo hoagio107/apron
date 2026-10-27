@@ -3,7 +3,6 @@ import { Button, Card, CardBody, Input, Autocomplete, AutocompleteItem } from '@
 import { Plus, Trash2, ShoppingCart, Users, GripVertical, X } from 'lucide-react';
 import type { FormValues } from './schema';
 import { useUnits } from '../../../hooks/useUnits';
-import { IngredientCombobox } from './IngredientCombobox';
 import { SectionHeader } from '../../shared/SectionHeader';
 import { SortableList, SortableItem } from './SortableList';
 
@@ -16,7 +15,7 @@ export function IngredientsSection() {
   });
 
   return (
-    <Card className="w-full" shadow="none">
+    <Card className="w-full app-card" shadow="none">
       <SectionHeader 
         title="Nguyên liệu" 
         icon={ShoppingCart}
@@ -52,7 +51,7 @@ export function IngredientsSection() {
       />
       <CardBody className="gap-0">
         {sections.length === 0 && (
-          <div className="text-center text-gray-500 py-4">Chưa có nguyên liệu nào. Hãy thêm nhóm nguyên liệu đầu tiên.</div>
+          <div className="text-center text-default-500 py-4">Chưa có nguyên liệu nào. Hãy thêm nhóm nguyên liệu đầu tiên.</div>
         )}
         
         {sections.map((section, sectionIndex) => (
@@ -81,7 +80,7 @@ export function IngredientsSection() {
 }
 
 function IngredientGroup({ sectionIndex, onRemove }: { sectionIndex: number, onRemove: () => void }) {
-  const { control, setValue } = useFormContext<FormValues>();
+  const { control } = useFormContext<FormValues>();
   
   const { fields: ingredients, append, remove, move } = useFieldArray({
     control,
@@ -135,15 +134,14 @@ function IngredientGroup({ sectionIndex, onRemove }: { sectionIndex: number, onR
                     name={`ingredientSections.${sectionIndex}.ingredients.${index}.name`}
                     control={control}
                     render={({ field, fieldState }) => (
-                      <IngredientCombobox
+                      <Input
+                        {...field}
                         value={field.value || ''}
-                        ingredientId={ingredients[index].ingredient_id}
-                        onChange={(name, id, defaultUnit) => {
-                          field.onChange(name);
-                          setValue(`ingredientSections.${sectionIndex}.ingredients.${index}.ingredient_id`, id);
-                          if (defaultUnit) {
-                            setValue(`ingredientSections.${sectionIndex}.ingredients.${index}.unit`, defaultUnit);
-                          }
+                        placeholder="Tên nguyên liệu (VD: Thịt bò)"
+                        variant="flat"
+                        className="flex-1 min-w-[140px]"
+                        classNames={{
+                          inputWrapper: "bg-default-100 hover:bg-default-200 border-none shadow-none"
                         }}
                         isInvalid={!!fieldState.error}
                         errorMessage={fieldState.error?.message}

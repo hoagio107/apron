@@ -1,18 +1,18 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/ui';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { BulkActionBar } from '../../components/shared/BulkActionBar';
 import { PageLoader } from '../../components/shared/PageLoader';
 import { ConfirmModal } from '../../components/shared/ConfirmModal';
-import { Trash2, CalendarDays, Tags, Search, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
+
 import type { RecipeViewType } from '../../components/recipes/list/RecipeCard';
 import { RecipeCard } from '../../components/recipes/list/RecipeCard';
 import { RecipeListToolbar } from '../../components/recipes/list/RecipeListToolbar';
 import { RecipeFilterDrawer, defaultFilterState } from '../../components/recipes/list/RecipeFilterDrawer';
 import type { RecipeFilterState } from '../../components/recipes/list/RecipeFilterDrawer';
 import { useRecipeStore } from '../../store/useRecipeStore';
-import { useIngredientCatalogStore } from '../../store/useIngredientCatalogStore';
+
 import type { Recipe } from '@apron/core';
 import { EmptyState } from '../../components/shared/EmptyState';
 
@@ -63,11 +63,9 @@ export function SavedRecipesPage() {
     (filters.maxTime !== null ? 1 : 0) + 
     ((filters.tags?.length || 0) > 0 ? 1 : 0) + 
     (filters.cookedStatus && filters.cookedStatus !== 'all' ? 1 : 0) + 
-    (filters.minRating ? 1 : 0) +
-    ((filters.ingredientIds?.length || 0) > 0 ? 1 : 0);
+    (filters.minRating ? 1 : 0);
 
-  const { getAllIngredients } = useIngredientCatalogStore();
-  const allCatalogIngredients = getAllIngredients();
+
 
   const filteredAndSortedRecipes = useMemo(() => {
     let result = [...recipes];
@@ -82,20 +80,7 @@ export function SavedRecipesPage() {
     }
     
     // Filters
-    // Lọc theo nguyên liệu
-    if (filters.ingredientIds && filters.ingredientIds.length > 0) {
-      const selectedMetas = allCatalogIngredients.filter(ing => filters.ingredientIds.includes(ing.id));
-      result = result.filter(r =>
-        r.ingredients && r.ingredients.some(ri => {
-          if (ri.ingredient_id && filters.ingredientIds.includes(ri.ingredient_id)) return true;
-          const riName = ri.name?.toLowerCase().trim();
-          return selectedMetas.some(meta => {
-            const mName = meta.name.toLowerCase().trim();
-            return riName && (riName.includes(mName) || mName.includes(riName));
-          });
-        })
-      );
-    }
+
 
     if (filters.difficulties.length > 0) {
       result = result.filter(r => filters.difficulties.includes(r.difficulty));

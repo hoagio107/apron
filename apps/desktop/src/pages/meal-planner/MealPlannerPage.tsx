@@ -252,7 +252,7 @@ export function MealPlannerPage() {
           />
           
           {/* Sidebar */}
-          <div className="hidden lg:block w-80 shrink-0 bg-white rounded-2xl border border-default-100 shadow-none overflow-hidden">
+          <div className="hidden lg:block w-80 shrink-0 app-card overflow-hidden">
             <RecipeSidebar />
           </div>
         </div>

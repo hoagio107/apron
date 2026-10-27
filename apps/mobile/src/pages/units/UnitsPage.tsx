@@ -6,17 +6,18 @@ import {
   toast 
 } from '@/ui';
 import type { ToolbarFilterItem } from '@/ui';
-import { Plus, Search, Scale, X, UtensilsCrossed, ArrowDownUp } from 'lucide-react';
+import { Plus, Search, Scale, Sparkles } from 'lucide-react';
 import { useUnitStore } from '../../store/useUnitStore';
 import { useRecipeStore } from '../../store/useRecipeStore';
 import type { Unit } from '@apron/core';
+import { UNIT_CATEGORIES, detectUnitCategory } from '@apron/core';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { ConfirmModal } from '../../components/shared/ConfirmModal';
-import { UnitCard, getUnitTheme } from './components/UnitCard';
-import { UnitModal, detectUnitCategory, UNIT_CATEGORIES } from './components/UnitModal';
+import { UnitCard } from './components/UnitCard';
+import { UnitModal } from './components/UnitModal';
 
 export function UnitsPage() {
-  const { units, addUnit, updateUnit, removeUnit } = useUnitStore();
+  const { units, addUnit, updateUnit, removeUnit, seedDefaultUnits } = useUnitStore();
   const { recipes, fetchRecipes } = useRecipeStore();
 
   useEffect(() => {
@@ -228,16 +229,29 @@ export function UnitsPage() {
           <EmptyState
             icon={<Scale className="w-12 h-12 text-default-300" />}
             title="Chưa có đơn vị tính nào"
-            description="Hãy thêm các đơn vị tính như g, kg, ml, thìa... để sử dụng cho công thức nấu ăn."
+            description="Hãy nạp bộ đơn vị tính chuẩn (g, kg, ml, muỗng...) hoặc tự thêm đơn vị mới để sử dụng."
             action={
-              <Button
-                color="primary"
-                onPress={handleOpenAdd}
-                startContent={<Plus className="w-4 h-4" />}
-                className="h-11 rounded-xl px-5 font-semibold text-sm shadow-xs"
-              >
-                Thêm đơn vị mới
-              </Button>
+              <div className="flex flex-col gap-2 w-full max-w-xs items-center">
+                <Button
+                  color="primary"
+                  onPress={() => {
+                    const count = seedDefaultUnits();
+                    toast.success(`Đã nạp ${count} đơn vị nấu ăn chuẩn!`);
+                  }}
+                  startContent={<Sparkles className="w-4 h-4" />}
+                  className="h-11 rounded-xl px-5 font-semibold text-sm shadow-xs w-full"
+                >
+                  Nạp đơn vị chuẩn
+                </Button>
+                <Button
+                  variant="flat"
+                  onPress={handleOpenAdd}
+                  startContent={<Plus className="w-4 h-4" />}
+                  className="h-11 rounded-xl px-5 font-semibold text-sm w-full"
+                >
+                  Tự thêm đơn vị mới
+                </Button>
+              </div>
             }
           />
         ) : filteredUnits.length === 0 ? (

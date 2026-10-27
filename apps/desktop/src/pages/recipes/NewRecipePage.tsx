@@ -18,8 +18,21 @@ export function NewRecipePage() {
       if (existing) {
         setEditRecipe(existing);
       }
+    } else {
+      const titleParam = searchParams.get('title');
+      const imageParam = searchParams.get('image');
+      if (titleParam || imageParam) {
+        setEditRecipe({
+          id: '',
+          title: titleParam || '',
+          image_url: imageParam || '',
+          servings: 2,
+          ingredients: [],
+          instructions: []
+        } as any);
+      }
     }
-  }, [editId, recipes]);
+  }, [editId, searchParams, recipes]);
 
   const handleSubmit = async (data: any) => {
     if (Array.isArray(data)) {
@@ -41,7 +54,7 @@ export function NewRecipePage() {
   }
 
   return (
-    <div className="h-full pt-6">
+    <div className="min-h-full flex flex-col pt-6 pb-14">
       <RecipeForm initialData={editRecipe} onSubmit={handleSubmit} />
     </div>
   );

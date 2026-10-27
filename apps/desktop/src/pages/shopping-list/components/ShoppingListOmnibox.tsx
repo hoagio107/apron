@@ -3,10 +3,8 @@ import type { Key } from 'react';
 import { Autocomplete, AutocompleteItem, Tabs, Tab, Avatar } from '@/ui';
 import { Search, Plus, BookOpen } from 'lucide-react';
 import { useShoppingListStore } from '../../../store/useShoppingListStore';
-import { useIngredientCatalogStore } from '../../../store/useIngredientCatalogStore';
 import { useRecipeStore } from '../../../store/useRecipeStore';
 import type { ShoppingListItem, Recipe } from '@apron/core';
-import type { IngredientMeta } from '../../../store/useIngredientCatalogStore';
 import { getCategoryTheme } from '../../../lib/categoryTheme';
 import { ImageManager } from '../../../lib/image-manager';
 
@@ -15,8 +13,6 @@ export function ShoppingListOmnibox() {
   const [searchTab, setSearchTab] = useState('all');
   
   const { items: listItems, addItem, addItems } = useShoppingListStore();
-  const getAllIngredients = useIngredientCatalogStore(s => s.getAllIngredients);
-  const catalogItems = getAllIngredients();
   const recipes = useRecipeStore(s => s.recipes);
 
   const normalizedInput = inputValue.toLowerCase().trim();
@@ -26,12 +22,6 @@ export function ShoppingListOmnibox() {
     if (!normalizedInput) return [];
     return listItems.filter((i: ShoppingListItem) => (i.name || '').toLowerCase().includes(normalizedInput)).slice(0, 5);
   }, [listItems, normalizedInput]);
-
-  // Filter Catalog Items
-  const filteredCatalogItems = useMemo(() => {
-    if (!normalizedInput) return [];
-    return catalogItems.filter((i: IngredientMeta) => (i.name || '').toLowerCase().includes(normalizedInput) && !listItems.find((li: ShoppingListItem) => (li.name || '').toLowerCase() === (i.name || '').toLowerCase())).slice(0, 5);
-  }, [catalogItems, normalizedInput, listItems]);
 
   // Filter Recipes
   const filteredRecipes = useMemo(() => {
@@ -45,17 +35,8 @@ export function ShoppingListOmnibox() {
     
     if (strKey.startsWith('custom_')) {
       const name = strKey.replace('custom_', '');
-      addItem(name, 1, 'đơn vị');
+      addItem(name, 1, 'phần');
       setInputValue('');
-      alert(`Đã thêm ${name} vào danh sách`);
-    } else if (strKey.startsWith('catalog_')) {
-      const id = strKey.replace('catalog_', '');
-      const catItem = catalogItems.find((i: IngredientMeta) => i.id === id);
-      if (catItem) {
-        addItem(catItem.name, 1, catItem.default_unit || 'đơn vị', catItem.default_category);
-        setInputValue('');
-        alert(`Đã thêm ${catItem.name} vào danh sách`);
-      }
     } else if (strKey.startsWith('recipe_')) {
       const id = strKey.replace('recipe_', '');
       const recipe = recipes.find((r: Recipe) => r.id === id);
@@ -69,7 +50,6 @@ export function ShoppingListOmnibox() {
           }));
           addItems(newItems);
           setInputValue('');
-          alert(`Đã thêm nguyên liệu của ${recipe.title}`);
         }
       }
     } else if (strKey.startsWith('list_')) {
@@ -107,7 +87,6 @@ export function ShoppingListOmnibox() {
                 }}
               >
                 <Tab key="all" title="Tất cả" />
-                <Tab key="catalog" title="Từ điển" />
                 <Tab key="recipes" title="Công thức" />
                 <Tab key="in_list" title="Đã có" />
               </Tabs>
@@ -115,33 +94,18 @@ export function ShoppingListOmnibox() {
           )
         }}
       >
-        {filteredListItems.length > 0 || filteredCatalogItems.length > 0 || filteredRecipes.length > 0 || normalizedInput ? (
+        {filteredListItems.length > 0 || filteredRecipes.length > 0 || normalizedInput ? (
           [
             // 1. Trong danh sách đi chợ (Active Items)
             ...(searchTab === 'all' || searchTab === 'in_list') ? filteredListItems.map((item: ShoppingListItem) => {
-              const catalogItem = catalogItems.find((c: IngredientMeta) => (c.name || '').toLowerCase() === (item.name || '').toLowerCase());
+              const theme = getCategoryTheme(item.group);
+              const Icon = theme.icon;
               return (
                 <AutocompleteItem key={`list_${item.id}`} textValue={item.name} className="py-2">
                   <div className="flex items-center gap-3">
-                    {(() => {
-                      const group = catalogItem?.default_category || item.group;
-                      const theme = getCategoryTheme(group);
-                      const Icon = theme.icon;
-                      
-                      return catalogItem?.image_url ? (
-                        <Avatar 
-                          src={ImageManager.getAssetUrl(catalogItem.image_url)} 
-                          radius="md" 
-                          showFallback
-                          className="w-10 h-10 flex-shrink-0 bg-default-100" 
-                          fallback={<Icon className="w-5 h-5 text-default-400" />}
-                        />
-                      ) : (
-                        <div className={`w-10 h-10 rounded-md flex-shrink-0 flex items-center justify-center ${theme.bg} ${theme.text}`}>
-                          <Icon className="w-5 h-5" />
-                        </div>
-                      );
-                    })()}
+                    <div className={`w-10 h-10 rounded-md flex-shrink-0 flex items-center justify-center ${theme.bg} ${theme.text}`}>
+                      <Icon className="w-5 h-5" />
+                    </div>
                     <div className="flex flex-col">
                       <span className="text-sm font-medium">{item.name}</span>
                       <span className="text-xs text-default-400">Đã có trong danh sách • {item.quantity} {item.unit}</span>
@@ -151,36 +115,7 @@ export function ShoppingListOmnibox() {
               );
             }) : [],
 
-            // 2. Từ điển nguyên liệu (Catalog)
-            ...(searchTab === 'all' || searchTab === 'catalog') ? filteredCatalogItems.map((item: IngredientMeta) => (
-              <AutocompleteItem key={`catalog_${item.id}`} textValue={item.name} className="py-2">
-                <div className="flex items-center gap-3">
-                  {(() => {
-                    const theme = getCategoryTheme(item.default_category);
-                    const Icon = theme.icon;
-                    return item.image_url ? (
-                      <Avatar 
-                        src={ImageManager.getAssetUrl(item.image_url)} 
-                        radius="md" 
-                        showFallback
-                        className="w-10 h-10 flex-shrink-0 bg-default-100" 
-                        fallback={<Icon className="w-5 h-5 text-default-400" />}
-                      />
-                    ) : (
-                      <div className={`w-10 h-10 rounded-md flex-shrink-0 flex items-center justify-center ${theme.bg} ${theme.text}`}>
-                        <Icon className="w-5 h-5" />
-                      </div>
-                    );
-                  })()}
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">{item.name}</span>
-                    <span className="text-xs text-default-400">Nguyên liệu: {item.default_category || 'Khác'}</span>
-                  </div>
-                </div>
-              </AutocompleteItem>
-            )) : [],
-
-            // 3. Công thức nấu ăn (Recipes)
+            // 2. Công thức nấu ăn (Recipes)
             ...(searchTab === 'all' || searchTab === 'recipes') ? filteredRecipes.map((recipe: Recipe) => (
               <AutocompleteItem key={`recipe_${recipe.id}`} textValue={recipe.title} className="py-2">
                 <div className="flex items-center gap-3">
@@ -207,8 +142,8 @@ export function ShoppingListOmnibox() {
               </AutocompleteItem>
             )) : [],
 
-            // 4. Custom Add
-            (searchTab === 'all' || searchTab === 'catalog') && normalizedInput && !filteredCatalogItems.find((i: IngredientMeta) => (i.name || '').toLowerCase() === normalizedInput) ? (
+            // 3. Custom Add
+            (searchTab === 'all') && normalizedInput ? (
               <AutocompleteItem key={`custom_${normalizedInput}`} textValue={inputValue} className="py-2">
                 <div className="flex items-center gap-3 text-secondary">
                   <div className="w-10 h-10 rounded-md flex-shrink-0 bg-secondary/10 flex items-center justify-center">

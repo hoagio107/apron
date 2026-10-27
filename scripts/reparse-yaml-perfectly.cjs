@@ -208,7 +208,10 @@ function cleanNoun(raw) {
     'mayonnaise': 'Sốt Mayonnaise',
     'sốt mayonnaise': 'Sốt Mayonnaise',
     'tương cà': 'Tương cà',
-    'tương ớt': 'Tương ớt'
+    'tương ớt': 'Tương ớt',
+    'thơm': 'Trái thơm',
+    'trái thơm': 'Trái thơm',
+    'dứa': 'Trái thơm'
   };
 
   const l = name.toLowerCase();
@@ -242,6 +245,18 @@ const KNOWN_UNITS = new Set([
 function parseYamlIngredientLine(line) {
   let str = line.trim();
   str = str.replace(/^[-*•]\s*/, '').trim();
+
+  // Normalize Unicode fractions
+  str = str.replace(/¼/g, '1/4 ')
+           .replace(/½/g, '1/2 ')
+           .replace(/¾/g, '3/4 ')
+           .replace(/⅓/g, '1/3 ')
+           .replace(/⅔/g, '2/3 ')
+           .replace(/⅛/g, '1/8 ')
+           .replace(/⅜/g, '3/8 ')
+           .replace(/⅝/g, '5/8 ')
+           .replace(/⅞/g, '7/8 ')
+           .replace(/\s+/g, ' ');
 
   // Strip leading number if not a fraction and followed by "gia vị" or "rau..."
   if (/^\d+(?!\/)[\s.,]+(gia vị|rau ăn kèm|rau sống|rau thơm|các loại rau)/i.test(str)) {

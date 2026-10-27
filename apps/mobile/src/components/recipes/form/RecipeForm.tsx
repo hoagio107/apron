@@ -5,20 +5,20 @@ import { recipeSchema } from './schema';
 import type { FormValues } from './schema';
 
 import { Button, Tabs, Tab, PageHeader, toast } from '@/ui';
-import { Sparkles, FileText, Utensils, ChefHat } from 'lucide-react';
+import { Sparkles, FileText, Utensils, ChefHat, Layers, X } from 'lucide-react';
 import { ImageSection } from './ImageSection';
 import { InfoSection } from './InfoSection';
 import { MetaSection } from './MetaSection';
 import { IngredientsSection } from './IngredientsSection';
 import { StepsSection } from './StepsSection';
-import { LinkedTipsSection } from './LinkedTipsSection';
 import { AiAssistModal } from './AiAssistModal';
 import { ImageManager } from '../../../lib/image-manager';
 import type { Recipe, Tag } from '@apron/core';
-import { DEFAULT_TAGS } from '@apron/core';
+import { DEFAULT_TAGS, normalizeUnit, extractAndNormalizeUnits } from '@apron/core';
+import { useUnitStore } from '../../../store/useUnitStore';
 import type { ParseRecipeResult } from '../../../lib/gemini';
-import { useIngredientCatalogStore } from '../../../store/useIngredientCatalogStore';
 import { BottomActionStepper } from '../../shared/BottomActionStepper';
+import { NEXT_TICK_DELAY_MS } from '../../../constants';
 
 interface RecipeFormProps {
   initialData?: Recipe;
@@ -50,7 +50,6 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [activeStep, setActiveStep] = useState('info');
-  const { addIngredientMeta, getIngredientMetaByName } = useIngredientCatalogStore();
 
   const defaultValues: FormValues = useMemo(() => {
     if (initialData) {
@@ -175,7 +174,7 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
     if (data.difficulty) newValues.difficulty = data.difficulty;
     if (data.prep_time_minutes) newValues.prep_time = data.prep_time_minutes;
     if (data.cook_time_minutes) newValues.cook_time = data.cook_time_minutes;
-    if (data.servings) newValues.servings = data.servings;
+    newValues.servings = (data.servings && Number(data.servings) > 0) ? Number(data.servings) : (currentValues.servings || 2);
     if (data.calories) newValues.calories = data.calories;
     if (data.linked_tips) newValues.linked_tips = Array.from(new Set([...(currentValues.linked_tips || []), ...data.linked_tips]));
     
@@ -183,7 +182,7 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
       const tagIds: string[] = [];
       const newDynamicTags: Tag[] = [];
       
-      data.tags.forEach(tagObj => {
+      data.tags.forEach((tagObj: any) => {
         const tagName = typeof tagObj === 'string' ? tagObj : tagObj.name;
         
         if (typeof tagObj !== 'string' && tagObj.is_new) {
@@ -216,29 +215,29 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
     }
     
     if (data.ingredientSections && data.ingredientSections.length > 0) {
-      newValues.ingredientSections = data.ingredientSections.map(section => ({
+      newValues.ingredientSections = data.ingredientSections.map((section: any) => ({
         name: section.name || 'Nguyên liệu',
-        ingredients: section.ingredients.map(ing => {
-          const matchedMeta = getIngredientMetaByName(ing.name);
-          return {
+        ingredients: (section.ingredients || [])
+          .filter((ing: any) => ing && ing.name && ing.name.trim().length > 0)
+          .map((ing: any) => ({
             id: crypto.randomUUID(),
-            ingredient_id: matchedMeta?.id,
-            name: matchedMeta ? matchedMeta.name : ing.name,
+            name: ing.name.trim(),
             quantity: ing.amount ? Number(ing.amount) || ing.amount : 0,
-            unit: ing.unit || matchedMeta?.default_unit || ''
-          };
-        })
+            unit: normalizeUnit(ing.unit || '')
+          }))
       }));
     }
 
     if (data.stepSections && data.stepSections.length > 0) {
-      newValues.stepSections = data.stepSections.map(section => ({
+      newValues.stepSections = data.stepSections.map((section: any) => ({
         name: section.name || 'Thực hiện',
-        steps: section.steps.map(step => ({
-          id: crypto.randomUUID(),
-          instruction: step.content,
-          images: []
-        }))
+        steps: (section.steps || [])
+          .filter((step: any) => step && (step.content || step.instruction) && (step.content || step.instruction).trim().length > 0)
+          .map((step: any) => ({
+            id: crypto.randomUUID(),
+            instruction: (step.content || step.instruction).trim(),
+            images: []
+          }))
       }));
     }
 
@@ -246,6 +245,10 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
   };
 
   const handleApplyAiData = (data: ParseRecipeResult) => {
+    const unitsInRecipe = extractAndNormalizeUnits(data);
+    if (unitsInRecipe.length > 0) {
+      useUnitStore.getState().ensureUnits(unitsInRecipe);
+    }
     const newValues = mapAiDataToFormValues(data, methods.getValues());
     methods.reset(newValues);
     setBulkRecipes(null);
@@ -253,10 +256,50 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
   };
 
   const handleApplyAiDataBulk = (dataList: ParseRecipeResult[]) => {
+    if (dataList.length === 1) {
+      handleApplyAiData(dataList[0]);
+      return;
+    }
+    const allUnits = extractAndNormalizeUnits(dataList);
+    if (allUnits.length > 0) {
+      useUnitStore.getState().ensureUnits(allUnits);
+    }
     const newBulkRecipes = dataList.map(data => mapAiDataToFormValues(data, defaultValues));
     setBulkRecipes(newBulkRecipes);
     setActiveBulkIndex(0);
     methods.reset(newBulkRecipes[0]);
+  };
+
+  const handleRemoveBulkRecipe = (idxToRemove: number) => {
+    if (!bulkRecipes) return;
+    if (bulkRecipes.length <= 1) {
+      setBulkRecipes(null);
+      setActiveBulkIndex(0);
+      return;
+    }
+    const currentValues = methods.getValues();
+    const updatedBulk = [...bulkRecipes];
+    updatedBulk[activeBulkIndex] = currentValues;
+
+    const filtered = updatedBulk.filter((_, i) => i !== idxToRemove);
+    if (filtered.length === 1) {
+      setBulkRecipes(null);
+      setActiveBulkIndex(0);
+      methods.reset(filtered[0]);
+      toast.info('Chỉ còn 1 món, đã chuyển về chế độ chỉnh sửa đơn lẻ');
+      return;
+    }
+
+    let nextIdx = activeBulkIndex;
+    if (activeBulkIndex === idxToRemove) {
+      nextIdx = Math.min(idxToRemove, filtered.length - 1);
+      methods.reset(filtered[nextIdx]);
+    } else if (activeBulkIndex > idxToRemove) {
+      nextIdx = activeBulkIndex - 1;
+    }
+    setActiveBulkIndex(nextIdx);
+    setBulkRecipes(filtered);
+    toast.info('Đã bỏ công thức khỏi danh sách');
   };
 
   const prepareFinalData = async (data: FormValues) => {
@@ -269,26 +312,21 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
     // Chuyển đổi dạng cha-con về mảng phẳng cho backend giống bản NextJS
     const flattenedIngredients = data.ingredientSections.flatMap(section => 
       section.ingredients.map(ing => {
-        let finalIngredientId = (ing as any).ingredient_id;
-        const nameTrimmed = ing.name.trim();
-        if (nameTrimmed && !finalIngredientId) {
-          const existing = getIngredientMetaByName(nameTrimmed);
-          if (existing) {
-            finalIngredientId = existing.id;
-          } else {
-            const added = addIngredientMeta(nameTrimmed, { default_unit: ing.unit || undefined });
-            finalIngredientId = added.id;
-          }
-        }
+        const normUnit = normalizeUnit(ing.unit || '');
         return {
-          ingredient_id: finalIngredientId,
-          name: nameTrimmed,
+          name: ing.name.trim(),
           quantity: ing.quantity,
-          unit: ing.unit || '',
+          unit: normUnit,
           group: section.name
         };
       })
     );
+
+    // Tự động đồng bộ các đơn vị xuất hiện trong công thức vào danh mục Đơn vị tính
+    const unitsToSync = Array.from(new Set(flattenedIngredients.map(i => i.unit).filter(Boolean)));
+    if (unitsToSync.length > 0) {
+      useUnitStore.getState().ensureUnits(unitsToSync);
+    }
     
     const flattenedStepsPromises = data.stepSections.flatMap(section => 
       section.steps.map(async step => ({
@@ -308,6 +346,7 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
 
     return {
       ...coreValues,
+      id: (coreValues as any).id || crypto.randomUUID(),
       image_url: finalImageUrl,
       images: finalImages,
       ingredients: flattenedIngredients,
@@ -345,7 +384,8 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
       if (!isValid) {
         setActiveBulkIndex(i);
         methods.reset(newBulk[i]);
-        setTimeout(() => methods.trigger(), 0);
+        setTimeout(() => methods.trigger(), NEXT_TICK_DELAY_MS);
+        toast.error(`Món "${newBulk[i].title || i + 1}" còn thiếu thông tin bắt buộc`);
         return;
       }
     }
@@ -357,6 +397,7 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
       if (!initialData) {
         localStorage.removeItem('recipe_form_draft');
       }
+      toast.success(`Đã lưu thành công ${allFinalData.length} công thức!`);
     } catch (error: any) {
       console.error('Error saving bulk recipes', error);
       toast.error('Không thể lưu các công thức: ' + (error?.message || 'Có lỗi xảy ra, vui lòng thử lại'));
@@ -423,38 +464,109 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
       >
 
         
-        {bulkRecipes && bulkRecipes.length > 1 && (
-          <div className="flex overflow-x-auto border-b border-default-200 w-full">
-            {bulkRecipes.map((recipe, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => {
-                   const currentValues = methods.getValues();
-                   const newBulk = [...bulkRecipes];
-                   newBulk[activeBulkIndex] = currentValues;
-                   setBulkRecipes(newBulk);
-                   
-                   setActiveBulkIndex(idx);
-                   methods.reset(newBulk[idx]);
-                }}
-                className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                  activeBulkIndex === idx 
-                    ? 'border-primary text-primary bg-primary-50/50' 
-                    : 'border-transparent text-default-500 hover:text-default-700 hover:bg-default-100/50'
-                }`}
-              >
-                {idx === activeBulkIndex ? (currentTitle || `Công thức ${idx + 1}`) : (recipe.title || `Công thức ${idx + 1}`)}
-              </button>
-            ))}
-          </div>
-        )}
-
         <PageHeader
-          title={bulkRecipes && bulkRecipes.length > 1 ? "Nhập nhiều công thức" : (initialData ? "Chỉnh sửa công thức" : "Tạo công thức mới")}
+          title={bulkRecipes && bulkRecipes.length > 1 ? `Nhập ${bulkRecipes.length} công thức` : (initialData ? "Chỉnh sửa công thức" : "Tạo công thức mới")}
           showBackButton
           className="px-4 pt-4 pb-2"
+          actions={
+            bulkRecipes && bulkRecipes.length > 1 ? (
+              <Button
+                type="button"
+                size="sm"
+                color="primary"
+                variant="solid"
+                isLoading={isSaving}
+                onPress={handleBulkSubmit}
+                className="font-bold rounded-xl text-white shadow-none px-3.5"
+              >
+                Lưu tất cả ({bulkRecipes.length})
+              </Button>
+            ) : initialData ? (
+              <Button
+                type="submit"
+                size="sm"
+                color="primary"
+                variant="flat"
+                isLoading={isSaving}
+                className="font-semibold rounded-xl"
+              >
+                Lưu ngay
+              </Button>
+            ) : null
+          }
         />
+
+        {bulkRecipes && bulkRecipes.length > 1 && (
+          <div className="bg-default-100/80 dark:bg-default-100/20 px-4 py-2.5 flex flex-col gap-2 mb-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                <Layers className="w-4 h-4" />
+                <span>Danh sách món ({activeBulkIndex + 1}/{bulkRecipes.length}):</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm('Bạn có chắc muốn thoát chế độ nhập hàng loạt? (Chỉ giữ lại món đang sửa)')) {
+                    setBulkRecipes(null);
+                    setActiveBulkIndex(0);
+                    toast.info('Đã chuyển về chế độ chỉnh sửa đơn lẻ');
+                  }
+                }}
+                className="text-[11px] text-default-400 hover:text-danger flex items-center gap-1 transition-colors cursor-pointer"
+              >
+                <X className="w-3 h-3" /> Thoát hàng loạt
+              </button>
+            </div>
+
+            <div className="flex overflow-x-auto gap-2 no-scrollbar py-0.5">
+              {bulkRecipes.map((recipe, idx) => {
+                const isActive = activeBulkIndex === idx;
+                const title = isActive ? (currentTitle || `Món ${idx + 1}`) : (recipe.title || `Món ${idx + 1}`);
+                return (
+                  <div
+                    key={idx}
+                    className={`flex items-center gap-1.5 pl-3.5 pr-2 py-1.5 rounded-xl text-sm whitespace-nowrap transition-all select-none ${
+                      isActive 
+                        ? 'bg-primary text-white font-semibold shadow-xs' 
+                        : 'bg-content1 text-foreground font-medium hover:bg-default-200/50'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const currentValues = methods.getValues();
+                        const newBulk = [...bulkRecipes];
+                        newBulk[activeBulkIndex] = currentValues;
+                        setBulkRecipes(newBulk);
+                        
+                        setActiveBulkIndex(idx);
+                        methods.reset(newBulk[idx]);
+                      }}
+                      className="max-w-[150px] truncate text-left font-inherit cursor-pointer"
+                    >
+                      {idx + 1}. {title}
+                    </button>
+                    {bulkRecipes.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveBulkRecipe(idx);
+                        }}
+                        className={`p-1 rounded-full hover:bg-black/20 transition-colors cursor-pointer ${
+                          isActive ? 'text-white' : 'text-default-400 hover:text-danger'
+                        }`}
+                        title="Bỏ món này"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md px-4 py-1.5 border-b border-divider/40 shadow-xs mb-3">
           <Tabs
@@ -494,7 +606,6 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
                 <ImageSection />
                 <InfoSection currentRecipeId={initialData?.id} />
                 <MetaSection dynamicTags={dynamicTags} currentRecipeId={initialData?.id} />
-                <LinkedTipsSection />
               </div>
             )}
             {activeStep === 'ingredients' && (
@@ -512,13 +623,20 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
             if (activeStep === 'steps') setActiveStep('ingredients');
             else if (activeStep === 'ingredients') setActiveStep('info');
           }}
-          isLastStep={activeStep === 'steps' || Boolean(initialData)}
+          isLastStep={activeStep === 'steps'}
           onNext={() => {
             if (activeStep === 'info') setActiveStep('ingredients');
             else if (activeStep === 'ingredients') setActiveStep('steps');
           }}
+          onSubmit={() => {
+            if (bulkRecipes) {
+              handleBulkSubmit();
+            } else {
+              methods.handleSubmit(handleSingleSubmit, onInvalid)();
+            }
+          }}
           isSaving={isSaving}
-          submitText={initialData ? "Lưu thay đổi" : "Lưu công thức"}
+          submitText={bulkRecipes && bulkRecipes.length > 1 ? `Lưu tất cả (${bulkRecipes.length} món)` : (initialData ? "Lưu thay đổi" : "Lưu công thức")}
           extraAction={
             <Button
               type="button"

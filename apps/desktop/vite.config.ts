@@ -6,6 +6,7 @@ import path from 'path';
 
 // https://vite.dev/config/
 export default defineConfig({
+  clearScreen: false,
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -15,5 +16,8 @@ export default defineConfig({
   server: {
     port: 5174,
     strictPort: true,
+    watch: {
+      ignored: ['**/src-tauri/**'],
+    },
   },
 })

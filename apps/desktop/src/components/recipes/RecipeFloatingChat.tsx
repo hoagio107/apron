@@ -65,7 +65,7 @@ ${recipe.steps.map((s: any, i: number) => `Bước ${i + 1}: ${s.instruction}`).
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
       {isOpen && (
-        <div className="w-[350px] sm:w-[400px] bg-white rounded-2xl shadow-2xl border border-default-200 overflow-hidden mb-4 flex flex-col h-[500px] max-h-[80vh] transition-all duration-300">
+        <div className="w-[350px] sm:w-[400px] bg-content1 rounded-2xl shadow-2xl border border-divider overflow-hidden mb-4 flex flex-col h-[500px] max-h-[80vh] transition-all duration-300">
           <div className="bg-primary text-primary-foreground p-4 flex items-center justify-between shadow-sm z-10">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5" />
@@ -76,7 +76,7 @@ ${recipe.steps.map((s: any, i: number) => `Bước ${i + 1}: ${s.instruction}`).
             </Button>
           </div>
           
-          <ScrollShadow ref={scrollRef} className="flex-1 p-4 bg-default-50 flex flex-col gap-4 overflow-y-auto">
+          <ScrollShadow ref={scrollRef} className="flex-1 p-4 bg-background flex flex-col gap-4 overflow-y-auto">
             {messages.length === 0 && (
               <div className="text-center text-default-500 my-auto pb-4">
                 <Sparkles className="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -90,7 +90,7 @@ ${recipe.steps.map((s: any, i: number) => `Bước ${i + 1}: ${s.instruction}`).
                 <div className={`max-w-[85%] rounded-2xl px-4 py-2 ${
                   msg.role === 'user' 
                     ? 'bg-primary text-white rounded-tr-sm' 
-                    : 'bg-white border border-default-200 text-foreground rounded-tl-sm shadow-sm'
+                    : 'bg-content2 border border-divider text-foreground rounded-tl-sm'
                 }`}>
                   <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                 </div>
@@ -99,7 +99,7 @@ ${recipe.steps.map((s: any, i: number) => `Bước ${i + 1}: ${s.instruction}`).
             
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-white border border-default-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm flex gap-1 items-center">
+                <div className="bg-content2 border border-divider rounded-2xl rounded-tl-sm px-4 py-3 flex gap-1 items-center">
                   <div className="w-2 h-2 rounded-full bg-default-300 animate-bounce" />
                   <div className="w-2 h-2 rounded-full bg-default-300 animate-bounce" style={{ animationDelay: '0.2s' }} />
                   <div className="w-2 h-2 rounded-full bg-default-300 animate-bounce" style={{ animationDelay: '0.4s' }} />
@@ -108,7 +108,7 @@ ${recipe.steps.map((s: any, i: number) => `Bước ${i + 1}: ${s.instruction}`).
             )}
           </ScrollShadow>
           
-          <div className="p-3 bg-white border-t border-default-200">
+          <div className="p-3 bg-content1 border-t border-divider">
             <form 
               onSubmit={(e) => { e.preventDefault(); handleSend(); }}
               className="flex items-center gap-2"

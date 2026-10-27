@@ -93,7 +93,7 @@ export function InfoSection({ currentRecipeId: _currentRecipeId }: { currentReci
           name="difficulty"
           control={control}
           render={({ field, fieldState }) => (
-            <div className="flex flex-col items-center gap-1 p-3 rounded-2xl bg-default-50">
+            <div className="flex flex-col items-center gap-1 p-3 rounded-2xl bg-content2">
               <div className="p-2 rounded-full bg-primary/10 text-primary mb-1">
                 <Gauge className="w-5 h-5" />
               </div>
@@ -128,7 +128,7 @@ export function InfoSection({ currentRecipeId: _currentRecipeId }: { currentReci
           name="calories"
           control={control}
           render={({ field, fieldState }) => (
-            <div className="flex flex-col items-center gap-1 p-3 rounded-2xl bg-default-50">
+            <div className="flex flex-col items-center gap-1 p-3 rounded-2xl bg-content2">
               <div className="p-2 rounded-full bg-warning/10 text-warning mb-1">
                 <Flame className="w-5 h-5" />
               </div>
@@ -149,7 +149,7 @@ export function InfoSection({ currentRecipeId: _currentRecipeId }: { currentReci
           name="prep_time"
           control={control}
           render={({ field, fieldState }) => (
-            <div className="flex flex-col items-center gap-1 p-3 rounded-2xl bg-default-50">
+            <div className="flex flex-col items-center gap-1 p-3 rounded-2xl bg-content2">
               <div className="p-2 rounded-full bg-secondary/10 text-secondary mb-1">
                 <Clock className="w-5 h-5" />
               </div>
@@ -170,7 +170,7 @@ export function InfoSection({ currentRecipeId: _currentRecipeId }: { currentReci
           name="cook_time"
           control={control}
           render={({ field, fieldState }) => (
-            <div className="flex flex-col items-center gap-1 p-3 rounded-2xl bg-default-50">
+            <div className="flex flex-col items-center gap-1 p-3 rounded-2xl bg-content2">
               <div className="p-2 rounded-full bg-success/10 text-success mb-1">
                 <Timer className="w-5 h-5" />
               </div>

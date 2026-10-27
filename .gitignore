@@ -4,3 +4,8 @@ dist
 .turbo
 target
 *.log
+.env
+.env.*
+!.env.example
+local.properties
+.DS_Store

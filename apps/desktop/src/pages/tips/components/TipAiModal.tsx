@@ -1,10 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import { 
-  Drawer, 
-  DrawerContent, 
-  DrawerHeader, 
-  DrawerBody, 
-  DrawerFooter, 
+  Modal, 
+  ModalContent, 
+  ModalHeader, 
+  ModalBody, 
+  ModalFooter, 
   Button, 
   Textarea, 
   Tabs, 
@@ -18,10 +18,10 @@ import {
   Check, 
   ExternalLink, 
   ClipboardPaste, 
-  AlertTriangle, 
   RotateCcw,
   FileText,
-  ArrowRight
+  Lightbulb,
+  CheckCircle2
 } from 'lucide-react';
 import { buildTipPrompt, parseTipGeminiResponse, type ParseTipResult } from '../../../lib/gemini';
 import { TIP_CATEGORIES } from '@apron/core';
@@ -127,34 +127,34 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
   }, [parsedData]);
 
   return (
-    <Drawer 
+    <Modal 
       isOpen={isOpen} 
       onOpenChange={onOpenChange} 
-      placement="bottom"
-      size="2xl" 
+      size="3xl" 
+      scrollBehavior="inside"
       classNames={{
         wrapper: "z-[200]",
-        base: "rounded-t-3xl rounded-b-none m-0 sm:m-auto sm:rounded-3xl max-h-[90vh] sm:max-h-[85vh] bg-content1 border-t sm:border border-divider/40 sm:max-w-xl mx-auto shadow-2xl",
-        header: "border-b border-divider/40 px-5 py-4 shrink-0",
-        body: "p-5 overflow-y-auto space-y-4",
-        footer: "border-t border-divider/40 px-5 py-3.5 shrink-0 flex items-center gap-3 bg-content1"
+        base: "bg-content1 rounded-2xl max-h-[90vh] shadow-2xl overflow-hidden",
+        header: "border-b border-divider/40 px-6 py-4 shrink-0",
+        body: "p-6 overflow-y-auto space-y-5",
+        footer: "border-t border-divider/40 px-6 py-3.5 shrink-0 flex items-center justify-between gap-3 bg-content1"
       }}
     >
-      <DrawerContent>
+      <ModalContent>
         {(onClose) => (
           <>
-            <DrawerHeader className="flex items-center gap-3 px-5 py-4 border-b border-divider/40 shrink-0">
+            <ModalHeader className="flex items-center gap-3 px-6 py-4 border-b border-divider/40 shrink-0">
               <div className="w-10 h-10 rounded-xl bg-secondary/15 text-secondary flex items-center justify-center shrink-0">
                 <Sparkles className="w-5 h-5 text-secondary" />
               </div>
               <div className="flex flex-col text-left">
                 <h3 className="text-base sm:text-lg font-bold text-foreground">Trợ lý AI Mẹo vặt</h3>
-                <p className="text-xs text-default-400 font-normal">Tự động trích xuất mẹo nhà bếp từ Gemini Web</p>
+                <p className="text-xs text-default-400 font-normal">Tự động gợi ý & chuẩn hóa mẹo nhà bếp khoa học từ Gemini Web</p>
               </div>
-            </DrawerHeader>
+            </ModalHeader>
 
             {/* Tabs */}
-            <div className="px-5 pt-2 border-b border-divider/40 shrink-0">
+            <div className="px-6 pt-2 border-b border-divider/40 shrink-0 bg-content1">
               <Tabs 
                 selectedKey={activeTab} 
                 onSelectionChange={(k) => setActiveTab(k as 'prompt' | 'result')}
@@ -179,7 +179,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
               </Tabs>
             </div>
 
-            <DrawerBody className="p-5">
+            <ModalBody className="p-6">
               {/* TAB 1: TẠO PROMPT */}
               {activeTab === 'prompt' && (
                 <div className="flex flex-col gap-4">
@@ -187,7 +187,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                     <div className="flex items-center justify-between">
                       <label className="text-sm font-semibold text-foreground flex items-center gap-2">
                         <FileText className="w-4 h-4 text-primary" />
-                        Chủ đề hoặc nội dung mẹo vặt:
+                        Chủ đề hoặc nội dung mẹo vặt cần tạo:
                       </label>
                       {inputText.trim() && (
                         <button
@@ -201,38 +201,40 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                     </div>
 
                     <Textarea
-                      placeholder="Ví dụ: Cách giữ bơ tươi lâu không thâm, Mẹo ướp thịt mềm mọng... (hoặc để trống để AI tự gợi ý)"
+                      placeholder="Ví dụ: Cách giữ rau củ tươi lâu trong tủ lạnh, Mẹo luộc trứng lòng đào dẻo ngon, Cách khử mùi tanh cá hồi..."
                       value={inputText}
                       onValueChange={setInputText}
-                      minRows={5}
-                      maxRows={9}
+                      minRows={4}
+                      maxRows={7}
                       variant="flat"
                       classNames={{
-                        inputWrapper: "bg-default-100 hover:bg-default-200/70 dark:bg-default-100/20 border border-divider/50 rounded-2xl shadow-none p-3.5",
+                        inputWrapper: "bg-default-100 hover:bg-default-200 border-none rounded-2xl shadow-none p-3.5",
                         input: "text-sm text-foreground leading-relaxed"
                       }}
                     />
+                    <p className="text-xs text-default-400">
+                      * Nhập chủ đề bạn quan tâm hoặc để trống để AI tự đề xuất mẹo ngẫu nhiên hữu ích nhất.
+                    </p>
                   </div>
 
-                  {/* 2 buttons with exact same width (50% each), height h-12, radius rounded-xl */}
-                  <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div className="grid grid-cols-2 gap-3 pt-2">
                     <Button
                       color="primary"
-                      className="h-12 rounded-xl font-bold shadow-none text-white"
+                      className="h-11 rounded-xl font-bold shadow-none text-white"
                       startContent={copied ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4" />}
                       onPress={handleCopyPrompt}
                     >
-                      {copied ? 'Đã chép Prompt' : 'Sao chép Prompt'}
+                      {copied ? 'Đã sao chép Prompt' : '1. Sao chép Prompt'}
                     </Button>
 
                     <Button
                       variant="flat"
                       color="secondary"
-                      className="h-12 rounded-xl font-semibold shadow-none"
+                      className="h-11 rounded-xl font-semibold shadow-none bg-secondary/15 text-secondary hover:bg-secondary/25"
                       startContent={<ExternalLink className="w-4 h-4" />}
                       onPress={handleOpenGemini}
                     >
-                      Mở Gemini Web
+                      2. Mở Gemini Web
                     </Button>
                   </div>
                 </div>
@@ -245,29 +247,30 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                     <div className="flex items-center justify-between">
                       <label className="text-sm font-semibold text-foreground flex items-center gap-2">
                         <ClipboardPaste className="w-4 h-4 text-primary" />
-                        Dán kết quả từ Gemini Web:
+                        Dán kết quả JSON từ Gemini Web:
                       </label>
                       <div className="flex items-center gap-2">
                         <Button
                           size="sm"
                           variant="flat"
-                          color="secondary"
-                          className="h-8 text-xs font-semibold rounded-lg shadow-none"
+                          color="primary"
                           startContent={<ClipboardPaste className="w-3.5 h-3.5" />}
                           onPress={handlePasteClipboard}
+                          className="h-8 text-xs font-semibold rounded-lg"
                         >
-                          Dán Clipboard
+                          Dán từ bộ nhớ tạm
                         </Button>
                         {resultText && (
                           <Button
                             size="sm"
                             variant="light"
                             color="danger"
-                            className="h-8 text-xs font-semibold rounded-lg"
                             onPress={() => {
                               setResultText('');
                               setParsedData(null);
+                              setError(null);
                             }}
+                            className="h-8 text-xs font-semibold rounded-lg"
                           >
                             Xóa
                           </Button>
@@ -276,119 +279,97 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                     </div>
 
                     <Textarea
-                      placeholder="Dán toàn bộ kết quả phản hồi từ Gemini vào đây..."
+                      placeholder="Dán toàn bộ câu trả lời từ Gemini vào đây (chứa mã JSON {...})..."
                       value={resultText}
                       onValueChange={(val) => {
                         setResultText(val);
-                        if (val.trim().startsWith('{') || val.includes('"title"') || val.includes('```json')) {
-                          handleParse(val);
+                        if (val.trim()) handleParse(val);
+                        else {
+                          setParsedData(null);
+                          setError(null);
                         }
                       }}
-                      minRows={6}
-                      maxRows={10}
+                      minRows={4}
+                      maxRows={8}
                       variant="flat"
                       classNames={{
-                        inputWrapper: "bg-default-100 hover:bg-default-200/70 dark:bg-default-100/20 border border-divider/50 rounded-2xl shadow-none p-3.5 font-mono",
-                        input: "text-xs font-mono leading-relaxed"
+                        inputWrapper: "bg-default-100 hover:bg-default-200 border-none rounded-2xl shadow-none p-3.5 font-mono text-xs",
+                        input: "text-foreground leading-relaxed"
                       }}
                     />
-
-                    {!parsedData && (
-                      <Button
-                        color="primary"
-                        variant="flat"
-                        className="w-full h-12 rounded-xl font-semibold shadow-none mt-1"
-                        startContent={<Sparkles className="w-4 h-4" />}
-                        onPress={() => handleParse()}
-                      >
-                        Trích xuất dữ liệu
-                      </Button>
-                    )}
                   </div>
 
                   {error && (
-                    <div className="p-3 bg-danger-50 dark:bg-danger-950/30 border border-danger-200 dark:border-danger-900/50 text-danger-700 dark:text-danger-300 rounded-xl flex items-start gap-2.5 text-xs">
-                      <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                      <div className="flex-1">{error}</div>
+                    <div className="p-3 bg-danger-50 dark:bg-danger-900/20 text-danger border border-danger-200 dark:border-danger-800/40 rounded-xl text-xs flex items-center gap-2">
+                      <span>⚠️ {error}</span>
                     </div>
                   )}
 
-                  {/* PREVIEW KẾT QUẢ */}
+                  {/* KẾT QUẢ TRÍCH XUẤT THÀNH CÔNG */}
                   {parsedData && (
-                    <div className="flex flex-col border border-success-200 dark:border-success-900/50 rounded-2xl overflow-hidden bg-success-50/20 dark:bg-success-950/10">
-                      <div className="bg-success-100/60 dark:bg-success-900/30 px-4 py-2.5 border-b border-success-200 dark:border-success-900/50 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Check className="w-4 h-4 text-success-600 dark:text-success-400" />
-                          <h4 className="font-bold text-sm text-success-800 dark:text-success-200">
-                            Đã trích xuất thành công
-                          </h4>
-                        </div>
+                    <div className="flex flex-col gap-3 p-4 bg-default-50 dark:bg-default-100/10 rounded-2xl border border-divider/60 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-success flex items-center gap-1.5">
+                          <CheckCircle2 className="w-4 h-4" /> Đã phân tích hợp lệ
+                        </span>
                         {matchedCategory && (
-                          <Chip size="sm" color="success" variant="flat" className="font-semibold text-xs">
+                          <Chip size="sm" variant="flat" color="primary" className="font-semibold text-xs">
                             {matchedCategory.name}
                           </Chip>
                         )}
                       </div>
 
-                      <div className="p-4 space-y-3 max-h-[260px] overflow-y-auto">
-                        <div>
-                          <span className="font-semibold text-default-400 uppercase tracking-wider text-[10px] block">
-                            Tiêu đề:
-                          </span>
-                          <h5 className="font-bold text-base text-foreground mt-0.5">
-                            {parsedData.title}
-                          </h5>
-                        </div>
-
-                        <div>
-                          <span className="font-semibold text-default-400 uppercase tracking-wider text-[10px] block mb-1">
-                            Nội dung hướng dẫn:
-                          </span>
-                          <div 
-                            className="p-3 bg-content1 rounded-xl border border-divider text-xs text-foreground/90 leading-relaxed max-h-36 overflow-y-auto"
-                            dangerouslySetInnerHTML={{ __html: parsedData.content }}
-                          />
-                        </div>
+                      <div className="flex flex-col gap-1">
+                        <h4 className="font-bold text-foreground text-base">
+                          {parsedData.title}
+                        </h4>
+                        <div 
+                          className="text-xs text-default-600 line-clamp-4 prose dark:prose-invert max-w-none pt-1 border-t border-divider/40"
+                          dangerouslySetInnerHTML={{ __html: parsedData.content }}
+                        />
                       </div>
                     </div>
                   )}
                 </div>
               )}
-            </DrawerBody>
+            </ModalBody>
 
-            <DrawerFooter className="px-5 py-3.5 border-t border-divider/40 flex items-center gap-3 bg-content1 shrink-0">
+            <ModalFooter className="px-6 py-3.5 border-t border-divider/40 flex items-center justify-between bg-content1 shrink-0">
               <Button 
                 variant="flat" 
-                className="flex-1 rounded-xl font-semibold h-12 border border-divider/60 text-foreground bg-default-100 hover:bg-default-200 shadow-none"
                 onPress={onClose}
+                className="rounded-xl px-5 font-semibold text-foreground bg-default-100 hover:bg-default-200 shadow-none h-10"
               >
-                Đóng
+                Hủy
               </Button>
 
-              {activeTab === 'prompt' ? (
-                <Button 
-                  color="primary" 
-                  className="flex-1 rounded-xl font-bold h-12 shadow-none text-white"
-                  endContent={<ArrowRight className="w-4 h-4" />}
-                  onPress={() => setActiveTab('result')}
-                >
-                  Nhập kết quả →
-                </Button>
-              ) : (
-                <Button 
-                  color="primary" 
-                  className="flex-1 rounded-xl font-bold h-12 shadow-none text-white"
-                  isDisabled={!parsedData}
-                  onPress={() => handleApplyTip(onClose)}
-                  startContent={<Check className="w-4 h-4" />}
-                >
-                  Áp dụng vào Form
-                </Button>
-              )}
-            </DrawerFooter>
+              <div className="flex items-center gap-2">
+                {activeTab === 'prompt' ? (
+                  <Button
+                    color="primary"
+                    variant="flat"
+                    onPress={() => setActiveTab('result')}
+                    className="rounded-xl px-5 font-bold h-10"
+                  >
+                    Tiếp tục sang bước 2 →
+                  </Button>
+                ) : (
+                  <Button
+                    color="primary"
+                    variant="solid"
+                    isDisabled={!parsedData}
+                    startContent={<Lightbulb className="w-4 h-4" />}
+                    onPress={() => handleApplyTip(onClose)}
+                    className="rounded-xl px-5 font-bold shadow-none text-white h-10 disabled:opacity-50"
+                  >
+                    Điền vào mẹo vặt
+                  </Button>
+                )}
+              </div>
+            </ModalFooter>
           </>
         )}
-      </DrawerContent>
-    </Drawer>
+      </ModalContent>
+    </Modal>
   );
 }

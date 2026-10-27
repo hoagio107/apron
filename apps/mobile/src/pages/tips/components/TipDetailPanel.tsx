@@ -20,7 +20,7 @@ export function TipDetailPanel({ tip, isOpen, onOpenChange, onEdit, onDelete }: 
   const category = TIP_CATEGORIES.find(c => c.id === tip.category_id);
 
   return (
-    <Drawer isOpen={isOpen} onOpenChange={onOpenChange} size="md" placement="right" radius="none" className="max-w-2xl">
+    <Drawer isOpen={isOpen} onOpenChange={onOpenChange} size="md" placement="right" radius="none" className="max-w-2xl pt-safe pb-safe">
       <DrawerContent>
         {() => (
           <div className="flex flex-col h-full bg-content1 text-foreground">

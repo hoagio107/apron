@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button, Input, ScrollShadow } from '@/ui';
-import { MessageSquare, X, Send, Sparkles, Loader2, Play } from 'lucide-react';
+import { X, Send, Sparkles, Loader2, Play } from 'lucide-react';
 import { askGemini } from '../../lib/geminiChat';
 import { GEMINI_MODELS } from '../../lib/gemini';
 import type { Recipe } from '@apron/core';

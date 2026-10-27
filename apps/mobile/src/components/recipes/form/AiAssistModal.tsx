@@ -7,9 +7,8 @@ import {
   DrawerFooter,
   Button, 
   Textarea,
-  Tabs,
-  Tab,
   Chip,
+  Tooltip,
   toast
 } from '@/ui';
 import { 
@@ -21,14 +20,23 @@ import {
   Copy, 
   ExternalLink, 
   ArrowRight, 
+  ArrowLeft,
   ClipboardPaste, 
-  RotateCcw,
-  FileText
+  FileText,
+  X,
+  HelpCircle,
+  Utensils,
+  Flame,
+  Lightbulb,
+  Trash2,
+  Carrot,
+  Timer
 } from 'lucide-react';
 import { type ParseRecipeResult, buildRecipePrompt, parseGeminiResponse } from '../../../lib/gemini';
-import { useIngredientCatalogStore } from '../../../store/useIngredientCatalogStore';
+import { extractAndNormalizeUnits } from '@apron/core';
 import { useTipStore } from '../../../store/useTipStore';
 import { useUnitStore } from '../../../store/useUnitStore';
+import { CLIPBOARD_RESET_DELAY_MS } from '../../../constants';
 
 interface AiAssistModalProps {
   isOpen: boolean;
@@ -37,8 +45,14 @@ interface AiAssistModalProps {
   onApplyBulk?: (data: ParseRecipeResult[]) => void;
 }
 
+const STEPS = [
+  { step: 1 as const, label: 'Tạo Prompt', tip: 'Soạn hoặc dán nội dung để tạo câu lệnh cho Gemini' },
+  { step: 2 as const, label: 'Dán kết quả', tip: 'Dán phản hồi JSON từ Gemini Web và trích xuất dữ liệu' },
+  { step: 3 as const, label: 'Xem trước', tip: 'Xem chi tiết các công thức đã trích xuất và đưa vào form' }
+];
+
 export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: AiAssistModalProps) {
-  const [activeTab, setActiveTab] = useState<'prompt' | 'result'>('prompt');
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [inputText, setInputText] = useState('');
   const [resultText, setResultText] = useState('');
   const [copied, setCopied] = useState(false);
@@ -46,7 +60,6 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
   const [parsedData, setParsedData] = useState<ParseRecipeResult[] | null>(null);
   const [activeRecipeIndex, setActiveRecipeIndex] = useState(0);
   
-  const catalog = useIngredientCatalogStore(state => state.catalog);
   const units = useUnitStore(state => state.units);
   const { tips, fetchTips } = useTipStore();
 
@@ -58,12 +71,9 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
     if (!isOpen) {
       setCopied(false);
       setError(null);
+      setCurrentStep(1);
     }
   }, [isOpen]);
-
-  const existingIngredients = useMemo(() => {
-    return Object.values(catalog).map(ing => ing.name);
-  }, [catalog]);
 
   const existingUnits = useMemo(() => {
     return units.map(u => u.name);
@@ -74,15 +84,15 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
   }, [tips]);
 
   const generatedPrompt = useMemo(() => {
-    return buildRecipePrompt(inputText, existingIngredients, existingTips, existingUnits);
-  }, [inputText, existingIngredients, existingTips, existingUnits]);
+    return buildRecipePrompt(inputText, [], existingTips, existingUnits);
+  }, [inputText, existingTips, existingUnits]);
 
   const handleCopyPrompt = async () => {
     try {
       await navigator.clipboard.writeText(generatedPrompt);
       setCopied(true);
       toast.success('Đã sao chép Prompt!');
-      setTimeout(() => setCopied(false), 2500);
+      setTimeout(() => setCopied(false), CLIPBOARD_RESET_DELAY_MS);
     } catch {
       const el = document.createElement('textarea');
       el.value = generatedPrompt;
@@ -92,7 +102,7 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
       document.body.removeChild(el);
       setCopied(true);
       toast.success('Đã sao chép Prompt!');
-      setTimeout(() => setCopied(false), 2500);
+      setTimeout(() => setCopied(false), CLIPBOARD_RESET_DELAY_MS);
     }
   };
 
@@ -105,7 +115,9 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
       const text = await navigator.clipboard.readText();
       if (text) {
         setResultText(text);
-        handleParse(text);
+        setParsedData(null);
+        setError(null);
+        toast.success('Đã dán từ bộ nhớ tạm');
       } else {
         toast.info('Bộ nhớ tạm trống');
       }
@@ -114,7 +126,7 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
     }
   };
 
-  const handleParse = (textToParse?: string) => {
+  const handleParse = (textToParse?: string, autoAdvance = true) => {
     const raw = textToParse !== undefined ? textToParse : resultText;
     if (!raw.trim()) {
       setError('Vui lòng dán kết quả từ Gemini Web.');
@@ -128,6 +140,9 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
       setParsedData(results);
       setActiveRecipeIndex(0);
       toast.success(`Đã trích xuất ${results.length} công thức!`);
+      if (autoAdvance) {
+        setCurrentStep(3);
+      }
     } catch (err: any) {
       setError(err.message || 'Lỗi khi phân tích dữ liệu JSON.');
       setParsedData(null);
@@ -136,27 +151,45 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
 
   const handleApply = (onClose: () => void) => {
     if (parsedData && parsedData.length > 0) {
-      onApply(parsedData[activeRecipeIndex]);
-      toast.success('Đã điền công thức vào form!');
+      const selected = parsedData[activeRecipeIndex];
+      const unitsInRecipe = extractAndNormalizeUnits(selected);
+      if (unitsInRecipe.length > 0) {
+        useUnitStore.getState().ensureUnits(unitsInRecipe);
+      }
+      onApply(selected);
+      toast.success(
+        parsedData.length > 1
+          ? `Đã điền món "${selected.title || `Món ${activeRecipeIndex + 1}`}" vào form!`
+          : 'Đã điền công thức vào form!'
+      );
       onClose();
       setInputText('');
       setResultText('');
       setParsedData(null);
       setError(null);
-      setActiveTab('prompt');
+      setCurrentStep(1);
     }
   };
 
   const handleApplyAll = (onClose: () => void) => {
-    if (parsedData && parsedData.length > 0 && onApplyBulk) {
-      onApplyBulk(parsedData);
-      toast.success(`Đã lưu ${parsedData.length} công thức!`);
+    if (parsedData && parsedData.length > 0) {
+      const allUnits = extractAndNormalizeUnits(parsedData);
+      if (allUnits.length > 0) {
+        useUnitStore.getState().ensureUnits(allUnits);
+      }
+      if (onApplyBulk) {
+        onApplyBulk(parsedData);
+        toast.success(`Đã nạp ${parsedData.length} công thức vào form!`);
+      } else {
+        onApply(parsedData[0]);
+        toast.success('Đã điền công thức vào form!');
+      }
       onClose();
       setInputText('');
       setResultText('');
       setParsedData(null);
       setError(null);
-      setActiveTab('prompt');
+      setCurrentStep(1);
     }
   };
 
@@ -165,148 +198,239 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
       isOpen={isOpen} 
       onOpenChange={onOpenChange} 
       placement="bottom"
-      size="2xl" 
+      size="full" 
       classNames={{
         wrapper: "z-[200]",
-        base: "rounded-t-3xl rounded-b-none m-0 sm:m-auto sm:rounded-3xl max-h-[90vh] sm:max-h-[85vh] bg-content1 border-t sm:border border-divider/40 sm:max-w-xl mx-auto shadow-2xl",
+        base: "h-[100dvh] max-h-[100dvh] rounded-none m-0 bg-content1 border-none w-full flex flex-col pt-safe pb-safe shadow-none",
         header: "border-b border-divider/40 px-5 py-4 shrink-0",
-        body: "p-5 overflow-y-auto space-y-4",
-        footer: "border-t border-divider/40 px-5 py-3.5 shrink-0 flex items-center gap-3 bg-content1"
+        body: "p-5 overflow-y-auto space-y-4 flex-1",
+        footer: "border-t border-divider/40 px-5 py-3.5 shrink-0 flex flex-col gap-2.5 bg-content1"
       }}
     >
       <DrawerContent>
         {(onClose) => (
           <>
-            <DrawerHeader className="flex items-center gap-3 px-5 py-4 border-b border-divider/40 shrink-0">
-              <div className="w-10 h-10 rounded-xl bg-secondary/15 text-secondary flex items-center justify-center shrink-0">
-                <Sparkles className="w-5 h-5 text-secondary" />
+            <DrawerHeader className="flex items-center justify-between px-5 py-4 border-b border-divider/40 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-secondary/15 text-secondary flex items-center justify-center shrink-0">
+                  <Sparkles className="w-5 h-5 text-secondary" />
+                </div>
+                <div className="flex flex-col text-left">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-bold text-foreground">Trợ lý AI Công thức</h3>
+                    <Tooltip content="Hỗ trợ trích xuất tự động công thức nấu ăn từ Gemini Web vào Apron" placement="right">
+                      <span className="cursor-help text-default-400 hover:text-default-600 transition-colors">
+                        <HelpCircle className="w-3.5 h-3.5" />
+                      </span>
+                    </Tooltip>
+                  </div>
+                  <p className="text-xs text-default-400 font-normal">Quy trình 3 bước thông minh với Gemini</p>
+                </div>
               </div>
-              <div className="flex flex-col text-left">
-                <h3 className="text-base sm:text-lg font-bold text-foreground">Trợ lý AI Công thức</h3>
-                <p className="text-xs text-default-400 font-normal">Tự động trích xuất công thức từ Gemini Web</p>
-              </div>
+
+              {parsedData && parsedData.length > 0 && (
+                <Chip size="sm" color="success" variant="flat" className="font-semibold text-xs">
+                  {parsedData.length} món
+                </Chip>
+              )}
             </DrawerHeader>
 
-            {/* Tabs */}
-            <div className="px-5 pt-2 border-b border-divider/40 shrink-0">
-              <Tabs 
-                selectedKey={activeTab} 
-                onSelectionChange={(k) => setActiveTab(k as 'prompt' | 'result')}
-                color="primary"
-                variant="underlined"
-                classNames={{
-                  tabList: "gap-6 p-0 border-none w-full",
-                  tab: "h-11 px-1 font-semibold text-sm",
-                  cursor: "w-full bg-primary"
-                }}
-              >
-                <Tab key="prompt" title="1. Lấy Prompt gửi Gemini" />
-                <Tab 
-                  key="result" 
-                  title={
-                    <div className="flex items-center gap-2">
-                      <span>2. Nhập kết quả</span>
-                      {parsedData && parsedData.length > 0 && (
-                        <span className="w-2 h-2 rounded-full bg-success" />
+            {/* Stepper Header */}
+            <div className="px-5 py-3 border-b border-divider/40 bg-default-50/50 dark:bg-default-100/10 shrink-0">
+              <div className="flex items-center justify-between w-full max-w-sm mx-auto">
+                {STEPS.map((s, idx) => {
+                  const isCompleted = s.step < currentStep || (s.step === 2 && Boolean(parsedData && parsedData.length > 0 && currentStep === 3));
+                  const isActive = s.step === currentStep;
+                  const isClickable = s.step <= currentStep || (s.step === 3 ? Boolean(parsedData && parsedData.length > 0) : true);
+
+                  return (
+                    <div key={s.step} className="flex items-center flex-1 last:flex-none">
+                      <Tooltip content={s.tip} placement="bottom">
+                        <button
+                          type="button"
+                          disabled={!isClickable}
+                          onClick={() => setCurrentStep(s.step)}
+                          className={`flex items-center gap-1.5 transition-all text-left outline-none ${
+                            !isClickable ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+                          }`}
+                        >
+                          <div
+                            className={`w-7 h-7 rounded-xl flex items-center justify-center font-bold text-xs transition-all duration-200 shrink-0 ${
+                              isActive
+                                ? 'bg-primary text-white shadow-xs ring-2 ring-primary/30 ring-offset-1 ring-offset-background'
+                                : isCompleted
+                                ? 'bg-success text-white'
+                                : 'bg-default-100 dark:bg-default-200/40 text-default-500 border border-divider/60'
+                            }`}
+                          >
+                            {isCompleted ? <Check className="w-3.5 h-3.5 stroke-[2.5]" /> : s.step}
+                          </div>
+                          <div className="flex flex-col">
+                            <span className={`text-[11px] font-semibold leading-tight ${
+                              isActive ? 'text-primary' : isCompleted ? 'text-foreground' : 'text-default-400'
+                            }`}>
+                              {s.label}
+                            </span>
+                            <span className="text-[9px] text-default-400 font-normal">
+                              Bước {s.step}
+                            </span>
+                          </div>
+                        </button>
+                      </Tooltip>
+
+                      {idx < STEPS.length - 1 && (
+                        <div className="flex-1 mx-2 h-[2px] bg-default-200 dark:bg-default-100/30 relative overflow-hidden rounded-full min-w-[16px]">
+                          <div
+                            className={`absolute inset-y-0 left-0 bg-primary transition-all duration-300 ${
+                              currentStep > s.step ? 'w-full' : 'w-0'
+                            }`}
+                          />
+                        </div>
                       )}
                     </div>
-                  } 
-                />
-              </Tabs>
+                  );
+                })}
+              </div>
             </div>
 
             <DrawerBody className="p-5">
-              {/* TAB 1: TẠO PROMPT */}
-              {activeTab === 'prompt' && (
+              {/* STEP 1: TẠO PROMPT */}
+              {currentStep === 1 && (
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between">
                       <label className="text-sm font-semibold text-foreground flex items-center gap-2">
                         <FileText className="w-4 h-4 text-primary" />
-                        Nội dung công thức thô hoặc link:
+                        <span>Nội dung công thức hoặc link</span>
+                        <Tooltip content="Dán văn bản công thức thô, danh sách nguyên liệu hoặc link để tạo prompt chuẩn" placement="top">
+                          <span className="cursor-help text-default-400 hover:text-default-600 transition-colors">
+                            <HelpCircle className="w-3.5 h-3.5" />
+                          </span>
+                        </Tooltip>
                       </label>
-                      {inputText.trim() && (
-                        <button
-                          type="button"
-                          onClick={() => setInputText('')}
-                          className="text-xs text-default-400 hover:text-danger flex items-center gap-1 transition-colors"
-                        >
-                          <RotateCcw className="w-3.5 h-3.5" /> Xóa
-                        </button>
-                      )}
+                      <div className="flex items-center gap-1">
+                        <Tooltip content="Dán từ bộ nhớ tạm" placement="top">
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="light"
+                            className="text-default-400 hover:text-default-600 dark:hover:text-default-200 min-w-8 w-8 h-8 rounded-lg"
+                            onPress={async () => {
+                              try {
+                                const text = await navigator.clipboard.readText();
+                                if (text) {
+                                  setInputText(text);
+                                  toast.success('Đã dán từ bộ nhớ tạm');
+                                } else {
+                                  toast.info('Bộ nhớ tạm trống');
+                                }
+                              } catch {
+                                toast.error('Không thể đọc bộ nhớ tạm.');
+                              }
+                            }}
+                          >
+                            <ClipboardPaste className="w-4 h-4" />
+                          </Button>
+                        </Tooltip>
+                        {inputText.trim() && (
+                          <Tooltip content="Xóa nội dung" placement="top">
+                            <Button
+                              isIconOnly
+                              size="sm"
+                              variant="light"
+                              className="text-default-400 hover:text-default-600 dark:hover:text-default-200 min-w-8 w-8 h-8 rounded-lg"
+                              onPress={() => setInputText('')}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </Tooltip>
+                        )}
+                      </div>
                     </div>
 
                     <Textarea
-                      placeholder="Dán bài viết, danh sách nguyên liệu, ghi chú hoặc link món ăn vào đây..."
+                      placeholder="Dán bài viết, ghi chú, nguyên liệu hoặc link món ăn vào đây..."
                       value={inputText}
                       onValueChange={setInputText}
-                      minRows={6}
+                      minRows={7}
                       maxRows={10}
                       variant="flat"
                       classNames={{
-                        inputWrapper: "bg-default-100 hover:bg-default-200/70 dark:bg-default-100/20 border border-divider/50 rounded-2xl shadow-none p-3.5",
+                        inputWrapper: "bg-default-100/70 hover:bg-default-100 dark:bg-default-100/20 border border-divider/50 rounded-2xl shadow-none p-3.5",
                         input: "text-sm text-foreground leading-relaxed"
                       }}
                     />
                   </div>
 
-                  {/* 2 buttons with exact same width (50% each), height h-12, radius rounded-xl */}
                   <div className="grid grid-cols-2 gap-3 pt-1">
-                    <Button
-                      color="primary"
-                      className="h-12 rounded-xl font-bold shadow-none text-white"
-                      startContent={copied ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4" />}
-                      onPress={handleCopyPrompt}
-                    >
-                      {copied ? 'Đã chép Prompt' : 'Sao chép Prompt'}
-                    </Button>
+                    <Tooltip content="Sao chép prompt đã chuẩn hóa kèm danh mục gia vị và mẹo sẵn có" placement="top">
+                      <Button
+                        color="primary"
+                        className="h-12 rounded-xl font-bold shadow-none text-white"
+                        startContent={copied ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4" />}
+                        onPress={handleCopyPrompt}
+                      >
+                        {copied ? 'Đã chép Prompt' : 'Sao chép Prompt'}
+                      </Button>
+                    </Tooltip>
 
-                    <Button
-                      variant="flat"
-                      color="secondary"
-                      className="h-12 rounded-xl font-semibold shadow-none"
-                      startContent={<ExternalLink className="w-4 h-4" />}
-                      onPress={handleOpenGemini}
-                    >
-                      Mở Gemini Web
-                    </Button>
+                    <Tooltip content="Mở Gemini Web trong tab mới để gửi prompt và nhận phản hồi JSON" placement="top">
+                      <Button
+                        variant="flat"
+                        color="secondary"
+                        className="h-12 rounded-xl font-semibold shadow-none"
+                        startContent={<ExternalLink className="w-4 h-4" />}
+                        onPress={handleOpenGemini}
+                      >
+                        Mở Gemini Web
+                      </Button>
+                    </Tooltip>
                   </div>
                 </div>
               )}
 
-              {/* TAB 2: DÁN KẾT QUẢ & ĐIỀN FORM */}
-              {activeTab === 'result' && (
+              {/* STEP 2: DÁN KẾT QUẢ */}
+              {currentStep === 2 && (
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between">
                       <label className="text-sm font-semibold text-foreground flex items-center gap-2">
                         <ClipboardPaste className="w-4 h-4 text-primary" />
-                        Dán kết quả từ Gemini Web:
+                        <span>Dán phản hồi từ Gemini Web</span>
+                        <Tooltip content="Dán toàn bộ khối mã JSON trả về từ Gemini Web vào đây" placement="top">
+                          <span className="cursor-help text-default-400 hover:text-default-600 transition-colors">
+                            <HelpCircle className="w-3.5 h-3.5" />
+                          </span>
+                        </Tooltip>
                       </label>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="flat"
-                          color="secondary"
-                          className="h-8 text-xs font-semibold rounded-lg shadow-none"
-                          startContent={<ClipboardPaste className="w-3.5 h-3.5" />}
-                          onPress={handlePasteClipboard}
-                        >
-                          Dán Clipboard
-                        </Button>
-                        {resultText && (
+                      <div className="flex items-center gap-1">
+                        <Tooltip content="Dán từ bộ nhớ tạm" placement="top">
                           <Button
+                            isIconOnly
                             size="sm"
                             variant="light"
-                            color="danger"
-                            className="h-8 text-xs font-semibold rounded-lg"
-                            onPress={() => {
-                              setResultText('');
-                              setParsedData(null);
-                            }}
+                            className="text-default-400 hover:text-default-600 dark:hover:text-default-200 min-w-8 w-8 h-8 rounded-lg"
+                            onPress={handlePasteClipboard}
                           >
-                            Xóa
+                            <ClipboardPaste className="w-4 h-4" />
                           </Button>
+                        </Tooltip>
+                        {resultText && (
+                          <Tooltip content="Xóa nội dung" placement="top">
+                            <Button
+                              isIconOnly
+                              size="sm"
+                              variant="light"
+                              className="text-default-400 hover:text-default-600 dark:hover:text-default-200 min-w-8 w-8 h-8 rounded-lg"
+                              onPress={() => {
+                                setResultText('');
+                                setParsedData(null);
+                                setError(null);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </Tooltip>
                         )}
                       </div>
                     </div>
@@ -316,151 +440,331 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
                       value={resultText}
                       onValueChange={(val) => {
                         setResultText(val);
-                        if (val.trim().startsWith('{') || val.includes('"recipes"') || val.includes('```json')) {
-                          handleParse(val);
-                        }
+                        setParsedData(null);
+                        if (error) setError(null);
                       }}
-                      minRows={6}
-                      maxRows={10}
+                      minRows={7}
+                      maxRows={12}
                       variant="flat"
                       classNames={{
-                        inputWrapper: "bg-default-100 hover:bg-default-200/70 dark:bg-default-100/20 border border-divider/50 rounded-2xl shadow-none p-3.5 font-mono",
+                        inputWrapper: "bg-default-100/70 hover:bg-default-100 dark:bg-default-100/20 border border-divider/50 rounded-2xl shadow-none p-3.5 font-mono",
                         input: "text-xs font-mono leading-relaxed"
                       }}
                     />
-
-                    {!parsedData && (
-                      <Button
-                        color="primary"
-                        variant="flat"
-                        className="w-full h-12 rounded-xl font-semibold shadow-none mt-1"
-                        startContent={<Sparkles className="w-4 h-4" />}
-                        onPress={() => handleParse()}
-                      >
-                        Trích xuất dữ liệu
-                      </Button>
-                    )}
                   </div>
 
                   {error && (
                     <div className="p-3 bg-danger-50 dark:bg-danger-950/30 border border-danger-200 dark:border-danger-900/50 text-danger-700 dark:text-danger-300 rounded-xl flex items-start gap-2.5 text-xs">
                       <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                      <div className="flex-1">{error}</div>
+                      <div className="flex-1 font-medium">{error}</div>
                     </div>
                   )}
+                </div>
+              )}
 
-                  {/* PREVIEW KẾT QUẢ */}
-                  {parsedData && parsedData.length > 0 && (
-                    <div className="flex flex-col border border-success-200 dark:border-success-900/50 rounded-2xl overflow-hidden bg-success-50/20 dark:bg-success-950/10">
-                      <div className="bg-success-100/60 dark:bg-success-900/30 px-4 py-2.5 border-b border-success-200 dark:border-success-900/50 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Check className="w-4 h-4 text-success-600 dark:text-success-400" />
-                          <h4 className="font-bold text-sm text-success-800 dark:text-success-200">
-                            Đã trích xuất thành công
-                          </h4>
-                        </div>
-                        {parsedData.length > 1 && (
-                          <Chip size="sm" color="success" variant="flat" className="font-semibold text-xs">
-                            {parsedData.length} món ăn
-                          </Chip>
-                        )}
+              {/* STEP 3: XEM TRƯỚC & ÁP DỤNG */}
+              {currentStep === 3 && (
+                <div className="flex flex-col gap-4">
+                  {(!parsedData || parsedData.length === 0) ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-center">
+                      <div className="w-12 h-12 rounded-2xl bg-default-100 flex items-center justify-center text-default-400 mb-3">
+                        <Sparkles className="w-6 h-6" />
                       </div>
-
-                      {/* Selector nếu có nhiều công thức */}
+                      <p className="text-sm font-semibold text-foreground">Chưa có công thức nào được trích xuất</p>
+                      <p className="text-xs text-default-400 mt-1 mb-4">Vui lòng quay lại bước 2 để dán phản hồi JSON từ Gemini</p>
+                      <Button
+                        size="sm"
+                        variant="flat"
+                        color="primary"
+                        startContent={<ArrowLeft className="w-4 h-4" />}
+                        onPress={() => setCurrentStep(2)}
+                        className="rounded-xl font-semibold"
+                      >
+                        Quay lại bước 2
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Bộ chọn món ăn nếu trích xuất nhiều món */}
                       {parsedData.length > 1 && (
-                        <div className="flex overflow-x-auto border-b border-success-200/60 bg-success-50/40 dark:bg-success-950/30 p-1.5 gap-1.5">
-                          {parsedData.map((recipe, idx) => (
-                            <button
-                              key={idx}
-                              onClick={() => setActiveRecipeIndex(idx)}
-                              className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
-                                activeRecipeIndex === idx 
-                                  ? 'bg-success text-white' 
-                                  : 'text-success-700 dark:text-success-300 hover:bg-success-100 dark:hover:bg-success-900/40'
-                              }`}
-                            >
-                              {recipe.title || `Món ${idx + 1}`}
-                            </button>
-                          ))}
+                        <div className="flex flex-col gap-2 pb-2.5 border-b border-divider/40">
+                          <div className="flex items-center justify-between text-xs font-semibold text-default-500 px-0.5">
+                            <span>Công thức ({activeRecipeIndex + 1}/{parsedData.length})</span>
+                            <span className="text-[11px] text-default-400 font-normal">Chọn món xem trước</span>
+                          </div>
+                          <div className="flex overflow-x-auto gap-1.5 py-0.5 no-scrollbar items-center">
+                            {parsedData.map((recipe, idx) => {
+                              const isActive = activeRecipeIndex === idx;
+                              return (
+                                <div
+                                  key={idx}
+                                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-all cursor-pointer select-none ${
+                                    isActive 
+                                      ? 'bg-primary text-white font-semibold shadow-xs' 
+                                      : 'bg-default-100/70 hover:bg-default-200/70 text-default-600 font-medium'
+                                  }`}
+                                  onClick={() => setActiveRecipeIndex(idx)}
+                                >
+                                  <span className="max-w-[130px] truncate">
+                                    {idx + 1}. {recipe.title || `Món ${idx + 1}`}
+                                  </span>
+                                  {parsedData.length > 1 && (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const nextList = parsedData.filter((_, i) => i !== idx);
+                                        setParsedData(nextList);
+                                        if (activeRecipeIndex >= nextList.length) {
+                                          setActiveRecipeIndex(Math.max(0, nextList.length - 1));
+                                        }
+                                        toast.info(`Đã loại bỏ "${recipe.title || `Món ${idx + 1}`}"`);
+                                      }}
+                                      className={`p-0.5 rounded-full hover:bg-black/20 transition-colors ${
+                                        isActive ? 'text-white' : 'text-default-400 hover:text-danger'
+                                      }`}
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
                       )}
 
-                      <div className="p-4 space-y-3 max-h-[260px] overflow-y-auto">
-                        <div>
-                          <h5 className="font-bold text-base text-foreground">
-                            {parsedData[activeRecipeIndex].title || 'Chưa đặt tên'}
-                          </h5>
-                          {parsedData[activeRecipeIndex].description && (
-                            <p className="text-xs text-default-500 mt-0.5 line-clamp-2">
-                              {parsedData[activeRecipeIndex].description}
-                            </p>
-                          )}
-                        </div>
+                      {/* Chi tiết công thức đang chọn */}
+                      {parsedData[activeRecipeIndex] && (() => {
+                        const cur = parsedData[activeRecipeIndex];
+                        const totalIngs = cur.ingredientSections?.reduce((acc, s) => acc + (s.ingredients?.length || 0), 0) || 0;
+                        const steps = cur.stepSections?.flatMap(s => s.steps) || [];
 
-                        <div className="flex flex-wrap gap-2 text-xs text-default-600">
-                          {parsedData[activeRecipeIndex].difficulty && (
-                            <span className="inline-flex items-center gap-1 bg-content1 px-2.5 py-1 rounded-lg border border-divider text-xs">
-                              <ChefHat className="w-3.5 h-3.5 text-primary" /> {parsedData[activeRecipeIndex].difficulty}
-                            </span>
-                          )}
-                          {parsedData[activeRecipeIndex].prep_time_minutes !== undefined && (
-                            <span className="inline-flex items-center gap-1 bg-content1 px-2.5 py-1 rounded-lg border border-divider text-xs">
-                              <Clock className="w-3.5 h-3.5 text-warning-500" /> Sơ chế: {parsedData[activeRecipeIndex].prep_time_minutes}p
-                            </span>
-                          )}
-                          {parsedData[activeRecipeIndex].cook_time_minutes !== undefined && (
-                            <span className="inline-flex items-center gap-1 bg-content1 px-2.5 py-1 rounded-lg border border-divider text-xs">
-                              <Clock className="w-3.5 h-3.5 text-success-500" /> Nấu: {parsedData[activeRecipeIndex].cook_time_minutes}p
-                            </span>
-                          )}
-                        </div>
+                        return (
+                          <div className="flex flex-col gap-4">
+                            {/* Tiêu đề & Thông tin tổng quan */}
+                            <div className="flex flex-col gap-2">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex-1">
+                                  <h3 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
+                                    {cur.title || 'Chưa đặt tên'}
+                                  </h3>
+                                  {cur.description && (
+                                    <p className="text-sm text-default-600 dark:text-default-400 mt-1 leading-relaxed">
+                                      {cur.description}
+                                    </p>
+                                  )}
+                                </div>
+                                {parsedData.length === 1 && (
+                                  <Chip size="sm" color="success" variant="flat" className="font-semibold text-xs shrink-0 mt-1">
+                                    Sẵn sàng
+                                  </Chip>
+                                )}
+                              </div>
 
-                        {/* Tóm tắt nguyên liệu */}
-                        {parsedData[activeRecipeIndex].ingredientSections && (
-                          <div className="text-xs text-default-600">
-                            <span className="font-semibold text-default-500">Nguyên liệu: </span>
-                            {parsedData[activeRecipeIndex].ingredientSections
-                              ?.flatMap(s => s.ingredients.map(i => i.name))
-                              .slice(0, 6)
-                              .join(', ')}
-                            {parsedData[activeRecipeIndex].ingredientSections?.reduce((acc, s) => acc + s.ingredients.length, 0) > 6 && '...'}
+                              {/* Badges metadata phẳng đồng bộ toàn app */}
+                              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                                {cur.difficulty && (
+                                  <Chip size="sm" variant="flat" color="primary" startContent={<ChefHat className="w-3.5 h-3.5" />} className="text-xs sm:text-sm font-medium">
+                                    {cur.difficulty}
+                                  </Chip>
+                                )}
+                                {cur.prep_time_minutes !== undefined && (
+                                  <Chip size="sm" variant="flat" color="warning" startContent={<Clock className="w-3.5 h-3.5" />} className="text-xs sm:text-sm font-medium">
+                                    Sơ chế {cur.prep_time_minutes}p
+                                  </Chip>
+                                )}
+                                {cur.cook_time_minutes !== undefined && (
+                                  <Chip size="sm" variant="flat" color="success" startContent={<Timer className="w-3.5 h-3.5" />} className="text-xs sm:text-sm font-medium">
+                                    Nấu {cur.cook_time_minutes}p
+                                  </Chip>
+                                )}
+                                {cur.servings !== undefined && (
+                                  <Chip size="sm" variant="flat" color="secondary" startContent={<Utensils className="w-3.5 h-3.5" />} className="text-xs sm:text-sm font-medium">
+                                    {cur.servings} người
+                                  </Chip>
+                                )}
+                                {cur.calories !== undefined && (
+                                  <Chip size="sm" variant="flat" color="danger" startContent={<Flame className="w-3.5 h-3.5" />} className="text-xs sm:text-sm font-medium">
+                                    {cur.calories} kcal
+                                  </Chip>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Nguyên liệu */}
+                            <div className="flex flex-col gap-3 pt-2 border-t border-divider/40">
+                              <div className="flex items-center justify-between pb-1.5 border-b border-divider/50">
+                                <h4 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                  <Carrot className="w-4 h-4 text-success" />
+                                  <span>Nguyên liệu</span>
+                                </h4>
+                                {totalIngs > 0 && (
+                                  <span className="text-xs text-default-400 font-medium">{totalIngs} mục</span>
+                                )}
+                              </div>
+
+                              {cur.ingredientSections && cur.ingredientSections.length > 0 ? (
+                                <div className="space-y-3">
+                                  {cur.ingredientSections.map((sec, sIdx) => (
+                                    <div key={sIdx} className="space-y-1">
+                                      {cur.ingredientSections!.length > 1 && (
+                                        <h5 className="text-xs font-bold text-default-400 uppercase tracking-wider">
+                                          {sec.name}
+                                        </h5>
+                                      )}
+                                      <div className="divide-y divide-divider/30">
+                                        {sec.ingredients.map((ing, iIdx) => (
+                                          <div key={iIdx} className="flex items-baseline justify-between py-2 text-sm">
+                                            <span className="font-normal text-foreground text-sm">{ing.name}</span>
+                                            <span className="text-default-500 font-normal shrink-0 ml-2 text-right text-sm">
+                                              {[ing.amount, ing.unit].filter(Boolean).join(' ') || 'Vừa đủ'}
+                                            </span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-sm text-default-400 italic">Không có danh sách nguyên liệu</p>
+                              )}
+                            </div>
+
+                            {/* Cách làm */}
+                            <div className="flex flex-col gap-3 pt-2 border-t border-divider/40">
+                              <div className="flex items-center justify-between pb-1.5 border-b border-divider/50">
+                                <h4 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                  <ChefHat className="w-4 h-4 text-primary" />
+                                  <span>Cách làm</span>
+                                </h4>
+                                {steps.length > 0 && (
+                                  <span className="text-xs text-default-400 font-medium">{steps.length} bước</span>
+                                )}
+                              </div>
+
+                              {steps.length > 0 ? (
+                                <div className="space-y-3">
+                                  {steps.map((step, idx) => (
+                                    <div key={idx} className="flex items-start gap-2.5 text-sm">
+                                      <span className="w-6 h-6 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center shrink-0 mt-0.5 text-xs">
+                                        {idx + 1}
+                                      </span>
+                                      <div
+                                        className="flex-1 leading-relaxed text-sm text-foreground pt-0.5 [&>p]:mb-1 [&>p:last-child]:mb-0 [&_strong]:font-semibold [&_b]:font-semibold"
+                                        dangerouslySetInnerHTML={{ __html: step.content }}
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-sm text-default-400 italic">Không có các bước thực hiện</p>
+                              )}
+
+                              {cur.suggested_tip && (
+                                <div className="mt-2 p-3.5 bg-secondary/10 border-l-4 border-secondary rounded-r-xl flex items-start gap-2.5 text-xs sm:text-sm">
+                                  <Lightbulb className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
+                                  <div className="flex-1">
+                                    <span className="font-bold text-secondary-700 dark:text-secondary-300 block text-sm">
+                                      Mẹo gợi ý: {cur.suggested_tip.title}
+                                    </span>
+                                    <div
+                                      className="text-foreground/90 text-xs sm:text-sm mt-0.5 leading-relaxed [&>p]:mb-1 [&>p:last-child]:mb-0"
+                                      dangerouslySetInnerHTML={{ __html: cur.suggested_tip.content }}
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    </div>
+                        );
+                      })()}
+                    </>
                   )}
                 </div>
               )}
             </DrawerBody>
 
-            <DrawerFooter className="px-5 py-3.5 border-t border-divider/40 flex items-center gap-3 bg-content1 shrink-0">
-              <Button 
-                variant="flat" 
-                className="flex-1 rounded-xl font-semibold h-12 border border-divider/60 text-foreground bg-default-100 hover:bg-default-200 shadow-none"
-                onPress={onClose}
-              >
-                Đóng
-              </Button>
+            <DrawerFooter className="px-5 py-3.5 border-t border-divider/40 flex flex-col gap-2 bg-content1 shrink-0">
+              {currentStep === 1 && (
+                <div className="flex items-center gap-2.5 w-full">
+                  <Button 
+                    variant="flat" 
+                    className="flex-1 rounded-xl font-semibold h-12 border border-divider/60 text-foreground bg-default-100 hover:bg-default-200 shadow-none text-xs sm:text-sm"
+                    onPress={onClose}
+                  >
+                    Đóng
+                  </Button>
+                  <Button 
+                    color="primary" 
+                    className="flex-1 rounded-xl font-bold h-12 shadow-none text-white text-xs sm:text-sm"
+                    endContent={<ArrowRight className="w-4 h-4" />}
+                    onPress={() => setCurrentStep(2)}
+                  >
+                    Tiếp tục: Dán kết quả
+                  </Button>
+                </div>
+              )}
 
-              {activeTab === 'prompt' ? (
-                <Button 
-                  color="primary" 
-                  className="flex-1 rounded-xl font-bold h-12 shadow-none text-white"
-                  endContent={<ArrowRight className="w-4 h-4" />}
-                  onPress={() => setActiveTab('result')}
-                >
-                  Nhập kết quả →
-                </Button>
-              ) : (
-                <Button 
-                  color="primary" 
-                  className="flex-1 rounded-xl font-bold h-12 shadow-none text-white"
-                  isDisabled={!parsedData || parsedData.length === 0}
-                  onPress={() => handleApply(onClose)}
-                  startContent={<Check className="w-4 h-4" />}
-                >
-                  Áp dụng vào Form
-                </Button>
+              {currentStep === 2 && (
+                <div className="flex items-center gap-2.5 w-full">
+                  <Button 
+                    variant="flat" 
+                    className="w-24 shrink-0 rounded-xl font-semibold h-12 border border-divider/60 text-foreground bg-default-100 hover:bg-default-200 shadow-none text-xs sm:text-sm"
+                    startContent={<ArrowLeft className="w-4 h-4" />}
+                    onPress={() => setCurrentStep(1)}
+                  >
+                    Quay lại
+                  </Button>
+                  <Button 
+                    color="primary" 
+                    isDisabled={!resultText.trim()}
+                    className="flex-1 rounded-xl font-bold h-12 shadow-none text-white text-xs sm:text-sm"
+                    endContent={<ArrowRight className="w-4 h-4" />}
+                    onPress={() => {
+                      if (parsedData && parsedData.length > 0) {
+                        setCurrentStep(3);
+                      } else {
+                        handleParse(undefined, true);
+                      }
+                    }}
+                  >
+                    Trích xuất & Xem trước
+                  </Button>
+                </div>
+              )}
+
+              {currentStep === 3 && (
+                <div className="flex flex-col gap-2 w-full">
+                  <div className="flex items-center gap-2.5 w-full">
+                    <Button 
+                      variant="flat" 
+                      className="w-24 shrink-0 rounded-xl font-semibold h-12 border border-divider/60 text-foreground bg-default-100 hover:bg-default-200 shadow-none text-xs sm:text-sm"
+                      startContent={<ArrowLeft className="w-4 h-4" />}
+                      onPress={() => setCurrentStep(2)}
+                    >
+                      Quay lại
+                    </Button>
+                    <Button 
+                      color="primary" 
+                      className="flex-1 rounded-xl font-bold h-12 shadow-none text-white text-xs sm:text-sm"
+                      onPress={() => (parsedData && parsedData.length > 1) ? handleApplyAll(onClose) : handleApply(onClose)}
+                      startContent={<Check className="w-4 h-4" />}
+                    >
+                      {(parsedData && parsedData.length > 1) ? `Áp dụng tất cả (${parsedData.length} món)` : 'Áp dụng vào Form'}
+                    </Button>
+                  </div>
+                  {parsedData && parsedData.length > 1 && (
+                    <Button 
+                      variant="light" 
+                      color="primary"
+                      className="w-full text-xs font-semibold h-8 rounded-lg"
+                      onPress={() => handleApply(onClose)}
+                    >
+                      Chỉ áp dụng món đang xem: {parsedData[activeRecipeIndex]?.title || `Món ${activeRecipeIndex + 1}`}
+                    </Button>
+                  )}
+                </div>
               )}
             </DrawerFooter>
           </>

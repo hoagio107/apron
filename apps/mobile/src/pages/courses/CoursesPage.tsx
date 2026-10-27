@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button, Spinner, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Badge } from '@/ui';
+import { Button, Spinner, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { Plus, BookOpen, Search, Filter, CheckSquare, Trash2 } from 'lucide-react';
 import { BulkActionBar } from '../../components/shared/BulkActionBar';
@@ -11,7 +10,6 @@ import { ConfirmModal } from '../../components/shared/ConfirmModal';
 import { CourseFormModal } from './components/CourseFormModal';
 
 export function CoursesPage() {
-  const navigate = useNavigate();
   const { courses, isLoading, fetchCourses, deleteCourse, deleteBulkCourses } = useCourseStore();
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');

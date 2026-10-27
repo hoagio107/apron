@@ -173,7 +173,7 @@ export function ImageSection() {
             <p className="text-xs text-default-400 text-center">Kéo thả file hoặc bấm để chọn ảnh/video</p>
           </div>
         ) : (
-          <div className="flex-1 aspect-square min-w-0 bg-default-100 dark:bg-default-50/40 rounded-2xl relative group overflow-hidden flex items-center justify-center shadow-inner border border-divider/60">
+          <div className="flex-1 aspect-square min-w-0 bg-default-100 dark:bg-default-50/40 rounded-2xl relative group overflow-hidden flex items-center justify-center shadow-inner">
             {allMedia[selectedIndex] && (
               isVideo(allMedia[selectedIndex]) ? (
                 <video 

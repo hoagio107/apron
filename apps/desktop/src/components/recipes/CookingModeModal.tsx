@@ -49,7 +49,7 @@ export function CookingModeModal({
       <ModalContent>
         {(onCloseModal) => (
           <div className="flex flex-col h-[80vh] bg-background">
-             <div className="flex items-center justify-between p-4 border-b border-default-200 bg-white">
+             <div className="flex items-center justify-between p-4 border-b border-divider bg-content1">
                <div className="flex items-center gap-3">
                  <Button isIconOnly variant="light" onPress={onCloseModal}><X className="w-6 h-6"/></Button>
                  <div className="font-bold text-lg">{recipe.title}</div>
@@ -61,7 +61,7 @@ export function CookingModeModal({
                </div>
              </div>
              
-             <div className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col items-center bg-default-50">
+             <div className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col items-center bg-background">
                {currentCookingStep === -1 ? (
                  <div className="max-w-4xl w-full flex flex-col gap-6">
                    <h3 className="text-2xl font-bold flex items-center gap-2">
@@ -72,10 +72,10 @@ export function CookingModeModal({
                      {recipe.ingredients?.map((ing: any, idx: number) => (
                        <div 
                          key={idx} 
-                         className={`flex items-center justify-between p-4 rounded-xl transition-all cursor-pointer bg-white shadow-sm ${
+                         className={`flex items-center justify-between p-4 rounded-xl transition-all cursor-pointer app-card ${
                            checkedIngredients.has(idx) 
-                             ? 'opacity-60 bg-default-100' 
-                             : 'hover:shadow-md'
+                             ? 'opacity-60 bg-content2' 
+                             : 'hover:bg-content2'
                          }`}
                          onClick={() => toggleIngredient(idx)}
                        >
@@ -169,7 +169,7 @@ export function CookingModeModal({
                 ) : null}
               </div>
               
-              <div className="p-4 md:p-6 border-t border-default-200 bg-white flex justify-between items-center">
+              <div className="p-4 md:p-6 border-t border-divider bg-content1 flex justify-between items-center">
                  <Button 
                    size="lg" 
                    variant="flat" 

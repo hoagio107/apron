@@ -69,11 +69,9 @@
     background-color: hsl(var(--heroui-content1));
     color: hsl(var(--heroui-foreground));
     border-radius: 1rem;
-    border-width: 1px;
-    border-style: solid;
-    border-color: hsl(var(--heroui-divider) / var(--heroui-divider-opacity, 0.15));
+    border: none;
     box-shadow: none;
-    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
   }
 
   .app-card-dashed {
@@ -92,7 +90,6 @@
   }
   .app-card-interactive:hover {
     background-color: hsl(var(--heroui-content2));
-    border-color: hsl(var(--heroui-default-300) / 0.5);
   }
   .app-card-interactive:active {
     transform: scale(0.99);
@@ -125,13 +122,14 @@
     background-color: hsl(var(--heroui-content1));
     color: hsl(var(--heroui-foreground));
     border-radius: 1rem;
-    border: 1px solid hsl(var(--heroui-divider) / var(--heroui-divider-opacity, 0.15));
+    border: none;
     padding: 1rem;
     display: flex;
+    flex-direction: row;
     align-items: center;
     gap: 1rem;
     box-shadow: none;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+    transition: background-color 0.2s ease;
   }
 
   .app-stat-value {
@@ -163,9 +161,9 @@
     background-color: hsl(var(--heroui-content1));
     color: hsl(var(--heroui-foreground));
     border-radius: 1rem;
-    border: 1px solid hsl(var(--heroui-divider) / var(--heroui-divider-opacity, 0.15));
+    border: none;
     box-shadow: none;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+    transition: background-color 0.2s ease;
   }
 
   /* 4. Standardized Typography Hierarchy */
@@ -236,6 +234,17 @@ button:not([data-slot="popover"]):not([data-slot="modal"]):not([data-slot="drawe
 [data-slot="cursor"],
 [data-slot="tab"] {
   box-shadow: none !important;
+}
+
+/* ==========================================================================
+   Thống nhất triệt để: Không sử dụng viền (border) cho các card trong app
+   Bảo toàn viền đứt nét duy nhất cho các card tải lên / empty state (.app-card-dashed).
+   ========================================================================== */
+.app-card:not(.app-card-dashed),
+[data-slot="card"]:not([data-dashed="true"]),
+.app-stat-card,
+.app-stat-card-vertical {
+  border: none !important;
 }
 
 /* ==========================================================================

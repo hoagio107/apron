@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
+import { Capacitor, type PluginListenerHandle } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
+import { toast } from '@/ui';
 
 interface SwipeState {
   isActive: boolean;
@@ -16,6 +19,7 @@ const EDGE_ZONE_WIDTH = 45;   // pixels tính từ mép màn hình
 export function SwipeBackHandler() {
   const location = useLocation();
   const navigate = useNavigate();
+  const lastBackPressRef = useRef<number>(0);
 
   const [swipeState, setSwipeState] = useState<SwipeState>({
     isActive: false,
@@ -51,8 +55,51 @@ export function SwipeBackHandler() {
     }
   }, [location.pathname, navigate]);
 
+  // Lắng nghe phím Back vật lý / cử chỉ vuốt cạnh điện thoại của Android qua Capacitor
   useEffect(() => {
-    // Không kích hoạt cử chỉ back khi đang ở trang chủ '/'
+    if (!Capacitor.isNativePlatform()) return;
+
+    let listenerHandle: PluginListenerHandle | null = null;
+
+    const setupListener = async () => {
+      listenerHandle = await CapApp.addListener('backButton', () => {
+        // 1. Nếu có modal, drawer, dialog hoặc popover đang mở -> đóng modal trước
+        const hasOpenOverlay = document.querySelector(
+          '[data-overlay-container="true"] [role="dialog"], [role="dialog"][data-open="true"], [data-slot="backdrop"]'
+        );
+        if (hasOpenOverlay) {
+          window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+          return;
+        }
+
+        // 2. Nếu đang ở trang con -> quay lại trang trước
+        if (location.pathname !== '/') {
+          handleGoBack();
+          return;
+        }
+
+        // 3. Nếu đang ở trang chủ '/' -> nhấn 2 lần trong 2 giây để thoát
+        const now = Date.now();
+        if (now - lastBackPressRef.current < 2000) {
+          CapApp.exitApp();
+        } else {
+          lastBackPressRef.current = now;
+          toast.info('Nhấn lần nữa để thoát ứng dụng');
+        }
+      });
+    };
+
+    setupListener();
+
+    return () => {
+      if (listenerHandle && typeof listenerHandle.remove === 'function') {
+        listenerHandle.remove();
+      }
+    };
+  }, [location.pathname, handleGoBack]);
+
+  useEffect(() => {
+    // Không kích hoạt cử chỉ web touch back khi đang ở trang chủ '/'
     if (location.pathname === '/') {
       return;
     }
@@ -200,16 +247,38 @@ export function SwipeBackHandler() {
     };
   }, [location.pathname, swipeState.isReadyToTrigger, handleGoBack]);
 
+  const pillRef = useRef<HTMLDivElement>(null);
+  const badgeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!swipeState.isActive) return;
+    const clampedY = Math.max(80, Math.min(window.innerHeight - 100, swipeState.y));
+    const isPullingRight = swipeState.direction === 'right';
+    const width = Math.max(34, Math.min(56, 26 + swipeState.distance * 0.45));
+
+    if (pillRef.current) {
+      pillRef.current.style.top = `${clampedY}px`;
+      pillRef.current.style.transform = 'translateY(-50%)';
+      pillRef.current.style.width = `${width}px`;
+      pillRef.current.style.height = '48px';
+      pillRef.current.style.paddingLeft = isPullingRight ? '8px' : '4px';
+      pillRef.current.style.paddingRight = isPullingRight ? '4px' : '8px';
+    }
+    if (badgeRef.current) {
+      badgeRef.current.style.top = `${clampedY}px`;
+      badgeRef.current.style.transform = 'translateY(-50%)';
+    }
+  }, [swipeState]);
+
   if (!swipeState.isActive) return null;
 
-  // Giới hạn toạ độ Y của bubble trong màn hình
-  const clampedY = Math.max(80, Math.min(window.innerHeight - 100, swipeState.y));
   const isPullingRight = swipeState.direction === 'right';
 
   return (
     <div className="fixed inset-0 pointer-events-none z-[9999] overflow-hidden select-none">
       {/* Chỉ báo cử chỉ Back dạng pill nổi bật theo phong cách Android/iOS */}
       <div
+        ref={pillRef}
         className={`absolute flex items-center justify-center transition-all duration-75 ${
           isPullingRight ? 'left-0 rounded-r-full' : 'right-0 rounded-l-full'
         } ${
@@ -217,14 +286,6 @@ export function SwipeBackHandler() {
             ? 'bg-primary text-white shadow-lg shadow-primary/40 scale-105'
             : 'bg-content1/90 backdrop-blur-md text-foreground border border-divider shadow-md'
         }`}
-        style={{
-          top: `${clampedY}px`,
-          transform: `translateY(-50%)`,
-          width: `${Math.max(34, Math.min(56, 26 + swipeState.distance * 0.45))}px`,
-          height: '48px',
-          paddingLeft: isPullingRight ? '8px' : '4px',
-          paddingRight: isPullingRight ? '4px' : '8px'
-        }}
       >
         <ChevronLeft
           className={`w-6 h-6 transition-all duration-150 ${
@@ -236,13 +297,10 @@ export function SwipeBackHandler() {
       {/* Badge phụ hiển thị chữ "Quay lại" khi đã kéo đủ ngưỡng */}
       {swipeState.isReadyToTrigger && (
         <div
+          ref={badgeRef}
           className={`absolute text-xs font-semibold px-2.5 py-1 rounded-full bg-primary text-white shadow-md transition-all duration-150 animate-in fade-in zoom-in-90 ${
             isPullingRight ? 'left-16' : 'right-16'
           }`}
-          style={{
-            top: `${clampedY}px`,
-            transform: 'translateY(-50%)'
-          }}
         >
           Quay lại
         </div>

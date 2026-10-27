@@ -21,7 +21,7 @@ export function LinkedTipsSection() {
   if (linkedTips.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-3 p-4 bg-primary-50/50 rounded-xl border border-primary-100">
+    <div className="flex flex-col gap-3 p-4 bg-primary-50/50 rounded-xl">
       <div className="flex items-center gap-2 text-primary-700">
         <Lightbulb className="w-5 h-5" />
         <h3 className="font-semibold">Mẹo nhà bếp liên kết</h3>
@@ -35,15 +35,17 @@ export function LinkedTipsSection() {
               key={id} 
               variant="flat" 
               color="primary"
-              className="pl-1 pr-2"
-              startContent={<div className="w-4 h-4 ml-1 rounded-full bg-primary-100 flex items-center justify-center"><Lightbulb className="w-2.5 h-2.5 text-primary-700" /></div>}
+              className="pl-1 pr-2 max-w-full sm:max-w-xs"
+              startContent={<div className="w-4 h-4 ml-1 rounded-full bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center shrink-0"><Lightbulb className="w-2.5 h-2.5 text-primary-700 dark:text-primary-300" /></div>}
               endContent={
-                <button type="button" onClick={() => handleRemove(id)} className="p-0.5 hover:bg-primary-200 rounded-full text-primary-700 transition-colors ml-1">
+                <button type="button" onClick={() => handleRemove(id)} className="p-0.5 hover:bg-primary-200 dark:hover:bg-primary-800 rounded-full text-primary-700 dark:text-primary-300 transition-colors ml-1 shrink-0" aria-label="Xoá mẹo">
                   <X className="w-3 h-3" />
                 </button>
               }
             >
-              {tip.title}
+              <span className="truncate max-w-[200px] sm:max-w-[260px] inline-block align-middle" title={tip.title}>
+                {tip.title}
+              </span>
             </Chip>
           );
         })}

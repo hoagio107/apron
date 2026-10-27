@@ -24,8 +24,21 @@ export function NewRecipePage() {
       if (existing) {
         setEditRecipe(existing);
       }
+    } else {
+      const titleParam = searchParams.get('title');
+      const imageParam = searchParams.get('image');
+      if (titleParam || imageParam) {
+        setEditRecipe({
+          id: '',
+          title: titleParam || '',
+          image_url: imageParam || '',
+          servings: 2,
+          ingredients: [],
+          instructions: []
+        } as any);
+      }
     }
-  }, [editId, recipes]);
+  }, [editId, searchParams, recipes]);
 
   const handleSubmit = async (data: any) => {
     if (Array.isArray(data)) {

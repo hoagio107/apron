@@ -249,7 +249,7 @@ function RecipeCardComponent({
             {recipe.title}
           </h3>
           
-          <div className="flex items-center gap-x-2 text-xs font-medium text-white/90 whitespace-nowrap overflow-hidden">
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs font-medium text-white/90">
             <div className="flex items-center gap-1 shrink-0">
               <Clock className="w-3 h-3 text-white/80" />
               <span>{formatTime(totalTime)}</span>
@@ -349,7 +349,7 @@ function RecipeCardComponent({
           {recipe.title}
         </h3>
         
-        <div className="flex items-center gap-x-2 whitespace-nowrap overflow-hidden mt-0.5 text-xs text-default-500">
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-0.5 text-xs text-default-500">
           <div className="flex items-center gap-1 shrink-0">
             <Clock className="w-3 h-3" />
             <span>{formatTime(totalTime)}</span>

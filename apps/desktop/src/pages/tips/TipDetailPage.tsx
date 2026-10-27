@@ -92,7 +92,7 @@ export function TipDetailPage() {
         }}
       />
 
-      <div className="bg-white rounded-2xl border border-default-100 shadow-none overflow-hidden flex flex-col md:min-h-[70vh]">
+      <div className="app-card overflow-hidden flex flex-col md:min-h-[70vh]">
         {/* Immersive Cover Image */}
         <div className="w-full relative min-h-[300px] md:min-h-[400px] flex items-end">
           {tip.image_url ? (
@@ -131,7 +131,7 @@ export function TipDetailPage() {
         </div>
 
         {/* Content */}
-        <div className="p-8 md:p-12 flex-1 bg-white">
+        <div className="p-8 md:p-12 flex-1 bg-content1">
           <div 
             className="prose prose-lg prose-primary max-w-4xl mx-auto leading-relaxed"
             dangerouslySetInnerHTML={{ __html: tip.content }}

@@ -261,7 +261,7 @@ export function CourseDetailPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground pb-28">
+    <div className="flex flex-col min-h-screen bg-background text-foreground pb-28 max-w-full overflow-x-hidden">
       {/* 1. TOP APP BAR (Flat & Clean) */}
       <header className="sticky top-0 z-40 bg-background/95 dark:bg-black/90 backdrop-blur-md border-b border-divider/50 px-4 py-3 h-14 flex items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -409,14 +409,14 @@ export function CourseDetailPage() {
 
       {/* 3. LESSON HEADER (Gọn gàng, tinh tế, không nhồi nhét) */}
       <div className="px-4 pt-4 pb-3 flex flex-col gap-1 border-b border-divider/40">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
-          <span>{currentItem?.moduleTitle || `Chương ${(currentItem?.moduleIndex ?? 0) + 1}`}</span>
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-primary flex-wrap">
+          <span className="break-words">{currentItem?.moduleTitle || `Chương ${(currentItem?.moduleIndex ?? 0) + 1}`}</span>
           <span>•</span>
-          <span>Bài {(currentItem?.lessonIndex ?? 0) + 1}</span>
+          <span className="shrink-0">Bài {(currentItem?.lessonIndex ?? 0) + 1}</span>
           {activeLesson?.duration_minutes ? (
             <>
               <span className="text-default-300">•</span>
-              <span className="text-default-500 font-normal">{activeLesson.duration_minutes} phút</span>
+              <span className="text-default-500 font-normal shrink-0">{activeLesson.duration_minutes} phút</span>
             </>
           ) : null}
         </div>
@@ -563,16 +563,18 @@ export function CourseDetailPage() {
                     <AccordionItem
                       key={module.id || `module-${mIdx}`}
                       title={
-                        <div className="flex items-center justify-between w-full pr-2">
-                          <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="flex items-start justify-between w-full gap-2.5 py-0.5">
+                          <div className="flex items-start gap-2.5 min-w-0 flex-1">
                             {module.icon && (
-                              <IconRenderer value={module.icon} className="w-4 h-4 text-primary shrink-0" />
+                              <div className="mt-0.5 shrink-0">
+                                <IconRenderer value={module.icon} className="w-4 h-4 text-primary" />
+                              </div>
                             )}
-                            <span className="font-bold truncate text-sm">
+                            <span className="font-bold text-sm text-foreground break-words whitespace-normal leading-snug">
                               {mIdx + 1}. {module.title}
                             </span>
                           </div>
-                          <span className="text-xs text-default-400 font-semibold shrink-0 ml-2">
+                          <span className="text-xs text-default-400 font-semibold shrink-0 ml-2 mt-0.5">
                             {moduleCompletedCount}/{moduleLessons.length}
                           </span>
                         </div>

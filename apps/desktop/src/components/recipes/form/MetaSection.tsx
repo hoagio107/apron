@@ -172,7 +172,7 @@ export function MetaSection({ dynamicTags, currentRecipeId }: MetaSectionProps) 
 
               {/* Render selected parent as a card */}
               {parentRecipe && (
-                <div className="flex flex-col gap-0 border border-divider rounded-xl overflow-hidden mt-2">
+                <div className="flex flex-col gap-0 rounded-xl overflow-hidden mt-2 bg-default-50/50">
                   <div className="flex gap-3 p-2 hover:bg-default-50 transition-colors group relative bg-default-50/50">
                     <Avatar src={ImageManager.getAssetUrl(parentRecipe.image_url || '')} radius="sm" className="w-10 h-10 shrink-0 text-small" fallback={parentRecipe.title.charAt(0)} />
                     <div className="flex flex-col justify-center flex-1 gap-0.5">

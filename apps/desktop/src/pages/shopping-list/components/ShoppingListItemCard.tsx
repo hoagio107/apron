@@ -1,9 +1,6 @@
 import { Checkbox, Button, Autocomplete, AutocompleteItem } from '@/ui';
 import { Minus, Plus, MoreVertical, Trash2 } from 'lucide-react';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
-import { useIngredientCatalogStore } from '../../../store/useIngredientCatalogStore';
-import { Avatar } from '@/ui';
-import { ImageManager } from '../../../lib/image-manager';
 import { getCategoryTheme } from '../../../lib/categoryTheme';
 import { useUnitStore } from '../../../store/useUnitStore';
 
@@ -16,12 +13,7 @@ interface ShoppingListItemCardProps {
 }
 
 export function ShoppingListItemCard({ item, onToggle, onRemove, onUpdateQuantity, onUpdateUnit }: ShoppingListItemCardProps) {
-  const { getIngredientMetaByName } = useIngredientCatalogStore();
   const { units } = useUnitStore();
-  const meta = getIngredientMetaByName(item.name);
-  const imageUrl = meta?.image_url;
-
-
 
   const handleIncrement = () => {
     const qty = parseInt(item.quantity?.toString() || '0');
@@ -37,8 +29,11 @@ export function ShoppingListItemCard({ item, onToggle, onRemove, onUpdateQuantit
     }
   };
 
+  const theme = getCategoryTheme(item.group);
+  const Icon = theme.icon;
+
   return (
-    <div className={`flex items-center gap-4 p-3 bg-white border border-default-100 rounded-2xl transition-all ${item.checked ? 'opacity-60' : 'hover:shadow-sm'}`}>
+    <div className={`flex items-center gap-4 p-3 app-card transition-all ${item.checked ? 'opacity-60' : 'hover:bg-content2'}`}>
       <Checkbox 
         isSelected={item.checked}
         onValueChange={() => onToggle(item.id)}
@@ -49,29 +44,17 @@ export function ShoppingListItemCard({ item, onToggle, onRemove, onUpdateQuantit
         radius="full"
       />
       
-      {(() => {
-        const theme = getCategoryTheme(item.group || meta?.default_category);
-        const Icon = theme.icon;
-        
-        return imageUrl ? (
-          <Avatar 
-            src={ImageManager.getAssetUrl(imageUrl)} 
-            radius="lg" 
-            showFallback
-            className="w-12 h-12 flex-shrink-0 bg-default-100" 
-            fallback={<Icon className="w-6 h-6 text-default-400" />}
-          />
-        ) : (
-          <div className={`w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center ${theme.bg} ${theme.text}`}>
-            <Icon className="w-6 h-6" />
-          </div>
-        );
-      })()}
+      <div className={`w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center ${theme.bg} ${theme.text}`}>
+        <Icon className="w-6 h-6" />
+      </div>
 
       <div className="flex-1 min-w-0">
         <h3 className={`font-semibold text-foreground truncate ${item.checked ? 'line-through text-default-500' : ''}`}>
           {item.name || item.title || item.ingredient_name || 'Nguyên liệu không tên'}
         </h3>
+        {item.group && (
+          <p className="text-xs text-default-400 truncate">{item.group}</p>
+        )}
       </div>
 
       <div className="flex items-center gap-0">

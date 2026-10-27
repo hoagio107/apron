@@ -35,9 +35,9 @@ export function SuggestedIngredientsSidebar() {
   const { addItem } = useShoppingListStore();
 
   return (
-    <div className="h-full bg-white border border-default-100 rounded-2xl flex flex-col overflow-hidden">
+    <div className="h-full app-card flex flex-col overflow-hidden">
       <div className="p-4">
-        <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+        <h2 className="app-card-title mb-4 flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-warning" />
           Gợi ý thường mua
         </h2>

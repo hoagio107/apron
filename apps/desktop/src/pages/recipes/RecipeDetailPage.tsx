@@ -279,7 +279,7 @@ export function RecipeDetailPage() {
         <div className="flex-1 flex flex-col gap-10 min-w-0 w-full">
           
           {/* Intro Section (Split Image / Details) */}
-          <div className="flex flex-col xl:flex-row gap-8 w-full bg-white p-6 rounded-2xl border border-default-100 shadow-none">
+          <div className="flex flex-col xl:flex-row gap-8 w-full app-card p-6">
             {/* Image */}
             <div className="w-full xl:w-2/5 shrink-0">
               <div className="flex gap-3 items-start">
@@ -430,7 +430,7 @@ export function RecipeDetailPage() {
                
                {/* Meta Stats Row instead of Notes */}
                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
-                  <div className="flex flex-col items-center justify-center gap-1 bg-white rounded-2xl p-4 border border-default-100">
+                  <div className="flex flex-col items-center justify-center gap-1 app-card p-4">
                     <div className="p-2 rounded-full bg-primary/10 text-primary mb-1">
                       <Gauge className="w-5 h-5" />
                     </div>
@@ -438,7 +438,7 @@ export function RecipeDetailPage() {
                     <span className="font-bold text-foreground">{recipe.difficulty || 'Chưa rõ'}</span>
                   </div>
                   
-                  <div className="flex flex-col items-center justify-center gap-1 bg-white rounded-2xl p-4 border border-default-100">
+                  <div className="flex flex-col items-center justify-center gap-1 app-card p-4">
                     <div className="p-2 rounded-full bg-warning/10 text-warning mb-1">
                       <Flame className="w-5 h-5" />
                     </div>
@@ -446,7 +446,7 @@ export function RecipeDetailPage() {
                     <span className="font-bold text-foreground">{recipe.calories || '-'} kcal</span>
                   </div>
                   
-                  <div className="flex flex-col items-center justify-center gap-1 bg-white rounded-2xl p-4 border border-default-100">
+                  <div className="flex flex-col items-center justify-center gap-1 app-card p-4">
                     <div className="p-2 rounded-full bg-secondary/10 text-secondary mb-1">
                       <Clock className="w-5 h-5" />
                     </div>
@@ -454,7 +454,7 @@ export function RecipeDetailPage() {
                     <span className="font-bold text-foreground">{recipe.prep_time || 0} phút</span>
                   </div>
                   
-                  <div className="flex flex-col items-center justify-center gap-1 bg-white rounded-2xl p-4 border border-default-100">
+                  <div className="flex flex-col items-center justify-center gap-1 app-card p-4">
                     <div className="p-2 rounded-full bg-success/10 text-success mb-1">
                       <Timer className="w-5 h-5" />
                     </div>
@@ -502,16 +502,16 @@ export function RecipeDetailPage() {
           <div className="flex-1 min-w-0 w-full grid grid-cols-1 xl:grid-cols-5 gap-8">
             
             {/* Ingredients */}
-            <div className="xl:col-span-2 flex flex-col gap-6 bg-white rounded-2xl border border-default-100 shadow-none p-6 h-fit">
+            <div className="xl:col-span-2 flex flex-col gap-6 app-card p-6 h-fit">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold flex items-center gap-2">
+                <h2 className="app-section-title text-xl">
                   <Carrot className="w-6 h-6 text-success" />
                   Nguyên liệu
                 </h2>
                 <div className="flex items-center gap-2 bg-default-100 px-2 py-1 rounded-full text-sm font-medium">
                   <span className="text-default-500 mr-1 hidden sm:inline ml-2">Khẩu phần</span>
                   <div 
-                    className="w-6 h-6 flex items-center justify-center bg-white rounded-full cursor-pointer shadow-sm text-default-600 hover:text-primary transition-colors shrink-0"
+                    className="w-6 h-6 flex items-center justify-center bg-content1 border border-divider rounded-full cursor-pointer text-default-600 hover:text-primary transition-colors shrink-0"
                     onClick={() => {
                       const val = Math.max(0.1, targetServings - 1);
                       setTargetServingsStr(Number.isInteger(val) ? val.toString() : val.toFixed(1));
@@ -523,12 +523,12 @@ export function RecipeDetailPage() {
                     type="number"
                     step="0.1"
                     min="0.1"
-                    className="w-12 text-center bg-transparent border-none outline-none text-sm font-bold p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="w-12 text-center bg-transparent border-none outline-none text-sm font-bold p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-foreground"
                     value={targetServingsStr}
                     onChange={(e) => setTargetServingsStr(e.target.value)}
                   />
                   <div 
-                    className="w-6 h-6 flex items-center justify-center bg-white rounded-full cursor-pointer shadow-sm text-default-600 hover:text-primary transition-colors shrink-0"
+                    className="w-6 h-6 flex items-center justify-center bg-content1 border border-divider rounded-full cursor-pointer text-default-600 hover:text-primary transition-colors shrink-0"
                     onClick={() => {
                       const val = targetServings + 1;
                       setTargetServingsStr(Number.isInteger(val) ? val.toString() : val.toFixed(1));
@@ -572,8 +572,8 @@ export function RecipeDetailPage() {
             </div>
 
             {/* Cooking Instructions (Timeline format) */}
-            <div className="xl:col-span-3 flex flex-col gap-6 bg-white rounded-2xl border border-default-100 shadow-none p-6">
-               <h2 className="text-2xl font-bold flex items-center gap-2">
+            <div className="xl:col-span-3 flex flex-col gap-6 app-card p-6">
+               <h2 className="app-section-title text-xl">
                  <ChefHat className="w-6 h-6 text-success" />
                  Cách làm
                </h2>
@@ -642,7 +642,7 @@ export function RecipeDetailPage() {
 
         {/* Right Column (Sidebar) */}
         <div className="w-full lg:w-[280px] xl:w-[320px] shrink-0 flex flex-col">
-          <div className="bg-white rounded-2xl border border-default-100 shadow-none p-4 flex flex-col w-full">
+          <div className="app-card p-4 flex flex-col w-full">
             <Tabs aria-label="Recipe Sidebar Tabs" color="primary" variant="underlined" fullWidth classNames={{ cursor: "w-full bg-primary", tabList: "w-full relative rounded-none p-0 border-b border-default-200", tab: "px-0 h-12" }}>
               
               <Tab key="overview" title={<span className="text-base font-medium">Tổng quan</span>}>

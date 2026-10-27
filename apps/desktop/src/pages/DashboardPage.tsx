@@ -113,31 +113,39 @@ export function DashboardPage() {
       {/* 2. Overview Statistics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          icon={<ChefHat className="w-6 h-6" />}
+          layout="vertical"
+          icon={<ChefHat className="w-5 h-5 sm:w-6 sm:h-6" />}
           label="Công thức của bạn"
           value={recipes.length}
           color="primary"
+          onClick={() => navigate('/recipes')}
         />
         
         <StatCard
-          icon={<Calendar className="w-6 h-6" />}
+          layout="vertical"
+          icon={<Calendar className="w-5 h-5 sm:w-6 sm:h-6" />}
           label="Thực đơn hôm nay"
           value={`${todayMealPlan ? todayMealPlan.meals.length : 0} món`}
           color="secondary"
+          onClick={() => navigate('/meal-planner')}
         />
 
         <StatCard
-          icon={<Lightbulb className="w-6 h-6" />}
+          layout="vertical"
+          icon={<Lightbulb className="w-5 h-5 sm:w-6 sm:h-6" />}
           label="Mẹo vặt nhà bếp"
           value={dailyTip ? 'Có sẵn' : 'Chưa có'}
           color="warning"
+          onClick={() => navigate('/tips')}
         />
 
         <StatCard
-          icon={<BookOpen className="w-6 h-6" />}
+          layout="vertical"
+          icon={<BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />}
           label="Khóa học của bạn"
           value={courses.length}
           color="success"
+          onClick={() => navigate('/courses')}
         />
       </div>
 

@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Button, AppCard, Input, EmptyState } from '@/ui';
-import { Plus, Trash2, Edit2, Check, X, Scale } from 'lucide-react';
+import { Button, AppCard, Input, EmptyState, toast } from '@/ui';
+import { Plus, Trash2, Edit2, Check, X, Scale, Sparkles } from 'lucide-react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { useUnitStore } from '../../store/useUnitStore';
 import type { Unit } from '@apron/core';
 
 export function UnitsPage() {
-  const { units, addUnit, updateUnit, removeUnit } = useUnitStore();
+  const { units, addUnit, updateUnit, removeUnit, seedDefaultUnits } = useUnitStore();
   const [isAdding, setIsAdding] = useState(false);
   const [newUnitName, setNewUnitName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -49,9 +49,26 @@ export function UnitsPage() {
         title="Đơn vị tính"
         className="pt-0"
         actions={
-          <Button color="primary" onClick={() => setIsAdding(true)} startContent={<Plus className="w-4 h-4" />}>
-            Thêm đơn vị
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="flat" 
+              color="secondary" 
+              startContent={<Sparkles className="w-4 h-4" />}
+              onClick={() => {
+                const count = seedDefaultUnits();
+                if (count > 0) {
+                  toast.success(`Đã thêm ${count} đơn vị nấu ăn chuẩn`);
+                } else {
+                  toast.info('Tất cả đơn vị nấu ăn chuẩn đã có trong danh sách');
+                }
+              }}
+            >
+              Đơn vị chuẩn
+            </Button>
+            <Button color="primary" onClick={() => setIsAdding(true)} startContent={<Plus className="w-4 h-4" />}>
+              Thêm đơn vị
+            </Button>
+          </div>
         }
       />
       
@@ -118,9 +135,12 @@ export function UnitsPage() {
             <EmptyState
               icon={<Scale className="w-10 h-10 text-default-400" />}
               title="Chưa có đơn vị tính nào"
-              description="Hãy thêm các đơn vị tính như gam, kg, ml, thìa... để sử dụng cho công thức nấu ăn."
-              actionLabel="Thêm đơn vị mới"
-              onAction={() => setIsAdding(true)}
+              description="Hãy nạp bộ đơn vị tính chuẩn (g, kg, ml, muỗng...) hoặc tự thêm đơn vị mới để sử dụng trong công thức nấu ăn."
+              actionLabel="Nạp đơn vị chuẩn"
+              onAction={() => {
+                const count = seedDefaultUnits();
+                toast.success(`Đã nạp ${count} đơn vị chuẩn!`);
+              }}
             />
           )}
         </div>

@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Tabs, Tab, EmptyState } from '@/ui';
-import { Plus, ArrowDownUp, Share2, ListTodo, ShoppingCart } from 'lucide-react';
+import { Button, Tabs, Tab, EmptyState, Pagination, Input } from '@/ui';
+import { Plus, ArrowDownUp, Share2, ListTodo, ShoppingCart, Search } from 'lucide-react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { useShoppingListStore } from '../../store/useShoppingListStore';
 import { CATEGORIES } from '@apron/core';
@@ -18,6 +18,26 @@ export function ShoppingListPage() {
   
   const [activeTab, setActiveTab] = useState('pending');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [recipePage, setRecipePage] = useState(1);
+  const [recipeSearch, setRecipeSearch] = useState('');
+
+  const filteredRecipes = useMemo(() => {
+    if (!recipeSearch.trim()) return recipes;
+    const q = recipeSearch.toLowerCase().trim();
+    return recipes.filter(r => r.title.toLowerCase().includes(q));
+  }, [recipes, recipeSearch]);
+
+  const RECIPES_PER_PAGE = 6;
+  const totalRecipePages = Math.max(1, Math.ceil(filteredRecipes.length / RECIPES_PER_PAGE));
+  const paginatedRecipes = useMemo(() => {
+    const start = (recipePage - 1) * RECIPES_PER_PAGE;
+    return filteredRecipes.slice(start, start + RECIPES_PER_PAGE);
+  }, [filteredRecipes, recipePage]);
+
+  const handleRecipeSearchChange = (val: string) => {
+    setRecipeSearch(val);
+    setRecipePage(1);
+  };
 
   useEffect(() => {
     fetchItems();
@@ -169,43 +189,97 @@ export function ShoppingListPage() {
         </div>
 
         {/* Right Column: Discover */}
-        <div className="hidden md:flex flex-col min-h-0 bg-default-50/50 rounded-l-3xl p-6 border-l border-default-100">
+        <div className="hidden md:flex flex-col min-h-0 bg-default-50/50 rounded-l-3xl p-6 border-l border-divider">
           <RecommendedIngredients />
 
           <div className="mt-8 flex-1 flex flex-col min-h-0">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold">Tất cả công thức</h3>
-              <Button variant="light" size="sm" className="text-primary font-medium">Xem thêm →</Button>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-bold">Tất cả công thức</h3>
+                <span className="text-xs text-default-400 font-medium">({filteredRecipes.length})</span>
+              </div>
+              <Button 
+                variant="light" 
+                size="sm" 
+                className="text-primary font-medium hover:underline px-2 h-7"
+                onPress={() => navigate('/recipes')}
+              >
+                Xem thêm →
+              </Button>
+            </div>
+
+            {/* Quick Search */}
+            <div className="mb-3">
+              <Input
+                size="sm"
+                variant="flat"
+                placeholder="Tìm nhanh công thức..."
+                value={recipeSearch}
+                onValueChange={handleRecipeSearchChange}
+                startContent={<Search className="w-3.5 h-3.5 text-default-400" />}
+                isClearable
+                onClear={() => handleRecipeSearchChange('')}
+                classNames={{
+                  inputWrapper: "h-8 bg-content1/80 border-none shadow-none text-xs"
+                }}
+              />
             </div>
             
-            <div className="flex-1 overflow-y-auto custom-scrollbar">
-              <div className="grid grid-cols-3 gap-3">
-                {recipes.slice(0, 6).map(recipe => (
-                  <div key={recipe.id} className="w-full">
-                    <RecipeCard 
-                      recipe={recipe} 
-                      viewType="grid-landscape" 
-                      size="sm" 
-                      hideMenu={true}
-                      actionIcon={<Plus className="w-5 h-5 text-white" />}
-                      onActionClick={(e, recipe) => {
-                        e.stopPropagation();
-                        if (recipe.ingredients && recipe.ingredients.length > 0) {
-                          const newItems = recipe.ingredients.map((ing: any) => ({
-                            name: ing.name,
-                            quantity: typeof ing.quantity === 'number' ? ing.quantity : 1,
-                            unit: ing.unit || 'đơn vị',
-                            group: ing.group
-                          }));
-                          addItems(newItems);
-                        }
-                      }}
-                      onClick={() => navigate(`/recipes/${recipe.id}`)}
-                    />
-                  </div>
-                ))}
-              </div>
+            <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
+              {filteredRecipes.length === 0 ? (
+                <div className="text-center py-8 text-xs text-default-400">
+                  {recipeSearch ? 'Không tìm thấy công thức phù hợp.' : 'Chưa có công thức nào.'}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 xl:grid-cols-3 gap-3">
+                  {paginatedRecipes.map(recipe => (
+                    <div key={recipe.id} className="w-full">
+                      <RecipeCard 
+                        recipe={recipe} 
+                        viewType="grid-landscape" 
+                        size="sm" 
+                        hideMenu={true}
+                        actionIcon={<Plus className="w-5 h-5 text-white" />}
+                        onActionClick={(e, recipe) => {
+                          e.stopPropagation();
+                          if (recipe.ingredients && recipe.ingredients.length > 0) {
+                            const newItems = recipe.ingredients.map((ing: any) => ({
+                              name: ing.name,
+                              quantity: typeof ing.quantity === 'number' ? ing.quantity : 1,
+                              unit: ing.unit || 'đơn vị',
+                              group: ing.group
+                            }));
+                            addItems(newItems);
+                          }
+                        }}
+                        onClick={() => navigate(`/recipes/${recipe.id}`)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
+
+            {totalRecipePages > 1 && (
+              <div className="flex justify-center pt-3 pb-1 border-t border-divider/30 mt-2 shrink-0">
+                <Pagination 
+                  total={totalRecipePages} 
+                  page={recipePage} 
+                  onChange={setRecipePage} 
+                  size="sm" 
+                  color="primary"
+                  variant="flat"
+                  showControls
+                  classNames={{
+                    wrapper: "gap-1 shadow-none",
+                    item: "bg-transparent text-default-600 font-medium text-xs min-w-7 w-7 h-7",
+                    cursor: "font-bold text-white shadow-none min-w-7 w-7 h-7",
+                    prev: "min-w-7 w-7 h-7",
+                    next: "min-w-7 w-7 h-7"
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
 

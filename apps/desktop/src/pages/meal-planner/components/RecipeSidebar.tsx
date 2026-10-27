@@ -33,14 +33,14 @@ export function RecipeSidebar() {
           <div className="flex items-center bg-default-100 p-0.5 rounded-lg">
             <button 
               onClick={() => setViewMode('list')}
-              className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-foreground' : 'text-default-400 hover:text-foreground'}`}
+              className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-content1 text-foreground' : 'text-default-400 hover:text-foreground'}`}
               title="Dạng danh sách"
             >
               <LayoutList className="w-4 h-4" />
             </button>
             <button 
               onClick={() => setViewMode('card')}
-              className={`p-1.5 rounded-md transition-colors ${viewMode === 'card' ? 'bg-white shadow-sm text-foreground' : 'text-default-400 hover:text-foreground'}`}
+              className={`p-1.5 rounded-md transition-colors ${viewMode === 'card' ? 'bg-content1 text-foreground' : 'text-default-400 hover:text-foreground'}`}
               title="Dạng thẻ"
             >
               <LayoutGrid className="w-4 h-4" />
@@ -59,7 +59,7 @@ export function RecipeSidebar() {
           />
         </div>
       </div>
-      <div className={`flex-1 overflow-y-auto p-4 flex ${viewMode === 'card' ? 'flex-row flex-wrap items-start content-start' : 'flex-col'} gap-3 custom-scrollbar bg-white rounded-b-2xl`}>
+      <div className={`flex-1 overflow-y-auto p-4 flex ${viewMode === 'card' ? 'flex-row flex-wrap items-start content-start' : 'flex-col'} gap-3 custom-scrollbar bg-content1 rounded-b-2xl`}>
         {filteredRecipes.length === 0 ? (
           <div className="text-center text-default-500 mt-10 w-full">
             <p className="text-sm">Không tìm thấy công thức nào</p>

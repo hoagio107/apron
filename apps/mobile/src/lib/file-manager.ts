@@ -4,7 +4,7 @@ export class FileManager {
   static async saveAttachment(file: File): Promise<string> { return URL.createObjectURL(file); } 
   static getAssetUrl(filePath: string): string { return filePath; } 
   static async deleteFile(filePath: string) { URL.revokeObjectURL(filePath); } 
-  static async readTextFile(filePath: string): Promise<string> { return ''; }
+  static async readTextFile(_filePath: string): Promise<string> { return ''; }
   static getFilename(path: string): string {
     if (!path) return '';
     if (path.startsWith('http://') || path.startsWith('https://')) {

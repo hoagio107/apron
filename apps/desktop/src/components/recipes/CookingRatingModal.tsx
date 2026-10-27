@@ -57,7 +57,7 @@ export function CookingRatingModal({ isOpen, onClose, onComplete }: CookingRatin
     >
       <ModalContent>
         {() => (
-          <div className="bg-white p-8 md:p-12 rounded-3xl text-center">
+          <div className="bg-content1 p-8 md:p-12 rounded-3xl text-center">
             {step === 'rating' ? (
               <div className="flex flex-col gap-8 animate-appearance-in">
                 <div className="flex flex-col gap-2 items-center">
@@ -92,7 +92,7 @@ export function CookingRatingModal({ isOpen, onClose, onComplete }: CookingRatin
                     minRows={3}
                     variant="bordered"
                     classNames={{
-                      inputWrapper: "bg-white data-[focus=true]:!border-primary data-[focus=true]:!border-2"
+                      inputWrapper: "bg-content1 data-[focus=true]:!border-primary data-[focus=true]:!border-2"
                     }}
                     className="w-full mt-4 max-w-lg"
                   />

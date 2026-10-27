@@ -14,7 +14,7 @@ export function FileUploader({ value = [], onChange, label = "Kéo thả file v�
   const [pendingUploads, setPendingUploads] = useState<{id: string, name: string, status: 'processing' | 'complete' | 'failed', progress: number}[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFiles = async (files: FileList) => {
+  const handleFiles = useCallback(async (files: FileList) => {
     const fileArray = Array.from(files);
     const newPending = fileArray.map(f => ({ id: crypto.randomUUID(), name: f.name, status: 'processing' as const, progress: 0 }));
     
@@ -50,7 +50,7 @@ export function FileUploader({ value = [], onChange, label = "Kéo thả file v�
     setTimeout(() => {
       setPendingUploads(prev => prev.filter(p => p.status !== 'complete'));
     }, 1500);
-  };
+  }, [value, onChange]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -58,7 +58,7 @@ export function FileUploader({ value = [], onChange, label = "Kéo thả file v�
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleFiles(e.dataTransfer.files);
     }
-  }, [value]);
+  }, [handleFiles]);
 
   const removeFile = (indexToRemove: number) => {
     const newUrls = (value || []).filter((_, idx) => idx !== indexToRemove);

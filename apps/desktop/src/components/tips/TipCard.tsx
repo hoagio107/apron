@@ -127,7 +127,7 @@ export function TipCard({ tip, onClick, onEdit, onDelete, isSelected, onSelect, 
         </div>
         
         <Button 
-          className="w-full bg-white text-black font-semibold rounded-full shadow-lg"
+          className="w-full bg-white/95 text-black font-semibold rounded-full hover:bg-white"
           size="md"
           onPress={handleClick}
         >

@@ -8,7 +8,7 @@ import type { Course } from '@apron/core';
 export function CourseFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { courses, addCourse, updateCourse, fetchCourses, isLoading } = useCourseStore();
+  const { courses, addCourse, updateCourse, fetchCourses } = useCourseStore();
 
   const isEditing = Boolean(id);
   const [initialCourse, setInitialCourse] = useState<Course | undefined>();

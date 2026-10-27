@@ -1,4 +1,4 @@
-import { DEFAULT_TAGS, TIP_CATEGORIES } from '@apron/core';
+import { TIP_CATEGORIES, normalizeUnit } from '@apron/core';
 const tauriFetch = window.fetch;
 
 export interface AiModel {
@@ -48,6 +48,12 @@ export interface ParseRecipeResult {
   };
 }
 
+export interface ParseTipResult {
+  title: string;
+  category_id: string;
+  content: string;
+}
+
 // Hàm hỗ trợ kiểm tra URL hợp lệ
 function isValidHttpUrl(string: string) {
   let url;
@@ -61,12 +67,19 @@ function isValidHttpUrl(string: string) {
 
 export function buildRecipePrompt(
   text: string, 
-  existingIngredients: string[] = [],
+  _existingIngredients: string[] = [],
   existingTips: { id: string, title: string }[] = [],
   existingUnits: string[] = []
 ): string {
-  const tagNames = DEFAULT_TAGS.filter(t => t.parent_id !== null).map(t => t.name).join(', ');
-  const ingredientNames = existingIngredients.length > 0 ? existingIngredients.join(', ') : 'Không có';
+  const tagHierarchyText = [
+    '   - Bữa ăn / Dịp lễ: Bữa sáng, Điểm tâm, Bánh mì, Bữa chính (Trưa/Tối), Cơm gia đình, Món tiệc, Ăn vặt, Cuối tuần',
+    '   - Loại món: Món chính (Cơm), Món nước (Bún/Phở), Khai vị / Ăn nhẹ, Đồ uống, Tráng miệng, Nước chấm / Sốt',
+    '   - Cách chế biến: Canh / Súp, Hầm / Ninh, Kho / Om, Hấp / Luộc, Chiên / Rán, Xào, Nướng, Làm bánh',
+    '   - Nguyên liệu chính: Thịt heo, Thịt bò, Gà / Vịt, Hải sản, Cá, Tôm, Rau củ & Nấm, Đậu phụ',
+    '   - Văn hóa ẩm thực: Việt Nam - Miền Bắc, Miền Trung, Miền Nam, Âu Mỹ, Hàn Quốc, Nhật Bản',
+    '   - Chế độ ăn: Eat Clean / Healthy, Keto / Low-carb, Thuần chay, Giảm cân'
+  ].join('\n');
+
   const unitNames = existingUnits.length > 0 ? existingUnits.join(', ') : 'muỗng canh, muỗng cà phê, g, kg, ml, lít, quả, trái, củ, cái, bó, nhánh, tép, lát, miếng, lon, hộp, gói, chén, bát, chút, xíu';
   const tipsStr = existingTips.length > 0 ? existingTips.map(t => `[${t.id}] ${t.title}`).join(', ') : 'Không có';
 
@@ -93,7 +106,8 @@ HÃY TRẢ VỀ DUY NHẤT MỘT KHỐI JSON HỢP LỆ VỚI CẤU TRÚC CHÍNH
       "notes": "<p>Ghi chú thêm, mẹo vặt, lưu ý (dùng thẻ HTML cơ bản như &lt;p&gt;, &lt;strong&gt;, &lt;ul&gt;, &lt;li&gt;)</p>",
       "tags": [
         { "name": "Bữa sáng", "is_new": false },
-        { "name": "Món canh", "is_new": false }
+        { "name": "Món canh", "is_new": false },
+        { "name": "Thịt bò", "is_new": false }
       ],
       "ingredientSections": [
         {
@@ -121,10 +135,10 @@ QUY TẮC BẮT BUỘC:
 1. Đối với Calories, Độ khó và Thời gian (prep_time_minutes, cook_time_minutes): nếu nguồn không có, BẠN BẮT BUỘC PHẢI TỰ DỰ ĐOÁN VÀ ĐIỀN SỐ THỰC TẾ dựa trên chuyên môn ẩm thực.
 2. Tên nguyên liệu và các bước làm: BẮT BUỘC viết hoa chữ cái đầu tiên (Ví dụ: "Thịt ức gà", "Thịt bò", "Hành lá", "Nước mắm").
 3. BẮT BUỘC CHUẨN HOÁ TÊN NGUYÊN LIỆU THUẦN TÚY (QUAN TRỌNG NHẤT):
-   - Trường "name" CHỈ ĐƯỢC CHỨA DANH TỪ TÊN NGUYÊN LIỆU THUẦN TÚY (Ví dụ ĐÚNG: "Thịt ba chỉ heo", "Hành tím", "Tỏi", "Cà chua", "Nấm đông cô", "Tôm khô").
+   - Trường "name" CHỈ ĐƯỢC CHỨA DANH TỪ TÊN NGUYÊN LIỆU THUẦN TÚY (Ví dụ ĐÚNG: "Thịt ba chỉ heo", "Thịt bò", "Hành tím", "Tỏi", "Cà chua", "Nấm đông cô", "Tôm khô").
    - TUYỆT ĐỐI KHÔNG ĐƯỢC để hành động sơ chế, hình dáng cắt thái, kích thước hay tình trạng vào tên nguyên liệu (Ví dụ SAI: "Ba chỉ heo, cắt miếng dài, dày khoảng 3 ngón tay", "Hành khô thái lát", "Nấm đông cô ngâm mềm thái sợi", "Tôm khô rửa sạch để ráo", "Thịt heo xay nhuyễn").
    - NẾU NGUYÊN LIỆU GỐC CÓ MÔ TẢ SƠ CHẾ/CẮT THÁI: BẠN BẮT BUỘC PHẢI TÁCH thông tin sơ chế đó (ví dụ: "cắt miếng dài dày khoảng 3 ngón tay") và ĐƯA VÀO BƯỚC SƠ CHẾ TRONG MẢNG CÁC BƯỚC LÀM ("stepSections" / "steps")! Tuyệt đối không để lại trong trường "name".
-   - Ưu tiên sử dụng tên nguyên liệu có sẵn trong từ điển sau: ${ingredientNames}. Phải gọi tên phân loại đầy đủ, ví dụ: "Thịt gà", "Thịt ức gà", "Thịt đùi gà", "Thịt ba chỉ heo", "Thịt heo xay", "Thịt bò" (KHÔNG ghi cộc lốc là "Gà", "Ức gà", "Heo", "Bò" để kho nguyên liệu lọc chính xác).
+   - Gọi tên cụ thể, chuẩn xác bằng danh từ tiếng Việt hoàn chỉnh (Ví dụ: "Thịt ba chỉ heo", "Thịt ức gà", "Thịt bò", "Tôm sú", "Hành lá", "Tỏi", "Cà chua"). KHÔNG ghi cộc lốc mơ hồ (như "Gà", "Heo", "Bò", "Củ").
    - TUYỆT ĐỐI KHÔNG GỘP NHIỀU NGUYÊN LIỆU: Không ghi gộp dạng "Gia vị: muối, đường, tiêu, mắm" hay "Hành tỏi băm". Phải tách từng loại nguyên liệu riêng biệt thành từng dòng trong mảng ingredients.
 4. BẮT BUỘC CHUẨN HOÁ ĐƠN VỊ ĐO LƯỜNG: Bắt buộc chọn đơn vị có trong danh sách chuẩn sau: ${unitNames}.
    - Phải map từ viết tắt hoặc từ địa phương về đơn vị chuẩn:
@@ -135,7 +149,12 @@ QUY TẮC BẮT BUỘC:
      * "l", "lit" -> "lít"
    - CHỈ bổ sung đơn vị mới nếu đơn vị đó thực sự cần thiết và chưa hề có trong danh sách chuẩn ở trên.
    - Tuyệt đối tách riêng số lượng ("amount") và đơn vị ("unit"), không để lẫn số hoặc đơn vị vào trường tên nguyên liệu ("name").
-5. Ưu tiên chọn thẻ tag có sẵn từ danh sách: ${tagNames}. (Nếu dùng tag có sẵn, đặt "is_new": false; nếu tag mới chưa có, đặt "is_new": true và gán "category_id" bằng 1 trong các giá trị: "root-meal", "root-cooking", "root-ingredient", "root-cuisine", "root-diet", "root-time-difficulty").
+5. BẮT BUỘC GẮN THẺ TAG TỪ DANH MỤC PHÂN CẤP:
+   Hãy chọn 2 - 5 thẻ tag phù hợp nhất từ các nhóm sau:
+${tagHierarchyText}
+   - BẮT BUỘC chọn đúng 1 thẻ thuộc nhóm "Nguyên liệu chính" (ví dụ: "Thịt bò", "Thịt heo", "Gà / Vịt", "Hải sản", "Cá", "Tôm", "Rau củ & Nấm", "Đậu phụ") để phân loại món ăn.
+   - Nếu dùng tag có sẵn trong danh sách trên: đặt "is_new": false.
+   - Nếu thực sự cần tag mới chưa có trong danh mục: đặt "is_new": true và gán "category_id" bằng 1 trong các nhóm ("root-meal", "root-dish-type", "root-cooking", "root-ingredient", "root-cuisine", "root-diet").
 ${existingTips.length > 0 ? `6. Dò tìm trong danh sách mẹo: ${tipsStr}. Nếu có mẹo liên quan, trả về mảng linked_tips chứa ID của mẹo đó.` : ''}
 7. TUYỆT ĐỐI CHỈ TRẢ VỀ MÃ JSON, KHÔNG CÓ BẤT KỲ LỜI CHÀO HAY VĂN BẢN NÀO BÊN NGOÀI KHỐI JSON.`;
 }
@@ -241,7 +260,7 @@ export function parseGeminiResponse(rawText: string): ParseRecipeResult[] {
                 ...ing,
                 name,
                 amount: typeof ing === 'object' && ing.amount !== undefined ? String(ing.amount) : '',
-                unit: typeof ing === 'object' ? ing.unit || '' : ''
+                unit: typeof ing === 'object' ? normalizeUnit(ing.unit || '') : ''
               };
             })
           : []
@@ -256,7 +275,7 @@ export function parseGeminiResponse(rawText: string): ParseRecipeResult[] {
           return {
             name,
             amount: typeof ing === 'object' && ing.amount !== undefined ? String(ing.amount) : '',
-            unit: typeof ing === 'object' ? ing.unit || '' : ''
+            unit: typeof ing === 'object' ? normalizeUnit(ing.unit || '') : ''
           };
         })
       }];

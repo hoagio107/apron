@@ -74,7 +74,7 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
       <ModalContent className="overflow-hidden">
         {() => (
           <>
-            <ModalHeader className="flex flex-col sm:flex-row gap-6 border-b border-default-200 bg-white p-6 pr-12 items-start">
+            <ModalHeader className="flex flex-col sm:flex-row gap-6 border-b border-divider bg-content1 p-6 pr-12 items-start">
               {(() => {
                 const mainImage = snapshot.images?.[0] || snapshot.image_url;
                 return mainImage ? (
@@ -106,11 +106,11 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
                 </div>
               </div>
             </ModalHeader>
-            <ModalBody className="p-6 bg-default-50 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <ModalBody className="p-6 bg-background [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               <div className="flex flex-col gap-8">
                 
                 {/* Stats */}
-                <div className="grid grid-cols-2 md:flex md:flex-wrap md:justify-between gap-6 md:gap-0 bg-white p-4 md:p-6 rounded-2xl border border-default-200 md:divide-x divide-default-200">
+                <div className="grid grid-cols-2 md:flex md:flex-wrap md:justify-between gap-6 md:gap-0 app-card p-4 md:p-6 md:divide-x divide-divider">
                   <div className="flex items-center gap-3 md:px-6 md:first:pl-0 md:last:pr-0 flex-1 justify-center md:justify-start">
                     <div className="p-2 bg-primary/10 rounded-xl hidden sm:block">
                       <Timer className="w-5 h-5 text-primary" />
@@ -150,7 +150,7 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
                 </div>
 
                 {/* Ingredients */}
-                <div className="bg-white p-6 rounded-2xl border border-default-200">
+                <div className="app-card p-6">
                   <h3 className="text-xl font-bold flex items-center gap-2 mb-4">
                     <Carrot className="w-6 h-6 text-primary" />
                     Nguyên liệu ({snapshot.servings} phần)
@@ -166,7 +166,7 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
                 </div>
 
                 {/* Steps */}
-                <div className="bg-white p-6 rounded-2xl border border-default-200">
+                <div className="app-card p-6">
                   <h3 className="text-xl font-bold flex items-center gap-2 mb-6">
                     <ChefHat className="w-6 h-6 text-primary" />
                     Các bước thực hiện

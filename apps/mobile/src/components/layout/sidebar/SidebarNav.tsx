@@ -15,9 +15,10 @@ export interface NavItem {
 
 interface SidebarNavProps {
   items: NavItem[];
+  isExpanded?: boolean;
 }
 
-export function SidebarNav({ items }: SidebarNavProps) {
+export function SidebarNav({ items, isExpanded = false }: SidebarNavProps) {
   const location = useLocation();
   const pathname = location.pathname;
 
@@ -29,22 +30,26 @@ export function SidebarNav({ items }: SidebarNavProps) {
           <li key={item.name}>
             <Link 
               to={item.path} 
+              title={!isExpanded ? item.name : undefined}
               className={cn(
-                "flex items-center justify-center group-[.is-expanded]/sidebar:justify-start gap-0 group-[.is-expanded]/sidebar:gap-3 h-12 px-0 group-[.is-expanded]/sidebar:px-4 rounded-xl transition-all group overflow-hidden",
+                "flex items-center h-11 rounded-xl transition-all duration-200 overflow-hidden",
+                isExpanded ? "justify-start px-3.5 gap-3" : "justify-center px-0 gap-0",
                 isActive 
-                  ? "bg-primary/10 dark:bg-primary/20 text-primary font-bold" 
-                  : "text-default-600 dark:text-default-400 hover:bg-default-100/50 dark:hover:bg-default-50/10"
+                  ? "bg-primary/10 text-primary font-bold" 
+                  : "text-default-600 hover:bg-default-100 hover:text-foreground"
               )}
             >
               <item.icon 
                 className={cn(
                   "h-5 w-5 flex-shrink-0 transition-transform", 
-                  isActive ? "text-primary" : "text-gray-400 group-hover:scale-110 group-[.is-expanded]/sidebar:scale-100"
+                  isActive ? "text-primary" : "text-default-400 group-hover:scale-105"
                 )} 
               />
-              <span className="whitespace-nowrap opacity-0 group-[.is-expanded]/sidebar:opacity-100 w-0 group-[.is-expanded]/sidebar:w-auto transition-all duration-300 pointer-events-none group-[.is-expanded]/sidebar:pointer-events-auto">
-                {item.name}
-              </span>
+              {isExpanded && (
+                <span className="whitespace-nowrap text-sm font-semibold truncate animate-in fade-in duration-200">
+                  {item.name}
+                </span>
+              )}
             </Link>
           </li>
         );

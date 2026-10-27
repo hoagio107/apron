@@ -121,7 +121,7 @@ export function TipListPage() {
     }
   };
 
-  const activeCategory = TIP_CATEGORIES.find(c => c.id === selectedCategoryId);
+
 
   return (
     <div className="flex flex-col min-h-full gap-6 w-full pt-6 pb-28 px-4 md:px-8">

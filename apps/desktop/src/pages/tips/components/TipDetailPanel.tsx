@@ -23,9 +23,9 @@ export function TipDetailPanel({ tip, isOpen, onOpenChange, onEdit, onDelete }: 
     <Drawer isOpen={isOpen} onOpenChange={onOpenChange} size="md" placement="right" radius="none" className="max-w-2xl">
       <DrawerContent>
         {() => (
-          <div className="flex flex-col h-full bg-white">
+          <div className="flex flex-col h-full bg-content1">
             {/* Header / Actions */}
-            <DrawerHeader className="flex justify-between items-center border-b border-default-200 px-6 py-4 bg-white/80 backdrop-blur-md z-50 sticky top-0">
+            <DrawerHeader className="flex justify-between items-center border-b border-divider px-6 py-4 bg-content1/80 backdrop-blur-md z-50 sticky top-0">
               <div className="flex items-center gap-2">
                 <Button 
                   variant="flat" 
@@ -89,7 +89,7 @@ export function TipDetailPanel({ tip, isOpen, onOpenChange, onEdit, onDelete }: 
                 </div>
 
                 {/* Content */}
-                <div className="p-8 flex-1 bg-white">
+                <div className="p-8 flex-1 bg-content1">
                   <div 
                     className="prose prose-primary max-w-none leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: tip.content }}

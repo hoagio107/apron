@@ -4,18 +4,49 @@ import { convertFileSrc } from '@tauri-apps/api/core';
 import { convertUrlToWebPDataUrl } from './image-utils';
 
 export class ImageManager {
-  static async getBaseDir() {
-    // Ưu tiên thư mục BYOS của người dùng
+  private static cachedBaseDir: string = typeof localStorage !== 'undefined' 
+    ? (localStorage.getItem('byos_base_dir') || '') 
+    : '';
+
+  static async getBaseDir(): Promise<string> {
     const byosDir = localStorage.getItem('byos_base_dir');
-    if (byosDir) return byosDir;
-    
-    // Fallback về appDataDir
-    return await appDataDir();
+    if (byosDir) {
+      this.cachedBaseDir = byosDir;
+      return byosDir;
+    }
+    const appDir = await appDataDir();
+    this.cachedBaseDir = appDir;
+    return appDir;
+  }
+
+  static toRelativePath(path: string): string {
+    if (!path) return '';
+    if (
+      path.startsWith('http://') || 
+      path.startsWith('https://') || 
+      path.startsWith('data:') || 
+      path.startsWith('blob:')
+    ) {
+      return path;
+    }
+
+    const normalized = path.replace(/\\/g, '/');
+    const match = normalized.match(/(?:^|\/)images\/([^/]+)$/i);
+    if (match) {
+      return `images/${match[1]}`;
+    }
+
+    if (/^[a-zA-Z0-9_.-]+\.(webp|png|jpg|jpeg|gif|svg)$/i.test(normalized)) {
+      return `images/${normalized}`;
+    }
+
+    return normalized;
   }
 
   static async initDirs() {
     try {
       const baseDir = await this.getBaseDir();
+      this.cachedBaseDir = baseDir;
       const tempDir = await join(baseDir, 'temp');
       const imagesDir = await join(baseDir, 'images');
 
@@ -43,24 +74,30 @@ export class ImageManager {
   static async commitImage(tempPath: string): Promise<string> {
     if (!tempPath) return tempPath;
     
-    // If it's a URL (http/https) or already in /images/, don't process it as a temp file
-    if (tempPath.startsWith('http://') || tempPath.startsWith('https://')) {
+    // If it's a URL (http/https) or data URL
+    if (tempPath.startsWith('http://') || tempPath.startsWith('https://') || tempPath.startsWith('data:')) {
       return tempPath;
     }
     
-    // Check if it's already in the images directory (not temp)
+    // Check if it's already a relative images path or inside the images directory (not in temp)
+    const rel = this.toRelativePath(tempPath);
     const baseDir = await this.getBaseDir();
+    this.cachedBaseDir = baseDir;
     const imagesDir = await join(baseDir, 'images');
+
+    if (rel.startsWith('images/') && !tempPath.includes('temp')) {
+      return rel;
+    }
     if (tempPath.includes(imagesDir)) {
-      return tempPath;
+      return rel;
     }
 
     try {
       await this.initDirs();
       
-      // Kiểm tra nếu file temp không tồn tại thì skip
+      // Kiểm tra nếu file temp không tồn tại thì fallback
       if (!(await exists(tempPath))) {
-        return tempPath;
+        return this.toRelativePath(tempPath);
       }
       
       const bytes = await readFile(tempPath);
@@ -90,20 +127,24 @@ export class ImageManager {
       }
       
       URL.revokeObjectURL(url);
-      return outPath;
+      return `images/${filename}`;
     } catch (e) {
       console.error('Failed to commit image', tempPath, e);
-      // Fallback: return original if failed
-      return tempPath; 
+      return this.toRelativePath(tempPath); 
     }
   }
 
   static async deleteImages(paths: string[]) {
+    const baseDir = await this.getBaseDir();
     for (const p of paths) {
-      if (!p || p.startsWith('http')) continue;
+      if (!p || p.startsWith('http') || p.startsWith('data:')) continue;
       try {
-        if (await exists(p)) {
-          await remove(p);
+        const rel = this.toRelativePath(p);
+        const targetPath = rel.startsWith('images/') 
+          ? await join(baseDir, 'images', rel.substring(7))
+          : p;
+        if (await exists(targetPath)) {
+          await remove(targetPath);
         }
       } catch (e) {
         console.error('Failed to remove image', p, e);
@@ -113,9 +154,28 @@ export class ImageManager {
 
   static getAssetUrl(path: string): string {
     if (!path) return '';
-    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:') || path.startsWith('blob:')) {
+    if (
+      path.startsWith('http://') || 
+      path.startsWith('https://') || 
+      path.startsWith('data:') || 
+      path.startsWith('blob:')
+    ) {
       return path;
     }
+
+    const rel = this.toRelativePath(path);
+    const baseDir = (typeof localStorage !== 'undefined' ? localStorage.getItem('byos_base_dir') : null) || this.cachedBaseDir;
+
+    if (rel.startsWith('images/')) {
+      const filename = rel.substring(7);
+      if (baseDir) {
+        const separator = baseDir.includes('\\') ? '\\' : '/';
+        const cleanBase = baseDir.replace(/[/\\]+$/, '');
+        const fullPath = `${cleanBase}${separator}images${separator}${filename}`;
+        return convertFileSrc(fullPath);
+      }
+    }
+
     return convertFileSrc(path);
   }
 }

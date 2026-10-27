@@ -355,14 +355,14 @@ export function RecipeListPage() {
           <Button 
             isIconOnly
             color="primary" 
-            className="w-14 h-14 rounded-2xl shadow-sm shrink-0"
+            className="w-14 h-14 rounded-2xl shrink-0"
             onPress={() => navigate('/recipes/new')}
           >
             <Plus className="w-6 h-6" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-foreground leading-tight">Sổ tay Công thức</h1>
-            <p className="text-default-500">
+            <h1 className="app-page-title leading-tight">Sổ tay Công thức</h1>
+            <p className="app-page-subtitle">
               {filteredAndSortedRecipes.length === recipes.length
                 ? `${recipes.length} công thức đã lưu`
                 : `Hiển thị ${filteredAndSortedRecipes.length} / ${recipes.length} công thức`}
@@ -396,17 +396,17 @@ export function RecipeListPage() {
 
       {/* Floating Selection Action Bar */}
       {isSelectMode && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 px-6 py-3 bg-content1 shadow-2xl border border-default-200 rounded-full animate-in slide-in-from-bottom-8 fade-in duration-300">
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 px-6 py-3 bg-content1 shadow-2xl border border-divider rounded-full animate-in slide-in-from-bottom-8 fade-in duration-300">
           <div className="flex items-center gap-3">
             <Button variant="flat" onPress={selectAll}>
               {selectedIds.size === filteredAndSortedRecipes.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
             </Button>
-            <span className="font-medium text-primary-700 min-w-[100px] text-center">
+            <span className="font-medium text-primary min-w-[100px] text-center">
               Đã chọn {selectedIds.size}
             </span>
           </div>
           
-          <div className="w-px h-8 bg-default-200 mx-1 shrink-0" />
+          <div className="w-px h-8 bg-divider mx-1 shrink-0" />
           
           <div className="flex items-center gap-2">
             <Button color="primary" variant="flat" startContent={<CalendarDays className="w-4 h-4" />} onPress={() => setIsMealPlannerModalOpen(true)}>
@@ -425,7 +425,7 @@ export function RecipeListPage() {
               Xóa
             </Button>
             
-            <div className="w-px h-8 bg-default-200 mx-1 shrink-0" />
+            <div className="w-px h-8 bg-divider mx-1 shrink-0" />
             
             <Button variant="light" onPress={toggleSelectMode}>
               Hủy

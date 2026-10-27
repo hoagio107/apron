@@ -179,14 +179,14 @@ export function CourseDetailPage() {
                 <AccordionItem 
                   key={mIdx.toString()} 
                   title={
-                    <div className="flex items-center gap-2">
-                      {module.icon && <IconRenderer value={module.icon} className="w-5 h-5 text-primary" />}
-                      <span>{mIdx + 1}. {module.title}</span>
+                    <div className="flex items-start gap-2 min-w-0 flex-1">
+                      {module.icon && <div className="mt-0.5 shrink-0"><IconRenderer value={module.icon} className="w-5 h-5 text-primary" /></div>}
+                      <span className="break-words whitespace-normal leading-snug">{mIdx + 1}. {module.title}</span>
                     </div>
                   }
                   aria-label={module.title}
                 >
-                  <div className="flex flex-col gap-1 mt-1 ml-6 border-l-2 border-default-100 pl-2">
+                  <div className="flex flex-col gap-1 mt-1 ml-6 border-l-2 border-divider pl-2">
                     {module.lessons?.map((lesson, lIdx) => {
                       const isActive = activeLessonId === lesson.id;
                       const isCompleted = completedLessons[lesson.id];
@@ -195,7 +195,7 @@ export function CourseDetailPage() {
                           key={lesson.id}
                           className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-all border ${
                             isActive 
-                              ? 'bg-primary-50 border-primary-200 text-primary-700 shadow-sm' 
+                              ? 'bg-primary/10 border-primary/30 text-primary' 
                               : 'border-transparent hover:bg-default-100'
                           }`}
                           onClick={() => setActiveLessonId(lesson.id)}
@@ -204,7 +204,7 @@ export function CourseDetailPage() {
                               isCompleted 
                                 ? 'bg-success border-success text-white' 
                                 : isActive 
-                                  ? 'border-primary text-primary bg-white' 
+                                  ? 'border-primary text-primary bg-content1' 
                                   : 'border-default-300 text-default-400'
                             }`}>
                             {isCompleted ? (
@@ -243,7 +243,7 @@ export function CourseDetailPage() {
           </div>
 
           {/* Middle: Lesson Content */}
-          <div className="lg:col-span-3 flex flex-col h-full min-h-0 bg-white rounded-2xl border border-default-100 shadow-none overflow-y-auto custom-scrollbar">
+          <div className="lg:col-span-3 flex flex-col h-full min-h-0 app-card overflow-y-auto custom-scrollbar">
             {activeLesson ? (
               <>
                 {/* Hero / Video at the top */}
@@ -277,7 +277,7 @@ export function CourseDetailPage() {
                 ) : null}
 
                 {/* Lesson Header */}
-                <div className="p-6 border-b border-default-100 flex flex-col gap-4">
+                <div className="p-6 border-b border-divider flex flex-col gap-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-primary font-medium text-sm">
                       <div className="flex items-center gap-1.5">
@@ -317,7 +317,7 @@ export function CourseDetailPage() {
                 </div>
                 
                 {/* Navigation Footer */}
-                <div className="p-6 border-t border-default-100 flex justify-between items-center bg-white sticky bottom-0 z-10 shrink-0">
+                <div className="p-6 border-t border-divider flex justify-between items-center bg-content1 sticky bottom-0 z-10 shrink-0">
                   <Button 
                     variant="flat" 
                     startContent={<ChevronLeft className="w-4 h-4" />}
@@ -361,14 +361,14 @@ export function CourseDetailPage() {
           </div>
 
           {/* Right: Course Meta & Notes Sidebar */}
-          <div className="lg:col-span-1 flex flex-col min-w-0 bg-white rounded-2xl border border-default-100 shadow-none overflow-y-auto h-full custom-scrollbar">
+          <div className="lg:col-span-1 flex flex-col min-w-0 app-card overflow-y-auto h-full custom-scrollbar">
             <Tabs 
               aria-label="Course Sidebar Tabs" 
-              color="primary"
+              color="primary" 
               variant="underlined"
               fullWidth
               classNames={{
-                base: "w-full sticky top-0 z-10 bg-white",
+                base: "w-full sticky top-0 z-10 bg-content1",
                 tabList: "w-full relative rounded-none p-0 border-b border-default-200",
                 tab: "px-0 h-12",
                 cursor: "w-full bg-primary",
@@ -435,7 +435,7 @@ export function CourseDetailPage() {
                                     key={recipe.id}
                                     isPressable 
                                     onPress={() => navigate(`/recipes/${recipe.id}`)}
-                                    className="bg-white border border-default-200 shadow-none hover:bg-default-50 transition-colors h-auto overflow-hidden"
+                                    className="app-card app-card-interactive h-auto overflow-hidden"
                                     classNames={{ body: "p-0" }}
                                   >
                                     <div className="flex items-center gap-3 p-2">

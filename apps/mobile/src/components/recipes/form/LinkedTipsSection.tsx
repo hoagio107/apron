@@ -35,15 +35,17 @@ export function LinkedTipsSection() {
               key={id} 
               variant="flat" 
               color="primary"
-              className="pl-1 pr-2"
-              startContent={<div className="w-4 h-4 ml-1 rounded-full bg-primary-100 flex items-center justify-center"><Lightbulb className="w-2.5 h-2.5 text-primary-700" /></div>}
+              className="pl-1 pr-2 max-w-full sm:max-w-xs"
+              startContent={<div className="w-4 h-4 ml-1 rounded-full bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center shrink-0"><Lightbulb className="w-2.5 h-2.5 text-primary-700 dark:text-primary-300" /></div>}
               endContent={
-                <button type="button" onClick={() => handleRemove(id)} className="p-0.5 active:bg-primary-200 rounded-full text-primary-700 transition-colors ml-1">
+                <button type="button" onClick={() => handleRemove(id)} className="p-0.5 active:bg-primary-200 dark:active:bg-primary-800 rounded-full text-primary-700 dark:text-primary-300 transition-colors ml-1 shrink-0" aria-label="Xoá mẹo">
                   <X className="w-3 h-3" />
                 </button>
               }
             >
-              {tip.title}
+              <span className="truncate max-w-[180px] sm:max-w-[220px] inline-block align-middle" title={tip.title}>
+                {tip.title}
+              </span>
             </Chip>
           );
         })}

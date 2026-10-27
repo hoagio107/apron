@@ -29,14 +29,14 @@ export function StepsSection() {
   };
 
   return (
-    <Card className="w-full" shadow="none">
+    <Card className="w-full app-card" shadow="none">
       <SectionHeader
         title="Các bước thực hiện"
         icon={ListOrdered}
       />
       <CardBody className="gap-0">
         {sections.length === 0 && (
-          <div className="text-center text-gray-500 py-4">Chưa có bước thực hiện nào. Hãy thêm giai đoạn đầu tiên.</div>
+          <div className="text-center text-default-500 py-4">Chưa có bước thực hiện nào. Hãy thêm giai đoạn đầu tiên.</div>
         )}
         
         {sections.map((section, sectionIndex) => (

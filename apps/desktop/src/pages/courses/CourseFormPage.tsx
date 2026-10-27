@@ -184,12 +184,13 @@ export function CourseFormPage() {
 
   return (
     <>
-      <div className="flex flex-col gap-8 w-full pt-6">
-        <div className="sticky top-0 z-50 bg-default-50/80 backdrop-blur-md py-4 -my-4">
+      <div className="flex flex-col gap-8 w-full pt-6 pb-14">
+        <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-md py-2 -my-2">
         <PageHeader 
           title={isEditing ? 'Sửa khoá học' : 'Thêm khoá học mới'}
           showBackButton
           onBack={() => navigate('/courses')}
+          className="pt-2 pb-2"
           actions={
             <Button 
               color="primary" 
@@ -204,7 +205,7 @@ export function CourseFormPage() {
 
       <div className="flex flex-col gap-8 w-full">
         {/* Row 1 */}
-          <div className="rounded-xl p-6 bg-content1 shadow-none grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="app-card p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col w-full">
                 {!formData.thumbnail_url ? (
@@ -221,7 +222,7 @@ export function CourseFormPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="w-full aspect-[4/3] bg-default-100 rounded-2xl relative group overflow-hidden flex items-center justify-center shadow-inner border border-default-200 cursor-pointer" onClick={() => setImageUploadTarget('course-cover')}>
+                  <div className="w-full aspect-[4/3] bg-default-100 rounded-2xl relative group overflow-hidden flex items-center justify-center shadow-inner cursor-pointer" onClick={() => setImageUploadTarget('course-cover')}>
                     <img src={formData.thumbnail_url} alt="Thumbnail preview" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <ImagePlus className="w-10 h-10 text-white drop-shadow-md" />
@@ -333,7 +334,7 @@ export function CourseFormPage() {
           </div>
 
           {/* Modules & Lessons */}
-          <div className="rounded-xl p-6 bg-content1 shadow-none flex flex-col gap-4">
+          <div className="app-card p-6 flex flex-col gap-4">
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <ListOrdered className="w-5 h-5 text-primary" />
@@ -375,7 +376,7 @@ export function CourseFormPage() {
                       </Button>
                     </div>
 
-                    <div className="flex flex-col gap-1 ml-6 border-l-2 border-default-100 pl-2">
+                    <div className="flex flex-col gap-1 ml-6 border-l-2 border-divider pl-2">
                       {module.lessons.map((lesson) => {
                         const isActive = activeLessonId === lesson.id;
                         return (
@@ -425,7 +426,7 @@ export function CourseFormPage() {
                 return (
                   <>
                     {/* Middle: Block Editor Area */}
-                    <div className="lg:col-span-3 flex flex-col bg-white rounded-2xl border border-default-100 shadow-none overflow-hidden">
+                    <div className="lg:col-span-3 flex flex-col app-card overflow-hidden">
                       <div className="px-10 py-8 flex flex-col flex-1 min-h-[400px]">
                         {/* Title Sync */}
                         <h1 className="text-4xl font-bold text-foreground mb-6">
@@ -453,7 +454,7 @@ export function CourseFormPage() {
                         </div>
                         
                         {/* Meta Bar */}
-                        <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-default-500 mb-8 pb-4 border-b border-default-100">
+                        <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-default-500 mb-8 pb-4 border-b border-divider">
                           <span className="flex items-center gap-1.5"><Star className="w-4 h-4 text-warning fill-warning" /> {activeLesson.rating || 0} Đánh giá</span>
                           <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {activeLesson.duration_minutes || 0} phút</span>
                           <span className="flex items-center gap-1.5"><Paperclip className="w-4 h-4" /> {activeLesson.attachments?.length || 0} file đính kèm</span>
@@ -607,7 +608,7 @@ export function CourseFormPage() {
                                 const recipe = recipes.find(r => r.id === rId);
                                 if (!recipe) return null;
                                 return (
-                                  <div key={rId} className="flex items-center justify-between p-2 rounded-xl border border-default-200 bg-white shadow-none">
+                                  <div key={rId} className="flex items-center justify-between p-2 rounded-xl bg-content2">
                                     <div className="flex items-center gap-3 overflow-hidden flex-1">
                                       <div className="w-12 h-12 shrink-0 rounded bg-default-100 overflow-hidden">
                                         {recipe.image_url ? (

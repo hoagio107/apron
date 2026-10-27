@@ -1,7 +1,7 @@
 import { useNavigate, NavLink } from 'react-router-dom';
 import {
-  CalendarDays, ShoppingCart, Refrigerator, GraduationCap,
-  Heart, Lightbulb, NotebookTabs, Scale, Settings, X
+  CalendarDays, ShoppingCart, GraduationCap,
+  Heart, Lightbulb, Scale, Settings, X, FolderHeart
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -15,13 +15,12 @@ export function BottomNavMore({ isOpen, onClose }: BottomNavMoreProps) {
   const { t } = useTranslation();
 
   const moreItems = [
+    { name: t('nav.collections', 'Bộ sưu tập'), icon: FolderHeart, path: '/collections' },
     { name: t('nav.mealPlanner'), icon: CalendarDays, path: '/meal-planner' },
     { name: t('nav.shoppingList'), icon: ShoppingCart, path: '/shopping-list' },
-    { name: t('nav.smartFridge'), icon: Refrigerator, path: '/smart-fridge' },
     { name: t('nav.courses'), icon: GraduationCap, path: '/courses' },
     { name: t('nav.saved'), icon: Heart, path: '/saved' },
     { name: t('nav.kitchenTips'), icon: Lightbulb, path: '/tips' },
-    { name: t('recipes.detail.ingredients'), icon: NotebookTabs, path: '/catalog' },
     { name: t('nav.units'), icon: Scale, path: '/units' },
   ];
 

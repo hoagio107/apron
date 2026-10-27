@@ -3,7 +3,6 @@ import { Button, Input, Autocomplete, AutocompleteItem } from '@/ui';
 import { Plus, Trash2, Users, GripVertical, X } from 'lucide-react';
 import type { FormValues } from './schema';
 import { useUnits } from '../../../hooks/useUnits';
-import { IngredientCombobox } from './IngredientCombobox';
 import { SortableList, SortableItem } from './SortableList';
 
 export function IngredientsSection() {
@@ -83,7 +82,7 @@ export function IngredientsSection() {
 }
 
 function IngredientGroup({ sectionIndex, onRemove }: { sectionIndex: number, onRemove: () => void }) {
-  const { control, setValue } = useFormContext<FormValues>();
+  const { control } = useFormContext<FormValues>();
   
   const { fields: ingredients, append, remove, move } = useFieldArray({
     control,
@@ -139,15 +138,14 @@ function IngredientGroup({ sectionIndex, onRemove }: { sectionIndex: number, onR
                         name={`ingredientSections.${sectionIndex}.ingredients.${index}.name`}
                         control={control}
                         render={({ field, fieldState }) => (
-                          <IngredientCombobox
+                          <Input
+                            {...field}
                             value={field.value || ''}
-                            ingredientId={ingredients[index].ingredient_id}
-                            onChange={(name, id, defaultUnit) => {
-                              field.onChange(name);
-                              setValue(`ingredientSections.${sectionIndex}.ingredients.${index}.ingredient_id`, id);
-                              if (defaultUnit) {
-                                setValue(`ingredientSections.${sectionIndex}.ingredients.${index}.unit`, defaultUnit);
-                              }
+                            placeholder="Tên nguyên liệu (VD: Thịt ba chỉ heo)"
+                            variant="flat"
+                            className="flex-1"
+                            classNames={{
+                              inputWrapper: "bg-default-100 hover:bg-default-200 border-none shadow-none"
                             }}
                             isInvalid={!!fieldState.error}
                             errorMessage={fieldState.error?.message}

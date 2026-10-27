@@ -4,7 +4,6 @@ import {
   RecipeRepository, 
   TipRepository, 
   CourseRepository, 
-  useIngredientCatalogStore, 
   type Recipe 
 } from '@apron/core';
 import { ImageManager } from './image-manager';
@@ -114,16 +113,6 @@ export class MediaCleaner {
       }
     } catch (e) {
       console.error('Failed to collect course images:', e);
-    }
-
-    // 4. Ingredients
-    try {
-      const ingredients = useIngredientCatalogStore.getState().getAllIngredients();
-      for (const ing of ingredients) {
-        addPath(ing.image_url);
-      }
-    } catch (e) {
-      console.error('Failed to collect ingredient images:', e);
     }
 
     return referencedFilenames;

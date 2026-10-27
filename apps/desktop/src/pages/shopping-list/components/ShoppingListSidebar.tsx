@@ -21,9 +21,9 @@ export function ShoppingListSidebar() {
     <div className="w-80 shrink-0 flex flex-col gap-6">
       
       {/* AI Suggestion Card */}
-      <div className="bg-white rounded-2xl border border-default-100 shadow-none overflow-hidden flex flex-col">
+      <div className="app-card overflow-hidden flex flex-col">
         <div className="p-4 pb-2 flex items-center justify-between">
-          <h2 className="text-sm font-bold flex items-center gap-2 text-primary-800">
+          <h2 className="text-sm font-bold flex items-center gap-2 text-primary">
             <Sparkles className="w-4 h-4 text-primary" />
             AI gợi ý bạn cần mua
           </h2>
@@ -39,7 +39,7 @@ export function ShoppingListSidebar() {
         
         <div className="flex flex-col">
           {MOCK_AI_SUGGESTIONS.map((item, idx) => (
-            <div key={item.id} className="flex items-center justify-between py-3 px-4 hover:bg-default-50 transition-colors border-t border-default-100 group">
+            <div key={item.id} className="flex items-center justify-between py-3 px-4 hover:bg-default-50 transition-colors border-t border-divider group">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-default-100 flex items-center justify-center text-xl overflow-hidden shrink-0">
                   {/* Fake emoji since we don't have images */}
@@ -62,7 +62,7 @@ export function ShoppingListSidebar() {
           ))}
         </div>
         
-        <div className="p-3 pt-1 border-t border-default-100">
+        <div className="p-3 pt-1 border-t border-divider">
           <Button variant="light" className="w-full text-xs text-primary font-medium flex justify-center items-center gap-1">
             Xem tất cả gợi ý (8) <ChevronRight className="w-3 h-3" />
           </Button>
@@ -70,8 +70,8 @@ export function ShoppingListSidebar() {
       </div>
 
       {/* Overview Card */}
-      <div className="bg-white rounded-2xl border border-default-100 shadow-none overflow-hidden">
-        <div className="p-4 border-b border-default-100">
+      <div className="app-card overflow-hidden">
+        <div className="p-4 border-b border-divider">
           <h2 className="text-sm font-bold flex items-center gap-2 text-foreground">
             <List className="w-4 h-4 text-primary" />
             Tổng quan

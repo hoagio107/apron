@@ -1,8 +1,5 @@
 import { Checkbox, Button } from '@/ui';
 import { Minus, Plus, Trash2 } from 'lucide-react';
-import { useIngredientCatalogStore } from '../../../store/useIngredientCatalogStore';
-import { Avatar } from '@/ui';
-import { ImageManager } from '../../../lib/image-manager';
 import { getCategoryTheme } from '../../../lib/categoryTheme';
 import { SwipeableRow, type SwipeAction } from '../../../components/shared/SwipeableRow';
 import type { ShoppingListItem } from '@apron/core';
@@ -21,10 +18,6 @@ export function ShoppingListItemCard({
   onRemove,
   onUpdateQuantity
 }: ShoppingListItemCardProps) {
-  const { getIngredientMetaByName } = useIngredientCatalogStore();
-  const meta = getIngredientMetaByName(item.name);
-  const imageUrl = meta?.image_url;
-
   const currentQty = typeof item.quantity === 'number'
     ? item.quantity
     : parseInt(item.quantity?.toString() ?? '1', 10) || 1;
@@ -41,7 +34,7 @@ export function ShoppingListItemCard({
     }
   };
 
-  const theme = getCategoryTheme(item.group || meta?.default_category);
+  const theme = getCategoryTheme(item.group);
   const Icon = theme.icon;
 
   const actions: SwipeAction[] = [
@@ -75,22 +68,12 @@ export function ShoppingListItemCard({
           aria-label={`Đánh dấu ${item.name}`}
         />
 
-        {/* Category Icon / Thumbnail */}
-        {imageUrl ? (
-          <Avatar
-            src={ImageManager.getAssetUrl(imageUrl)}
-            radius="lg"
-            showFallback
-            className="w-10 h-10 flex-shrink-0 bg-default-100/70"
-            fallback={<Icon className="w-5 h-5 text-default-400" />}
-          />
-        ) : (
-          <div
-            className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center ${theme.bg} ${theme.text}`}
-          >
-            <Icon className="w-5 h-5" />
-          </div>
-        )}
+        {/* Category Icon */}
+        <div
+          className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center ${theme.bg} ${theme.text}`}
+        >
+          <Icon className="w-5 h-5" />
+        </div>
 
         {/* Title & Group */}
         <div className="flex-1 min-w-0">
@@ -102,7 +85,7 @@ export function ShoppingListItemCard({
             {item.name || 'Nguyên liệu'}
           </h3>
           <p className="text-[11px] text-default-400 truncate">
-            {item.group || meta?.default_category || 'Khác'}
+            {item.group || 'Khác'}
           </p>
         </div>
 

@@ -35,8 +35,8 @@ export function CoursesPage() {
             <Plus className="w-6 h-6" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-foreground leading-tight">Sổ tay Khoá học</h1>
-            <p className="text-default-500">{courses.length} khoá học đã lưu</p>
+            <h1 className="app-page-title leading-tight">Sổ tay Khoá học</h1>
+            <p className="app-page-subtitle">{courses.length} khoá học đã lưu</p>
           </div>
         </div>
       </div>
@@ -77,7 +77,7 @@ export function CoursesPage() {
                     className="card-media-img absolute inset-x-0 top-0 bottom-6 w-full h-[calc(100%-1.5rem)] object-cover z-0" 
                   />
                 ) : (
-                  <div className="card-media-img absolute inset-x-0 top-0 bottom-6 w-full h-[calc(100%-1.5rem)] flex items-center justify-center bg-white text-default-400 z-0">
+                  <div className="card-media-img absolute inset-x-0 top-0 bottom-6 w-full h-[calc(100%-1.5rem)] flex items-center justify-center bg-content2 text-default-400 z-0">
                     <BookOpen className="w-12 h-12" />
                   </div>
                 )}

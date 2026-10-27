@@ -447,6 +447,17 @@ button:not([data-slot="popover"]):not([data-slot="modal"]):not([data-slot="drawe
 }
 
 /* ==========================================================================
+   Thống nhất triệt để: Không sử dụng viền (border) cho các card trong app
+   Bảo toàn viền đứt nét duy nhất cho các card tải lên / empty state (.app-card-dashed).
+   ========================================================================== */
+.app-card:not(.app-card-dashed),
+[data-slot="card"]:not([data-dashed="true"]),
+.app-stat-card,
+.app-stat-card-vertical {
+  border: none !important;
+}
+
+/* ==========================================================================
    7. INPUTS, TEXTAREAS & TIPTAP EDITOR DARK MODE CONTRAST STANDARDIZATION
    Đảm bảo toàn bộ chữ trong các ô nhập liệu, ghi chú và các bước làm
    luôn hiển thị sắc nét, tương phản cao trong chế độ Dark Mode.

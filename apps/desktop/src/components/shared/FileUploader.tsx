@@ -105,7 +105,7 @@ export function FileUploader({ value = [], onChange, label = "Kéo thả file v�
           {pendingUploads.map((u) => (
             <div key={u.id} className={`flex flex-col p-2 rounded-lg border ${u.status === 'failed' ? 'border-danger-200 bg-danger-50' : 'border-primary-200 bg-primary-50'}`}>
               <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded flex items-center justify-center flex-shrink-0 ${u.status === 'failed' ? 'bg-danger-100 text-danger' : 'bg-white text-primary'}`}>
+                <div className={`w-8 h-8 rounded flex items-center justify-center flex-shrink-0 ${u.status === 'failed' ? 'bg-danger-100 text-danger' : 'bg-content1 text-primary'}`}>
                   {u.status === 'complete' ? <FileIcon className="w-4 h-4" /> : <Loader2 className={`w-4 h-4 ${u.status === 'processing' ? 'animate-spin' : ''}`} />}
                 </div>
                 <div className="flex-1 min-w-0 flex flex-col">
@@ -130,7 +130,7 @@ export function FileUploader({ value = [], onChange, label = "Kéo thả file v�
           {value.map((url, idx) => {
             const filename = FileManager.getFilename(url);
             return (
-              <div key={idx} className="flex items-center justify-between p-2 rounded-lg border border-default-200 bg-white">
+              <div key={idx} className="flex items-center justify-between p-2 rounded-lg border border-divider bg-content1">
                 <div className="flex items-center gap-3 overflow-hidden">
                   <div className="w-8 h-8 rounded bg-default-100 flex items-center justify-center flex-shrink-0 text-default-600">
                     <FileIcon className="w-4 h-4" />

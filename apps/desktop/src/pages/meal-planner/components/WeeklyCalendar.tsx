@@ -44,7 +44,7 @@ function MealSlot({ date, mealType, label, entries, onRemoveEntry, viewMode = 'l
       ref={setNodeRef}
       style={style}
       className={`group/slot min-h-[100px] py-2 px-2 relative flex flex-col gap-2 rounded-2xl border transition-colors ${
-        isOver ? 'bg-primary-50 ring-2 ring-primary border-primary' : 'bg-white border-default-100 shadow-none'
+        isOver ? 'bg-primary-50 ring-2 ring-primary border-primary' : 'app-card'
       }`}
     >
       {/* Drag handle */}

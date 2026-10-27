@@ -32,11 +32,8 @@ import {
   Paperclip, 
   StickyNote, 
   Utensils, 
-  Flame, 
-  BarChart, 
   X,
-  Layers,
-  Settings
+  Layers
 } from 'lucide-react';
 import type { Course, Lesson, CourseModule } from '@apron/core';
 import { FormField } from '../../shared/form';
@@ -65,7 +62,7 @@ export function CourseForm({
   onSubmit,
   onCancel,
   submitText,
-  isModal = false
+  isModal: _isModal = false
 }: CourseFormProps) {
   const navigate = useNavigate();
   const { recipes, addRecipe, fetchRecipes } = useRecipeStore();
@@ -147,7 +144,7 @@ export function CourseForm({
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/\s+/g, '-')
-      .replace(/[^\w\-]+/g, '');
+      .replace(/[^\w-]+/g, '');
     setFormData(prev => ({ ...prev, title, slug }));
   };
 

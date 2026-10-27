@@ -68,7 +68,7 @@ export function RichTextEditor({
 
   return (
     <>
-    <div className={`flex flex-col border rounded-xl bg-default-100 dark:bg-default-50/20 text-foreground transition-colors focus-within:bg-default-50 dark:focus-within:bg-default-100/30 ${isInvalid ? 'border-danger' : 'border-transparent hover:bg-default-200 dark:hover:bg-default-100/40'}`}>
+    <div className={`flex flex-col border rounded-xl bg-default-100 text-foreground transition-colors hover:bg-default-200/80 focus-within:bg-default-100 ${isInvalid ? 'border-danger' : 'border-transparent'}`}>
       
       {/* Sticky Bottom Bar on Mobile */}
       {editor && (

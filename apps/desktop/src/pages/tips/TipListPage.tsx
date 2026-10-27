@@ -1,13 +1,15 @@
 import { useState, useMemo, useEffect } from 'react';
 
 import { Button, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
-import { Plus, Trash2, Search, Filter, CheckCircle2 } from 'lucide-react';
+import { Plus, Trash2, Search, Filter, CheckCircle2, Sparkles } from 'lucide-react';
 import { useTipStore } from '../../store/useTipStore';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { TipCard } from '../../components/tips/TipCard';
 import { TipFormModal } from './components/TipFormModal';
 import { TipDetailPanel } from './components/TipDetailPanel';
+import { TipAiModal } from './components/TipAiModal';
 import { TIP_CATEGORIES } from '@apron/core';
+import type { ParseTipResult } from '../../lib/gemini';
 
 export function TipListPage() {
   const { tips, fetchTips, deleteBulkTips, deleteTip } = useTipStore();
@@ -19,6 +21,8 @@ export function TipListPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [initialAiData, setInitialAiData] = useState<ParseTipResult | null>(null);
   const [editingTipId, setEditingTipId] = useState<string | undefined>(undefined);
   
   const [viewingTipId, setViewingTipId] = useState<string | undefined>(undefined);
@@ -93,17 +97,34 @@ export function TipListPage() {
       {/* Header & Toolbar */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div className="flex items-center gap-4 shrink-0">
-          <Button 
-            isIconOnly
-            color="primary" 
-            className="w-14 h-14 rounded-2xl shadow-sm shrink-0"
-            onPress={() => setIsFormModalOpen(true)}
-          >
-            <Plus className="w-6 h-6" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              isIconOnly
+              color="primary" 
+              className="w-14 h-14 rounded-2xl shrink-0"
+              onPress={() => {
+                setInitialAiData(null);
+                setEditingTipId(undefined);
+                setIsFormModalOpen(true);
+              }}
+              title="Thêm mẹo vặt mới"
+            >
+              <Plus className="w-6 h-6" />
+            </Button>
+            <Button 
+              isIconOnly
+              variant="flat"
+              color="secondary" 
+              className="w-14 h-14 rounded-2xl shrink-0 bg-secondary/15 text-secondary hover:bg-secondary/25 shadow-none"
+              onPress={() => setIsAiModalOpen(true)}
+              title="AI Trợ lý tạo mẹo (Gemini)"
+            >
+              <Sparkles className="w-6 h-6" />
+            </Button>
+          </div>
           <div>
-            <h1 className="text-3xl font-bold text-foreground leading-tight">Mẹo nhà bếp</h1>
-            <p className="text-default-500">{tips.length} mẹo đã lưu</p>
+            <h1 className="app-page-title leading-tight">Mẹo nhà bếp</h1>
+            <p className="app-page-subtitle">{tips.length} mẹo đã lưu</p>
           </div>
         </div>
 
@@ -162,24 +183,24 @@ export function TipListPage() {
 
       {/* Floating Selection Action Bar */}
       {isSelectMode && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 px-6 py-3 bg-content1 shadow-2xl border border-default-200 rounded-full animate-in slide-in-from-bottom-8 fade-in duration-300">
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 px-6 py-3 bg-content1 shadow-2xl border border-divider rounded-full animate-in slide-in-from-bottom-8 fade-in duration-300">
           <div className="flex items-center gap-3">
             <Button variant="flat" onPress={selectAll}>
               {selectedIds.size === filteredTips.length && filteredTips.length > 0 ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
             </Button>
-            <span className="font-medium text-primary-700 min-w-[100px] text-center">
+            <span className="font-medium text-primary min-w-[100px] text-center">
               Đã chọn {selectedIds.size}
             </span>
           </div>
           
-          <div className="w-px h-8 bg-default-200 mx-1 shrink-0" />
+          <div className="w-px h-8 bg-divider mx-1 shrink-0" />
           
           <div className="flex items-center gap-2">
             <Button color="danger" variant="flat" startContent={<Trash2 className="w-4 h-4" />} onPress={handleBulkDelete}>
               Xóa
             </Button>
             
-            <div className="w-px h-8 bg-default-200 mx-1 shrink-0" />
+            <div className="w-px h-8 bg-divider mx-1 shrink-0" />
             
             <Button variant="light" onPress={toggleSelectMode}>
               Hủy
@@ -219,12 +240,27 @@ export function TipListPage() {
         isOpen={isFormModalOpen}
         onOpenChange={(open) => {
           setIsFormModalOpen(open);
-          if (!open) setEditingTipId(undefined);
+          if (!open) {
+            setEditingTipId(undefined);
+            setInitialAiData(null);
+          }
         }}
         tipId={editingTipId}
+        initialData={initialAiData}
         onSuccess={() => {
           fetchTips();
           setEditingTipId(undefined);
+          setInitialAiData(null);
+        }}
+      />
+
+      <TipAiModal 
+        isOpen={isAiModalOpen}
+        onOpenChange={setIsAiModalOpen}
+        onApply={(data) => {
+          setInitialAiData(data);
+          setEditingTipId(undefined);
+          setIsFormModalOpen(true);
         }}
       />
       

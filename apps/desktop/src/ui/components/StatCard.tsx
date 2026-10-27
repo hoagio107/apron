@@ -35,7 +35,7 @@ export function StatCard({
   label, 
   value, 
   color = 'primary', 
-  layout = 'horizontal',
+  layout = 'vertical',
   onClick,
   className = '' 
 }: StatCardProps) {
@@ -46,14 +46,14 @@ export function StatCard({
       <AppCard 
         pressable={Boolean(onClick)} 
         onClick={onClick}
-        className={`app-stat-card-vertical flex flex-col items-center justify-center text-center p-2.5 sm:p-3 gap-1.5 min-w-0 flex-1 ${className}`}
+        className={`app-stat-card-vertical flex flex-col items-center justify-center text-center p-2.5 sm:p-4 gap-1.5 sm:gap-2 min-w-0 flex-1 ${className}`}
       >
-        <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 ${bg} ${text}`}>
+        <div className={`w-8 h-8 sm:w-11 md:w-12 sm:h-11 md:h-12 rounded-full flex items-center justify-center shrink-0 ${bg} ${text}`}>
           {icon}
         </div>
-        <div className="flex flex-col items-center min-w-0 w-full">
-          <span className="text-base sm:text-xl font-bold text-foreground truncate w-full">{value}</span>
-          <span className="text-[11px] sm:text-xs font-medium text-default-500 truncate w-full">{label}</span>
+        <div className="flex flex-col items-center justify-center min-w-0 w-full text-center">
+          <span className="text-base sm:text-xl md:text-2xl font-bold text-foreground text-center truncate w-full">{value}</span>
+          <span className="text-[11px] sm:text-xs md:text-sm font-medium text-default-500 text-center truncate w-full">{label}</span>
         </div>
       </AppCard>
     );
@@ -63,14 +63,14 @@ export function StatCard({
     <AppCard 
       pressable={Boolean(onClick)} 
       onClick={onClick}
-      className={`app-stat-card ${className}`}
+      className={`app-stat-card !flex-row items-center gap-3 sm:gap-4 p-3.5 sm:p-4 ${className}`}
     >
-      <div className={`app-icon-badge ${bg} ${text}`}>
+      <div className={`app-icon-badge shrink-0 ${bg} ${text}`}>
         {icon}
       </div>
-      <div className="flex flex-col min-w-0 flex-1">
-        <span className="app-stat-label truncate">{label}</span>
-        <span className="app-stat-value truncate">{value}</span>
+      <div className="flex flex-col min-w-0 flex-1 text-left items-start">
+        <span className="app-stat-value truncate w-full">{value}</span>
+        <span className="app-stat-label truncate w-full">{label}</span>
       </div>
     </AppCard>
   );

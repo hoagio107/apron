@@ -5,7 +5,7 @@ export function Titlebar() {
   return (
     <div 
       data-tauri-drag-region
-      className="h-12 bg-content1 border-b border-divider flex items-center justify-between px-4 select-none z-50 flex-shrink-0 text-foreground"
+      className="h-12 bg-content1 flex items-center justify-between px-4 select-none z-50 flex-shrink-0 text-foreground"
     >
       {/* Left: Window Controls */}
       <div className="flex items-center gap-2 w-1/3 z-10 pointer-events-auto" data-tauri-drag-region>
@@ -13,7 +13,7 @@ export function Titlebar() {
       </div>
 
       {/* Center: Smart Search & Breadcrumb */}
-      <div className="flex-1 flex justify-center items-center pointer-events-none z-10" data-tauri-drag-region>
+      <div className="flex-1 flex justify-center items-center pointer-events-none z-10 pt-1.5" data-tauri-drag-region>
         <SmartSearch />
       </div>
 

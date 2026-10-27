@@ -14,28 +14,7 @@ import { Trash2, Tag, Layers, ArrowRightLeft, UtensilsCrossed } from 'lucide-rea
 import type { Unit } from '@apron/core';
 import { FormField } from '../../../components/shared/form/FormField';
 import { getUnitTheme } from './UnitCard';
-
-export const UNIT_CATEGORIES = [
-  'Khối lượng',
-  'Thể tích',
-  'Số lượng / Đếm',
-  'Đóng gói & Khác'
-] as const;
-
-export function detectUnitCategory(name: string): string {
-  const norm = name.toLowerCase().trim();
-  const weight = ['g', 'gam', 'gram', 'kg', 'kilogam', 'lạng', 'cân', 'oz', 'lb', 'pound', 'mg'];
-  const volume = ['ml', 'l', 'lít', 'lit', 'muỗng', 'thìa', 'tbsp', 'tsp', 'cup', 'chén', 'bát', 'giọt'];
-  const count = ['quả', 'trái', 'củ', 'bắp', 'tép', 'nhánh', 'cây', 'bó', 'lát', 'miếng', 'con'];
-  const packaging = ['gói', 'hộp', 'lon', 'chai', 'khay', 'túi', 'đĩa', 'phần', 'bịch', 'thùng'];
-
-  if (weight.some(w => norm === w || norm.startsWith(w + ' '))) return 'Khối lượng';
-  if (volume.some(v => norm === v || norm.includes(v))) return 'Thể tích';
-  if (count.some(c => norm === c || norm.startsWith(c + ' '))) return 'Số lượng / Đếm';
-  if (packaging.some(p => norm === p || norm.startsWith(p + ' '))) return 'Đóng gói & Khác';
-
-  return 'Số lượng / Đếm';
-}
+import { UNIT_CATEGORIES, detectUnitCategory } from '@apron/core';
 
 interface UnitModalProps {
   isOpen: boolean;

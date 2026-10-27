@@ -177,12 +177,12 @@ export function SavedRecipesPage() {
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         {/* Left side: Add New + Title */}
         <div className="flex items-center gap-4 shrink-0">
-          <div className="w-14 h-14 rounded-2xl shadow-sm shrink-0 bg-primary/10 flex items-center justify-center text-primary">
+          <div className="w-14 h-14 rounded-2xl shrink-0 bg-primary/10 flex items-center justify-center text-primary">
             <Heart className="w-6 h-6 fill-current" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-foreground leading-tight">Đã lưu</h1>
-            <p className="text-default-500">{filteredAndSortedRecipes.length} công thức yêu thích</p>
+            <h1 className="app-page-title leading-tight">Đã lưu</h1>
+            <p className="app-page-subtitle">{filteredAndSortedRecipes.length} công thức yêu thích</p>
           </div>
         </div>
 
@@ -212,17 +212,17 @@ export function SavedRecipesPage() {
 
       {/* Floating Selection Action Bar */}
       {isSelectMode && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 px-6 py-3 bg-content1 shadow-2xl border border-default-200 rounded-full animate-in slide-in-from-bottom-8 fade-in duration-300">
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 px-6 py-3 bg-content1 shadow-2xl border border-divider rounded-full animate-in slide-in-from-bottom-8 fade-in duration-300">
           <div className="flex items-center gap-3">
             <Button variant="flat" onPress={selectAll}>
               {selectedIds.size === filteredAndSortedRecipes.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
             </Button>
-            <span className="font-medium text-primary-700 min-w-[100px] text-center">
+            <span className="font-medium text-primary min-w-[100px] text-center">
               Đã chọn {selectedIds.size}
             </span>
           </div>
           
-          <div className="w-px h-8 bg-default-200 mx-1 shrink-0" />
+          <div className="w-px h-8 bg-divider mx-1 shrink-0" />
           
           <div className="flex items-center gap-2">
             <Button color="primary" variant="flat" startContent={<CalendarDays className="w-4 h-4" />}>
@@ -235,7 +235,7 @@ export function SavedRecipesPage() {
               Bỏ lưu
             </Button>
             
-            <div className="w-px h-8 bg-default-200 mx-1 shrink-0" />
+            <div className="w-px h-8 bg-divider mx-1 shrink-0" />
             
             <Button variant="light" onPress={toggleSelectMode}>
               Hủy

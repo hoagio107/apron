@@ -78,12 +78,13 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
       placement="bottom"
       backdrop="blur"
       classNames={{
-        base: "max-h-[90vh] rounded-t-3xl bg-content1 shadow-2xl flex flex-col",
-        header: "border-b border-divider p-4 pr-12 bg-content1 shrink-0",
+        base: "max-h-[calc(100dvh-var(--sat,0px)-20px)] rounded-t-3xl bg-content1 shadow-2xl flex flex-col mt-auto overflow-hidden",
+        backdrop: "bg-black/60 backdrop-blur-sm",
+        header: "border-b border-divider p-4 pr-12 bg-content1 shrink-0 rounded-t-3xl",
         body: "p-4 sm:p-6 overflow-y-auto space-y-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
       }}
     >
-      <DrawerContent>
+      <DrawerContent className="rounded-t-3xl overflow-hidden">
         {() => (
           <>
             {/* Header: 2 cột - Cột trái chiếm 1/4 là ảnh đại diện thu gọn, cột phải là tên, ngày tháng, đánh giá, nhận xét */}

@@ -1,7 +1,7 @@
 import { useNavigate, NavLink } from 'react-router-dom';
 import {
   CalendarDays, ShoppingCart, GraduationCap,
-  Heart, Lightbulb, Scale, Settings, X, FolderHeart
+  Heart, Lightbulb, Scale, Settings, X, FolderHeart, FileUp
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -22,6 +22,7 @@ export function BottomNavMore({ isOpen, onClose }: BottomNavMoreProps) {
     { name: t('nav.saved'), icon: Heart, path: '/saved' },
     { name: t('nav.kitchenTips'), icon: Lightbulb, path: '/tips' },
     { name: t('nav.units'), icon: Scale, path: '/units' },
+    { name: t('nav.import', 'Nhập dữ liệu JSON'), icon: FileUp, path: '/import' },
   ];
 
   if (!isOpen) return null;
@@ -35,7 +36,7 @@ export function BottomNavMore({ isOpen, onClose }: BottomNavMoreProps) {
       />
 
       {/* Sheet */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-content1 text-foreground rounded-t-3xl shadow-2xl border-t border-divider animate-in slide-in-from-bottom-4 duration-300 max-h-[80vh] overflow-y-auto">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-content1 text-foreground rounded-t-3xl shadow-2xl border-t border-divider animate-in slide-in-from-bottom-4 duration-300 max-h-[calc(100dvh-var(--sat,0px)-24px)] overflow-y-auto">
         {/* Handle */}
         <div className="sticky top-0 bg-content1 z-10 pt-3 pb-2 px-4 flex flex-col items-center border-b border-divider">
           <div className="w-10 h-1 rounded-full bg-default-300 mb-2" />

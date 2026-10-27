@@ -122,7 +122,7 @@ export function DashboardPage() {
       
       {/* 1. Welcome Banner */}
       <div className="flex items-center gap-3.5 sm:gap-4">
-        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white dark:bg-default-100 p-2 shadow-sm border border-default-200/60 dark:border-default-700/50 shrink-0 flex items-center justify-center">
+        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white dark:bg-default-100 p-2 shadow-sm shrink-0 flex items-center justify-center">
           <img src="/logo.svg" alt="apron logo" className="w-full h-full object-contain" />
         </div>
         <div className="flex flex-col">

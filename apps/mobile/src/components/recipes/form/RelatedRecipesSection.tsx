@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom';
 import { Button, Avatar, Drawer, DrawerContent, DrawerHeader, DrawerBody, useDisclosure, Input } from '@/ui';
@@ -13,8 +13,8 @@ import { useTipStore } from '../../../store/useTipStore';
 
 export function RelatedRecipesSection() {
   const { watch, setValue } = useFormContext<FormValues>();
-  const { recipes } = useRecipeStore();
-  const { tips } = useTipStore();
+  const { recipes, fetchRecipes } = useRecipeStore();
+  const { tips, fetchTips } = useTipStore();
   const relatedRecipes = watch('related_recipes') || [];
   const linkedTips = watch('linked_tips') || [];
 
@@ -25,6 +25,11 @@ export function RelatedRecipesSection() {
   
   const [searchParams] = useSearchParams();
   const editId = searchParams.get('edit');
+
+  useEffect(() => {
+    fetchRecipes();
+    fetchTips();
+  }, [fetchRecipes, fetchTips]);
 
   const filteredItems = useMemo(() => {
     const matchedRecipes = recipes
@@ -41,12 +46,12 @@ export function RelatedRecipesSection() {
         id: item.id,
         title: item.title,
         image_url: item.image_url,
+        category: (item as any).category,
         is_tip: true,
         isSelected: linkedTips.some(tid => tid === item.id)
       }));
 
     return [...matchedRecipes, ...matchedTips];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recipes, tips, searchValue, editId, relatedRecipes, linkedTips]);
 
   const handleSelect = (key: React.Key | null) => {
@@ -94,7 +99,7 @@ export function RelatedRecipesSection() {
       <div className="flex flex-col gap-4">
         <Button
           variant="flat"
-          className="w-full justify-start bg-default-100 hover:bg-default-200 text-default-500 text-left font-normal px-3"
+          className="w-full justify-start bg-default-100 hover:bg-default-200 text-default-500 text-left font-normal px-3 h-11 rounded-xl shadow-none border-none"
           onPress={onOpen}
           startContent={<Search className="w-4 h-4 text-default-400 shrink-0" />}
           endContent={
@@ -115,22 +120,39 @@ export function RelatedRecipesSection() {
             ) : undefined
           }
         >
-          Tìm kiếm công thức hoặc mẹo...
+          <span className="truncate text-left flex-1 text-sm text-default-400">
+            {totalSelectedCount > 0 
+              ? `Đã chọn ${totalSelectedCount} mục liên kết (${relatedRecipes.length} công thức, ${linkedTips.length} mẹo)` 
+              : "Tìm kiếm công thức hoặc mẹo..."}
+          </span>
         </Button>
-        <Drawer isOpen={isOpen} onOpenChange={onOpenChange} placement="bottom" size="full">
-          <DrawerContent>
+        <Drawer 
+          isOpen={isOpen} 
+          onOpenChange={onOpenChange} 
+          placement="bottom" 
+          size="2xl"
+          classNames={{
+            base: "max-h-[calc(100dvh-var(--sat,0px)-20px)] rounded-t-3xl overflow-hidden shadow-2xl mt-auto",
+            backdrop: "bg-black/60 backdrop-blur-sm"
+          }}
+        >
+          <DrawerContent className="rounded-t-3xl overflow-hidden">
             {(onClose) => (
               <>
-                <DrawerHeader className="flex flex-col gap-1 px-4 py-3 border-b border-divider z-10">
+                <DrawerHeader className="flex flex-col gap-1.5 px-4 pt-3 pb-3 border-b border-divider z-10 bg-content1 rounded-t-3xl">
+                  <div className="w-10 h-1 rounded-full bg-default-300 dark:bg-default-600 mx-auto -mt-0.5 mb-1" />
                   <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold">Thêm liên kết</span>
-                    <Button isIconOnly variant="light" size="md" onPress={onClose} className="bg-default-100 w-8 h-8 rounded-full">
+                    <div className="flex items-center gap-2">
+                      <Link className="w-4 h-4 text-primary" />
+                      <span className="text-base font-bold text-foreground">Liên kết công thức & mẹo</span>
+                    </div>
+                    <Button isIconOnly variant="light" size="sm" onPress={onClose} className="bg-default-100 w-8 h-8 rounded-full">
                       <X className="w-4 h-4" />
                     </Button>
                   </div>
                 </DrawerHeader>
-                <DrawerBody className="p-4 pt-6 bg-default-50/50">
-                  <div className="flex gap-2 items-center mb-6">
+                <DrawerBody className="p-4 pt-4 bg-default-50/50">
+                  <div className="flex gap-2 items-center mb-4">
                     <Input
                       autoFocus
                       placeholder="Tìm kiếm công thức hoặc mẹo..."
@@ -140,7 +162,7 @@ export function RelatedRecipesSection() {
                       variant="flat"
                       className="flex-1"
                       classNames={{
-                        inputWrapper: "bg-default-100 h-12 shadow-none border-none"
+                        inputWrapper: "bg-default-100 h-11 shadow-none border-none rounded-xl"
                       }}
                       isClearable
                       onClear={() => setSearchValue("")}
@@ -148,14 +170,14 @@ export function RelatedRecipesSection() {
                     <Button 
                       isIconOnly 
                       variant="flat" 
-                      className="h-12 w-12 bg-default-100 shadow-none border-none"
+                      className="h-11 w-11 bg-default-100 shadow-none border-none rounded-xl"
                       onPress={() => setViewMode(m => m === 'grid' ? 'list' : 'grid')}
                     >
-                      {viewMode === 'grid' ? <List className="w-5 h-5 text-default-500" /> : <LayoutGrid className="w-5 h-5 text-default-500" />}
+                      {viewMode === 'grid' ? <List className="w-4 h-4 text-default-500" /> : <LayoutGrid className="w-4 h-4 text-default-500" />}
                     </Button>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto pb-8">
+                  <div className="flex-1 overflow-y-auto pb-6">
                     {viewMode === 'list' ? (
                       <div className="flex flex-col gap-2">
                         {filteredItems.map((item) => {
@@ -163,24 +185,45 @@ export function RelatedRecipesSection() {
                           return (
                             <div
                               key={key}
-                              className="flex items-center justify-between w-full p-3 hover:bg-default-100 rounded-xl cursor-pointer transition-colors"
+                              className={`flex items-center justify-between w-full p-2.5 rounded-xl cursor-pointer transition-colors border ${
+                                item.isSelected 
+                                  ? 'bg-primary/5 border-primary/30 dark:bg-primary/10' 
+                                  : 'bg-content1 hover:bg-default-100 border-transparent shadow-none'
+                              }`}
                               onClick={() => {
                                 handleSelect(key);
                               }}
                             >
-                              <div className="flex items-center gap-3 min-w-0">
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
                                 {item.is_tip ? (
-                                  <div className="w-24 h-24 rounded-xl bg-warning/20 flex items-center justify-center shrink-0">
-                                    <Lightbulb className="w-5 h-5 text-warning" />
-                                  </div>
+                                  item.image_url ? (
+                                    <Avatar 
+                                      src={ImageManager.getAssetUrl(item.image_url)} 
+                                      radius="sm" 
+                                      className="w-12 h-12 shrink-0 text-small" 
+                                      fallback={<Lightbulb className="w-5 h-5 text-warning" />} 
+                                    />
+                                  ) : (
+                                    <div className="w-12 h-12 rounded-lg bg-warning/15 text-warning flex items-center justify-center shrink-0 border border-warning/20">
+                                      <Lightbulb className="w-5 h-5" />
+                                    </div>
+                                  )
                                 ) : (
-                                  <Avatar src={ImageManager.getAssetUrl(item.image_url || '')} radius="lg" className="w-24 h-24 shrink-0 text-large" fallback={item.title.charAt(0)} />
+                                  <Avatar 
+                                    src={ImageManager.getAssetUrl(item.image_url || '')} 
+                                    radius="sm" 
+                                    className="w-12 h-12 shrink-0 text-large" 
+                                    fallback={item.title.charAt(0)} 
+                                  />
                                 )}
                                 <div className="flex flex-col min-w-0 flex-1">
-                                  <span className="font-medium text-sm line-clamp-1">{item.title}</span>
-                                  <div className="flex items-center gap-3 text-xs text-default-400 mt-0.5">
+                                  <span className="font-medium text-sm text-foreground line-clamp-1">{item.title}</span>
+                                  <div className="flex items-center gap-2 text-xs text-default-400 mt-0.5">
                                     {item.is_tip ? (
-                                      <span className="text-warning-600">Mẹo nhà bếp</span>
+                                      <span className="text-warning-600 dark:text-warning-400 font-medium flex items-center gap-1">
+                                        <Lightbulb className="w-3 h-3 text-warning" />
+                                        Mẹo nhà bếp
+                                      </span>
                                     ) : (
                                       <>
                                         {(item as any).taste_score ? (
@@ -197,7 +240,15 @@ export function RelatedRecipesSection() {
                                   </div>
                                 </div>
                               </div>
-                              {item.isSelected && <Check className="w-5 h-5 text-success shrink-0 ml-2" />}
+                              <div className="shrink-0 ml-2">
+                                {item.isSelected ? (
+                                  <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center shadow-sm">
+                                    <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                  </div>
+                                ) : (
+                                  <div className="w-6 h-6 rounded-full border border-default-300" />
+                                )}
+                              </div>
                             </div>
                           );
                         })}
@@ -208,35 +259,47 @@ export function RelatedRecipesSection() {
                           const key = item.is_tip ? `tip:${item.id}` : `recipe:${item.id}`;
                           
                           if (item.is_tip) {
-                            // Render a simple tip card to match grid
                             return (
                               <div 
                                 key={key}
                                 onClick={() => handleSelect(key)}
-                                className={`group flex flex-col cursor-pointer relative gap-3`}
+                                className={`group flex flex-col cursor-pointer relative p-3 rounded-xl border transition-all ${
+                                  item.isSelected 
+                                    ? 'bg-primary/5 border-primary shadow-sm' 
+                                    : 'bg-content1 hover:bg-default-100 border-default-200/60 shadow-none'
+                                }`}
                               >
-                                <div className="relative rounded-xl overflow-hidden bg-warning/20 w-full aspect-[3/4] flex items-center justify-center">
-                                  <Lightbulb className="w-12 h-12 text-warning" />
+                                <div className="relative rounded-lg overflow-hidden bg-warning/15 w-full aspect-[4/3] flex items-center justify-center mb-2 border border-warning/20">
+                                  {item.image_url ? (
+                                    <img 
+                                      src={ImageManager.getAssetUrl(item.image_url)} 
+                                      alt={item.title} 
+                                      className="w-full h-full object-cover" 
+                                    />
+                                  ) : (
+                                    <Lightbulb className="w-10 h-10 text-warning" />
+                                  )}
                                   {item.isSelected && (
-                                    <div className="absolute top-3 right-3 z-20">
-                                      <div className="bg-primary text-white rounded-full p-1">
-                                        <Check className="w-3 h-3" />
+                                    <div className="absolute top-2 right-2 z-20">
+                                      <div className="bg-primary text-white rounded-full p-1 shadow-sm">
+                                        <Check className="w-3 h-3 stroke-[3]" />
                                       </div>
                                     </div>
                                   )}
-                                  <div className="absolute inset-0 z-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
                                 </div>
-                                <div className="flex flex-col gap-1.5">
-                                  <h3 className="font-semibold line-clamp-2 leading-tight text-base">
+                                <div className="flex flex-col gap-1">
+                                  <h3 className="font-semibold line-clamp-2 leading-tight text-sm text-foreground">
                                     {item.title}
                                   </h3>
-                                  <span className="text-xs text-warning-600 font-medium">Mẹo nhà bếp</span>
+                                  <span className="text-[11px] text-warning-600 dark:text-warning-400 font-medium flex items-center gap-1">
+                                    <Lightbulb className="w-3 h-3 text-warning" />
+                                    Mẹo nhà bếp
+                                  </span>
                                 </div>
                               </div>
                             );
                           }
 
-                          // Render a RecipeCard for recipes
                           return (
                             <RecipeCard 
                               key={key}
@@ -246,6 +309,7 @@ export function RelatedRecipesSection() {
                               isSelected={item.isSelected}
                               onSelectChange={() => handleSelect(key)}
                               hideMenu
+                              size="sm"
                             />
                           );
                         })}
@@ -253,13 +317,15 @@ export function RelatedRecipesSection() {
                     )}
                     
                     {filteredItems.length === 0 && (
-                      <div className="text-center text-default-500 py-8">
+                      <div className="text-center text-default-400 py-12 text-sm">
                         Không tìm thấy kết quả nào
                       </div>
                     )}
                   </div>
-                  <div className="p-4 border-t border-divider mt-auto shrink-0 bg-default-50 -mx-4 -mb-4">
-                    <Button color="primary" className="w-full h-14 text-base font-medium rounded-xl" onPress={onClose}>Xong ({totalSelectedCount})</Button>
+                  <div className="p-3 border-t border-divider mt-auto shrink-0 bg-content1 -mx-4 -mb-4">
+                    <Button color="primary" className="w-full h-12 text-base font-medium rounded-xl" onPress={onClose}>
+                      Hoàn tất ({totalSelectedCount})
+                    </Button>
                   </div>
                 </DrawerBody>
               </>
@@ -267,75 +333,98 @@ export function RelatedRecipesSection() {
           </DrawerContent>
         </Drawer>
 
+        {/* Selected Items List below trigger */}
         {totalSelectedCount > 0 && isListExpanded && (
-          <div className="flex flex-col gap-0 border border-divider rounded-xl overflow-hidden -mt-2">
-            <div className="flex flex-col divide-y divide-divider">
-              {relatedRecipes.map(recipe => {
-                const extra = recipes.find(r => r.id === recipe.id);
-                return (
-                  <div key={`recipe-${recipe.id}`} className="flex gap-3 p-2 hover:bg-default-50 transition-colors group relative">
-                    <Avatar src={ImageManager.getAssetUrl(recipe.image_url || '')} radius="sm" className="w-10 h-10 shrink-0 text-small" fallback={recipe.title.charAt(0)} />
-                    <div className="flex flex-col justify-center flex-1 gap-0.5">
-                      <h4 className="font-medium text-sm line-clamp-1 pr-6">{recipe.title}</h4>
-                      <div className="flex items-center gap-2 text-[10px] text-default-500">
-                        {extra?.taste_score ? (
-                          <span className="flex items-center gap-0.5" title="Đánh giá"><Star className="w-3 h-3 text-warning" />{extra.taste_score}</span>
-                        ) : null}
-                        {extra?.calories ? (
-                          <span className="flex items-center gap-0.5" title="Calories"><Flame className="w-3 h-3 text-danger" />{extra.calories} kcal</span>
-                        ) : null}
-                        {extra?.difficulty ? (
-                          <span className="flex items-center gap-0.5" title="Độ khó"><ChefHat className="w-3 h-3 text-primary" />{extra.difficulty}</span>
-                        ) : null}
-                      </div>
+          <div className="flex flex-col rounded-xl overflow-hidden bg-default-50/50 border border-divider/50 divide-y divide-divider/50 -mt-2">
+            {relatedRecipes.map(recipe => {
+              const extra = recipes.find(r => r.id === recipe.id);
+              return (
+                <div key={`recipe-${recipe.id}`} className="flex gap-2.5 p-2 hover:bg-default-100/60 transition-colors group relative items-center">
+                  <Avatar 
+                    src={ImageManager.getAssetUrl(recipe.image_url || '')} 
+                    radius="sm" 
+                    className="w-10 h-10 shrink-0 text-small" 
+                    fallback={recipe.title.charAt(0)} 
+                  />
+                  <div className="flex flex-col justify-center flex-1 min-w-0 pr-8">
+                    <h4 className="font-medium text-sm text-foreground truncate">{recipe.title}</h4>
+                    <div className="flex items-center gap-2 text-[10px] text-default-500 mt-0.5">
+                      {extra?.taste_score ? (
+                        <span className="flex items-center gap-0.5" title="Đánh giá"><Star className="w-2.5 h-2.5 text-warning" />{extra.taste_score}</span>
+                      ) : null}
+                      {extra?.calories ? (
+                        <span className="flex items-center gap-0.5" title="Calories"><Flame className="w-2.5 h-2.5 text-danger" />{extra.calories} kcal</span>
+                      ) : null}
+                      {extra?.difficulty ? (
+                        <span className="flex items-center gap-0.5" title="Độ khó"><ChefHat className="w-2.5 h-2.5 text-primary" />{extra.difficulty}</span>
+                      ) : null}
                     </div>
-                    <button 
-                      type="button"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center bg-default-200/50 hover:bg-danger/20 text-default-500 hover:text-danger w-7 h-7 min-w-7 z-10 rounded-full cursor-pointer transition-colors"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleRemoveRecipe(recipe.id);
-                      }}
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
                   </div>
-                );
-              })}
-              {linkedTips.map(tipId => {
-                const tip = tips.find(t => t.id === tipId);
-                if (!tip) return null;
-                return (
-                  <div key={`tip-${tip.id}`} className="flex gap-3 p-2 hover:bg-default-50 transition-colors group relative">
-                    <div className="w-10 h-10 rounded bg-warning/20 flex items-center justify-center shrink-0">
-                      <Lightbulb className="w-4 h-4 text-warning" />
+                  <button 
+                    type="button"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center bg-default-200/50 hover:bg-danger/20 text-default-500 hover:text-danger w-7 h-7 min-w-7 z-10 rounded-full cursor-pointer transition-colors"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleRemoveRecipe(recipe.id);
+                    }}
+                    title="Bỏ liên kết"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              );
+            })}
+            {linkedTips.map(tipId => {
+              const tip = tips.find(t => t.id === tipId);
+              if (!tip) return null;
+              return (
+                <div key={`tip-${tip.id}`} className="flex gap-2.5 p-2 hover:bg-default-100/60 transition-colors group relative items-center">
+                  {tip.image_url ? (
+                    <Avatar 
+                      src={ImageManager.getAssetUrl(tip.image_url)} 
+                      radius="sm" 
+                      className="w-10 h-10 shrink-0 text-small" 
+                      fallback={<Lightbulb className="w-4 h-4 text-warning" />} 
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg bg-warning/15 text-warning flex items-center justify-center shrink-0 border border-warning/20">
+                      <Lightbulb className="w-5 h-5" />
                     </div>
-                    <div className="flex flex-col justify-center flex-1 gap-0.5">
-                      <h4 className="font-medium text-sm line-clamp-1 pr-6">{tip.title}</h4>
-                      <div className="flex items-center gap-2 text-[10px] text-warning-600">
+                  )}
+                  <div className="flex flex-col justify-center flex-1 min-w-0 pr-8">
+                    <h4 className="font-medium text-sm text-foreground truncate">{tip.title}</h4>
+                    <div className="flex items-center gap-2 text-[10px] text-default-500 mt-0.5">
+                      <span className="flex items-center gap-1 text-warning-600 dark:text-warning-400 font-medium">
+                        <Lightbulb className="w-3 h-3 text-warning" />
                         Mẹo nhà bếp
-                      </div>
+                      </span>
+                      {(tip as any).category && (
+                        <>
+                          <span className="text-default-300">•</span>
+                          <span className="text-default-400">{(tip as any).category}</span>
+                        </>
+                      )}
                     </div>
-                    <button 
-                      type="button"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center bg-default-200/50 hover:bg-danger/20 text-default-500 hover:text-danger w-7 h-7 min-w-7 z-10 rounded-full cursor-pointer transition-colors"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleRemoveTip(tip.id);
-                      }}
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
                   </div>
-                );
-              })}
-            </div>
+                  <button 
+                    type="button"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center bg-default-200/50 hover:bg-danger/20 text-default-500 hover:text-danger w-7 h-7 min-w-7 z-10 rounded-full cursor-pointer transition-colors"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleRemoveTip(tip.id);
+                    }}
+                    title="Bỏ liên kết"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
     </FormField>
   );
 }
-

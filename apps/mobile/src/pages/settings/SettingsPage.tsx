@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Button,
   toast
@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from 'next-themes';
+import { useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { useRecipeStore } from '../../store/useRecipeStore';
 import { useTipStore } from '../../store/useTipStore';
@@ -27,19 +28,19 @@ import { ConfirmModal } from '../../components/shared/ConfirmModal';
 import { FEEDBACK_RESET_DELAY_MS, RESET_APP_RELOAD_DELAY_MS } from '../../constants';
 
 export function SettingsPage() {
+  const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [copied, setCopied] = useState(false);
 
   // Store statistics
-  const { recipes, addBulkRecipes, fetchRecipes } = useRecipeStore();
+  const { recipes } = useRecipeStore();
   const { tips } = useTipStore();
   const { units } = useUnitStore();
 
   // Reset modal state
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
-  const fileImportRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -108,101 +109,6 @@ export function SettingsPage() {
     } catch {
       toast.error('Có lỗi xảy ra khi xuất dữ liệu');
     }
-  };
-
-  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      try {
-        const parsed = JSON.parse(event.target?.result as string);
-        let recipesToImport: any[] = [];
-        let unitsToImport: any[] = [];
-
-        if (Array.isArray(parsed)) {
-          recipesToImport = parsed;
-        } else if (parsed && typeof parsed === 'object') {
-          if (Array.isArray(parsed.recipes)) {
-            recipesToImport = parsed.recipes;
-          } else if (parsed.title || parsed.name) {
-            recipesToImport = [parsed];
-          }
-
-          if (Array.isArray(parsed.units)) {
-            unitsToImport = parsed.units;
-          }
-        } else {
-          throw new Error('Định dạng tệp sao lưu không hợp lệ.');
-        }
-
-        // Auto-extract any custom units from recipes
-        recipesToImport.forEach((r: any) => {
-          if (Array.isArray(r.ingredients)) {
-            r.ingredients.forEach((ing: any) => {
-              if (ing && ing.name) {
-                const unit = ing.unit ? String(ing.unit).trim() : '';
-                if (unit && !['g', 'kg', 'ml', 'lít', 'muỗng canh', 'muỗng cà phê'].includes(unit.toLowerCase())) {
-                  unitsToImport.push({
-                    name: unit,
-                    symbol: unit,
-                    type: 'other',
-                    is_custom: true
-                  });
-                }
-              }
-            });
-          }
-        });
-
-        // 1. Bulk import units
-        let addedUnitsCount = 0;
-        if (unitsToImport.length > 0) {
-          addedUnitsCount = useUnitStore.getState().bulkAddUnits(unitsToImport);
-        }
-
-        // 2. Import recipes
-        if (recipesToImport.length > 0) {
-          const normalized = recipesToImport.map(r => ({
-            ...r,
-            title: r.title || r.name || 'Không có tiêu đề',
-            slug: r.slug || (r.title || r.name || 'recipe').toLowerCase().replace(/\s+/g, '-'),
-            id: r.id || `recipe-${crypto.randomUUID()}`,
-            image_url: r.image_url || r.image || '',
-            taste_score: 0,
-            cooking_history: [],
-            difficulty: r.difficulty || 'Vừa',
-            servings: Number(r.servings) || 2,
-            prep_time: Number(r.prep_time) || 0,
-            cook_time: Number(r.cook_time) || 0,
-            calories: Number(r.calories) || (r.nutrition?.calories ? Number(r.nutrition.calories) : 0),
-            ingredients: Array.isArray(r.ingredients) ? r.ingredients : [],
-            steps: Array.isArray(r.steps) ? r.steps : [],
-            author_id: r.author_id || 'user',
-            created_at: r.created_at || new Date().toISOString(),
-            updated_at: r.updated_at || new Date().toISOString()
-          }));
-
-          await addBulkRecipes(normalized);
-          await fetchRecipes();
-
-          const details: string[] = [`${normalized.length} công thức`];
-          if (addedUnitsCount > 0) details.push(`${addedUnitsCount} đơn vị`);
-
-          toast.success(`Đã nạp thành công: ${details.join(', ')}!`);
-        } else if (addedUnitsCount > 0) {
-          toast.success(`Đã nạp thành công: ${addedUnitsCount} đơn vị!`);
-        } else {
-          toast.warning('Tệp không chứa công thức nào.');
-        }
-      } catch (err: any) {
-        console.error('Import error:', err);
-        toast.error('Tệp không đúng định dạng sao lưu Apron JSON.');
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = '';
   };
 
   const handleResetData = () => {
@@ -386,7 +292,7 @@ export function SettingsPage() {
 
             <button
               type="button"
-              onClick={() => fileImportRef.current?.click()}
+              onClick={() => navigate('/import')}
               className="flex items-center justify-between p-3.5 hover:bg-default-100/30 transition-colors w-full text-left"
             >
               <div className="flex items-center gap-3">
@@ -395,18 +301,11 @@ export function SettingsPage() {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-sm font-semibold text-foreground">{t('settings.data.importBackup')}</span>
-                  <span className="text-[11px] text-default-400">JSON Restore</span>
+                  <span className="text-[11px] text-default-400">JSON Restore (Kiểm tra & Xác nhận)</span>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-default-400 shrink-0" />
             </button>
-            <input
-              type="file"
-              accept=".json"
-              ref={fileImportRef}
-              onChange={handleImportFile}
-              className="hidden"
-            />
 
             <button
               type="button"

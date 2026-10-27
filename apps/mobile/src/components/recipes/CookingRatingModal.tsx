@@ -56,10 +56,11 @@ export function CookingRatingModal({ isOpen, onClose, onComplete }: CookingRatin
       backdrop="blur"
       hideCloseButton
       classNames={{
-        base: "max-h-[85vh] rounded-t-3xl bg-content1 shadow-2xl overflow-hidden",
+        base: "max-h-[calc(100dvh-var(--sat,0px)-20px)] rounded-t-3xl bg-content1 shadow-2xl overflow-hidden mt-auto",
+        backdrop: "bg-black/60 backdrop-blur-sm"
       }}
     >
-      <DrawerContent>
+      <DrawerContent className="rounded-t-3xl overflow-hidden">
         {() => (
           <DrawerBody className="p-6 sm:p-8 bg-content1 text-center">
             {/* Grab handle */}

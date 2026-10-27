@@ -111,6 +111,8 @@ function RecipeCardComponent({
           <img 
             src={ImageManager.getAssetUrl(recipe.image_url)} 
             alt={recipe.title} 
+            loading="lazy"
+            decoding="async"
             className="card-media-img absolute inset-x-0 top-0 bottom-7 w-full h-[calc(100%-1.75rem)] object-cover z-0 transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
@@ -163,7 +165,7 @@ function RecipeCardComponent({
             {recipe.title}
           </h3>
           
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium text-white/90">
+          <div className={`flex flex-wrap items-center gap-y-1 font-medium text-white/90 ${size === 'sm' ? 'text-[10px] gap-x-2' : 'text-[11px] gap-x-3'}`}>
             <div className="flex items-center gap-1">
               <Clock className="w-3.5 h-3.5" />
               <span>{formatTime(totalTime)}</span>
@@ -235,6 +237,8 @@ function RecipeCardComponent({
           <img 
             src={ImageManager.getAssetUrl(recipe.image_url)} 
             alt={recipe.title} 
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
@@ -258,7 +262,7 @@ function RecipeCardComponent({
           {recipe.title}
         </h3>
         
-        <div className={`flex flex-wrap items-center gap-y-1 mt-0.5 ${size === 'sm' ? 'text-[10px] text-default-400 gap-x-2' : 'text-xs text-default-500 gap-x-3'}`}>
+        <div className={`flex flex-wrap items-center gap-y-1 mt-0.5 ${size === 'sm' ? 'text-[10px] text-default-400 gap-x-2' : 'text-[11px] text-default-500 gap-x-3'}`}>
           <div className="flex items-center gap-1">
             <Clock className="w-3 h-3" />
             <span>{formatTime(totalTime)}</span>

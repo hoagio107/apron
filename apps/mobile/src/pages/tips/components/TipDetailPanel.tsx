@@ -20,12 +20,21 @@ export function TipDetailPanel({ tip, isOpen, onOpenChange, onEdit, onDelete }: 
   const category = TIP_CATEGORIES.find(c => c.id === tip.category_id);
 
   return (
-    <Drawer isOpen={isOpen} onOpenChange={onOpenChange} size="md" placement="right" radius="none" className="max-w-2xl pt-safe pb-safe">
+    <Drawer 
+      isOpen={isOpen} 
+      onOpenChange={onOpenChange} 
+      size="md" 
+      placement="right" 
+      classNames={{
+        base: "max-w-2xl top-[calc(var(--sat,0px)+10px)] h-[calc(100dvh-var(--sat,0px)-10px)] max-h-[calc(100dvh-var(--sat,0px)-10px)] rounded-tl-3xl shadow-2xl flex flex-col pb-safe overflow-hidden",
+        backdrop: "bg-black/60 backdrop-blur-sm"
+      }}
+    >
       <DrawerContent>
         {() => (
           <div className="flex flex-col h-full bg-content1 text-foreground">
             {/* Header / Actions */}
-            <DrawerHeader className="flex justify-between items-center border-b border-divider px-6 py-4 bg-content1/80 backdrop-blur-md z-50 sticky top-0">
+            <DrawerHeader className="flex justify-between items-center border-b border-divider px-6 py-4 bg-content1/90 backdrop-blur-md z-50 shrink-0">
               <div className="flex items-center gap-2">
                 <Button 
                   variant="flat" 

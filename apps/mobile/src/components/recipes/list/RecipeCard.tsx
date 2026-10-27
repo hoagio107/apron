@@ -1,7 +1,6 @@
 import { useState, useEffect, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Recipe } from '@apron/core';
-import { RecipeRepository } from '@apron/core';
 import { Clock, Star, Flame, Image as ImageIcon, MoreVertical, Heart, Trash2, CalendarDays, Edit2 } from 'lucide-react';
 import { Checkbox, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button, toast } from '@/ui';
 import { ImageManager } from '../../../lib/image-manager';
@@ -54,8 +53,7 @@ function RecipeCardComponent({
     }
     try {
       const nextFav = !recipe.is_favorite;
-      await RecipeRepository.save({ ...recipe, is_favorite: nextFav });
-      useRecipeStore.getState().fetchRecipes();
+      await useRecipeStore.getState().toggleFavorite(recipe.id);
       if (nextFav) {
         toast.success(`Đã thêm "${recipe.title}" vào yêu thích!`);
       } else {
@@ -109,8 +107,7 @@ function RecipeCardComponent({
       switch (actionKey) {
         case 'favorite':
           try {
-            await RecipeRepository.save({ ...recipe, is_favorite: !recipe.is_favorite });
-            useRecipeStore.getState().fetchRecipes();
+            await useRecipeStore.getState().toggleFavorite(recipe.id);
           } catch (e) {
             console.error('Failed to update favorite status:', e);
           }
@@ -124,8 +121,7 @@ function RecipeCardComponent({
         case 'delete':
           if (window.confirm(`Bạn có chắc muốn xoá công thức "${recipe.title}"?`)) {
             try {
-              await RecipeRepository.delete(recipe.id);
-              useRecipeStore.getState().fetchRecipes();
+              await useRecipeStore.getState().deleteRecipe(recipe.id);
             } catch (e) {
               console.error('Failed to delete recipe:', e);
             }
@@ -179,6 +175,8 @@ function RecipeCardComponent({
           <img 
             src={ImageManager.getAssetUrl(recipe.image_url)} 
             alt={recipe.title} 
+            loading="lazy"
+            decoding="async"
             className="card-media-img absolute inset-x-0 top-0 bottom-7 w-full h-[calc(100%-1.75rem)] object-cover z-0"
             onError={() => setImgError(true)}
           />
@@ -210,7 +208,7 @@ function RecipeCardComponent({
             </button>
           )}
           {variantCount > 0 && (
-            <div className="bg-black/60 backdrop-blur-sm text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+            <div className="bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
               +{variantCount} biến thể
             </div>
           )}
@@ -249,7 +247,7 @@ function RecipeCardComponent({
             {recipe.title}
           </h3>
           
-          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs font-medium text-white/90">
+          <div className={`flex flex-wrap items-center gap-y-1 font-medium text-white/90 ${size === 'sm' ? 'text-[10px] gap-x-2' : 'text-[11px] gap-x-2.5'}`}>
             <div className="flex items-center gap-1 shrink-0">
               <Clock className="w-3 h-3 text-white/80" />
               <span>{formatTime(totalTime)}</span>
@@ -297,7 +295,7 @@ function RecipeCardComponent({
             </button>
           )}
           {variantCount > 0 && (
-            <div className="bg-black/60 backdrop-blur-sm text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+            <div className="bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
               +{variantCount} biến thể
             </div>
           )}
@@ -334,6 +332,8 @@ function RecipeCardComponent({
           <img 
             src={ImageManager.getAssetUrl(recipe.image_url)} 
             alt={recipe.title} 
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover"
             onError={() => setImgError(true)}
           />
@@ -349,7 +349,7 @@ function RecipeCardComponent({
           {recipe.title}
         </h3>
         
-        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-0.5 text-xs text-default-500">
+        <div className={`flex flex-wrap items-center gap-y-1 mt-0.5 ${size === 'sm' ? 'text-[10px] text-default-400 gap-x-2' : 'text-[11px] text-default-500 gap-x-2.5'}`}>
           <div className="flex items-center gap-1 shrink-0">
             <Clock className="w-3 h-3" />
             <span>{formatTime(totalTime)}</span>

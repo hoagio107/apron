@@ -152,7 +152,7 @@ export function RelatedRecipesSection() {
           onOpenChange={onOpenChange} 
           size="3xl"
           scrollBehavior="inside"
-          radius="2xl"
+          radius="lg"
           classNames={{
             base: "rounded-2xl overflow-hidden border border-divider/40 shadow-2xl",
             backdrop: "bg-black/60 backdrop-blur-sm"
@@ -468,10 +468,10 @@ export function RelatedRecipesSection() {
                         <Lightbulb className="w-3 h-3 text-warning" />
                         Mẹo nhà bếp
                       </span>
-                      {tip.category && (
+                      {(tip as any).category && (
                         <>
                           <span className="text-default-300">•</span>
-                          <span className="text-default-400">{tip.category}</span>
+                          <span className="text-default-400">{(tip as any).category}</span>
                         </>
                       )}
                     </div>

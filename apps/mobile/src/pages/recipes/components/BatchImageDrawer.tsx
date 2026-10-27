@@ -173,26 +173,29 @@ export function BatchImageDrawer({
     <Drawer 
       isOpen={isOpen} 
       onOpenChange={onOpenChange} 
-      size="full" 
+      size="2xl" 
       placement="bottom" 
       radius="none"
       hideCloseButton
       classNames={{
-        base: "max-h-[92vh] rounded-t-3xl bg-content1 shadow-2xl flex flex-col",
-        header: "border-b border-divider px-5 py-4",
+        base: "max-h-[calc(100dvh-var(--sat,0px)-20px)] rounded-t-3xl bg-content1 shadow-2xl flex flex-col mt-auto overflow-hidden",
+        backdrop: "bg-black/60 backdrop-blur-sm",
+        header: "border-b border-divider px-5 pt-3 pb-4 rounded-t-3xl bg-content1",
         body: "p-0 overflow-y-auto",
-        footer: "border-t border-divider px-5 py-3 bg-content1/80 backdrop-blur-md"
+        footer: "border-t border-divider px-5 py-3 bg-content1/80 backdrop-blur-md pb-safe"
       }}
     >
-      <DrawerContent>
+      <DrawerContent className="rounded-t-3xl overflow-hidden">
         {(onClose) => (
           <>
             {/* Header */}
-            <DrawerHeader className="flex justify-between items-center shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-warning/15 text-warning">
-                  <Images className="w-5 h-5" />
-                </div>
+            <DrawerHeader className="flex flex-col gap-2 shrink-0">
+              <div className="w-10 h-1 rounded-full bg-default-300 dark:bg-default-600 mx-auto -mt-0.5 mb-1" />
+              <div className="flex justify-between items-center w-full">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-2xl bg-warning/15 text-warning">
+                    <Images className="w-5 h-5" />
+                  </div>
                 <div>
                   <h2 className="text-base md:text-lg font-bold text-foreground">
                     Chèn ảnh cho từng món
@@ -208,6 +211,7 @@ export function BatchImageDrawer({
               >
                 <X className="w-5 h-5" />
               </Button>
+              </div>
             </DrawerHeader>
 
             {/* Quick Actions & Statistics Bar */}

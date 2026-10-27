@@ -82,4 +82,31 @@ describe('useRecipeStore', () => {
     expect(recipes[0].ingredients).toHaveLength(1);
     expect(recipes[0].ingredients[0].ingredient_id).toBe('ing-1');
   });
+
+  it('toggles recipe favorite status optimistically', async () => {
+    await useRecipeStore.getState().addRecipe({ ...baseRecipe, is_favorite: false });
+
+    await useRecipeStore.getState().toggleFavorite('store-r-1');
+    expect(useRecipeStore.getState().recipes[0].is_favorite).toBe(true);
+
+    await useRecipeStore.getState().toggleFavorite('store-r-1');
+    expect(useRecipeStore.getState().recipes[0].is_favorite).toBe(false);
+  });
+
+  it('caches recipe details and avoids redundant disk reads in fetchRecipes when already fetched', async () => {
+    await useRecipeStore.getState().addRecipe(baseRecipe);
+    expect(useRecipeStore.getState().hasFetched).toBe(false);
+
+    // Initial fetch
+    await useRecipeStore.getState().fetchRecipes();
+    expect(useRecipeStore.getState().hasFetched).toBe(true);
+    expect(useRecipeStore.getState().recipes).toHaveLength(1);
+
+    // Fetch recipe detail
+    const detail = await useRecipeStore.getState().fetchRecipeDetail('store-r-1');
+    expect(detail).not.toBeNull();
+    expect(detail?.title).toBe('Gà Hấp Lá Chanh');
+    expect(useRecipeStore.getState().recipeDetails['store-r-1']).toBeDefined();
+  });
 });
+

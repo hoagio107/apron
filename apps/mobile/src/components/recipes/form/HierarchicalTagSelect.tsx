@@ -288,15 +288,17 @@ export function HierarchicalTagSelect({ selectedIds, onChange, error, dynamicTag
         isOpen={isOpen} 
         onOpenChange={setIsOpen} 
         placement="bottom"
-        size="full"
+        size="2xl"
         classNames={{
-          base: "h-[85vh] max-h-[85vh]",
+          base: "max-h-[calc(100dvh-var(--sat,0px)-20px)] rounded-t-3xl overflow-hidden shadow-2xl mt-auto",
+          backdrop: "bg-black/60 backdrop-blur-sm"
         }}
       >
-        <DrawerContent>
+        <DrawerContent className="rounded-t-3xl overflow-hidden">
           {(onClose) => (
             <>
-              <DrawerHeader className="flex flex-col gap-1 px-4 py-3 border-b border-divider shrink-0">
+              <DrawerHeader className="flex flex-col gap-1.5 px-4 pt-3 pb-3 border-b border-divider shrink-0 bg-content1 rounded-t-3xl">
+                <div className="w-10 h-1 rounded-full bg-default-300 dark:bg-default-600 mx-auto -mt-0.5 mb-1" />
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-bold">Quản lý Tags</span>
                   <div className="flex items-center gap-2">

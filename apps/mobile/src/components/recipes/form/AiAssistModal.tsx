@@ -198,23 +198,26 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
       isOpen={isOpen} 
       onOpenChange={onOpenChange} 
       placement="bottom"
-      size="full" 
+      size="2xl" 
       classNames={{
         wrapper: "z-[200]",
-        base: "h-[100dvh] max-h-[100dvh] rounded-none m-0 bg-content1 border-none w-full flex flex-col pt-safe pb-safe shadow-none",
-        header: "border-b border-divider/40 px-5 py-4 shrink-0",
+        base: "max-h-[calc(100dvh-var(--sat,0px)-20px)] rounded-t-3xl m-0 bg-content1 shadow-2xl w-full flex flex-col pb-safe mt-auto overflow-hidden",
+        backdrop: "bg-black/60 backdrop-blur-sm",
+        header: "border-b border-divider/40 px-5 pt-3 pb-4 shrink-0 rounded-t-3xl bg-content1",
         body: "p-5 overflow-y-auto space-y-4 flex-1",
         footer: "border-t border-divider/40 px-5 py-3.5 shrink-0 flex flex-col gap-2.5 bg-content1"
       }}
     >
-      <DrawerContent>
+      <DrawerContent className="rounded-t-3xl overflow-hidden">
         {(onClose) => (
           <>
-            <DrawerHeader className="flex items-center justify-between px-5 py-4 border-b border-divider/40 shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-secondary/15 text-secondary flex items-center justify-center shrink-0">
-                  <Sparkles className="w-5 h-5 text-secondary" />
-                </div>
+            <DrawerHeader className="flex flex-col gap-2 shrink-0 border-b border-divider/40 px-5 pt-3 pb-4">
+              <div className="w-10 h-1 rounded-full bg-default-300 dark:bg-default-600 mx-auto -mt-0.5 mb-1" />
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-secondary/15 text-secondary flex items-center justify-center shrink-0">
+                    <Sparkles className="w-5 h-5 text-secondary" />
+                  </div>
                 <div className="flex flex-col text-left">
                   <div className="flex items-center gap-2">
                     <h3 className="text-base sm:text-lg font-bold text-foreground">Trợ lý AI Công thức</h3>
@@ -233,6 +236,7 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
                   {parsedData.length} món
                 </Chip>
               )}
+              </div>
             </DrawerHeader>
 
             {/* Stepper Header */}

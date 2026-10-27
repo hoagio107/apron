@@ -134,22 +134,26 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
       size="2xl" 
       classNames={{
         wrapper: "z-[200]",
-        base: "rounded-t-3xl rounded-b-none m-0 sm:m-auto sm:rounded-3xl max-h-[90vh] sm:max-h-[85vh] bg-content1 border-t sm:border border-divider/40 sm:max-w-xl mx-auto shadow-2xl",
-        header: "border-b border-divider/40 px-5 py-4 shrink-0",
+        base: "rounded-t-3xl rounded-b-none m-0 sm:m-auto sm:rounded-3xl max-h-[calc(100dvh-var(--sat,0px)-20px)] sm:max-h-[85vh] bg-content1 border-t sm:border border-divider/40 sm:max-w-xl mx-auto shadow-2xl mt-auto overflow-hidden",
+        backdrop: "bg-black/60 backdrop-blur-sm",
+        header: "border-b border-divider/40 px-5 pt-3 pb-4 shrink-0 rounded-t-3xl bg-content1",
         body: "p-5 overflow-y-auto space-y-4",
         footer: "border-t border-divider/40 px-5 py-3.5 shrink-0 flex items-center gap-3 bg-content1"
       }}
     >
-      <DrawerContent>
+      <DrawerContent className="rounded-t-3xl overflow-hidden">
         {(onClose) => (
           <>
-            <DrawerHeader className="flex items-center gap-3 px-5 py-4 border-b border-divider/40 shrink-0">
-              <div className="w-10 h-10 rounded-xl bg-secondary/15 text-secondary flex items-center justify-center shrink-0">
-                <Sparkles className="w-5 h-5 text-secondary" />
-              </div>
-              <div className="flex flex-col text-left">
-                <h3 className="text-base sm:text-lg font-bold text-foreground">Trợ lý AI Mẹo vặt</h3>
-                <p className="text-xs text-default-400 font-normal">Tự động trích xuất mẹo nhà bếp từ Gemini Web</p>
+            <DrawerHeader className="flex flex-col gap-2 shrink-0 border-b border-divider/40 px-5 pt-3 pb-4">
+              <div className="w-10 h-1 rounded-full bg-default-300 dark:bg-default-600 mx-auto -mt-0.5 mb-1" />
+              <div className="flex items-center gap-3 w-full">
+                <div className="w-10 h-10 rounded-xl bg-secondary/15 text-secondary flex items-center justify-center shrink-0">
+                  <Sparkles className="w-5 h-5 text-secondary" />
+                </div>
+                <div className="flex flex-col text-left">
+                  <h3 className="text-base sm:text-lg font-bold text-foreground">Trợ lý AI Mẹo vặt</h3>
+                  <p className="text-xs text-default-400 font-normal">Tự động trích xuất mẹo nhà bếp từ Gemini Web</p>
+                </div>
               </div>
             </DrawerHeader>
 

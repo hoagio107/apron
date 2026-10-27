@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { 
   Home, Heart, GraduationCap, 
   Lightbulb, PlusCircle, ShoppingCart, Scale, 
-  CalendarDays, Palette, ChefHat,
+  CalendarDays, FileUp, ChefHat,
   PanelLeftClose, PanelLeft
 } from 'lucide-react';
 import { Button } from '@/ui';
@@ -37,7 +37,7 @@ export function MainSidebar({ isExpanded, onToggle }: MainSidebarProps) {
     { name: t('nav.mealPlanner'), icon: CalendarDays, path: '/meal-planner' },
     { name: t('nav.kitchenTips'), icon: Lightbulb, path: '/tips' },
     { name: t('nav.units'), icon: Scale, path: '/units' },
-    { name: 'Design System', icon: Palette, path: '/design-system' },
+    { name: t('nav.import', 'Nhập dữ liệu'), icon: FileUp, path: '/import' },
   ];
 
   return (

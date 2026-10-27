@@ -541,5 +541,37 @@ select,
   color: hsl(var(--heroui-default-400)) !important;
 }
 
+/* ==========================================================================
+   8. MOBILE SAFE AREA FOR PANELS, DRAWERS & BOTTOM SHEETS
+   Đẩy các panel, drawer và bottom sheet trên mobile xuống dưới một khoảng
+   để không bị thanh status bar của Android (clock, pin, camera notch) đè lên.
+   ========================================================================== */
 
+/* Side panels (Drawer trượt từ cạnh phải / trái) */
+[role="dialog"][data-placement="right"],
+[role="dialog"][data-placement="left"],
+section[role="dialog"][data-placement="right"],
+section[role="dialog"][data-placement="left"] {
+  top: calc(var(--sat, 0px) + 10px) !important;
+  height: calc(100dvh - var(--sat, 0px) - 10px) !important;
+  max-height: calc(100dvh - var(--sat, 0px) - 10px) !important;
+  border-top-left-radius: 1.5rem !important;
+  border-bottom-left-radius: 0 !important;
+  overflow: hidden !important;
+}
 
+/* Bottom sheets (Drawer trượt từ đáy màn hình) */
+[role="dialog"][data-placement="bottom"],
+section[role="dialog"][data-placement="bottom"] {
+  max-height: calc(100dvh - var(--sat, 0px) - 20px) !important;
+  border-top-left-radius: 1.5rem !important;
+  border-top-right-radius: 1.5rem !important;
+  margin-top: auto !important;
+  overflow: hidden !important;
+}
+
+/* Modal wrapper trên mobile: đệm phía trên để modal không đè lên status bar */
+div[data-slot="wrapper"].items-end,
+div[data-slot="wrapper"]:not(.sm\:items-center) {
+  padding-top: calc(var(--sat, 0px) + 16px) !important;
+}

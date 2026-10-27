@@ -46,13 +46,13 @@ export function CookingModeModal({
       backdrop="blur"
       hideCloseButton
       classNames={{
-        base: "max-h-[94vh] rounded-t-3xl bg-content1 shadow-2xl flex flex-col overflow-hidden",
-        header: "border-b border-divider p-4 bg-content1 shrink-0",
+        base: "max-h-[calc(100dvh-var(--sat,0px)-20px)] rounded-t-3xl bg-content1 shadow-2xl flex flex-col overflow-hidden mt-auto",
+        header: "border-b border-divider p-4 bg-content1 shrink-0 rounded-t-3xl",
         body: "p-4 sm:p-6 overflow-y-auto bg-background flex flex-col",
         footer: "border-t border-divider p-4 bg-content1 shrink-0 pb-safe",
       }}
     >
-      <DrawerContent>
+      <DrawerContent className="rounded-t-3xl overflow-hidden">
         {(onCloseModal) => (
           <div className="flex flex-col h-full overflow-hidden">
             {/* Header */}

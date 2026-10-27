@@ -126,11 +126,25 @@ export class TipRepository {
   }
 
   /**
-   * Lưu nhiều tip cùng lúc
+   * Lưu nhiều tip cùng lúc (tối ưu khởi tạo thư mục 1 lần duy nhất)
    */
   static async saveBulk(tips: Tip[]): Promise<void> {
+    if (!tips || tips.length === 0) return;
+    const storage = getStorageProvider();
+    await this.init();
+    const now = new Date().toISOString();
+
     for (const t of tips) {
-      await this.save(t);
+      if (!t.id) {
+        t.id = crypto.randomUUID();
+      }
+      if (!t.created_at) {
+        t.created_at = now;
+      }
+      t.updated_at = now;
+
+      const filePath = `${TIPS_DIR}/${t.id}.json`;
+      await storage.writeTextFile(filePath, JSON.stringify(t, null, 2));
     }
   }
 }

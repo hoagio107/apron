@@ -29,13 +29,15 @@ import {
   Info, 
   Sparkles,
   HardDrive,
-  ExternalLink
+  ExternalLink,
+  FileUp
 } from "lucide-react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
 import { getStorageProvider } from "@apron/core";
 import { ImageManager } from "../../lib/image-manager";
 import { MediaCleaner, type CleanupResult } from "../../lib/media-cleaner";
+import { COPY_FEEDBACK_DELAY_MS, RELOAD_DELAY_MS } from "../../constants";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -84,7 +86,7 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
     navigator.clipboard.writeText(baseDir);
     setCopied(true);
     toast.success('Đã sao chép đường dẫn database!');
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), COPY_FEEDBACK_DELAY_MS);
   };
 
   const handleOpenFolder = async () => {
@@ -93,7 +95,7 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
       return;
     }
     try {
-      // @ts-ignore
+      // @ts-expect-error Tauri internals check
       if (typeof window !== 'undefined' && window.__TAURI_INTERNALS__) {
         await invoke('open_in_folder', { path: baseDir });
       } else {
@@ -160,10 +162,10 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
       setPendingDir(null);
       toast.success('Đã chuyển đổi vị trí database! Đang làm mới dữ liệu...');
       
-      // Reload ứng dụng sau 600ms để nạp dữ liệu từ vị trí database mới
+      // Reload ứng dụng sau delay để nạp dữ liệu từ vị trí database mới
       setTimeout(() => {
         window.location.reload();
-      }, 600);
+      }, RELOAD_DELAY_MS);
     } catch (err: any) {
       console.error('Failed to switch base dir:', err);
       toast.error('Lỗi khi thiết lập vị trí lưu trữ mới: ' + (err?.message || ''));
@@ -424,6 +426,35 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                           </span>
                         </div>
                       )}
+                    </div>
+
+                    {/* Nhập dữ liệu sao lưu (JSON) */}
+                    <div className="app-card p-5 bg-content2/30 flex flex-col gap-3">
+                      <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0">
+                            <FileUp className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-sm text-foreground">Nhập dữ liệu sao lưu (JSON)</h4>
+                            <p className="text-xs text-default-500">Khôi phục hoặc nạp thêm công thức, mẹo vặt và đơn vị từ tệp JSON</p>
+                          </div>
+                        </div>
+
+                        <Button
+                          size="sm"
+                          color="primary"
+                          variant="flat"
+                          startContent={<FileUp className="w-4 h-4" />}
+                          onPress={() => {
+                            onOpenChange(false);
+                            window.dispatchEvent(new CustomEvent('open-json-import'));
+                          }}
+                          className="font-semibold text-xs h-9 px-3.5 rounded-xl"
+                        >
+                          Mở bảng nhập JSON
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </Tab>

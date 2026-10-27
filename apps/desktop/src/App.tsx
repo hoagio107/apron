@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { getStorageProvider, purgeAllLegacyMockData } from '@apron/core';
 import { MainSidebar } from './components/layout/MainSidebar';
 import { Titlebar } from './components/layout/Titlebar';
@@ -23,7 +23,13 @@ const CourseFormPage = lazy(() => import('./pages/courses/CourseFormPage').then(
 const CollectionsPage = lazy(() => import('./pages/collections/CollectionsPage').then(m => ({ default: m.CollectionsPage })));
 const CollectionDetailPage = lazy(() => import('./pages/collections/CollectionDetailPage').then(m => ({ default: m.CollectionDetailPage })));
 const UnitsPage = lazy(() => import('./pages/units/UnitsPage').then(m => ({ default: m.UnitsPage })));
-const DesignSystemPage = lazy(() => import('./pages/DesignSystemPage').then(m => ({ default: m.DesignSystemPage })));
+
+function ImportRedirect() {
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('open-json-import'));
+  }, []);
+  return <Navigate to="/recipes" replace />;
+}
 
 function PageLoadingFallback() {
   return (
@@ -106,6 +112,8 @@ function App() {
                     
                     <Route path="/recipes" element={<RecipeListPage />} />
                     <Route path="/recipes/new" element={<NewRecipePage />} />
+                    <Route path="/recipes/:id/edit" element={<NewRecipePage />} />
+                    <Route path="/recipes/edit/:id" element={<NewRecipePage />} />
                     <Route path="/recipes/:id" element={<RecipeDetailPage />} />
                     <Route path="/saved" element={<SavedRecipesPage />} />
                     <Route path="/meal-planner" element={<MealPlannerPage />} />
@@ -119,7 +127,7 @@ function App() {
                     <Route path="/collections" element={<CollectionsPage />} />
                     <Route path="/collections/:id" element={<CollectionDetailPage />} />
                     <Route path="/units" element={<UnitsPage />} />
-                    <Route path="/design-system" element={<DesignSystemPage />} />
+                    <Route path="/import" element={<ImportRedirect />} />
                     
                     <Route path="*" element={
                       <div className="flex flex-col items-center justify-center h-full">

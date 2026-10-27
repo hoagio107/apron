@@ -97,4 +97,101 @@ describe('RecipeRepository', () => {
 
     unsubscribe();
   });
+
+  it('creates and maintains recipes_index.json on save and delete', async () => {
+    await RecipeRepository.save(sampleRecipe);
+
+    // Index file should exist
+    const hasIndex = await mockStorage.exists('recipes_index.json');
+    expect(hasIndex).toBe(true);
+
+    const indexContent = await mockStorage.readTextFile('recipes_index.json');
+    const indexRecipes = JSON.parse(indexContent) as Recipe[];
+    expect(indexRecipes).toHaveLength(1);
+    expect(indexRecipes[0].id).toBe('test-recipe-1');
+
+    // Delete updates the index file
+    await RecipeRepository.delete('test-recipe-1');
+    const updatedIndexContent = await mockStorage.readTextFile('recipes_index.json');
+    const updatedIndexRecipes = JSON.parse(updatedIndexContent) as Recipe[];
+    expect(updatedIndexRecipes).toHaveLength(0);
+  });
+
+  it('rebuilds recipes_index.json if the index file is missing', async () => {
+    // Manually write an individual file directly without index
+    const manualRecipe: Recipe = {
+      ...sampleRecipe,
+      id: 'manual-r1',
+      title: 'Manual Recipe'
+    };
+    await mockStorage.writeTextFile('recipes/manual-r1.json', JSON.stringify(manualRecipe));
+
+    // Ensure recipes_index.json does NOT exist yet
+    expect(await mockStorage.exists('recipes_index.json')).toBe(false);
+
+    // getAll should trigger rebuildIndex and write recipes_index.json
+    const all = await RecipeRepository.getAll();
+    expect(all).toHaveLength(1);
+    expect(all[0].id).toBe('manual-r1');
+    expect(await mockStorage.exists('recipes_index.json')).toBe(true);
+  });
+
+  it('strips recipe_snapshot in recipes_index.json but keeps it in getById', async () => {
+    const recipeWithHistory: Recipe = {
+      ...sampleRecipe,
+      id: 'history-r1',
+      cooking_history: [
+        {
+          id: 'hist-1',
+          date: '2026-10-27',
+          rating: 5,
+          notes: 'Ngon tuyệt',
+          recipe_snapshot: {
+            id: 'history-r1',
+            title: 'Phở Bò Cũ',
+            slug: 'pho-bo-cu',
+            image_url: '',
+            prep_time: 20,
+            cook_time: 100,
+            difficulty: 'Vừa',
+            calories: 400,
+            taste_score: 9,
+            servings: 4,
+            ingredients: [],
+            steps: [],
+            author_id: 'user-1'
+          }
+        }
+      ]
+    };
+
+    await RecipeRepository.save(recipeWithHistory);
+
+    // Check individual file: snapshot preserved
+    const individual = await RecipeRepository.getById('history-r1');
+    expect(individual?.cooking_history?.[0]?.recipe_snapshot).toBeDefined();
+    expect(individual?.cooking_history?.[0]?.recipe_snapshot?.title).toBe('Phở Bò Cũ');
+
+    // Check index file: snapshot stripped
+    const indexContent = await mockStorage.readTextFile('recipes_index.json');
+    const indexRecipes = JSON.parse(indexContent) as Recipe[];
+    expect(indexRecipes[0].cooking_history?.[0]?.recipe_snapshot).toBeUndefined();
+    expect(indexRecipes[0].cooking_history?.[0]?.rating).toBe(5);
+  });
+
+  it('handles saveBulk and deleteBulk updating the index file in a single pass', async () => {
+    const r1 = { ...sampleRecipe, id: 'bulk-1', title: 'Bulk 1' };
+    const r2 = { ...sampleRecipe, id: 'bulk-2', title: 'Bulk 2' };
+
+    await RecipeRepository.saveBulk([r1, r2]);
+
+    const all = await RecipeRepository.getAll();
+    expect(all).toHaveLength(2);
+
+    await RecipeRepository.deleteBulk(['bulk-1']);
+    const remaining = await RecipeRepository.getAll();
+    expect(remaining).toHaveLength(1);
+    expect(remaining[0].id).toBe('bulk-2');
+  });
 });
+

@@ -1,6 +1,23 @@
 # 🍳 Apron — Trợ lý Bếp Thông minh & Lập Kế hoạch Bữa ăn
 
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/hoagio107/apron/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Android-green.svg)](https://github.com/hoagio107/apron/releases)
+[![Built With](https://img.shields.io/badge/built%20with-Tauri%20v2%20%7C%20Capacitor%20v8%20%7C%20React%2019-blueviolet.svg)](https://github.com/hoagio107/apron)
+
 Apron là ứng dụng quản lý công thức nấu ăn, thực đơn tuần, tủ lạnh thông minh và danh sách đi chợ theo triết lý **Local-First & BYOS (Bring Your Own Storage)**. Ứng dụng hỗ trợ đa nền tảng (Desktop & Mobile) với kiến trúc Monorepo hiện đại.
+
+---
+
+## 📦 Tải về & Cài đặt (Downloads)
+
+Tải phiên bản mới nhất tại [GitHub Releases](https://github.com/hoagio107/apron/releases/latest):
+
+| Nền tảng | Định dạng | Tải về |
+| :--- | :--- | :--- |
+| **Windows** | Bộ cài đặt NSIS (`.exe`) | [apron_1.0.0_x64-setup.exe](https://github.com/hoagio107/apron/releases/latest) |
+| **Windows** | Gói cài đặt MSI (`.msi`) | [apron_1.0.0_x64_en-US.msi](https://github.com/hoagio107/apron/releases/latest) |
+| **Android** | Gói ứng dụng (`.apk`) | [app-debug.apk](https://github.com/hoagio107/apron/releases/latest) |
 
 ---
 
@@ -82,8 +99,11 @@ pnpm build:desktop
 # Build mobile web assets
 pnpm build:mobile
 
-# Đóng gói bộ cài Desktop (.msi / .exe trên Windows, .dmg trên macOS)
+# Đóng gói bộ cài Desktop (.msi / .exe trên Windows)
 pnpm tauri:build
+
+# Đóng gói ứng dụng Android (.apk)
+pnpm build:apk
 ```
 
 ---
@@ -106,6 +126,6 @@ Bộ test case của `@apron/core` bao gồm:
 
 ---
 
-## 📄 Bản quyền
+## 📄 Bản quyền (License)
 
-Dự án thuộc bản quyền phát triển Apron Team.
+Dự án được phân phối dưới giấy phép **MIT License**. Xem chi tiết tại [LICENSE](LICENSE).

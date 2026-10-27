@@ -3,13 +3,15 @@ import { Link } from 'react-router-dom';
 import { 
   Home, Heart, GraduationCap, 
   Lightbulb, PlusCircle, ShoppingCart, Scale, 
-  CalendarDays, Palette, ChefHat, FolderHeart
+  CalendarDays, FileUp, ChefHat, FolderHeart
 } from 'lucide-react';
 import { Button } from '@/ui';
 import { useTranslation } from 'react-i18next';
 import { SettingsModal } from '../settings/SettingsModal';
+import { JsonImportModal } from '../import/JsonImportModal';
 import { SidebarNav, type NavItem } from './sidebar/SidebarNav';
 import { SidebarProfile } from './sidebar/SidebarProfile';
+import { SIDEBAR_HOVER_DELAY_MS } from '../../constants';
 
 interface MainSidebarProps {
   isPinned?: boolean;
@@ -18,6 +20,7 @@ interface MainSidebarProps {
 export function MainSidebar({ isPinned = false }: MainSidebarProps) {
   const { t } = useTranslation();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -35,7 +38,7 @@ export function MainSidebar({ isPinned = false }: MainSidebarProps) {
     }
     hoverTimeoutRef.current = setTimeout(() => {
       setIsHovered(false);
-    }, 150);
+    }, SIDEBAR_HOVER_DELAY_MS);
   };
 
   useEffect(() => {
@@ -46,11 +49,18 @@ export function MainSidebar({ isPinned = false }: MainSidebarProps) {
     };
   }, []);
 
-  // Lắng nghe custom event từ AiAssistModal để mở Settings
+  // Lắng nghe custom event từ AiAssistModal hoặc các trang khác để mở Settings/Import
   useEffect(() => {
-    const handler = () => setIsSettingsOpen(true);
-    window.addEventListener('open-settings', handler);
-    return () => window.removeEventListener('open-settings', handler);
+    const settingsHandler = () => setIsSettingsOpen(true);
+    const importHandler = () => setIsImportOpen(true);
+
+    window.addEventListener('open-settings', settingsHandler);
+    window.addEventListener('open-json-import', importHandler);
+
+    return () => {
+      window.removeEventListener('open-settings', settingsHandler);
+      window.removeEventListener('open-json-import', importHandler);
+    };
   }, []);
 
   const navItems: NavItem[] = [
@@ -63,10 +73,14 @@ export function MainSidebar({ isPinned = false }: MainSidebarProps) {
     { name: t('nav.mealPlanner'), icon: CalendarDays, path: '/meal-planner' },
     { name: t('nav.kitchenTips'), icon: Lightbulb, path: '/tips' },
     { name: t('nav.units'), icon: Scale, path: '/units' },
-    { name: 'Design System', icon: Palette, path: '/design-system' },
+    { 
+      name: t('nav.import', 'Nhập dữ liệu'), 
+      icon: FileUp, 
+      onClick: () => setIsImportOpen(true) 
+    },
   ];
 
-  const isExpanded = isPinned || isHovered || isSettingsOpen;
+  const isExpanded = isPinned || isHovered || isSettingsOpen || isImportOpen;
 
   return (
     <>
@@ -116,6 +130,11 @@ export function MainSidebar({ isPinned = false }: MainSidebarProps) {
       <SettingsModal 
         isOpen={isSettingsOpen} 
         onOpenChange={setIsSettingsOpen} 
+      />
+
+      <JsonImportModal
+        isOpen={isImportOpen}
+        onOpenChange={setIsImportOpen}
       />
     </>
   );

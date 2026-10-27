@@ -118,14 +118,15 @@ export function RecipeFilterDrawer({
       placement="right"
       hideCloseButton
       classNames={{
-        base: "max-w-md w-full bg-background dark:bg-background border-l border-divider/60 shadow-2xl flex flex-col pt-safe pb-safe",
+        base: "max-w-md w-full bg-background dark:bg-background border-l border-divider/60 shadow-2xl flex flex-col top-[calc(var(--sat,0px)+10px)] h-[calc(100dvh-var(--sat,0px)-10px)] max-h-[calc(100dvh-var(--sat,0px)-10px)] rounded-tl-3xl pb-safe overflow-hidden",
+        backdrop: "bg-black/60 backdrop-blur-sm"
       }}
     >
       <DrawerContent>
         {(onClose) => (
           <>
             {/* 1. Header */}
-            <DrawerHeader className="flex items-center justify-between px-5 py-3.5 border-b border-divider/50 bg-background/90 backdrop-blur-md sticky top-0 z-30">
+            <DrawerHeader className="flex items-center justify-between px-5 py-3.5 border-b border-divider/50 bg-background/90 backdrop-blur-md shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-teal-500/10 text-primary flex items-center justify-center border border-primary/20 shadow-xs">
                   <Filter className="w-4 h-4" />

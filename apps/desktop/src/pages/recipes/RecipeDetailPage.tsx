@@ -469,9 +469,10 @@ export function RecipeDetailPage() {
                    <div className="flex items-center gap-1.5 text-sm font-semibold text-default-500 mr-1">
                      <Tag className="w-4 h-4" /> Tags:
                    </div>
-                   {recipe.tags.map(tagId => {
-                      const t = DEFAULT_TAGS.find(x => x.id === tagId);
-                      return t ? <span key={tagId} className="px-3 py-1 bg-default-100 rounded-full text-xs font-medium text-default-700">{t.name}</span> : null;
+                   {recipe.tags.map(tag => {
+                      const t = DEFAULT_TAGS.find(x => x.id === tag || x.slug === tag || x.name.toLowerCase() === tag.toLowerCase());
+                      const displayName = t ? t.name : tag;
+                      return <span key={tag} className="px-3 py-1 bg-default-100 rounded-full text-xs font-medium text-default-700">{displayName}</span>;
                    })}
                  </div>
                )}

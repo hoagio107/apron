@@ -29,18 +29,20 @@
 }
 
 :root {
+  --sat-native: 0px;
+  --sab-native: 0px;
   --sat-fallback: 0px;
-}
-
-body.is-native {
-  --sat-fallback: 32px;
-}
-
-:root {
-  --sat: max(var(--sat-native, var(--sat-fallback, 0px)), env(safe-area-inset-top, 0px));
+  --sat: max(var(--sat-native, 0px), env(safe-area-inset-top, 0px));
   --sab: max(var(--sab-native, 0px), env(safe-area-inset-bottom, 0px));
   --sal: env(safe-area-inset-left, 0px);
   --sar: env(safe-area-inset-right, 0px);
+}
+
+html.is-native,
+body.is-native {
+  --sat-fallback: 36px;
+  --sat: max(var(--sat-native, 36px), env(safe-area-inset-top, 36px));
+  --sab: max(var(--sab-native, 16px), env(safe-area-inset-bottom, 16px));
 }
 
 .safe-area-inset-bottom {

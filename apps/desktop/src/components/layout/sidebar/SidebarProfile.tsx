@@ -29,7 +29,7 @@ export function SidebarProfile({ isExpanded = false, onOpenSettings }: SidebarPr
         {isExpanded && (
           <div className="flex flex-col min-w-0 overflow-hidden">
             <span className="font-bold text-sm text-foreground truncate whitespace-nowrap">
-              {localStorage.getItem('account_name') || 'Apron'}
+              {localStorage.getItem('account_name') || 'apron'}
             </span>
           </div>
         )}

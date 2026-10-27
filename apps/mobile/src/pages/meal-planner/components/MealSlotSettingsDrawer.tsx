@@ -166,11 +166,12 @@ export function MealSlotSettingsDrawer({
       radius="lg"
       hideCloseButton
       classNames={{
-        base: 'rounded-t-3xl bg-content1 text-foreground flex flex-col',
+        base: 'max-h-[calc(100dvh-var(--sat,0px)-20px)] rounded-t-3xl bg-content1 text-foreground flex flex-col mt-auto overflow-hidden shadow-2xl',
+        backdrop: 'bg-black/60 backdrop-blur-sm',
         body: 'p-4 flex flex-col gap-4',
       }}
     >
-      <DrawerContent>
+      <DrawerContent className="rounded-t-3xl overflow-hidden">
         <DrawerHeader className="flex flex-col gap-1 border-b border-divider/40 px-4 pt-3 pb-3 shrink-0">
           <div className="w-10 h-1 rounded-full bg-default-300 mx-auto mb-2" />
           <div className="flex items-center justify-between">

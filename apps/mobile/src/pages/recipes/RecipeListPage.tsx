@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Spinner, toast } from '@/ui';
 import { BulkActionBar } from '../../components/shared/BulkActionBar';
@@ -13,7 +13,6 @@ import { RecipeFilterDrawer, defaultFilterState } from '../../components/recipes
 import type { RecipeFilterState } from '../../components/recipes/list/RecipeFilterDrawer';
 import { useRecipeStore } from '../../store/useRecipeStore';
 import type { Recipe } from '@apron/core';
-import { useEffect } from 'react';
 import { MealPlannerSelectModal } from './components/MealPlannerSelectModal';
 import { TagSelectModal } from './components/TagSelectModal';
 import { ParentRecipeSelectModal } from './components/ParentRecipeSelectModal';
@@ -39,7 +38,7 @@ export function RecipeListPage() {
   const [deleteTarget, setDeleteTarget] = useState<Recipe | null>(null);
   const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
 
-  const { recipes, fetchRecipes, deleteBulkRecipes, updateRecipe, deleteRecipe, isLoading } = useRecipeStore();
+  const { recipes, fetchRecipes, deleteBulkRecipes, updateRecipe, deleteRecipe, toggleFavorite, isLoading } = useRecipeStore();
   const { addMealPlanEntry } = useMealPlanStore();
 
   const [isMealPlannerModalOpen, setIsMealPlannerModalOpen] = useState(false);
@@ -156,6 +155,51 @@ export function RecipeListPage() {
     return result;
   }, [recipes, searchQuery, sortOption, filters]);
 
+  const variantCountsMap = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const r of recipes) {
+      if (r.parent_id) {
+        map.set(r.parent_id, (map.get(r.parent_id) || 0) + 1);
+      }
+    }
+    return map;
+  }, [recipes]);
+
+  const INITIAL_BATCH = 24;
+  const BATCH_SIZE = 24;
+  const [displayLimit, setDisplayLimit] = useState(INITIAL_BATCH);
+
+  useEffect(() => {
+    setDisplayLimit(INITIAL_BATCH);
+  }, [searchQuery, sortOption, filters]);
+
+  const displayedRecipes = useMemo(() => {
+    return filteredAndSortedRecipes.slice(0, displayLimit);
+  }, [filteredAndSortedRecipes, displayLimit]);
+
+  const hasMore = displayLimit < filteredAndSortedRecipes.length;
+
+  const handleLoadMore = () => {
+    setDisplayLimit(prev => Math.min(prev + BATCH_SIZE, filteredAndSortedRecipes.length));
+  };
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!hasMore) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        setDisplayLimit(prev => Math.min(prev + BATCH_SIZE, filteredAndSortedRecipes.length));
+      }
+    }, { rootMargin: '300px' });
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, filteredAndSortedRecipes.length]);
+
   const toggleSelect = (id: string) => {
     const newSelected = new Set(selectedIds);
     if (newSelected.has(id)) {
@@ -193,11 +237,15 @@ export function RecipeListPage() {
     switch (action) {
       case 'favorite': {
         const nextFav = !recipe.is_favorite;
-        await updateRecipe({ ...recipe, is_favorite: nextFav });
-        if (nextFav) {
-          toast.success(`Đã thêm "${recipe.title}" vào yêu thích!`);
-        } else {
-          toast.info(`Đã bỏ yêu thích "${recipe.title}".`);
+        try {
+          await toggleFavorite(recipe.id);
+          if (nextFav) {
+            toast.success(`Đã thêm "${recipe.title}" vào yêu thích!`);
+          } else {
+            toast.info(`Đã bỏ yêu thích "${recipe.title}".`);
+          }
+        } catch {
+          toast.error('Không thể cập nhật trạng thái yêu thích.');
         }
         break;
       }
@@ -414,8 +462,8 @@ export function RecipeListPage() {
           ${viewType === 'grid-landscape' ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6' : ''}
           ${viewType === 'grid-portrait-out' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6' : ''}
         `}>
-          {filteredAndSortedRecipes.map(r => {
-            const variantCount = recipes.filter(child => child.parent_id === r.id).length;
+          {displayedRecipes.map(r => {
+            const variantCount = variantCountsMap.get(r.id!) || 0;
             return (
               <RecipeCard 
                 key={r.id!} 
@@ -430,6 +478,18 @@ export function RecipeListPage() {
               />
             );
           })}
+          {hasMore && (
+            <div ref={sentinelRef} className="col-span-full flex flex-col items-center justify-center py-6 gap-2">
+              <Button 
+                variant="flat" 
+                size="sm" 
+                onPress={handleLoadMore}
+                className="text-xs text-default-500 font-medium bg-default-100 dark:bg-default-50/20"
+              >
+                Tải thêm ({displayedRecipes.length}/{filteredAndSortedRecipes.length} món)
+              </Button>
+            </div>
+          )}
         </div>
       )}
 

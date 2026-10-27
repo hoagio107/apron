@@ -10,7 +10,8 @@ function cn(...inputs: ClassValue[]) {
 export interface NavItem {
   name: string;
   icon: LucideIcon;
-  path: string;
+  path?: string;
+  onClick?: () => void;
 }
 
 interface SidebarNavProps {
@@ -25,34 +26,53 @@ export function SidebarNav({ items, isExpanded = false }: SidebarNavProps) {
   return (
     <ul className="space-y-1 p-0 m-0 list-none w-full">
       {items.map((item) => {
-        const isActive = pathname === item.path;
+        const isActive = item.path ? pathname === item.path : false;
+        const sharedClasses = cn(
+          "flex items-center h-11 rounded-xl transition-all duration-200 overflow-hidden text-left border-none bg-transparent cursor-pointer",
+          isExpanded 
+            ? "w-full justify-start px-3.5 gap-3" 
+            : "w-11 min-w-11 justify-center px-0 mx-auto",
+          isActive 
+            ? "bg-primary/10 text-primary font-bold" 
+            : "text-default-600 hover:bg-default-100 hover:text-foreground"
+        );
+
+        const innerContent = (
+          <>
+            <item.icon 
+              className={cn(
+                "h-5 w-5 flex-shrink-0 transition-transform", 
+                isActive ? "text-primary" : "text-default-400 group-hover:scale-105"
+              )} 
+            />
+            {isExpanded && (
+              <span className="whitespace-nowrap text-sm font-semibold truncate animate-in fade-in duration-200">
+                {item.name}
+              </span>
+            )}
+          </>
+        );
+
         return (
           <li key={item.name} className="flex justify-center w-full">
-            <Link 
-              to={item.path} 
-              title={!isExpanded ? item.name : undefined}
-              className={cn(
-                "flex items-center h-11 rounded-xl transition-all duration-200 overflow-hidden",
-                isExpanded 
-                  ? "w-full justify-start px-3.5 gap-3" 
-                  : "w-11 min-w-11 justify-center px-0 mx-auto",
-                isActive 
-                  ? "bg-primary/10 text-primary font-bold" 
-                  : "text-default-600 hover:bg-default-100 hover:text-foreground"
-              )}
-            >
-              <item.icon 
-                className={cn(
-                  "h-5 w-5 flex-shrink-0 transition-transform", 
-                  isActive ? "text-primary" : "text-default-400 group-hover:scale-105"
-                )} 
-              />
-              {isExpanded && (
-                <span className="whitespace-nowrap text-sm font-semibold truncate animate-in fade-in duration-200">
-                  {item.name}
-                </span>
-              )}
-            </Link>
+            {item.onClick ? (
+              <button 
+                type="button"
+                onClick={item.onClick}
+                title={!isExpanded ? item.name : undefined}
+                className={sharedClasses}
+              >
+                {innerContent}
+              </button>
+            ) : (
+              <Link 
+                to={item.path || '#'} 
+                title={!isExpanded ? item.name : undefined}
+                className={sharedClasses}
+              >
+                {innerContent}
+              </Link>
+            )}
           </li>
         );
       })}

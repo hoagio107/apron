@@ -13,6 +13,7 @@ describe('useCollectionStore', () => {
 
   const baseCollection: Collection = {
     id: 'col-1',
+    slug: 'thuc-don-an-dam-cho-be',
     title: 'Thực đơn ăn dặm cho bé',
     description: 'Tổng hợp các món dinh dưỡng',
     folders: [

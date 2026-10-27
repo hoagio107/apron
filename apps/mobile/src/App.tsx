@@ -25,7 +25,7 @@ const CollectionsPage = lazy(() => import('./pages/collections/CollectionsPage')
 const CollectionDetailPage = lazy(() => import('./pages/collections/CollectionDetailPage').then(m => ({ default: m.CollectionDetailPage })));
 const UnitsPage = lazy(() => import('./pages/units/UnitsPage').then(m => ({ default: m.UnitsPage })));
 const SettingsPage = lazy(() => import('./pages/settings/SettingsPage').then(m => ({ default: m.SettingsPage })));
-const DesignSystemPage = lazy(() => import('./pages/DesignSystemPage').then(m => ({ default: m.DesignSystemPage })));
+const JsonImportPage = lazy(() => import('./pages/import/JsonImportPage').then(m => ({ default: m.JsonImportPage })));
 
 function PageLoadingFallback() {
   return (
@@ -46,7 +46,7 @@ function AppLayout() {
   const isTipDetailPage = location.pathname.startsWith('/tips/') && location.pathname !== '/tips' && location.pathname !== '/tips/';
   const isCollectionDetailPage = location.pathname.startsWith('/collections/') && location.pathname !== '/collections' && location.pathname !== '/collections/';
 
-  const hideNav = isRecipeDetailPageOrForm || isCourseDetailPageOrForm || isTipDetailPage || isCollectionDetailPage;
+  const hideNav = isRecipeDetailPageOrForm || isCourseDetailPageOrForm || isTipDetailPage || isCollectionDetailPage || location.pathname === '/import';
 
   return (
     <div className="flex flex-col h-[100dvh] w-full bg-background text-foreground overflow-hidden pt-safe">
@@ -76,7 +76,7 @@ function AppLayout() {
               <Route path="/collections/:id" element={<CollectionDetailPage />} />
               <Route path="/units" element={<UnitsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/design-system" element={<DesignSystemPage />} />
+              <Route path="/import" element={<JsonImportPage />} />
               <Route path="*" element={
                 <div className="flex flex-col items-center justify-center h-full">
                   <h2 className="text-2xl font-bold text-default-400">Trang đang được xây dựng...</h2>
@@ -102,6 +102,7 @@ function App() {
 
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
+      document.documentElement.classList.add('is-native');
       document.body.classList.add('is-native');
     }
 

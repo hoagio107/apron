@@ -21,3 +21,4 @@ export * from './data/seedMockData';
 export * from './data/purgeMockData';
 export * from './store';
 export * from './i18n';
+export * from './importer/json-importer';

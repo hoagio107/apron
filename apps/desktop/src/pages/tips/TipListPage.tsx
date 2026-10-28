@@ -1,4 +1,5 @@
-import { useState, useMemo, useEffect } from 'react';
+(import { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Button, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
 import { Plus, Trash2, Search, Filter, CheckCircle2, Sparkles } from 'lucide-react';
@@ -12,19 +13,20 @@ import { TIP_CATEGORIES } from '@apron/core';
 import type { ParseTipResult } from '../../lib/gemini';
 
 export function TipListPage() {
+  const { t } = useTranslation();
   const { tips, fetchTips, deleteBulkTips, deleteTip } = useTipStore();
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  
+
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  
+
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [initialAiData, setInitialAiData] = useState<ParseTipResult | null>(null);
   const [editingTipId, setEditingTipId] = useState<string | undefined>(undefined);
-  
+
   const [viewingTipId, setViewingTipId] = useState<string | undefined>(undefined);
   const viewingTip = useMemo(() => tips.find(t => t.id === viewingTipId) || null, [tips, viewingTipId]);
 
@@ -34,19 +36,19 @@ export function TipListPage() {
 
   const filteredTips = useMemo(() => {
     let result = [...tips];
-    
+
     if (selectedCategoryId) {
       result = result.filter(t => t.category_id === selectedCategoryId);
     }
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(t => 
-        t.title.toLowerCase().includes(q) || 
+      result = result.filter(t =>
+        t.title.toLowerCase().includes(q) ||
         t.content.toLowerCase().includes(q)
       );
     }
-    
+
     return result;
   }, [tips, searchQuery, selectedCategoryId]);
 
@@ -77,7 +79,7 @@ export function TipListPage() {
 
   const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
-    if (window.confirm(`Bạn có chắc muốn xóa ${selectedIds.size} mẹo này không?`)) {
+    if (window.confirm(t('tips.confirmBulkDelete', { count: selectedIds.size }))) {
       await deleteBulkTips(Array.from(selectedIds));
       setIsSelectMode(false);
       setSelectedIds(new Set());
@@ -85,7 +87,7 @@ export function TipListPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Bạn có chắc muốn xóa mẹo này không?')) {
+    if (window.confirm(t('tips.confirmDelete'))) {
       await deleteTip(id);
     }
   };
@@ -93,38 +95,38 @@ export function TipListPage() {
   const activeCategory = TIP_CATEGORIES.find(c => c.id === selectedCategoryId);
 
   return (
-    <div className="flex flex-col h-full gap-6 w-full pt-6 pb-8">
+    <div className="flex flex-col h-full gap-6 w-full pb-8">
       {/* Header & Toolbar */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-6 pb-4 -mx-8 px-8 flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-divider/50 shadow-2xs">
         <div className="flex items-center gap-4 shrink-0">
           <div className="flex items-center gap-2">
-            <Button 
+            <Button
               isIconOnly
-              color="primary" 
-              className="w-14 h-14 rounded-2xl shrink-0"
+              color="primary"
+              className="w-14 h-14 rounded-2xl shrink-0 text-white"
               onPress={() => {
                 setInitialAiData(null);
                 setEditingTipId(undefined);
                 setIsFormModalOpen(true);
               }}
-              title="Thêm mẹo vặt mới"
+              title={t('tips.addTip')}
             >
-              <Plus className="w-6 h-6" />
+              <Plus className="w-6 h-6 text-white" />
             </Button>
-            <Button 
+            <Button
               isIconOnly
               variant="flat"
-              color="secondary" 
+              color="secondary"
               className="w-14 h-14 rounded-2xl shrink-0 bg-secondary/15 text-secondary hover:bg-secondary/25 shadow-none"
               onPress={() => setIsAiModalOpen(true)}
-              title="AI Trợ lý tạo mẹo (Gemini)"
+              title={t('tips.aiAssistant')}
             >
               <Sparkles className="w-6 h-6" />
             </Button>
           </div>
           <div>
-            <h1 className="app-page-title leading-tight">Mẹo nhà bếp</h1>
-            <p className="app-page-subtitle">{tips.length} mẹo đã lưu</p>
+            <h1 className="app-page-title leading-tight">{t('tips.title')}</h1>
+            <p className="app-page-subtitle">{t('tips.subtitle', { count: tips.length })}</p>
           </div>
         </div>
 
@@ -135,24 +137,24 @@ export function TipListPage() {
               base: "max-w-[300px]",
               input: "text-small",
             }}
-            placeholder="Tìm kiếm mẹo..."
+            placeholder={t('tips.searchPlaceholder')}
             startContent={<Search className="w-4 h-4" />}
             value={searchQuery}
             onValueChange={setSearchQuery}
           />
-          
+
           <Dropdown>
             <DropdownTrigger>
-              <Button 
-                variant="flat" 
+              <Button
+                variant="flat"
                 color={selectedCategoryId ? "primary" : "default"}
                 startContent={<Filter className="w-4 h-4" />}
               >
-                {activeCategory ? activeCategory.name : 'Tất cả danh mục'}
+                {activeCategory ? activeCategory.name : t('tips.categories.all')}
               </Button>
             </DropdownTrigger>
-            <DropdownMenu 
-              aria-label="Filter Categories" 
+            <DropdownMenu
+              aria-label="Filter Categories"
               selectionMode="single"
               selectedKeys={selectedCategoryId ? new Set([selectedCategoryId]) : new Set(['all'])}
               onSelectionChange={(keys) => {
@@ -160,7 +162,7 @@ export function TipListPage() {
                 setSelectedCategoryId(key === 'all' ? null : key);
               }}
               items={[
-                { id: 'all', name: 'Tất cả danh mục' },
+                { id: 'all', name: t('tips.categories.all') },
                 ...TIP_CATEGORIES
               ]}
             >
@@ -170,8 +172,8 @@ export function TipListPage() {
             </DropdownMenu>
           </Dropdown>
 
-          <Button 
-            variant="flat" 
+          <Button
+            variant="flat"
             color={isSelectMode ? "primary" : "default"}
             startContent={<CheckCircle2 className="w-4 h-4" />}
             onPress={toggleSelectMode}
@@ -186,22 +188,22 @@ export function TipListPage() {
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 px-6 py-3 bg-content1 shadow-2xl border border-divider rounded-full animate-in slide-in-from-bottom-8 fade-in duration-300">
           <div className="flex items-center gap-3">
             <Button variant="flat" onPress={selectAll}>
-              {selectedIds.size === filteredTips.length && filteredTips.length > 0 ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+              {selectedIds.size === filteredTips.length && filteredTips.length > 0 ? t('common.deselectAll') : t('common.selectAll')}
             </Button>
             <span className="font-medium text-primary min-w-[100px] text-center">
-              Đã chọn {selectedIds.size}
+              {t('common.selectedCount', { count: selectedIds.size })}
             </span>
           </div>
-          
+
           <div className="w-px h-8 bg-divider mx-1 shrink-0" />
-          
+
           <div className="flex items-center gap-2">
             <Button color="danger" variant="flat" startContent={<Trash2 className="w-4 h-4" />} onPress={handleBulkDelete}>
               Xóa
             </Button>
-            
+
             <div className="w-px h-8 bg-divider mx-1 shrink-0" />
-            
+
             <Button variant="light" onPress={toggleSelectMode}>
               Hủy
             </Button>
@@ -213,15 +215,15 @@ export function TipListPage() {
       {filteredTips.length === 0 ? (
         <EmptyState
           icon={<Search className="w-10 h-10 text-default-300" />}
-          title="Không tìm thấy mẹo nào"
-          description="Thử thay đổi từ khóa tìm kiếm hoặc xóa bớt bộ lọc để xem kết quả khác."
+          title={t('tips.emptySearchTitle')}
+          description={t('tips.emptySearchDesc')}
         />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6">
           {filteredTips.map(t => (
-            <TipCard 
-              key={t.id!} 
-              tip={t} 
+            <TipCard
+              key={t.id!}
+              tip={t}
               selectable={isSelectMode}
               isSelected={selectedIds.has(t.id!)}
               onSelect={() => toggleSelect(t.id!)}
@@ -236,7 +238,7 @@ export function TipListPage() {
         </div>
       )}
 
-      <TipFormModal 
+      <TipFormModal
         isOpen={isFormModalOpen}
         onOpenChange={(open) => {
           setIsFormModalOpen(open);
@@ -254,7 +256,7 @@ export function TipListPage() {
         }}
       />
 
-      <TipAiModal 
+      <TipAiModal
         isOpen={isAiModalOpen}
         onOpenChange={setIsAiModalOpen}
         onApply={(data) => {
@@ -263,7 +265,7 @@ export function TipListPage() {
           setIsFormModalOpen(true);
         }}
       />
-      
+
       <TipDetailPanel
         tip={viewingTip}
         isOpen={!!viewingTipId}

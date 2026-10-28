@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useCollectionStore } from '../../store/useCollectionStore';
 import { useRecipeStore } from '../../store/useRecipeStore';
+import { useTranslation } from 'react-i18next';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { ConfirmModal } from '../../components/shared/ConfirmModal';
@@ -24,17 +25,19 @@ import type { CollectionItem, CollectionFolder, Recipe } from '@apron/core';
 
 type SortOption = 'newest' | 'oldest' | 'name-asc' | 'name-desc' | 'recipe-first';
 
-const sortLabels: Record<SortOption, string> = {
-  'newest': 'Mới nhất',
-  'oldest': 'Cũ nhất',
-  'name-asc': 'Tên A - Z',
-  'name-desc': 'Tên Z - A',
-  'recipe-first': 'Có công thức trước',
-};
+
 
 type FolderSortOption = 'default' | 'name-asc' | 'name-desc' | 'count-desc' | 'count-asc';
 
 export function CollectionDetailPage() {
+  const { t } = useTranslation();
+  const sortLabels: Record<SortOption, string> = {
+    'newest': t('collections.sortNewest'),
+    'oldest': t('collections.sortOldest'),
+    'name-asc': t('collections.sortNameAsc'),
+    'name-desc': t('collections.sortNameDesc'),
+    'recipe-first': t('collections.recipeFirstOption'),
+  };
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { 
@@ -324,7 +327,7 @@ export function CollectionDetailPage() {
           ...editingFolder,
           name: folderName.trim(),
         });
-        toast.success('Đã cập nhật thư mục');
+        toast.success(t('collections.folderUpdated'));
       } else {
         const newFolder: CollectionFolder = {
           id: `folder-${Date.now()}`,
@@ -333,12 +336,12 @@ export function CollectionDetailPage() {
         };
         await addFolder(collection.id, newFolder);
         setActiveFolderId(newFolder.id);
-        toast.success('Đã tạo thư mục mới');
+        toast.success(t('collections.folderCreated'));
       }
       setIsFolderModalOpen(false);
     } catch (err: any) {
       console.error('Failed to save folder', err);
-      toast.error('Lỗi khi lưu thư mục: ' + err.message);
+      toast.error(err.message || t('common.status.errorOccurred'));
     }
   };
 
@@ -396,17 +399,17 @@ export function CollectionDetailPage() {
 
   const processItemFile = async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      toast.error('Vui lòng chọn file hình ảnh (PNG, JPG, WebP...)');
+      toast.error(t('collections.invalidImage'));
       return;
     }
     try {
       const tempPath = await ImageManager.saveToTemp(file);
       const committedPath = await ImageManager.commitImage(tempPath);
       setItemImageUrl(committedPath);
-      toast.success('Đã tải ảnh món ăn');
+      toast.success(t('collections.uploadImageSuccess'));
     } catch (e) {
       console.error('Lỗi lưu ảnh món:', e);
-      toast.error('Không thể lưu ảnh món ăn');
+      toast.error(t('collections.uploadImageError'));
     }
   };
 
@@ -443,7 +446,7 @@ export function CollectionDetailPage() {
             notes: itemNotes.trim(),
           });
         }
-        toast.success('Đã cập nhật món ăn');
+        toast.success(t('collections.dishUpdated'));
       } else {
         const newItem: CollectionItem = {
           id: `item-${Date.now()}`,
@@ -454,12 +457,12 @@ export function CollectionDetailPage() {
           created_at: new Date().toISOString()
         };
         await addItemToFolder(collection.id, itemTargetFolderId, newItem);
-        toast.success('Đã thêm món ăn');
+        toast.success(t('collections.dishCreated'));
       }
       setIsItemModalOpen(false);
     } catch (err: any) {
       console.error('Failed to save item', err);
-      toast.error('Lỗi khi lưu món: ' + err.message);
+      toast.error(err.message || t('common.status.errorOccurred'));
     } finally {
       setIsSavingItem(false);
     }
@@ -469,7 +472,7 @@ export function CollectionDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
         <Spinner size="lg" />
-        <p className="text-default-400 mt-3 text-sm">Đang tải bộ sưu tập...</p>
+        <p className="text-default-400 mt-3 text-sm">{t('collections.loadingCollection')}</p>
       </div>
     );
   }
@@ -487,13 +490,13 @@ export function CollectionDetailPage() {
             variant="flat"
             className="bg-black/40 backdrop-blur-md rounded-full w-7 h-7 min-w-7 text-white hover:bg-black/60"
             onClick={(e) => e.stopPropagation()}
-            aria-label="Tùy chọn món"
+            aria-label={t('common.actions.more')}
           >
             <MoreVertical className="w-3.5 h-3.5" />
           </Button>
         </DropdownTrigger>
         <DropdownMenu
-          aria-label="Tùy chọn món ăn"
+          aria-label={t('common.actions.more')}
           onAction={(key) => {
             if (key === 'preview') handleOpenLightbox(item.id);
             if (key === 'recipe' && item.recipe_id) navigate(`/recipes/${item.recipe_id}`);
@@ -503,22 +506,22 @@ export function CollectionDetailPage() {
           }}
         >
           <DropdownItem key="preview" startContent={<Maximize2 className="w-4 h-4" />}>
-            Xem ảnh lớn
+            {t('collections.viewLargeImage')}
           </DropdownItem>
           {item.recipe_id ? (
             <DropdownItem key="recipe" startContent={<ChefHat className="w-4 h-4 text-primary" />}>
-              Xem công thức
+              {t('collections.viewRecipe')}
             </DropdownItem>
           ) : (
             <DropdownItem key="create-recipe" startContent={<ChefHat className="w-4 h-4 text-primary" />}>
-              Tạo bài công thức từ món này
+              {t('collections.createRecipeFromItem')}
             </DropdownItem>
           )}
           <DropdownItem key="edit" startContent={<Edit2 className="w-4 h-4" />}>
-            Chỉnh sửa
+            {t('common.actions.edit')}
           </DropdownItem>
           <DropdownItem key="delete" className="text-danger" color="danger" startContent={<Trash2 className="w-4 h-4" />}>
-            Xoá món
+            {t('collections.deleteItem')}
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
@@ -555,10 +558,10 @@ export function CollectionDetailPage() {
                       navigate(`/recipes/${item.recipe_id}`);
                     }}
                     className="flex items-center gap-1 bg-primary/95 hover:bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md backdrop-blur-md transition-all active:scale-95"
-                    title="Bấm để xem bài công thức"
+                    title={t('collections.viewRecipeButton')}
                   >
                     <ChefHat className="w-3 h-3" />
-                    <span>Công thức</span>
+                    <span>{t('nav.recipes')}</span>
                   </div>
                 )}
                 {activeFolderId === 'all' && !groupByFolder && item.folderName && (
@@ -614,10 +617,10 @@ export function CollectionDetailPage() {
                   navigate(`/recipes/${item.recipe_id}`);
                 }}
                 className="flex items-center gap-1 bg-primary/95 hover:bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md backdrop-blur-md transition-all active:scale-95"
-                title="Bấm để xem bài công thức"
+                title={t('collections.viewRecipeButton')}
               >
                 <ChefHat className="w-3 h-3" />
-                <span>Công thức</span>
+                <span>{t('nav.recipes')}</span>
               </div>
             )}
             {activeFolderId === 'all' && !groupByFolder && item.folderName && (
@@ -647,7 +650,7 @@ export function CollectionDetailPage() {
       {/* Standard PageHeader */}
       <PageHeader
         title={collection.title}
-        description={`${collection.folders?.length || 0} thư mục • ${totalAllItems} món ăn / hình ảnh`}
+        description={t('collections.itemCount', { folders: collection.folders?.length || 0, items: totalAllItems })}
         showBackButton
         onBack={() => navigate('/collections')}
         actions={
@@ -657,21 +660,21 @@ export function CollectionDetailPage() {
               startContent={<Edit2 className="w-4 h-4 text-default-500" />}
               onPress={() => setIsCollectionModalOpen(true)}
             >
-              Sửa bộ sưu tập
+              {t('collections.editCollection')}
             </Button>
             <Button
               variant="flat"
               startContent={<FolderPlus className="w-4 h-4 text-primary" />}
               onPress={handleOpenAddFolder}
             >
-              Thêm thư mục
+              {t('collections.addFolder')}
             </Button>
             <Button
               color="primary"
               startContent={<Plus className="w-4 h-4" />}
               onPress={handleOpenAddItem}
             >
-              Thêm món / ảnh
+              {t('collections.addItem')}
             </Button>
           </div>
         }
@@ -683,7 +686,7 @@ export function CollectionDetailPage() {
         <div className="w-full lg:w-64 xl:w-72 shrink-0 flex flex-col gap-2.5">
           <div className="flex items-center justify-between px-1">
             <span className="text-xs font-semibold text-default-500 uppercase tracking-wider">
-              Danh sách thư mục
+              {t('collections.folderList')}
             </span>
             <Chip size="sm" variant="flat">{collection.folders?.length || 0}</Chip>
           </div>
@@ -694,7 +697,7 @@ export function CollectionDetailPage() {
               <Input
                 variant="flat"
                 size="sm"
-                placeholder="Tìm thư mục..."
+                placeholder={t('collections.searchFolders')}
                 startContent={<Search className="w-3.5 h-3.5 text-default-400" />}
                 value={folderSearch}
                 onValueChange={setFolderSearch}
@@ -710,14 +713,14 @@ export function CollectionDetailPage() {
                   size="sm" 
                   variant="flat" 
                   className="rounded-xl shrink-0 text-default-600"
-                  aria-label="Sắp xếp thư mục"
-                  title="Sắp xếp thư mục"
+                  aria-label={t('collections.folderSortTitle')}
+                  title={t('collections.folderSortTitle')}
                 >
                   <ArrowUpDown className="w-3.5 h-3.5" />
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
-                aria-label="Sắp xếp thư mục"
+                aria-label={t('collections.folderSortTitle')}
                 selectedKeys={new Set([folderSort])}
                 selectionMode="single"
                 onSelectionChange={(keys) => {
@@ -725,11 +728,11 @@ export function CollectionDetailPage() {
                   if (sel) setFolderSort(sel);
                 }}
               >
-                <DropdownItem key="default">Thứ tự ban đầu</DropdownItem>
-                <DropdownItem key="name-asc">Tên thư mục A - Z</DropdownItem>
-                <DropdownItem key="name-desc">Tên thư mục Z - A</DropdownItem>
-                <DropdownItem key="count-desc">Nhiều món nhất</DropdownItem>
-                <DropdownItem key="count-asc">Ít món nhất</DropdownItem>
+                <DropdownItem key="default">{t('collections.folderSortDefault')}</DropdownItem>
+                <DropdownItem key="name-asc">{t('collections.sortNameAsc')}</DropdownItem>
+                <DropdownItem key="name-desc">{t('collections.sortNameDesc')}</DropdownItem>
+                <DropdownItem key="count-desc">{t('collections.sortCountDesc')}</DropdownItem>
+                <DropdownItem key="count-asc">{t('collections.sortCountAsc')}</DropdownItem>
               </DropdownMenu>
             </Dropdown>
           </div>
@@ -746,7 +749,7 @@ export function CollectionDetailPage() {
             >
               <div className="flex items-center gap-2.5 min-w-0 flex-1 mr-2">
                 <Layers className={`w-4 h-4 shrink-0 ${activeFolderId === 'all' ? 'text-white' : 'text-primary'}`} />
-                <span className="truncate font-semibold">Tất cả các món</span>
+                <span className="truncate font-semibold">{t('collections.allDishes')}</span>
               </div>
               <Chip size="sm" variant="flat" color={activeFolderId === 'all' ? 'default' : 'default'}>
                 {totalAllItems}
@@ -789,23 +792,23 @@ export function CollectionDetailPage() {
                             isActive ? 'text-white hover:bg-black/20' : 'text-default-500'
                           }`}
                           onClick={(e) => e.stopPropagation()}
-                          aria-label="Thao tác thư mục"
+                          aria-label={t('common.actions.more')}
                         >
                           <MoreVertical className="w-3.5 h-3.5" />
                         </Button>
                       </DropdownTrigger>
                       <DropdownMenu
-                        aria-label="Thao tác"
+                        aria-label={t('common.actions.more')}
                         onAction={(key) => {
                           if (key === 'edit') handleOpenEditFolder(folder);
                           if (key === 'delete') setDeleteFolderId(folder.id);
                         }}
                       >
                         <DropdownItem key="edit" startContent={<Edit2 className="w-4 h-4" />}>
-                          Đổi tên thư mục
+                          {t('collections.renameFolder')}
                         </DropdownItem>
                         <DropdownItem key="delete" className="text-danger" color="danger" startContent={<Trash2 className="w-4 h-4" />}>
-                          Xoá thư mục
+                          {t('collections.deleteFolder')}
                         </DropdownItem>
                       </DropdownMenu>
                     </Dropdown>
@@ -816,7 +819,7 @@ export function CollectionDetailPage() {
 
             {displayedFolders.length === 0 && folderSearch.trim() && (
               <div className="py-6 px-3 text-center text-xs text-default-400 bg-content2/40 rounded-xl">
-                Không tìm thấy thư mục nào
+                {t('collections.noMatchingFolders')}
               </div>
             )}
           </div>
@@ -828,8 +831,8 @@ export function CollectionDetailPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
               <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-                {activeFolderId === 'all' ? 'Tất cả các món trong bộ sưu tập' : activeFolder?.name}
-                <Chip size="sm" variant="flat">{displayedItems.length} món</Chip>
+                {activeFolderId === 'all' ? t('collections.allDishesSubtitle') : activeFolder?.name}
+                <Chip size="sm" variant="flat">{displayedItems.length} {t('collections.dishes')}</Chip>
               </h2>
             </div>
 
@@ -838,7 +841,7 @@ export function CollectionDetailPage() {
                 <Input
                   variant="flat"
                   size="sm"
-                  placeholder="Tìm món trong thư mục..."
+                  placeholder={t('collections.searchItemsInFolder')}
                   startContent={<Search className="w-3.5 h-3.5 text-default-400" />}
                   value={searchQuery}
                   onValueChange={setSearchQuery}
@@ -856,11 +859,11 @@ export function CollectionDetailPage() {
                     startContent={<ArrowUpDown className="w-3.5 h-3.5 text-default-500" />}
                     className="font-medium shrink-0"
                   >
-                    {sortLabels[sortBy] || 'Sắp xếp'}
+                    {sortLabels[sortBy] || t('common.actions.sort')}
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu 
-                  aria-label="Tùy chọn sắp xếp"
+                  aria-label={t('common.actions.sort')}
                   selectedKeys={new Set([sortBy])}
                   selectionMode="single"
                   onSelectionChange={(keys) => {
@@ -868,11 +871,11 @@ export function CollectionDetailPage() {
                     if (selected) setSortBy(selected);
                   }}
                 >
-                  <DropdownItem key="newest">Mới nhất</DropdownItem>
-                  <DropdownItem key="oldest">Cũ nhất</DropdownItem>
-                  <DropdownItem key="name-asc">Tên A - Z</DropdownItem>
-                  <DropdownItem key="name-desc">Tên Z - A</DropdownItem>
-                  <DropdownItem key="recipe-first">Có công thức trước</DropdownItem>
+                  <DropdownItem key="newest">{t('collections.sortNewest')}</DropdownItem>
+                  <DropdownItem key="oldest">{t('collections.sortOldest')}</DropdownItem>
+                  <DropdownItem key="name-asc">{t('collections.sortNameAsc')}</DropdownItem>
+                  <DropdownItem key="name-desc">{t('collections.sortNameDesc')}</DropdownItem>
+                  <DropdownItem key="recipe-first">{t('collections.recipeFirstOption')}</DropdownItem>
                 </DropdownMenu>
               </Dropdown>
 
@@ -887,7 +890,7 @@ export function CollectionDetailPage() {
                     startContent={<Folder className="w-3.5 h-3.5" />}
                     onPress={() => setGroupByFolder(true)}
                   >
-                    Theo thư mục
+                    {t('collections.groupByFolder')}
                   </Button>
                   <Button
                     size="sm"
@@ -897,7 +900,7 @@ export function CollectionDetailPage() {
                     startContent={<Layers className="w-3.5 h-3.5" />}
                     onPress={() => setGroupByFolder(false)}
                   >
-                    Lưới phẳng
+                    {t('collections.flatGrid')}
                   </Button>
                 </div>
               )}
@@ -908,8 +911,8 @@ export function CollectionDetailPage() {
                 size="sm"
                 variant="flat"
                 className="shrink-0"
-                aria-label={viewMode === 'portrait' ? 'Chuyển sang dạng thẻ vuông (tên bên ngoài)' : 'Chuyển sang dạng thẻ dọc'}
-                title={viewMode === 'portrait' ? 'Chuyển sang dạng thẻ vuông (tên bên ngoài)' : 'Chuyển sang dạng thẻ dọc'}
+                aria-label={viewMode === 'portrait' ? t('collections.switchToSquare') : t('collections.switchToPortrait')}
+                title={viewMode === 'portrait' ? t('collections.switchToSquare') : t('collections.switchToPortrait')}
                 onPress={() => setViewMode(prev => prev === 'portrait' ? 'square' : 'portrait')}
               >
                 {viewMode === 'portrait' ? (
@@ -928,8 +931,8 @@ export function CollectionDetailPage() {
               <div className="flex-1 flex items-center justify-center p-8 bg-content1/50 rounded-2xl border border-dashed border-divider">
                 <EmptyState
                   icon={<ImageIcon className="w-10 h-10 text-default-300" />}
-                  title="Không tìm thấy món ăn nào"
-                  description="Thử tìm kiếm với từ khoá khác hoặc thêm món mới."
+                  title={t('collections.noMatchingDishes')}
+                  description={t('collections.noMatchingDishesDesc')}
                 />
               </div>
             ) : (
@@ -950,7 +953,7 @@ export function CollectionDetailPage() {
                             {folder.name}
                           </h3>
                           <Chip size="sm" variant="flat" color="primary" className="text-xs shrink-0 font-semibold">
-                            {folder.items.length} món
+                            {folder.items.length} {t('collections.dishes')}
                           </Chip>
                         </div>
                       </div>
@@ -963,7 +966,7 @@ export function CollectionDetailPage() {
                         endContent={<ChevronRight className="w-3.5 h-3.5" />}
                         onPress={() => setActiveFolderId(folder.id)}
                       >
-                        Xem riêng thư mục này
+                        {t('collections.viewSingleFolder')}
                       </Button>
                     </div>
 
@@ -979,8 +982,8 @@ export function CollectionDetailPage() {
             <div className="flex-1 flex items-center justify-center p-8 bg-content1/50 rounded-2xl border border-dashed border-divider">
               <EmptyState
                 icon={<ImageIcon className="w-10 h-10 text-default-300" />}
-                title="Chưa có món nào trong thư mục này"
-                description="Bấm 'Thêm món / ảnh' để tải ảnh thực đơn hoặc chọn công thức nấu ăn vào đây."
+                title={t('collections.emptyFolder')}
+                description={t('collections.emptyFolderDesc')}
                 action={
                   <Button 
                     color="primary" 
@@ -988,7 +991,7 @@ export function CollectionDetailPage() {
                     startContent={<Plus className="w-4 h-4" />}
                     onPress={handleOpenAddItem}
                   >
-                    Thêm món ngay
+                    {t('collections.addItem')}
                   </Button>
                 }
               />
@@ -1008,7 +1011,7 @@ export function CollectionDetailPage() {
                     onPress={() => setVisibleCount(prev => Math.min(prev + 48, displayedItems.length))}
                     className="text-default-600 bg-content2 hover:bg-content3 font-medium px-4 h-9"
                   >
-                    Xem thêm ({displayedItems.length - visibleCount} món còn lại)
+                    {t('collections.loadMoreDishes', { count: displayedItems.length - visibleCount })}
                   </Button>
                 </div>
               )}
@@ -1045,7 +1048,7 @@ export function CollectionDetailPage() {
                   startContent={<ChefHat className="w-4 h-4" />}
                   onPress={() => navigate(`/recipes/${displayedItems[lightboxIndex].recipe_id}`)}
                 >
-                  Xem công thức
+                  {t('collections.viewRecipe')}
                 </Button>
               ) : (
                 <Button
@@ -1055,7 +1058,7 @@ export function CollectionDetailPage() {
                   startContent={<ChefHat className="w-4 h-4 text-primary" />}
                   onPress={() => navigate(`/recipes/new?title=${encodeURIComponent(displayedItems[lightboxIndex].title)}&image=${encodeURIComponent(displayedItems[lightboxIndex].image_url || '')}`)}
                 >
-                  Tạo công thức
+                  {t('collections.createRecipeFromItem')}
                 </Button>
               )}
 
@@ -1064,7 +1067,7 @@ export function CollectionDetailPage() {
                 variant="flat"
                 className="bg-white/10 hover:bg-white/20 text-white"
                 onPress={() => handleOpenEditItem(displayedItems[lightboxIndex])}
-                title="Sửa thông tin"
+                title={t('common.actions.edit')}
               >
                 <Edit2 className="w-4 h-4" />
               </Button>
@@ -1073,7 +1076,7 @@ export function CollectionDetailPage() {
                 variant="flat"
                 className="bg-white/10 hover:bg-white/20 text-white"
                 onPress={() => setLightboxIndex(null)}
-                title="Đóng (Esc)"
+                title={t('collections.closeLightbox')}
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -1091,7 +1094,7 @@ export function CollectionDetailPage() {
               radius="full"
               className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/25 text-white z-20"
               onPress={handlePrevImage}
-              title="Món trước"
+              title={t('collections.previousDish')}
             >
               <ChevronLeft className="w-6 h-6" />
             </Button>
@@ -1108,7 +1111,7 @@ export function CollectionDetailPage() {
               radius="full"
               className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/25 text-white z-20"
               onPress={handleNextImage}
-              title="Món sau"
+              title={t('collections.nextDish')}
             >
               <ChevronRight className="w-6 h-6" />
             </Button>
@@ -1160,18 +1163,18 @@ export function CollectionDetailPage() {
             </div>
             <div className="flex flex-col text-left">
               <h3 className="text-base font-bold">
-                {editingFolder ? 'Đổi tên thư mục' : 'Thêm thư mục mới'}
+                {editingFolder ? t('collections.editFolderTitle') : t('collections.newFolderTitle')}
               </h3>
               <p className="text-xs text-default-400 font-normal">
-                Phân nhóm món ăn theo giai đoạn hoặc loại bữa ăn
+                {t('collections.folderSubtitle')}
               </p>
             </div>
           </ModalHeader>
           <ModalBody>
             <Input
-              label="Tên thư mục"
+              label={t('collections.folderName')}
               labelPlacement="outside"
-              placeholder="Ví dụ: Thực đơn 7 tháng, Bữa sáng..."
+              placeholder={t('collections.folderNamePlaceholder')}
               value={folderName}
               onValueChange={setFolderName}
               variant="flat"
@@ -1184,7 +1187,7 @@ export function CollectionDetailPage() {
               variant="flat" 
               onPress={() => setIsFolderModalOpen(false)}
             >
-              Huỷ
+              {t('common.actions.cancel')}
             </Button>
             <Button 
               color="primary" 
@@ -1192,7 +1195,7 @@ export function CollectionDetailPage() {
               onPress={handleSaveFolder}
               isDisabled={!folderName.trim()}
             >
-              Lưu thư mục
+              {t('collections.saveFolder')}
             </Button>
           </ModalFooter>
         </ModalContent>
@@ -1213,10 +1216,10 @@ export function CollectionDetailPage() {
             </div>
             <div className="flex flex-col text-left">
               <h3 className="text-base font-bold">
-                {editingItem ? 'Chỉnh sửa món ăn' : 'Thêm món vào bộ sưu tập'}
+                {editingItem ? t('collections.editItem') : t('collections.addItem')}
               </h3>
               <p className="text-xs text-default-400 font-normal">
-                Linh hoạt giữa ảnh chụp nhanh đơn giản hoặc liên kết công thức nấu ăn
+                {t('collections.itemSubtitle')}
               </p>
             </div>
           </ModalHeader>
@@ -1234,7 +1237,7 @@ export function CollectionDetailPage() {
                 title={
                   <div className="flex items-center gap-2">
                     <ImageIcon className="w-4 h-4" />
-                    <span>Thêm ảnh nhanh</span>
+                    <span>{t('collections.quickPhoto')}</span>
                   </div>
                 } 
               />
@@ -1243,7 +1246,7 @@ export function CollectionDetailPage() {
                 title={
                   <div className="flex items-center gap-2">
                     <ChefHat className="w-4 h-4" />
-                    <span>Chọn từ Sổ tay công thức</span>
+                    <span>{t('collections.fromRecipeBook')}</span>
                   </div>
                 } 
               />
@@ -1251,7 +1254,7 @@ export function CollectionDetailPage() {
 
             {/* Target Folder Selector using HeroUI Select */}
             <Select
-              label="Thuộc thư mục"
+              label={t('collections.inFolder')}
               labelPlacement="outside"
               variant="flat"
               selectedKeys={itemTargetFolderId ? [itemTargetFolderId] : []}
@@ -1260,7 +1263,7 @@ export function CollectionDetailPage() {
             >
               {(collection.folders || []).map(f => (
                 <SelectItem key={f.id} textValue={f.name}>
-                  {f.name} ({f.items?.length || 0} món)
+                  {f.name} ({f.items?.length || 0} {t('collections.dishes')})
                 </SelectItem>
               ))}
             </Select>
@@ -1271,17 +1274,17 @@ export function CollectionDetailPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-primary flex items-center gap-1.5 uppercase tracking-wide">
                     <ChefHat className="w-4 h-4" />
-                    Liên kết với bài công thức
+                    {t('collections.linkRecipe')}
                   </span>
                   {selectedRecipe && (
                     <Chip size="sm" color="success" variant="flat" startContent={<Check className="w-3 h-3" />}>
-                      Đã chọn: {selectedRecipe.title}
+                      {t('collections.selectedRecipeLabel', { title: selectedRecipe.title })}
                     </Chip>
                   )}
                 </div>
 
                 <Input
-                  placeholder="Gõ tên món để tìm trong Sổ tay công thức..."
+                  placeholder={t('recipes.searchPlaceholder')}
                   value={recipeSearch}
                   onValueChange={setRecipeSearch}
                   variant="flat"
@@ -1294,7 +1297,7 @@ export function CollectionDetailPage() {
                 <div className="max-h-48 overflow-y-auto flex flex-col gap-1.5 pr-1">
                   {filteredRecipesForPicker.length === 0 ? (
                     <p className="text-xs text-default-400 text-center py-4">
-                      Không tìm thấy công thức nào phù hợp
+                      {t('recipes.empty.title')}
                     </p>
                   ) : (
                     filteredRecipesForPicker.map(rec => {
@@ -1330,10 +1333,10 @@ export function CollectionDetailPage() {
                           </div>
 
                           {isSelected ? (
-                            <Chip size="sm" color="primary" variant="solid">Đang chọn</Chip>
+                            <Chip size="sm" color="primary" variant="solid">{t('common.actions.selected', { defaultValue: 'Đang chọn' })}</Chip>
                           ) : (
                             <Button size="sm" variant="light" className="text-xs h-7 min-w-16">
-                              Chọn
+                              {t('common.actions.select')}
                             </Button>
                           )}
                         </div>
@@ -1348,7 +1351,7 @@ export function CollectionDetailPage() {
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-foreground flex items-center gap-2">
                 <ImageIcon className="w-4 h-4 text-default-500" />
-                Ảnh món ăn / thực đơn
+                {t('collections.coverImageLabel')}
               </label>
 
               {itemImageUrl ? (
@@ -1366,7 +1369,7 @@ export function CollectionDetailPage() {
                       onPress={() => itemFileInputRef.current?.click()}
                       startContent={<ImagePlus className="w-4 h-4" />}
                     >
-                      Đổi ảnh
+                      {t('collections.changeImage')}
                     </Button>
                     <Button
                       size="sm"
@@ -1375,7 +1378,7 @@ export function CollectionDetailPage() {
                       variant="flat"
                       className="bg-background/80 backdrop-blur-md"
                       onPress={() => setItemImageUrl('')}
-                      title="Xoá ảnh"
+                      title={t('collections.removeImage')}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -1388,10 +1391,10 @@ export function CollectionDetailPage() {
                 >
                   <ImagePlus className="w-6 h-6 mb-1 text-default-400" />
                   <p className="font-semibold text-xs text-foreground">
-                    Tải ảnh món ăn
+                    {t('collections.uploadCover')}
                   </p>
                   <p className="text-[11px] text-default-400">
-                    Bấm để chọn file ảnh từ thiết bị
+                    {t('collections.dragDropCover')}
                   </p>
                 </div>
               )}
@@ -1407,9 +1410,9 @@ export function CollectionDetailPage() {
 
             {/* Title Input */}
             <Input
-              label="Tên món ăn"
+              label={t('collections.itemTitle')}
               labelPlacement="outside"
-              placeholder="Ví dụ: Cháo yến mạch tôm bằm, Bữa trưa ngày 01..."
+              placeholder={t('collections.dishTitlePlaceholder')}
               value={itemTitle}
               onValueChange={setItemTitle}
               variant="flat"
@@ -1418,9 +1421,9 @@ export function CollectionDetailPage() {
 
             {/* Notes / Description */}
             <Textarea
-              label="Ghi chú / Mô tả"
+              label={t('collections.notesLabel')}
               labelPlacement="outside"
-              placeholder="Ghi chú nguyên liệu, định lượng hoặc cách nấu vắn tắt..."
+              placeholder={t('collections.notesPlaceholder')}
               value={itemNotes}
               onValueChange={setItemNotes}
               variant="flat"
@@ -1432,7 +1435,7 @@ export function CollectionDetailPage() {
               variant="flat" 
               onPress={() => setIsItemModalOpen(false)}
             >
-              Huỷ
+              {t('common.actions.cancel')}
             </Button>
             <Button 
               color="primary" 
@@ -1441,7 +1444,7 @@ export function CollectionDetailPage() {
               isLoading={isSavingItem}
               isDisabled={!itemTitle.trim() || !itemTargetFolderId}
             >
-              Lưu món ăn
+              {t('common.actions.save')}
             </Button>
           </ModalFooter>
         </ModalContent>
@@ -1451,16 +1454,16 @@ export function CollectionDetailPage() {
       <ConfirmModal
         isOpen={deleteFolderId !== null}
         onOpenChange={(open) => !open && setDeleteFolderId(null)}
-        title="Xoá thư mục"
-        description="Bạn có chắc muốn xoá thư mục này không? Các món ăn trong thư mục cũng sẽ bị xoá."
-        confirmLabel="Xoá thư mục"
+        title="{t('collections.deleteFolder')}"
+        description={t('collections.deleteFolderConfirm')}
+        confirmLabel="{t('collections.deleteFolder')}"
         confirmColor="danger"
         onConfirm={async () => {
           if (deleteFolderId && collection) {
             await deleteFolder(collection.id, deleteFolderId);
             setActiveFolderId('all');
             setDeleteFolderId(null);
-            toast.success('Đã xoá thư mục');
+            toast.success(t('collections.folderDeleted'));
           }
         }}
       />
@@ -1469,15 +1472,15 @@ export function CollectionDetailPage() {
       <ConfirmModal
         isOpen={deleteItemTarget !== null}
         onOpenChange={(open) => !open && setDeleteItemTarget(null)}
-        title="Xoá món ăn"
-        description="Bạn có chắc chắn muốn xoá món này khỏi bộ sưu tập?"
-        confirmLabel="Xoá món"
+        title={t('collections.deleteItem')}
+        description={t('collections.deleteItemConfirm')}
+        confirmLabel={t('collections.deleteItem')}
         confirmColor="danger"
         onConfirm={async () => {
           if (deleteItemTarget && collection) {
             await deleteItemFromFolder(collection.id, deleteItemTarget.folderId, deleteItemTarget.itemId);
             setDeleteItemTarget(null);
-            toast.success('Đã xoá món ăn');
+            toast.success(t('collections.dishDeleted'));
           }
         }}
       />

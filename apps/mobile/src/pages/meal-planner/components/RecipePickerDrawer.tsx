@@ -11,6 +11,7 @@ import {
 import { Search, ChefHat, Clock, Flame, Plus, X, Utensils } from 'lucide-react';
 import type { Recipe } from '@apron/core';
 import { useRecipeStore } from '../../../store/useRecipeStore';
+import { useTranslation } from 'react-i18next';
 import { ImageManager } from '../../../lib/image-manager';
 
 interface RecipePickerDrawerProps {
@@ -23,6 +24,8 @@ interface RecipePickerDrawerProps {
 }
 
 export function RecipePickerDrawer({
+  // props
+
   isOpen,
   onClose,
   targetDate,
@@ -30,6 +33,7 @@ export function RecipePickerDrawer({
   onSelectRecipe,
   onAddCustomMeal
 }: RecipePickerDrawerProps) {
+  const { t } = useTranslation();
   const { recipes } = useRecipeStore();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -95,10 +99,10 @@ export function RecipePickerDrawer({
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-base sm:text-lg font-bold text-foreground">
-                Thêm món vào {targetSlotName}
+                {t('planner.addDishToSlot', { slot: targetSlotName })}
               </h3>
               <p className="text-xs text-default-400 font-medium">
-                Kế hoạch ngày: {dateFormatted}
+                {t('planner.planForDate', { date: dateFormatted })}
               </p>
             </div>
             <button
@@ -113,7 +117,7 @@ export function RecipePickerDrawer({
 
         <DrawerBody>
           <Tabs
-            aria-label="Tùy chọn thêm món"
+            aria-label={t('common.actions.more')}
             color="primary"
             variant="underlined"
             classNames={{
@@ -129,7 +133,7 @@ export function RecipePickerDrawer({
               title={
                 <div className="flex items-center gap-1.5">
                   <ChefHat className="w-4 h-4" />
-                  <span>Từ công thức ({recipes.length})</span>
+                  <span>{t('planner.fromRecipeTab', { count: recipes.length })}</span>
                 </div>
               }
             >
@@ -138,7 +142,7 @@ export function RecipePickerDrawer({
                 <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-default-400" />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm công thức nấu ăn..."
+                  placeholder={t('recipes.searchPlaceholder')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 bg-default-100 dark:bg-default-50/20 text-foreground placeholder:text-default-400 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/40 transition-all"
@@ -168,7 +172,7 @@ export function RecipePickerDrawer({
                           : 'bg-default-100 dark:bg-default-50/20 text-default-600 hover:text-foreground'
                       }`}
                     >
-                      {cat === 'all' ? 'Tất cả' : cat}
+                      {cat === 'all' ? t('common.actions.all') : cat}
                     </button>
                   ))}
                 </div>
@@ -179,7 +183,7 @@ export function RecipePickerDrawer({
                 {filteredRecipes.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-10 text-center text-default-400 gap-2">
                     <ChefHat className="w-10 h-10 opacity-30 stroke-[1.5]" />
-                    <p className="text-sm font-medium">Không tìm thấy công thức nào</p>
+                    <p className="text-sm font-medium">{t('recipes.empty.title')}</p>
                     <p className="text-xs text-default-400">
                       Bạn có thể nhập món tự chọn ở tab bên cạnh
                     </p>
@@ -260,7 +264,7 @@ export function RecipePickerDrawer({
                             onClose();
                           }}
                         >
-                          Chọn
+                          {t('common.actions.select')}
                         </Button>
                       </div>
                     );
@@ -275,20 +279,20 @@ export function RecipePickerDrawer({
               title={
                 <div className="flex items-center gap-1.5">
                   <Utensils className="w-4 h-4" />
-                  <span>Món tự chọn / Ăn ngoài</span>
+                  <span>{t('planner.customTab')}</span>
                 </div>
               }
             >
               <form onSubmit={handleCustomSubmit} className="flex flex-col gap-4 py-2">
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="custom-dish-title" className="text-xs font-bold text-foreground">
-                    Tên món ăn <span className="text-danger">*</span>
+                    {t('planner.customDish')} <span className="text-danger">*</span>
                   </label>
                   <input
                     id="custom-dish-title"
                     type="text"
                     required
-                    placeholder="Vd: Phở bò tái lăn, Cơm sườn nướng, Ăn ngoài..."
+                    placeholder={t('planner.customDishPlaceholder')}
                     value={customTitle}
                     onChange={(e) => setCustomTitle(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-default-100 dark:bg-default-50/20 text-foreground placeholder:text-default-400 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/40 transition-all font-medium"
@@ -297,12 +301,12 @@ export function RecipePickerDrawer({
 
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="custom-dish-note" className="text-xs font-bold text-foreground">
-                    Ghi chú món (tùy chọn)
+                    {t('recipes.form.notesLabel')}
                   </label>
                   <textarea
                     id="custom-dish-note"
                     rows={2}
-                    placeholder="Vd: Quán quen đầu ngõ, nhớ mua thêm sữa chua..."
+                    placeholder={t('planner.customDishNotesPlaceholder')}
                     value={customNote}
                     onChange={(e) => setCustomNote(e.target.value)}
                     className="w-full px-3.5 py-2 bg-default-100 dark:bg-default-50/20 text-foreground placeholder:text-default-400 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/40 transition-all resize-none"
@@ -312,7 +316,7 @@ export function RecipePickerDrawer({
                 {/* Quick suggestions */}
                 <div className="flex flex-col gap-1.5">
                   <span className="text-[11px] font-semibold text-default-400">
-                    Gợi ý nhanh:
+                    {t('planner.quickSuggestions')}
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {['Cơm văn phòng', 'Phở bò', 'Bún chả', 'Bánh mì', 'Ăn cỗ / Tiệc', 'Tự nấu đơn giản'].map(
@@ -337,7 +341,7 @@ export function RecipePickerDrawer({
                   startContent={<Plus className="w-4 h-4" />}
                   disabled={!customTitle.trim()}
                 >
-                  Thêm vào thực đơn
+                  {t('planner.addToPlan')}
                 </Button>
               </form>
             </Tab>

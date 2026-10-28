@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { 
   Button, 
@@ -58,12 +59,14 @@ export interface CourseFormProps {
 }
 
 export function CourseForm({
+  // props
   initialData,
   onSubmit,
   onCancel,
   submitText,
   isModal: _isModal = false
 }: CourseFormProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { recipes, addRecipe, fetchRecipes } = useRecipeStore();
 
@@ -350,7 +353,7 @@ export function CourseForm({
     <div className="flex flex-col w-full bg-background text-foreground min-h-full">
       {/* 1. Header (Chuẩn PageHeader đồng nhất RecipeForm & TipFormModal) */}
       <PageHeader
-        title={initialData ? 'Chỉnh sửa khoá học' : 'Tạo khoá học mới'}
+        title={initialData ? t('courses.form.editTitle') : t('courses.form.createTitle')}
         showBackButton
         onBack={onCancel || (() => navigate(-1))}
         className="px-4 pt-4 pb-2"
@@ -407,7 +410,7 @@ export function CourseForm({
         {activeStep === 'info' && (
           <div className="flex flex-col gap-6">
             {/* Ảnh bìa khoá học (Cover Image) */}
-            <FormField label="Ảnh bìa khoá học" icon={ImageIcon}>
+            <FormField label={t('recipes.form.coverImage')} icon={ImageIcon}>
               {formData.thumbnail_url ? (
                 <div className="w-full aspect-16/9 sm:aspect-21/9 max-h-[280px] rounded-2xl overflow-hidden relative group border border-divider/60 bg-default-100 shadow-none">
                   <img
@@ -456,7 +459,7 @@ export function CourseForm({
             </FormField>
 
             {/* Tên khoá học */}
-            <FormField label="Tên khoá học" icon={Type} isRequired>
+            <FormField label={t('courses.form.titleLabel')} icon={Type} isRequired>
               <Input
                 placeholder="VD: Nhập môn làm bánh Âu căn bản"
                 value={formData.title}
@@ -471,7 +474,7 @@ export function CourseForm({
             </FormField>
 
             {/* Cấp độ khoá học */}
-            <FormField label="Cấp độ khoá học" icon={Gauge}>
+            <FormField label={t('courses.form.levelLabel')} icon={Gauge}>
               <div className="grid grid-cols-3 gap-3">
                 {(['Cơ bản', 'Nâng cao', 'Chuyên gia'] as const).map(level => {
                   const isSelected = formData.level === level;
@@ -482,7 +485,7 @@ export function CourseForm({
                       onClick={() => setFormData(prev => ({ ...prev, level }))}
                       className={`flex items-center justify-center h-12 rounded-xl border-2 transition-all font-medium text-sm ${
                         isSelected
-                          ? 'border-primary bg-primary-50 dark:bg-primary-50/20 text-primary font-semibold'
+                          ? 'border-primary bg-primary/10 dark:bg-primary/20 dark:bg-primary/10 dark:bg-primary/20/20 text-primary font-semibold'
                           : 'border-default-200 dark:border-default-100 hover:border-default-300 text-default-600 bg-default-50/50'
                       }`}
                     >
@@ -494,7 +497,7 @@ export function CourseForm({
             </FormField>
 
             {/* Mô tả khoá học */}
-            <FormField label="Mô tả khoá học" icon={Info}>
+            <FormField label={t('courses.form.descLabel')} icon={Info}>
               <div className="bg-default-100 rounded-xl overflow-hidden p-3 min-h-[140px]">
                 <BlockEditor
                   value={formData.description || ''}

@@ -1,21 +1,20 @@
+import { useTranslation } from 'react-i18next';
 import { 
   Drawer, 
   DrawerContent, 
   DrawerHeader, 
   DrawerBody, 
-  DrawerFooter,
-  Button, 
-  Switch 
+  DrawerFooter, 
+  Button 
 } from '@/ui';
 import { 
   Filter, 
   Check, 
   Clock, 
   Star, 
-  Sparkles, 
   ChefHat, 
   Flame, 
-  Layers,
+  Layers, 
   X 
 } from 'lucide-react';
 
@@ -25,7 +24,6 @@ export interface RecipeFilterState {
   tags: string[];
   cookedStatus?: 'all' | 'cooked' | 'uncooked';
   minRating?: number;
-  hideVariants?: boolean;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -34,8 +32,7 @@ export const defaultFilterState: RecipeFilterState = {
   maxTime: null,
   tags: [],
   cookedStatus: 'all',
-  minRating: 0,
-  hideVariants: false
+  minRating: 0
 };
 
 const DEFAULT_INACTIVE_BUTTON_CLASS = 'bg-default-100 hover:bg-default-200/80 text-default-700 dark:text-default-300 border-transparent';
@@ -63,28 +60,29 @@ export function RecipeFilterDrawer({
   onFilterChange, 
   availableTags = [] 
 }: RecipeFilterDrawerProps) {
+  const { t } = useTranslation();
   
   const timeOptions = [
-    { label: 'Tất cả', value: null },
-    { label: '≤ 15 phút', value: 15 },
-    { label: '≤ 30 phút', value: 30 },
-    { label: '≤ 60 phút', value: 60 },
+    { label: t('recipes.filter.all'), value: null },
+    { label: `≤ 15 ${t('common.time.minutes')}`, value: 15 },
+    { label: `≤ 30 ${t('common.time.minutes')}`, value: 30 },
+    { label: `≤ 60 ${t('common.time.minutes')}`, value: 60 },
   ];
 
   const difficultyOptions = [
-    { label: 'Dễ', colorClass: 'border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold' },
-    { label: 'Trung bình', colorClass: 'border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold' },
-    { label: 'Khó', colorClass: 'border-rose-500/40 bg-rose-500/15 text-rose-600 dark:text-rose-400 font-bold' }
+    { value: 'Dễ', label: t('recipes.difficulty.easy'), colorClass: 'border-emerald-500/40 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold' },
+    { value: 'Trung bình', label: t('recipes.difficulty.medium'), colorClass: 'border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold' },
+    { value: 'Khó', label: t('recipes.difficulty.hard'), colorClass: 'border-rose-500/40 bg-rose-500/15 text-rose-600 dark:text-rose-400 font-bold' }
   ];
 
   const cookedOptions = [
-    { label: 'Tất cả', value: 'all' },
-    { label: 'Đã nấu', value: 'cooked' },
-    { label: 'Chưa nấu', value: 'uncooked' }
+    { label: t('recipes.filter.cookedAll'), value: 'all' },
+    { label: t('recipes.filter.cooked'), value: 'cooked' },
+    { label: t('recipes.filter.uncooked'), value: 'uncooked' }
   ];
 
   const ratingOptions = [
-    { label: 'Tất cả', value: 0 },
+    { label: t('recipes.filter.all'), value: 0 },
     { label: '3+ ★', value: 3 },
     { label: '4+ ★', value: 4 },
     { label: '5 ★', value: 5 }
@@ -95,18 +93,17 @@ export function RecipeFilterDrawer({
     (filters.maxTime !== null ? 1 : 0) + 
     ((filters.tags?.length ?? 0) > 0 ? 1 : 0) + 
     (filters.cookedStatus && filters.cookedStatus !== 'all' ? 1 : 0) + 
-    ((filters.minRating ?? 0) > 0 ? 1 : 0) + 
-    (filters.hideVariants ? 1 : 0);
+    ((filters.minRating ?? 0) > 0 ? 1 : 0);
 
   const handleClear = () => {
     onFilterChange(defaultFilterState);
   };
 
-  const toggleDifficulty = (diff: string) => {
-    const isSelected = filters.difficulties.includes(diff);
+  const toggleDifficulty = (diffValue: string) => {
+    const isSelected = filters.difficulties.includes(diffValue);
     const newDiffs = isSelected
-      ? filters.difficulties.filter(d => d !== diff)
-      : [...filters.difficulties, diff];
+      ? filters.difficulties.filter(d => d !== diffValue)
+      : [...filters.difficulties, diffValue];
     onFilterChange({ ...filters, difficulties: newDiffs });
   };
 
@@ -115,7 +112,7 @@ export function RecipeFilterDrawer({
       isOpen={isOpen} 
       onOpenChange={onOpenChange} 
       size="sm" 
-      placement="right"
+      placement="right" 
       hideCloseButton
       classNames={{
         base: "max-w-md w-full bg-background dark:bg-background border-l border-divider/60 shadow-2xl flex flex-col",
@@ -132,7 +129,7 @@ export function RecipeFilterDrawer({
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-base font-bold text-foreground">Bộ lọc công thức</span>
+                    <span className="text-base font-bold text-foreground">{t('recipes.filter.title')}</span>
                     {activeFilterCount > 0 && (
                       <span className="px-2 py-0.5 text-xs font-bold bg-primary text-primary-foreground rounded-full shadow-xs animate-in fade-in zoom-in-95">
                         {activeFilterCount}
@@ -140,7 +137,7 @@ export function RecipeFilterDrawer({
                     )}
                   </div>
                   <p className="text-xs text-default-400 font-normal">
-                    Tùy chỉnh tiêu chí tìm kiếm món ăn
+                    {t('recipes.filter.resetFilters')} &bull; {activeFilterCount} {t('common.actions.filter').toLowerCase()}
                   </p>
                 </div>
               </div>
@@ -151,7 +148,7 @@ export function RecipeFilterDrawer({
                 size="sm"
                 className="rounded-full text-default-400 hover:text-foreground"
                 onPress={onClose}
-                aria-label="Đóng"
+                aria-label={t('common.actions.close')}
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -166,16 +163,16 @@ export function RecipeFilterDrawer({
                   <div className="w-7 h-7 rounded-xl bg-warning/15 text-warning flex items-center justify-center shrink-0 shadow-xs">
                     <Flame className="w-4 h-4" />
                   </div>
-                  <span>Độ khó</span>
+                  <span>{t('recipes.filter.difficulty')}</span>
                 </span>
                 <div className="grid grid-cols-3 gap-2">
                   {difficultyOptions.map(diff => {
-                    const isSelected = filters.difficulties.includes(diff.label);
+                    const isSelected = filters.difficulties.includes(diff.value);
                     return (
                       <button
-                        key={diff.label}
+                        key={diff.value}
                         type="button"
-                        onClick={() => toggleDifficulty(diff.label)}
+                        onClick={() => toggleDifficulty(diff.value)}
                         className={`h-10 px-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-all border cursor-pointer ${
                           isSelected
                             ? diff.colorClass + ' shadow-xs'
@@ -190,7 +187,6 @@ export function RecipeFilterDrawer({
                 </div>
               </div>
 
-              {/* Phân cách có padding hai bên */}
               <FilterDivider />
 
               {/* 2. THỜI GIAN NẤU */}
@@ -199,7 +195,7 @@ export function RecipeFilterDrawer({
                   <div className="w-7 h-7 rounded-xl bg-primary/15 text-primary flex items-center justify-center shrink-0 shadow-xs">
                     <Clock className="w-4 h-4" />
                   </div>
-                  <span>Thời gian nấu tối đa</span>
+                  <span>{t('recipes.filter.maxTime')}</span>
                 </span>
                 <div className="grid grid-cols-2 gap-2">
                   {timeOptions.map(opt => {
@@ -223,16 +219,15 @@ export function RecipeFilterDrawer({
                 </div>
               </div>
 
-              {/* Phân cách có padding hai bên */}
               <FilterDivider />
 
-              {/* 3. TRẠNG THÁI THỰC HIỆN */}
+              {/* 3. TRẠNG THÁI NẤU */}
               <div className="space-y-2.5">
                 <span className="text-sm font-bold text-foreground flex items-center gap-2.5">
                   <div className="w-7 h-7 rounded-xl bg-success/15 text-success flex items-center justify-center shrink-0 shadow-xs">
                     <ChefHat className="w-4 h-4" />
                   </div>
-                  <span>Trạng thái thực hiện</span>
+                  <span>{t('recipes.filter.cookedStatus')}</span>
                 </span>
                 <div className="grid grid-cols-3 gap-2">
                   {cookedOptions.map(opt => {
@@ -256,7 +251,6 @@ export function RecipeFilterDrawer({
                 </div>
               </div>
 
-              {/* Phân cách có padding hai bên */}
               <FilterDivider />
 
               {/* 4. ĐÁNH GIÁ TỐI THIỂU */}
@@ -265,7 +259,7 @@ export function RecipeFilterDrawer({
                   <div className="w-7 h-7 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0 shadow-xs">
                     <Star className="w-4 h-4 fill-amber-500" />
                   </div>
-                  <span>Đánh giá tối thiểu</span>
+                  <span>{t('recipes.filter.minRating')}</span>
                 </span>
                 <div className="grid grid-cols-4 gap-2">
                   {ratingOptions.map(opt => {
@@ -289,27 +283,7 @@ export function RecipeFilterDrawer({
                 </div>
               </div>
 
-              {/* Phân cách có padding hai bên */}
-              <FilterDivider />
 
-              {/* 5. MÓN BIẾN THỂ */}
-              <div className="flex items-center justify-between py-1">
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm font-bold text-foreground flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-secondary" />
-                    <span>Bao gồm món biến thể</span>
-                  </span>
-                  <span className="text-xs text-default-400">
-                    Hiển thị các phiên bản công thức con
-                  </span>
-                </div>
-                <Switch
-                  isSelected={!filters.hideVariants}
-                  onValueChange={(val) => onFilterChange({ ...filters, hideVariants: !val })}
-                  size="md"
-                  color="primary"
-                />
-              </div>
 
               {/* 6. THẺ CÔNG THỨC */}
               {availableTags && availableTags.length > 0 && (
@@ -320,7 +294,7 @@ export function RecipeFilterDrawer({
                       <div className="w-7 h-7 rounded-xl bg-primary/15 text-primary flex items-center justify-center shrink-0 shadow-xs">
                         <Layers className="w-4 h-4" />
                       </div>
-                      <span>Thẻ công thức ({availableTags.length})</span>
+                      <span>{t('recipes.filter.tags')} ({availableTags.length})</span>
                     </label>
                     <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-1">
                       {availableTags.map(tag => {
@@ -360,14 +334,14 @@ export function RecipeFilterDrawer({
                 onPress={handleClear}
                 className="flex-1 font-semibold rounded-xl h-11 text-sm"
               >
-                Đặt lại
+                {t('recipes.filter.resetFilters')}
               </Button>
               <Button
                 color="primary"
                 onPress={() => onOpenChange(false)}
                 className="flex-1 font-bold rounded-xl h-11 text-sm shadow-md"
               >
-                Áp dụng bộ lọc
+                {t('recipes.filter.applyFilters')}
               </Button>
             </DrawerFooter>
           </>

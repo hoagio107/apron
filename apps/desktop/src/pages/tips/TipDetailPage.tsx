@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/ui';
 import { ArrowLeft, Edit, Trash2, Calendar, Lightbulb } from 'lucide-react';
@@ -6,10 +7,11 @@ import { useTipStore } from '../../store/useTipStore';
 import { TIP_CATEGORIES, type Tip, TipRepository } from '@apron/core';
 import { ImageManager } from '../../lib/image-manager';
 import { format } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { vi, enUS } from 'date-fns/locale';
 import { TipFormModal } from './components/TipFormModal';
 
 export function TipDetailPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
   const { deleteTip } = useTipStore();
@@ -28,16 +30,16 @@ export function TipDetailPage() {
   }, [id]);
 
   if (isLoading) {
-    return <div className="p-8 text-center text-default-500">Đang tải...</div>;
+    return <div className="p-8 text-center text-default-500">{t('common.loading')}</div>;
   }
 
   if (!tip) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center h-full">
         <Lightbulb className="w-16 h-16 text-default-300 mb-4" />
-        <h2 className="text-2xl font-bold mb-2">Không tìm thấy mẹo</h2>
-        <p className="text-default-500 mb-6">Mẹo này có thể đã bị xóa hoặc không tồn tại.</p>
-        <Button color="primary" onPress={() => navigate('/tips')}>Quay lại danh sách</Button>
+        <h2 className="text-2xl font-bold mb-2">{t('tips.emptySearchTitle')}</h2>
+        <p className="text-default-500 mb-6">{t('tips.emptySearchDesc')}</p>
+        <Button color="primary" onPress={() => navigate('/tips')}>{t('recipes.backToList')}</Button>
       </div>
     );
   }
@@ -45,7 +47,7 @@ export function TipDetailPage() {
   const category = TIP_CATEGORIES.find(c => c.id === tip.category_id);
 
   const handleDelete = async () => {
-    if (window.confirm('Bạn có chắc muốn xóa mẹo này không?')) {
+    if (window.confirm(t('tips.confirmDelete'))) {
       await deleteTip(tip.id!);
       navigate('/tips');
     }
@@ -120,7 +122,7 @@ export function TipDetailPage() {
               )}
               <div className="flex items-center text-sm text-white/80 gap-1.5 font-medium bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm">
                 <Calendar className="w-4 h-4" />
-                <span>{tip.created_at ? format(new Date(tip.created_at), 'dd MMMM, yyyy', { locale: vi }) : ''}</span>
+                <span>{tip.created_at ? format(new Date(tip.created_at), 'dd MMMM, yyyy', { locale: i18n.language === 'vi' ? vi : enUS }) : ''}</span>
               </div>
             </div>
 

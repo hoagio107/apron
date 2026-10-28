@@ -30,8 +30,10 @@ import {
   useTipStore,
   useUnitStore
 } from '@apron/core';
+import { useTranslation } from 'react-i18next';
 
 export function JsonImportPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -72,14 +74,18 @@ export function JsonImportPage() {
       setParseResult(result);
       setImportSummary(null);
       if (result.totalItems === 0) {
-        toast.warning('Tệp không chứa dữ liệu công thức, mẹo hoặc đơn vị nào.');
+        toast.warning(t('common.status.noResults'));
       } else {
-        toast.success(`Đã phân tích ${result.totalItems} mục dữ liệu!`);
+        toast.success(t('importJson.validSummary', {
+          recipes: result.items.filter(i => i.type === 'recipe').length,
+          tips: result.items.filter(i => i.type === 'tip').length,
+          units: result.items.filter(i => i.type === 'unit').length,
+        }));
       }
     } catch (e: unknown) {
       const err = e as Error;
       console.error('JSON parse error:', err);
-      toast.error(err?.message || 'Tệp JSON không hợp lệ hoặc cấu trúc bị lỗi.');
+      toast.error(err?.message || t('importJson.errorToast'));
     }
   };
 
@@ -101,17 +107,17 @@ export function JsonImportPage() {
       const text = await navigator.clipboard.readText();
       if (text) {
         setPastedJson(text);
-        toast.success('Đã dán nội dung từ clipboard!');
+        toast.success(t('importJson.pastedSuccess'));
       }
     } catch {
-      toast.info('Vui lòng chạm và dán thủ công vào ô nhập.');
+      toast.info(t('importJson.pasteLabel'));
     }
   };
 
   const handleConfirmImport = async () => {
     if (!parseResult) return;
     setIsImporting(true);
-    setImportProgress({ completed: 0, total: parseResult.items.length, currentName: 'Đang chuẩn bị...' });
+    setImportProgress({ completed: 0, total: parseResult.items.length, currentName: t('common.status.loading') });
 
     try {
       const summary = await executeImport(
@@ -122,13 +128,15 @@ export function JsonImportPage() {
         }
       );
       setImportSummary(summary);
-      toast.success(
-        `Nhập dữ liệu thành công: Thêm mới ${summary.importedCount} mục, Cập nhật ${summary.updatedCount} mục!`
-      );
+      toast.success(t('importJson.successToast', {
+        recipes: summary.importedCount,
+        tips: summary.updatedCount,
+        units: summary.skippedCount,
+      }));
     } catch (e: unknown) {
       const err = e as Error;
       console.error('Import error:', err);
-      toast.error('Có lỗi xảy ra khi nhập dữ liệu: ' + (err?.message || ''));
+      toast.error(t('importJson.errorToast') + ': ' + (err?.message || ''));
     } finally {
       setIsImporting(false);
     }
@@ -167,7 +175,7 @@ export function JsonImportPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background pb-28">
       <PageHeader 
-        title="Nhập dữ liệu JSON" 
+        title={t('importJson.title')} 
         showBackButton
         onBack={() => navigate(-1)}
       />
@@ -178,8 +186,8 @@ export function JsonImportPage() {
           <div className="bg-content1 rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-divider flex flex-col items-center gap-4 text-center animate-in zoom-in-95 duration-200">
             <Spinner size="lg" color="primary" />
             <div>
-              <h3 className="text-base font-bold text-foreground mb-1">Đang nhập dữ liệu vào máy...</h3>
-              <p className="text-xs text-default-400">Vui lòng không đóng ứng dụng trong khi dữ liệu đang được lưu trữ.</p>
+              <h3 className="text-base font-bold text-foreground mb-1">{t('importJson.savingProgress')}</h3>
+              <p className="text-xs text-default-400">{t('importJson.savingProgressDesc')}</p>
             </div>
             {importProgress.total > 0 && (
               <div className="w-full mt-2">
@@ -188,7 +196,7 @@ export function JsonImportPage() {
                   <span className="font-mono">{importProgress.completed} / {importProgress.total}</span>
                 </div>
                 <Progress
-                  aria-label="Tiến trình nhập dữ liệu"
+                  aria-label="Progress"
                   size="sm"
                   color="primary"
                   value={Math.round((importProgress.completed / importProgress.total) * 100)}
@@ -208,24 +216,24 @@ export function JsonImportPage() {
               <CheckCircle2 className="w-7 h-7" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-foreground">Nhập dữ liệu thành công!</h2>
-              <p className="text-xs text-default-400 mt-0.5">Dữ liệu đã được nạp an toàn vào máy và đồng bộ chỉ mục tức thì.</p>
+              <h2 className="text-base font-bold text-foreground">{t('importJson.successTitle')}</h2>
+              <p className="text-xs text-default-400 mt-0.5">{t('importJson.successDesc')}</p>
             </div>
 
             <div className="flex flex-col gap-1.5 w-full my-2 text-xs">
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-success/10 text-success font-medium">
-                <span>Số mục thêm mới:</span>
+                <span>{t('importJson.newAdded')}:</span>
                 <span className="font-bold">+{importSummary.importedCount}</span>
               </div>
               {importSummary.updatedCount > 0 && (
                 <div className="flex items-center justify-between p-2.5 rounded-xl bg-warning/10 text-warning font-medium">
-                  <span>Số mục cập nhật (ghi đè):</span>
+                  <span>{t('importJson.updated')}:</span>
                   <span className="font-bold">{importSummary.updatedCount}</span>
                 </div>
               )}
               {importSummary.skippedCount > 0 && (
                 <div className="flex items-center justify-between p-2.5 rounded-xl bg-default-100 text-default-500 font-medium">
-                  <span>Số mục bỏ qua:</span>
+                  <span>{t('importJson.skipped')}:</span>
                   <span className="font-bold">{importSummary.skippedCount}</span>
                 </div>
               )}
@@ -238,14 +246,14 @@ export function JsonImportPage() {
                 endContent={<ChevronRight className="w-4 h-4" />}
                 className="w-full rounded-2xl font-bold text-sm h-11"
               >
-                Xem danh sách công thức
+                {t('importJson.viewRecipes')}
               </Button>
               <Button
                 variant="flat"
                 onPress={handleReset}
                 className="w-full rounded-2xl font-medium text-xs h-10"
               >
-                Nhập tệp khác
+                {t('importJson.importAnother')}
               </Button>
             </div>
           </div>
@@ -265,7 +273,7 @@ export function JsonImportPage() {
                     : 'text-default-400'
                 }`}
               >
-                Chọn Tệp JSON
+                {t('importJson.tabFile')}
               </button>
               <button
                 type="button"
@@ -276,7 +284,7 @@ export function JsonImportPage() {
                     : 'text-default-400'
                 }`}
               >
-                Dán mã JSON
+                {t('importJson.tabPaste')}
               </button>
             </div>
 
@@ -296,20 +304,20 @@ export function JsonImportPage() {
                   <Upload className="w-7 h-7" />
                 </div>
                 <h3 className="text-sm font-bold text-foreground mb-1">
-                  Chạm để chọn tệp .json từ thiết bị
+                  {t('importJson.dragDrop')}
                 </h3>
                 <p className="text-xs text-default-400 max-w-xs mb-3">
-                  Hỗ trợ tệp sao lưu dữ liệu Apron, danh sách công thức hoặc từng món riêng lẻ.
+                  {t('importJson.fileHelp')}
                 </p>
                 <div className="flex items-center gap-1.5 text-[11px] text-default-400 bg-default-100/70 px-3 py-1.5 rounded-full">
                   <Sparkles className="w-3.5 h-3.5 text-warning" />
-                  <span>Tự động phát hiện trùng lặp trước khi lưu</span>
+                  <span>{t('importJson.autoCheck')}</span>
                 </div>
               </div>
             ) : (
               <div className="flex flex-col gap-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-default-400">Dán trực tiếp JSON vào đây:</span>
+                  <span className="text-xs text-default-400">{t('importJson.pasteLabel')}</span>
                   <Button
                     size="sm"
                     variant="light"
@@ -317,13 +325,13 @@ export function JsonImportPage() {
                     startContent={<ClipboardPaste className="w-3.5 h-3.5 text-primary" />}
                     className="text-xs text-primary h-7 px-2"
                   >
-                    Dán nhanh
+                    {t('importJson.pasteFromClipboard')}
                   </Button>
                 </div>
                 <textarea
                   value={pastedJson}
                   onChange={(e) => setPastedJson(e.target.value)}
-                  placeholder='[{"title": "Món ăn", "ingredients": [...]}]'
+                  placeholder='[{"title": "...", "ingredients": []}]'
                   rows={8}
                   className="w-full p-3.5 rounded-2xl bg-content2/30 border border-divider text-xs font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
@@ -333,7 +341,7 @@ export function JsonImportPage() {
                   onPress={() => handleProcessRawJson(pastedJson, 'pasted-data.json')}
                   className="w-full rounded-2xl font-bold text-sm h-11"
                 >
-                  Phân tích dữ liệu JSON
+                  {t('importJson.parseBtn')}
                 </Button>
               </div>
             )}
@@ -353,7 +361,7 @@ export function JsonImportPage() {
                 onClick={handleReset}
                 className="text-xs text-primary font-medium"
               >
-                Đổi tệp
+                {t('importJson.selectAnotherFile')}
               </button>
             </div>
 
@@ -372,7 +380,7 @@ export function JsonImportPage() {
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span className="text-base font-bold">{parseResult.validCount}</span>
                 </div>
-                <span className="text-[10px] text-default-500 font-medium">Hợp lệ</span>
+                <span className="text-[10px] text-default-500 font-medium">{t('importJson.valid')}</span>
               </div>
 
               {/* Trùng lặp */}
@@ -388,7 +396,7 @@ export function JsonImportPage() {
                   <AlertTriangle className="w-3.5 h-3.5" />
                   <span className="text-base font-bold">{parseResult.duplicateCount}</span>
                 </div>
-                <span className="text-[10px] text-default-500 font-medium">Trùng lặp</span>
+                <span className="text-[10px] text-default-500 font-medium">{t('importJson.duplicate')}</span>
               </div>
 
               {/* Lỗi */}
@@ -404,7 +412,7 @@ export function JsonImportPage() {
                   <XCircle className="w-3.5 h-3.5" />
                   <span className="text-base font-bold">{parseResult.invalidCount}</span>
                 </div>
-                <span className="text-[10px] text-default-500 font-medium">Lỗi</span>
+                <span className="text-[10px] text-default-500 font-medium">{t('importJson.invalid')}</span>
               </div>
             </div>
 
@@ -413,14 +421,14 @@ export function JsonImportPage() {
               <div className="bg-content2/30 border border-divider p-3.5 rounded-2xl flex flex-col gap-2">
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-warning">
                   <Copy className="w-3.5 h-3.5" />
-                  <span>Xử lý {parseResult.duplicateCount} mục trùng lặp:</span>
+                  <span>{t('importJson.conflictTitle')} ({parseResult.duplicateCount}):</span>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                   <label className={`flex items-center justify-between p-2.5 rounded-xl border text-xs cursor-pointer transition-all ${
                     conflictStrategy === 'skip' ? 'border-primary bg-primary/10 font-bold' : 'border-divider bg-content1'
                   }`}>
-                    <span className="text-foreground">Bỏ qua (Chỉ lấy món mới)</span>
+                    <span className="text-foreground">{t('importJson.conflictSkip')}</span>
                     <input
                       type="radio"
                       name="strategy"
@@ -433,7 +441,7 @@ export function JsonImportPage() {
                   <label className={`flex items-center justify-between p-2.5 rounded-xl border text-xs cursor-pointer transition-all ${
                     conflictStrategy === 'overwrite' ? 'border-primary bg-primary/10 font-bold' : 'border-divider bg-content1'
                   }`}>
-                    <span className="text-foreground">Ghi đè (Cập nhật món cũ)</span>
+                    <span className="text-foreground">{t('importJson.conflictOverwrite')}</span>
                     <input
                       type="radio"
                       name="strategy"
@@ -446,7 +454,7 @@ export function JsonImportPage() {
                   <label className={`flex items-center justify-between p-2.5 rounded-xl border text-xs cursor-pointer transition-all ${
                     conflictStrategy === 'create_copy' ? 'border-primary bg-primary/10 font-bold' : 'border-divider bg-content1'
                   }`}>
-                    <span className="text-foreground">Tạo bản sao mới</span>
+                    <span className="text-foreground">{t('importJson.conflictKeepBoth')}</span>
                     <input
                       type="radio"
                       name="strategy"
@@ -463,7 +471,7 @@ export function JsonImportPage() {
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-xs font-bold text-foreground">
-                  Chi tiết ({filteredItems.length} mục)
+                  {t('importJson.previewList')} ({filteredItems.length} {t('collections.items')})
                 </span>
                 <div className="relative w-44">
                   <Search className="w-3 h-3 text-default-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -471,7 +479,7 @@ export function JsonImportPage() {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Tìm tên..."
+                    placeholder={t('importJson.searchItemPlaceholder')}
                     className="w-full pl-7 pr-2 py-1 rounded-xl bg-default-100 border border-divider text-xs text-foreground placeholder:text-default-400 focus:outline-none"
                   />
                 </div>
@@ -480,7 +488,7 @@ export function JsonImportPage() {
               <div className="bg-content1 rounded-2xl border border-divider divide-y divide-divider/30 max-h-60 overflow-y-auto">
                 {filteredItems.length === 0 ? (
                   <div className="py-6 text-center text-xs text-default-400">
-                    Không có mục nào trong danh mục này.
+                    {t('importJson.noMatchingItems')}
                   </div>
                 ) : (
                   filteredItems.map((item) => {
@@ -498,7 +506,7 @@ export function JsonImportPage() {
                           <div className="flex flex-col min-w-0">
                             <span className="text-xs font-semibold text-foreground truncate">{item.title}</span>
                             <span className="text-[10px] text-default-400 truncate">
-                              {item.statusReason || item.subtitle || (isRecipe ? 'Công thức' : isTip ? 'Mẹo' : 'Đơn vị')}
+                              {item.statusReason || item.subtitle || (isRecipe ? t('nav.recipes') : isTip ? t('nav.kitchenTips') : t('nav.units'))}
                             </span>
                           </div>
                         </div>
@@ -507,17 +515,17 @@ export function JsonImportPage() {
                         <div className="shrink-0">
                           {item.status === 'valid' && (
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-success/15 text-success">
-                              Hợp lệ
+                              {t('importJson.valid')}
                             </span>
                           )}
                           {item.status === 'duplicate' && (
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-warning/15 text-warning">
-                              Trùng
+                              {t('importJson.duplicate')}
                             </span>
                           )}
                           {item.status === 'invalid' && (
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-danger/15 text-danger">
-                              Lỗi
+                              {t('importJson.invalid')}
                             </span>
                           )}
                         </div>
@@ -535,7 +543,7 @@ export function JsonImportPage() {
                 onPress={handleReset}
                 className="rounded-2xl text-xs font-medium h-11 px-4"
               >
-                Hủy
+                {t('common.actions.cancel')}
               </Button>
 
               <Button
@@ -544,7 +552,7 @@ export function JsonImportPage() {
                 isDisabled={importableCount === 0}
                 className="flex-1 rounded-2xl font-bold text-sm h-11 shadow-lg shadow-primary/25"
               >
-                Xác nhận nhập ({importableCount} mục)
+                {t('importJson.confirmImport', { count: importableCount })}
               </Button>
             </div>
           </div>

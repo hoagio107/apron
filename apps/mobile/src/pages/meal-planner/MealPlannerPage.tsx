@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   ChevronLeft,
@@ -49,6 +50,7 @@ function getSlotIcon(slotId: string) {
 }
 
 export function MealPlannerPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState<Date>(() => new Date());
   
@@ -157,13 +159,13 @@ export function MealPlannerPage() {
         recipe_id: recipe.id,
         meal_type: pickerState.slotId as MealType
       });
-      toast.success(`Đã thêm "${recipe.title}" vào ${pickerState.slotName}!`);
+      toast.success(t('planner.recipeAddedSuccess', { title: recipe.title, slot: pickerState.slotName }));
     } catch {
-      toast.error('Không thể thêm món vào thực đơn.');
+      toast.error(t('planner.recipeAddedError'));
     }
   };
 
-  // Thêm món tự chọn / ăn ngoài
+  // {t('planner.addDish')} tự chọn / ăn ngoài
   const handleAddCustomMeal = async (title: string, note?: string) => {
     if (!pickerState.slotId) return;
     try {
@@ -172,9 +174,9 @@ export function MealPlannerPage() {
         notes: fullNote,
         meal_type: pickerState.slotId as MealType
       });
-      toast.success(`Đã thêm "${title}" vào ${pickerState.slotName}!`);
+      toast.success(t('planner.recipeAddedSuccess', { title, slot: pickerState.slotName }));
     } catch {
-      toast.error('Không thể thêm món vào thực đơn.');
+      toast.error(t('planner.recipeAddedError'));
     }
   };
 
@@ -182,16 +184,16 @@ export function MealPlannerPage() {
   const handleRemoveEntry = async (entryId: string, dishTitle: string) => {
     try {
       await removeMealPlanEntry(selectedDateStr, entryId);
-      toast.success(`Đã xóa món "${dishTitle}" khỏi bữa ăn.`);
+      toast.success(t('planner.dishRemovedSuccess', { title: dishTitle }));
     } catch {
-      toast.error('Không thể xóa món.');
+      toast.error(t('planner.dishRemovedError'));
     }
   };
 
   // Thêm nguyên liệu của 1 món vào danh sách Đi chợ
   const handleAddDishToShopping = async (recipe: Recipe) => {
     if (!recipe.ingredients || recipe.ingredients.length === 0) {
-      toast.info(`Công thức "${recipe.title}" chưa có danh sách nguyên liệu.`);
+      toast.info(t('planner.noIngredientsInRecipe', { title: recipe.title }));
       return;
     }
 
@@ -202,16 +204,16 @@ export function MealPlannerPage() {
         unit: ing.unit,
       }));
       await addItems(itemsToAdd);
-      toast.success(`Đã thêm ${itemsToAdd.length} nguyên liệu của "${recipe.title}" vào Đi chợ!`);
+      toast.success(t('planner.ingredientsAddedSuccess', { count: itemsToAdd.length, title: recipe.title }));
     } catch {
-      toast.error('Không thể thêm nguyên liệu vào danh sách Đi chợ.');
+      toast.error(t('planner.ingredientsAddedError'));
     }
   };
 
   // Thêm toàn bộ nguyên liệu của ngày đang chọn vào Đi chợ
   const handleAddDayToShopping = async () => {
     if (!activePlan || activePlan.meals.length === 0) {
-      toast.info('Ngày này chưa có món ăn nào được lên thực đơn.');
+      toast.info(t('planner.noMealsInDay'));
       return;
     }
 
@@ -232,15 +234,15 @@ export function MealPlannerPage() {
     });
 
     if (itemsToAdd.length === 0) {
-      toast.info('Các món trong ngày không có nguyên liệu công thức để thêm.');
+      toast.info(t('planner.noIngredientsInDay'));
       return;
     }
 
     try {
       await addItems(itemsToAdd);
-      toast.success(`Đã thêm ${itemsToAdd.length} nguyên liệu của ngày vào danh sách Đi chợ!`);
+      toast.success(t('planner.dayIngredientsAddedSuccess', { count: itemsToAdd.length }));
     } catch {
-      toast.error('Có lỗi xảy ra khi thêm vào danh sách Đi chợ.');
+      toast.error(t('planner.ingredientsAddedError'));
     }
   };
 
@@ -266,15 +268,15 @@ export function MealPlannerPage() {
     });
 
     if (weekItems.length === 0) {
-      toast.info('Chưa có công thức nào có nguyên liệu trong tuần này.');
+      toast.info(t('planner.noIngredientsInWeek'));
       return;
     }
 
     try {
       await addItems(weekItems);
-      toast.success(`Đã chuyển ${weekItems.length} nguyên liệu tuần này vào danh sách Đi chợ!`);
+      toast.success(t('planner.weekIngredientsAddedSuccess', { count: weekItems.length }));
     } catch {
-      toast.error('Không thể thêm nguyên liệu tuần.');
+      toast.error(t('planner.weekIngredientsAddedError'));
     }
   };
 
@@ -318,8 +320,8 @@ export function MealPlannerPage() {
     <div className="flex flex-col min-h-full gap-6 w-full pt-6 pb-28 px-4 md:px-8">
       {/* 1. Header & Toolbar chuẩn hệ thống */}
       <PageHeader
-        title="Thực đơn tuần"
-        description="Kế hoạch dinh dưỡng & bữa ăn từng ngày"
+        title={t('planner.title')}
+        description={t('planner.mobileSubtitle')}
         actions={
           <div className="flex items-center gap-2 w-full">
             {/* Thanh chọn tuần kéo dài lấp đầy width */}
@@ -330,7 +332,7 @@ export function MealPlannerPage() {
                 variant="light"
                 className="rounded-lg h-7 w-7 min-w-7 text-default-600 shrink-0"
                 onClick={handlePrevWeek}
-                aria-label="Tuần trước"
+                aria-label={t('planner.prevWeek')}
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
@@ -358,7 +360,7 @@ export function MealPlannerPage() {
                 variant="light"
                 className="rounded-lg h-7 w-7 min-w-7 text-default-600 shrink-0"
                 onClick={handleNextWeek}
-                aria-label="Tuần sau"
+                aria-label={t('planner.nextWeek')}
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
@@ -370,14 +372,14 @@ export function MealPlannerPage() {
               startContent={<ShoppingCart className="w-4 h-4" />}
               onClick={handleAddWeekToShopping}
             >
-              Đi chợ tuần
+              {t('planner.shopWeek')}
             </Button>
             <Button
               isIconOnly
               variant="flat"
               className="rounded-xl h-10 w-10 min-w-10 shrink-0 text-default-600"
               onClick={() => setIsSettingsOpen(true)}
-              aria-label="Cài đặt bữa ăn"
+              aria-label={t('planner.slotSettings')}
             >
               <Settings className="w-5 h-5" />
             </Button>
@@ -458,7 +460,7 @@ export function MealPlannerPage() {
               {activeDateFormatted}
             </h2>
             <div className="flex items-center gap-2 text-xs text-default-400 font-medium">
-              <span>{daySummary.totalMeals} món đã lên</span>
+              <span>{t('planner.dishesPlanned', { count: daySummary.totalMeals })}</span>
               {daySummary.totalCalories > 0 && (
                 <>
                   <span>•</span>
@@ -479,8 +481,8 @@ export function MealPlannerPage() {
               color="primary"
               className="rounded-xl h-8 w-8 min-w-8"
               onClick={handleAddDayToShopping}
-              aria-label="Đi chợ ngày này"
-              title="Đi chợ ngày này"
+              aria-label={t('planner.shopDay')}
+              title={t('planner.shopDay')}
             >
               <ShoppingCart className="w-4 h-4" />
             </Button>
@@ -510,7 +512,7 @@ export function MealPlannerPage() {
                     </h3>
                     {slotEntries.length > 0 && (
                       <span className="text-[10px] font-bold text-default-400 bg-default-100 dark:bg-default-50/20 px-1.5 py-0.5 rounded-full">
-                        {slotEntries.length} món
+                        {slotEntries.length} {t('planner.dishesCount', { count: slotEntries.length })}
                       </span>
                     )}
                   </div>
@@ -530,7 +532,7 @@ export function MealPlannerPage() {
                         })
                       }
                     >
-                      Thêm món
+                      {t('planner.addDish')}
                     </Button>
                   )}
                 </div>
@@ -543,7 +545,7 @@ export function MealPlannerPage() {
                         ? recipes.find((r) => r.id === entry.recipe_id)
                         : null;
 
-                      const dishTitle = recipe ? recipe.title : entry.notes ?? 'Món tự chọn';
+                      const dishTitle = recipe ? recipe.title : entry.notes ?? t('planner.customDish');
                       const totalTime = recipe
                         ? (recipe.prep_time || 0) + (recipe.cook_time || 0)
                         : 0;
@@ -553,7 +555,7 @@ export function MealPlannerPage() {
                         actions.push({
                           key: 'shopping',
                           icon: <ShoppingCart className="w-4 h-4" />,
-                          label: 'Thêm vào Đi chợ',
+                          label: t('planner.addToShopping'),
                           color: 'primary',
                           onClick: () => handleAddDishToShopping(recipe),
                         });
@@ -561,7 +563,7 @@ export function MealPlannerPage() {
                       actions.push({
                         key: 'delete',
                         icon: <Trash2 className="w-4 h-4" />,
-                        label: 'Xóa khỏi bữa ăn',
+                        label: t('planner.removeDishFromMeal'),
                         color: 'danger',
                         onClick: () => handleRemoveEntry(entry.id, dishTitle),
                       });
@@ -620,7 +622,7 @@ export function MealPlannerPage() {
                                   </span>
                                 ) : null}
                                 {!recipe && (
-                                  <span className="italic text-[11px]">Món tự chọn</span>
+                                  <span className="italic text-[11px]">{t('planner.customDish')}</span>
                                 )}
                               </div>
                             </div>
@@ -644,7 +646,7 @@ export function MealPlannerPage() {
                   >
                     <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-semibold">
-                      Thêm món cho {slot.name}
+                      {t('planner.addDishToSlot', { slot: slot.name })}
                     </span>
                   </button>
                 )}

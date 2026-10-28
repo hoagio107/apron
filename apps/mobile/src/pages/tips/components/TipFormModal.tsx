@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -58,7 +59,13 @@ interface TipFormModalProps {
   onSuccess?: () => void;
 }
 
-export function TipFormModal({ isOpen, onOpenChange, tipId, onSuccess }: TipFormModalProps) {
+export function TipFormModal({
+  isOpen,
+  onOpenChange,
+  tipId,
+  onSuccess
+}: TipFormModalProps) {
+  const { t } = useTranslation();
   const { addTip, updateTip } = useTipStore();
   
   const [isLoading, setIsLoading] = useState(false);
@@ -172,7 +179,7 @@ export function TipFormModal({ isOpen, onOpenChange, tipId, onSuccess }: TipForm
               <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md border-b border-divider/60 shrink-0 px-4 sm:px-6 py-3.5">
                 <div className="max-w-3xl mx-auto w-full">
                   <PageHeader
-                    title={tipId ? 'Chỉnh sửa mẹo vặt' : 'Thêm mẹo vặt mới'}
+                    title={tipId ? t('tips.form.editTitle') : t('tips.form.createTitle')}
                     showBackButton
                     onBack={onClose}
                     className="p-0"
@@ -192,7 +199,7 @@ export function TipFormModal({ isOpen, onOpenChange, tipId, onSuccess }: TipForm
                     
                     {/* 1. Cover Image Section (Chuẩn ImageSection của RecipeForm) */}
                     <FormField
-                      label="Ảnh đại diện"
+                      label={t('tips.form.imageLabel')}
                       icon={ImageIcon}
                       error={errors.image_url?.message}
                     >
@@ -380,7 +387,7 @@ export function TipFormModal({ isOpen, onOpenChange, tipId, onSuccess }: TipForm
                     onPress={() => handleSubmit(onSubmit)()}
                     isLoading={isLoading}
                   >
-                    {tipId ? 'Lưu thay đổi' : 'Lưu mẹo vặt'}
+                    {tipId ? t('common.saveChanges') : t('tips.form.saveTip')}
                   </Button>
                 </div>
               </div>

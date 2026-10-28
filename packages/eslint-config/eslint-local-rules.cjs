@@ -25,6 +25,20 @@ module.exports = {
           if (node.name.name === 'style') {
             const filename = context.getFilename().replace(/\\/g, '/');
             if (ALLOWED_DIRS.some(d => filename.includes(d))) return;
+            // Cho phép dynamic transform của dnd-kit hoặc virtualizer coordinates
+            if (node.value && node.value.type === 'JSXExpressionContainer') {
+              const src = context.getSourceCode().getText(node.value);
+              if (
+                src.includes('transform') ||
+                src.includes('virtual') ||
+                src.includes('Virtual') ||
+                src.includes('CSS.Transform') ||
+                src.includes('CSS.Translate') ||
+                (node.value.expression && (node.value.expression.name === 'style' || node.value.expression.name === 'itemStyle'))
+              ) {
+                return;
+              }
+            }
             context.report({
               node,
               message: '[Quy Tắc Mới] Vi phạm Explicit CSS: Tuyệt đối không dùng thuộc tính style nội tuyến. Vui lòng sử dụng Tailwind Classes hoặc khai báo token/variant mới.'

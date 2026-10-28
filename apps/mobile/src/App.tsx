@@ -6,6 +6,7 @@ import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import { BottomNav } from './components/layout/BottomNav';
 import { useKeyboard } from './hooks/useKeyboard';
 import { SwipeBackHandler } from './components/layout/SwipeBackHandler';
+import { ScrollRestorationHandler } from './components/shared/ScrollRestorationHandler';
 import { ImageManager } from './lib/image-manager';
 
 // Lazy-loaded pages for mobile bundle optimization & faster startup
@@ -52,6 +53,7 @@ function AppLayout() {
     <div className="flex flex-col h-[100dvh] w-full bg-background text-foreground overflow-hidden pt-safe">
       {/* Cử chỉ vuốt để quay lại toàn cục */}
       <SwipeBackHandler />
+      <ScrollRestorationHandler containerSelector="main.overflow-y-auto" />
 
       {/* Main Content */}
       <main className={`flex-1 overflow-y-auto no-scrollbar ${hideNav ? 'pb-safe' : 'pb-[calc(76px+var(--sab,0px))]'}`}>

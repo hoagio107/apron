@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Button, Spinner } from '@/ui';
 import { Plus, BookOpen, Trash2, User, Link as LinkIcon, Star } from 'lucide-react';
@@ -7,6 +8,7 @@ import { EmptyState } from '../../components/shared/EmptyState';
 import { ImageManager } from '../../lib/image-manager';
 
 export function CoursesPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { courses, isLoading, fetchCourses, deleteCourse } = useCourseStore();
 
@@ -16,27 +18,27 @@ export function CoursesPage() {
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (confirm('Bạn có chắc chắn muốn xoá khoá học này không?')) {
+    if (confirm(t('courses.confirmDelete'))) {
       await deleteCourse(id);
     }
   };
 
   return (
-    <div className="flex flex-col h-full gap-6 w-full pt-6 pb-8">
+    <div className="flex flex-col h-full gap-6 w-full pb-8">
       {/* Header */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-6 pb-4 -mx-8 px-8 flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-divider/50 shadow-2xs mb-2">
         <div className="flex items-center gap-4 shrink-0">
           <Button 
             isIconOnly
             color="primary" 
-            className="w-14 h-14 rounded-2xl shadow-sm shrink-0"
+            className="w-14 h-14 rounded-2xl shadow-sm shrink-0 text-white"
             onPress={() => navigate('/courses/add')}
           >
-            <Plus className="w-6 h-6" />
+            <Plus className="w-6 h-6 text-white" />
           </Button>
           <div>
-            <h1 className="app-page-title leading-tight">Sổ tay Khoá học</h1>
-            <p className="app-page-subtitle">{courses.length} khoá học đã lưu</p>
+            <h1 className="app-page-title leading-tight">{t('courses.title')}</h1>
+            <p className="app-page-subtitle">{t('courses.subtitle', { count: courses.length })}</p>
           </div>
         </div>
       </div>
@@ -48,8 +50,8 @@ export function CoursesPage() {
         ) : courses.length === 0 ? (
           <EmptyState
             icon={<BookOpen className="w-10 h-10 text-default-300" />}
-            title="Chưa có khoá học nào"
-            description="Bắt đầu tạo khoá học đầu tiên của bạn để lưu lại các bài giảng."
+            title={t('courses.empty.title')}
+            description={t('courses.empty.description')}
             action={
               <Button 
                 color="primary" 
@@ -133,7 +135,7 @@ export function CoursesPage() {
                       dangerouslySetInnerHTML={{ __html: course.description }}
                     />
                   ) : (
-                    <p className="text-sm text-white/80 mb-4">Chưa có mô tả</p>
+                    <p className="text-sm text-white/80 mb-4">{t('courses.noDescription')}</p>
                   )}
                   
                   {/* Source and Teacher */}
@@ -176,7 +178,7 @@ export function CoursesPage() {
                     {course.modules && course.modules.length > 0 && (
                       <span className="inline-flex items-center gap-2">
                         {(course.level || course.rating) && <span className="text-white/40 select-none">•</span>}
-                        <span>{course.modules.length} chương</span>
+                        <span>{course.modules.length} {t('courses.modules')}</span>
                       </span>
                     )}
 
@@ -185,7 +187,7 @@ export function CoursesPage() {
                         {(course.level || course.rating || (course.modules && course.modules.length > 0)) && (
                           <span className="text-white/40 select-none">•</span>
                         )}
-                        <span>{course.modules.reduce((acc: any, m: any) => acc + (m.lessons?.length || 0), 0)} bài</span>
+                        <span>{course.modules.reduce((acc: any, m: any) => acc + (m.lessons?.length || 0), 0)} {t('courses.lessons')}</span>
                       </span>
                     )}
                   </div>

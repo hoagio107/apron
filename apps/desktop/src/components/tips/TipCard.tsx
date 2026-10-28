@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { Button } from '@/ui';
+import { useTranslation } from 'react-i18next';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
 import { Lightbulb, Edit, Trash2, MoreVertical } from 'lucide-react';
 import type { Tip } from '@apron/core';
 import { TIP_CATEGORIES } from '@apron/core';
 import { formatDistanceToNow } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { vi, enUS } from 'date-fns/locale';
 import { ImageManager } from '../../lib/image-manager';
 
 interface TipCardProps {
@@ -18,6 +20,8 @@ interface TipCardProps {
 }
 
 export function TipCard({ tip, onClick, onEdit, onDelete, isSelected, onSelect, selectable }: TipCardProps) {
+  const { t, i18n } = useTranslation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const category = TIP_CATEGORIES.find(c => c.id === tip.category_id);
   
   const handleClick = () => {
@@ -36,7 +40,7 @@ export function TipCard({ tip, onClick, onEdit, onDelete, isSelected, onSelect, 
     <div 
       onClick={handleClick}
       className={`group w-full aspect-[3/4] sm:aspect-[4/5] relative overflow-hidden transition-all duration-300 rounded-2xl bg-black border-none shadow-none cursor-pointer card-media-root
-        ${isSelected ? 'ring-4 ring-primary' : 'hover:scale-[1.02]'}
+        ${isSelected ? 'ring-4 ring-primary' : isMenuOpen ? '' : 'hover:scale-[1.02]'}
       `}
     >
       {/* Background Image: dừng lại trước 2 góc dưới và fade mask để triệt tiêu hoàn toàn viền trắng subpixel */}
@@ -58,21 +62,27 @@ export function TipCard({ tip, onClick, onEdit, onDelete, isSelected, onSelect, 
       ></div>
 
       {/* Action Buttons (Top Right) */}
-      <div className="absolute top-4 right-4 z-20 flex gap-2">
+      <div className="absolute top-4 right-4 z-20 flex gap-2" onClick={(e) => e.stopPropagation()}>
         {selectable ? (
           <div className="bg-black/40 backdrop-blur-md rounded-full p-1 border border-white/20 shadow-sm">
             <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-primary border-primary text-white' : 'border-white/60 bg-transparent'}`}>
-              {isSelected && <span className="w-2.5 h-2.5 bg-white rounded-full"></span>}
+              {isSelected && <span className="w-2.5 h-2.5 bg-primary-foreground rounded-full"></span>}
             </div>
           </div>
         ) : (
-          <Dropdown placement="bottom-end">
+          <Dropdown 
+            placement="bottom-end" 
+            shouldBlockScroll={false} 
+            disableAnimation
+            isOpen={isMenuOpen}
+            onOpenChange={setIsMenuOpen}
+          >
             <DropdownTrigger>
               <Button 
                 isIconOnly 
                 variant="light" 
                 size="sm" 
-                className="bg-transparent border-none text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/20"
+                className={`bg-transparent border-none text-white transition-opacity hover:bg-white/20 ${isMenuOpen ? 'opacity-100 bg-white/20' : 'opacity-0 group-hover:opacity-100'}`}
               >
                 <MoreVertical className="w-5 h-5" />
               </Button>

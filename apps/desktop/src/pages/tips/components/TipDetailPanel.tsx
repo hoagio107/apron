@@ -1,9 +1,10 @@
+import { useTranslation } from 'react-i18next';
 import { Drawer, DrawerContent, DrawerHeader, DrawerBody, Button } from '@/ui';
 import { Calendar, Edit, Trash2 } from 'lucide-react';
 import type { Tip } from '@apron/core';
 import { TIP_CATEGORIES } from '@apron/core';
 import { format } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { vi, enUS } from 'date-fns/locale';
 import { ImageManager } from '../../../lib/image-manager';
 
 interface TipDetailPanelProps {
@@ -15,6 +16,7 @@ interface TipDetailPanelProps {
 }
 
 export function TipDetailPanel({ tip, isOpen, onOpenChange, onEdit, onDelete }: TipDetailPanelProps) {
+  const { t, i18n } = useTranslation();
   if (!tip) return null;
 
   const category = TIP_CATEGORIES.find(c => c.id === tip.category_id);
@@ -78,7 +80,7 @@ export function TipDetailPanel({ tip, isOpen, onOpenChange, onEdit, onDelete }: 
                       )}
                       <div className="flex items-center text-xs text-white/80 gap-1.5 font-medium bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm">
                         <Calendar className="w-3 h-3" />
-                        <span>{tip.created_at ? format(new Date(tip.created_at), 'dd MMMM, yyyy', { locale: vi }) : ''}</span>
+                        <span>{tip.created_at ? format(new Date(tip.created_at), 'dd MMMM, yyyy', { locale: i18n.language === 'vi' ? vi : enUS }) : ''}</span>
                       </div>
                     </div>
 

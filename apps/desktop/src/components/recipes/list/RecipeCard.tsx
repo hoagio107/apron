@@ -1,4 +1,5 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Recipe } from '@apron/core';
 import { Clock, Star, Flame, Image as ImageIcon, MoreVertical, Heart, Trash2, CalendarDays, Edit2 } from 'lucide-react';
 import { Checkbox, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from '@/ui';
@@ -35,10 +36,20 @@ function RecipeCardComponent({
   actionIcon,
   onActionClick
 }: RecipeCardProps) {
+  const { t } = useTranslation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   const handleSelectClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onSelectChange?.(!isSelected);
+  };
+
+  const handleMenuAction = (key: React.Key) => {
+    const actionKey = String(key);
+    // Trì hoãn 80ms để Dropdown đóng hoàn tất trước khi kích hoạt update state gây re-render
+    setTimeout(() => {
+      if (onAction) onAction(actionKey, recipe);
+    }, 80);
   };
 
   const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
@@ -61,50 +72,34 @@ function RecipeCardComponent({
   
   const averageRating = getAverageRating();
 
-
   // Grid views
   const isPortrait = viewType === 'grid-portrait';
 
-  const menuProps = {
-    trigger: (
-      <Button 
-        isIconOnly 
-        variant="light" 
-        size="sm" 
-        className={`rounded-full transition-opacity opacity-0 group-hover:opacity-100 ${isPortrait ? 'bg-transparent text-white border-none hover:bg-white/20' : 'bg-black/20 text-white hover:bg-black/40'}`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <MoreVertical className="w-5 h-5" />
-      </Button>
-    ),
-    dropdown: (
-      <DropdownMenu 
-        aria-label="Recipe actions"
-        onAction={(key) => {
-          if (onAction) onAction(key as string, recipe);
-        }}
-      >
-        <DropdownItem key="meal_plan" startContent={<CalendarDays className="w-4 h-4" />}>
-          Thêm vào thực đơn
-        </DropdownItem>
-        <DropdownItem key="favorite" startContent={<Heart className={`w-4 h-4 ${recipe.is_favorite ? 'fill-current' : ''}`} />}>
-          {recipe.is_favorite ? 'Bỏ yêu thích' : 'Yêu thích'}
-        </DropdownItem>
-        <DropdownItem key="edit" startContent={<Edit2 className="w-4 h-4" />}>
-          Chỉnh sửa
-        </DropdownItem>
-        <DropdownItem key="delete" className="text-danger" color="danger" startContent={<Trash2 className="w-4 h-4" />}>
-          Xoá công thức
-        </DropdownItem>
-      </DropdownMenu>
-    )
-  };
+  const renderDropdownMenu = () => (
+    <DropdownMenu 
+      aria-label="Recipe actions"
+      onAction={handleMenuAction}
+    >
+      <DropdownItem key="meal_plan" startContent={<CalendarDays className="w-4 h-4" />}>
+        {t('recipes.actions.addToMealPlan')}
+      </DropdownItem>
+      <DropdownItem key="favorite" startContent={<Heart className={`w-4 h-4 ${recipe.is_favorite ? 'fill-current' : ''}`} />}>
+        {recipe.is_favorite ? t('recipes.actions.unfavorite') : t('recipes.actions.favorite')}
+      </DropdownItem>
+      <DropdownItem key="edit" startContent={<Edit2 className="w-4 h-4" />}>
+        {t('common.actions.edit')}
+      </DropdownItem>
+      <DropdownItem key="delete" className="text-danger" color="danger" startContent={<Trash2 className="w-4 h-4" />}>
+        {t('recipes.actions.delete')}
+      </DropdownItem>
+    </DropdownMenu>
+  );
 
   if (isPortrait) {
     return (
       <div 
         onClick={onClick}
-        className={`group w-full aspect-[3/4] sm:aspect-[4/5] relative overflow-hidden transition-all duration-300 rounded-2xl bg-black border-none shadow-none cursor-pointer card-media-root ${isSelected ? 'ring-4 ring-primary' : 'hover:scale-[1.02]'}`}
+        className={`group w-full aspect-[3/4] sm:aspect-[4/5] relative overflow-hidden transition-all duration-300 rounded-2xl bg-black border-none shadow-none cursor-pointer card-media-root ${isSelected ? 'ring-4 ring-primary' : isMenuOpen ? '' : 'hover:scale-[1.02]'}`}
       >
         {/* Background Image: dừng lại trước 2 góc dưới và fade mask để triệt tiêu hoàn toàn viền trắng subpixel */}
         {recipe.image_url ? (
@@ -135,23 +130,38 @@ function RecipeCardComponent({
           )}
           {variantCount > 0 && (
             <div className="bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
-              +{variantCount} biến thể
+              {t('recipes.actions.variantsCount', { count: variantCount })}
             </div>
           )}
         </div>
         
-        <div className="absolute top-3 right-3 z-20">
+        <div className="absolute top-3 right-3 z-20" onClick={(e) => e.stopPropagation()}>
           {!hideMenu ? (
-            <Dropdown>
-              <DropdownTrigger>{menuProps.trigger}</DropdownTrigger>
-              {menuProps.dropdown}
+            <Dropdown 
+              placement="bottom-end" 
+              shouldBlockScroll={false} 
+              disableAnimation
+              isOpen={isMenuOpen}
+              onOpenChange={setIsMenuOpen}
+            >
+              <DropdownTrigger>
+                <Button 
+                  isIconOnly 
+                  variant="light" 
+                  size="sm" 
+                  className={`rounded-full transition-opacity ${isMenuOpen ? 'opacity-100 bg-white/20' : 'opacity-0 group-hover:opacity-100'} bg-transparent text-white border-none hover:bg-white/20`}
+                >
+                  <MoreVertical className="w-5 h-5" />
+                </Button>
+              </DropdownTrigger>
+              {renderDropdownMenu()}
             </Dropdown>
           ) : actionIcon && onActionClick ? (
             <Button
               isIconOnly 
               variant="light" 
               size="sm" 
-              className={`rounded-full transition-opacity opacity-0 group-hover:opacity-100 ${isPortrait ? 'bg-transparent text-white border-none hover:bg-white/20' : 'bg-black/20 text-white hover:bg-black/40'}`}
+              className="rounded-full transition-opacity opacity-0 group-hover:opacity-100 bg-transparent text-white border-none hover:bg-white/20"
               onClick={(e) => { e.stopPropagation(); onActionClick(e, recipe); }}
             >
               {actionIcon}
@@ -165,19 +175,19 @@ function RecipeCardComponent({
             {recipe.title}
           </h3>
           
-          <div className={`flex flex-wrap items-center gap-y-1 font-medium text-white/90 ${size === 'sm' ? 'text-[10px] gap-x-2' : 'text-[11px] gap-x-3'}`}>
+          <div className={`flex flex-wrap items-center gap-y-1 font-medium text-white/95 ${size === 'sm' ? 'text-xs gap-x-2.5' : 'text-[13px] gap-x-3.5'}`}>
             <div className="flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5" />
+              <Clock className="w-4 h-4" />
               <span>{formatTime(totalTime)}</span>
             </div>
             
             <div className="flex items-center gap-1">
-              <Star className="w-3.5 h-3.5 text-warning" fill="currentColor" />
+              <Star className="w-4 h-4 text-warning" fill="currentColor" />
               <span>{averageRating > 0 ? averageRating : '0'}</span>
             </div>
 
             <div className="flex items-center gap-1">
-              <Flame className="w-3.5 h-3.5 text-danger" />
+              <Flame className="w-4 h-4 text-danger" />
               <span>{recipe.calories} kcal</span>
             </div>
           </div>
@@ -199,7 +209,7 @@ function RecipeCardComponent({
       onClick={onClick}
       className={`group flex flex-col cursor-pointer relative ${size === 'sm' ? 'gap-1.5' : 'gap-3'}`}
     >
-      <div className={`relative rounded-xl overflow-hidden bg-primary-50 ${viewType === 'grid-landscape' ? 'w-full aspect-[4/3]' : 'w-full aspect-square'}`}>
+      <div className={`relative rounded-xl overflow-hidden bg-primary/10 dark:bg-primary/20 ${viewType === 'grid-landscape' ? 'w-full aspect-[4/3]' : 'w-full aspect-square'}`}>
         <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
           {selectable && (
             <div onClick={handleSelectClick}>
@@ -208,17 +218,32 @@ function RecipeCardComponent({
           )}
           {variantCount > 0 && (
             <div className="bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
-              +{variantCount} biến thể
+              {t('recipes.actions.variantsCount', { count: variantCount })}
             </div>
           )}
         </div>
         
         {/* Context Menu or Custom Action */}
-        <div className="absolute top-2 right-2 z-20">
+        <div className="absolute top-2 right-2 z-20" onClick={(e) => e.stopPropagation()}>
           {!hideMenu ? (
-            <Dropdown>
-              <DropdownTrigger>{menuProps.trigger}</DropdownTrigger>
-              {menuProps.dropdown}
+            <Dropdown 
+              placement="bottom-end" 
+              shouldBlockScroll={false} 
+              disableAnimation
+              isOpen={isMenuOpen}
+              onOpenChange={setIsMenuOpen}
+            >
+              <DropdownTrigger>
+                <Button 
+                  isIconOnly 
+                  variant="light" 
+                  size="sm" 
+                  className={`rounded-full transition-opacity ${isMenuOpen ? 'opacity-100 bg-black/40' : 'opacity-0 group-hover:opacity-100'} bg-black/20 text-white hover:bg-black/40`}
+                >
+                  <MoreVertical className="w-5 h-5" />
+                </Button>
+              </DropdownTrigger>
+              {renderDropdownMenu()}
             </Dropdown>
           ) : actionIcon && onActionClick ? (
             <Button
@@ -262,19 +287,19 @@ function RecipeCardComponent({
           {recipe.title}
         </h3>
         
-        <div className={`flex flex-wrap items-center gap-y-1 mt-0.5 ${size === 'sm' ? 'text-[10px] text-default-400 gap-x-2' : 'text-[11px] text-default-500 gap-x-3'}`}>
+        <div className={`flex flex-wrap items-center gap-y-1 mt-0.5 ${size === 'sm' ? 'text-xs text-default-500 gap-x-2.5' : 'text-[13px] text-default-500 gap-x-3.5'}`}>
           <div className="flex items-center gap-1">
-            <Clock className="w-3 h-3" />
+            <Clock className="w-3.5 h-3.5" />
             <span>{formatTime(totalTime)}</span>
           </div>
           
           <div className="flex items-center gap-1">
-            <Star className="w-3 h-3 text-warning" fill="currentColor" />
+            <Star className="w-3.5 h-3.5 text-warning" fill="currentColor" />
             <span>{averageRating > 0 ? averageRating : '0'}</span>
           </div>
 
           <div className="flex items-center gap-1">
-            <Flame className="w-3 h-3 text-danger" />
+            <Flame className="w-3.5 h-3.5 text-danger" />
             <span>{recipe.calories} kcal</span>
           </div>
         </div>

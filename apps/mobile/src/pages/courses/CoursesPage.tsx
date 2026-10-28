@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Spinner, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { Plus, BookOpen, Search, Filter, CheckSquare, Trash2 } from 'lucide-react';
@@ -10,6 +11,7 @@ import { ConfirmModal } from '../../components/shared/ConfirmModal';
 import { CourseFormModal } from './components/CourseFormModal';
 
 export function CoursesPage() {
+  const { t } = useTranslation();
   const { courses, isLoading, fetchCourses, deleteCourse, deleteBulkCourses } = useCourseStore();
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -70,8 +72,8 @@ export function CoursesPage() {
   return (
     <div className="flex flex-col min-h-full gap-6 w-full pt-6 pb-28 px-4 md:px-8">
       <PageHeader
-        title="Sổ tay Khoá học"
-        description={`${courses.length} khoá học đã lưu`}
+        title={t('courses.title')}
+        description={t('courses.subtitle', { count: courses.length })}
         actions={
           <div className="flex flex-col md:flex-row justify-end gap-3 w-full">
             <Input
@@ -80,7 +82,7 @@ export function CoursesPage() {
                 base: "w-full md:max-w-[300px]",
                 input: "text-small",
               }}
-              placeholder="Tìm kiếm khoá học..."
+              placeholder={t('courses.searchPlaceholder')}
               size="md"
               startContent={<Search className="w-4 h-4 text-default-400" />}
               value={searchQuery}
@@ -95,15 +97,15 @@ export function CoursesPage() {
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu
-                  aria-label="Lọc theo trình độ"
+                  aria-label={t('courses.level.all')}
                   selectionMode="single"
                   selectedKeys={new Set([selectedLevel])}
                   onSelectionChange={(keys) => setSelectedLevel(Array.from(keys)[0] as string)}
                 >
-                  <DropdownItem key="all">Tất cả trình độ</DropdownItem>
-                  <DropdownItem key="Cơ bản">Cơ bản</DropdownItem>
-                  <DropdownItem key="Nâng cao">Nâng cao</DropdownItem>
-                  <DropdownItem key="Chuyên gia">Chuyên gia</DropdownItem>
+                  <DropdownItem key="all">{t('courses.level.all')}</DropdownItem>
+                  <DropdownItem key="Cơ bản">{t('courses.level.beginner')}</DropdownItem>
+                  <DropdownItem key="Nâng cao">{t('courses.level.intermediate')}</DropdownItem>
+                  <DropdownItem key="Chuyên gia">{t('courses.level.advanced')}</DropdownItem>
                 </DropdownMenu>
               </Dropdown>
               
@@ -147,8 +149,8 @@ export function CoursesPage() {
         ) : courses.length === 0 ? (
           <EmptyState
             icon={<BookOpen className="w-10 h-10 text-default-300" />}
-            title="Chưa có khoá học nào"
-            description="Bắt đầu tạo khoá học đầu tiên của bạn để lưu lại các bài giảng."
+            title={t('courses.empty.title')}
+            description={t('courses.empty.description')}
             action={
               <Button 
                 color="primary" 
@@ -182,9 +184,9 @@ export function CoursesPage() {
       <ConfirmModal
         isOpen={!!deleteTarget}
         onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
-        title="Xoá khoá học"
-        description="Bạn có chắc chắn muốn xoá khoá học này không? Hành động này không thể hoàn tác."
-        confirmLabel="Xoá"
+        title={t('courses.deleteModalTitle')}
+        description={t('courses.deleteModalDesc')}
+        confirmLabel={t('common.delete')}
         confirmColor="danger"
         onConfirm={handleDeleteConfirm}
       />
@@ -192,9 +194,9 @@ export function CoursesPage() {
       <ConfirmModal
         isOpen={isBulkDeleteOpen}
         onOpenChange={setIsBulkDeleteOpen}
-        title={`Xoá ${selectedIds.size} khoá học`}
-        description="Bạn có chắc chắn muốn xoá các khoá học đã chọn? Hành động này không thể hoàn tác."
-        confirmLabel="Xoá"
+        title={t('courses.bulkDeleteModalTitle')}
+        description={t('courses.bulkDeleteModalDesc', { count: selectedIds.size })}
+        confirmLabel={t('common.delete')}
         confirmColor="danger"
         onConfirm={handleBulkDeleteConfirm}
       />
@@ -217,7 +219,7 @@ export function CoursesPage() {
           actions={[
             {
               key: 'delete',
-              label: 'Xoá',
+              label: t('common.delete'),
               icon: <Trash2 className="w-4 h-4" />,
               color: 'danger',
               onPress: () => setIsBulkDeleteOpen(true)

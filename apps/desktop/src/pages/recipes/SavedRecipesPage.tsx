@@ -10,8 +10,10 @@ import type { RecipeFilterState } from '../../components/recipes/list/RecipeFilt
 import { useRecipeStore } from '../../store/useRecipeStore';
 import type { Recipe } from '@apron/core';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { useTranslation } from 'react-i18next';
 
 export function SavedRecipesPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [viewType, setViewType] = useState<RecipeViewType>('grid-portrait');
@@ -149,7 +151,7 @@ export function SavedRecipesPage() {
         navigate(`/recipes/${recipe.id}/edit`);
         break;
       case 'delete':
-        if (window.confirm(`Bạn có chắc muốn xoá công thức "${recipe.title}"?`)) {
+        if (window.confirm(t('recipes.actions.deleteConfirm', { title: recipe.title }))) {
           await deleteRecipe(recipe.id!);
         }
         break;
@@ -160,7 +162,7 @@ export function SavedRecipesPage() {
   };
 
   const handleBulkUnsave = async () => {
-    if (window.confirm(`Bạn có chắc chắn muốn bỏ lưu ${selectedIds.size} công thức này không?`)) {
+    if (window.confirm(t('recipes.actions.bulkDeleteConfirm', { count: selectedIds.size }))) {
       const updates = Array.from(selectedIds).map(id => {
         const recipe = recipes.find(r => r.id === id);
         return recipe ? updateRecipe({ ...recipe, is_favorite: false }) : Promise.resolve();
@@ -172,17 +174,17 @@ export function SavedRecipesPage() {
   };
 
   return (
-    <div className="flex flex-col h-full gap-6 w-full pt-6 pb-8">
+    <div className="flex flex-col h-full gap-6 w-full pb-8">
       {/* Header & Toolbar */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-6 pb-4 -mx-8 px-8 flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-divider/50 shadow-2xs">
         {/* Left side: Add New + Title */}
         <div className="flex items-center gap-4 shrink-0">
           <div className="w-14 h-14 rounded-2xl shrink-0 bg-primary/10 flex items-center justify-center text-primary">
             <Heart className="w-6 h-6 fill-current" />
           </div>
           <div>
-            <h1 className="app-page-title leading-tight">Đã lưu</h1>
-            <p className="app-page-subtitle">{filteredAndSortedRecipes.length} công thức yêu thích</p>
+            <h1 className="app-page-title leading-tight">{t('recipes.savedTitle')}</h1>
+            <p className="app-page-subtitle">{t('recipes.savedSubtitle', { count: filteredAndSortedRecipes.length })}</p>
           </div>
         </div>
 
@@ -215,10 +217,10 @@ export function SavedRecipesPage() {
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 px-6 py-3 bg-content1 shadow-2xl border border-divider rounded-full animate-in slide-in-from-bottom-8 fade-in duration-300">
           <div className="flex items-center gap-3">
             <Button variant="flat" onPress={selectAll}>
-              {selectedIds.size === filteredAndSortedRecipes.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+              {selectedIds.size === filteredAndSortedRecipes.length ? t('common.actions.deselectAll') : t('common.actions.selectAll')}
             </Button>
             <span className="font-medium text-primary min-w-[100px] text-center">
-              Đã chọn {selectedIds.size}
+              {t('common.actions.selectedCount', { count: selectedIds.size })}
             </span>
           </div>
           
@@ -226,19 +228,19 @@ export function SavedRecipesPage() {
           
           <div className="flex items-center gap-2">
             <Button color="primary" variant="flat" startContent={<CalendarDays className="w-4 h-4" />}>
-              Thêm vào thực đơn
+              {t('recipes.actions.addToMealPlan')}
             </Button>
             <Button color="secondary" variant="flat" startContent={<Tags className="w-4 h-4" />}>
-              Gắn thẻ
+              {t('recipes.actions.addTags')}
             </Button>
             <Button color="danger" variant="flat" startContent={<Trash2 className="w-4 h-4" />} onPress={handleBulkUnsave}>
-              Bỏ lưu
+              {t('recipes.actions.unfavorite')}
             </Button>
             
             <div className="w-px h-8 bg-divider mx-1 shrink-0" />
             
             <Button variant="light" onPress={toggleSelectMode}>
-              Hủy
+              {t('common.actions.cancel')}
             </Button>
           </div>
         </div>
@@ -248,10 +250,10 @@ export function SavedRecipesPage() {
       {filteredAndSortedRecipes.length === 0 ? (
         <EmptyState
           icon={searchQuery ? <Search className="w-10 h-10 text-default-300" /> : <Heart className="w-10 h-10 text-default-300" />}
-          title={searchQuery ? 'Không tìm thấy công thức' : 'Chưa lưu công thức nào'}
+          title={searchQuery ? t('recipes.empty.title') : t('recipes.savedEmpty.title')}
           description={searchQuery 
-            ? 'Thử thay đổi từ khóa tìm kiếm hoặc xóa bớt bộ lọc để xem các công thức khác.' 
-            : 'Hãy khám phá các công thức ngon và lưu lại để dễ dàng truy cập sau này nhé.'}
+            ? t('recipes.empty.description') 
+            : t('recipes.savedEmpty.description')}
         />
       ) : (
         <div className={`

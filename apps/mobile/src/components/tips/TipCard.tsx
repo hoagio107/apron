@@ -1,9 +1,10 @@
+import { useTranslation } from 'react-i18next';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
 import { Lightbulb, Edit, Trash2, MoreVertical, Check, Clock } from 'lucide-react';
 import type { Tip } from '@apron/core';
 import { TIP_CATEGORIES } from '@apron/core';
 import { formatDistanceToNow } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { vi, enUS } from 'date-fns/locale';
 import { ImageManager } from '../../lib/image-manager';
 
 interface TipCardProps {
@@ -27,6 +28,7 @@ export function TipCard({
   selectable,
   viewMode = 'grid'
 }: TipCardProps) {
+  const { t, i18n } = useTranslation();
   const isSingle = viewMode === 'single';
 
   const category = TIP_CATEGORIES.find(c => 
@@ -112,7 +114,7 @@ export function TipCard({
               <button 
                 type="button"
                 className="w-9 h-9 rounded-full bg-transparent hover:bg-white/15 active:bg-white/25 text-white flex items-center justify-center border-none shadow-none outline-none active:scale-90 transition-all cursor-pointer"
-                aria-label="Tùy chọn mẹo"
+                aria-label={t('common.actions')}
               >
                 <MoreVertical className="w-5 h-5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]" />
               </button>

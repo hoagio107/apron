@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter, Button, SectionTitle } from '@/ui';
 import { X, Carrot, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { ImageManager } from '../../lib/image-manager';
@@ -24,6 +25,7 @@ export function CookingModeModal({
   scaleQuantity,
   onFinish
 }: CookingModeModalProps) {
+  const { t } = useTranslation();
   const [currentCookingStep, setCurrentCookingStep] = useState(-1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -66,7 +68,7 @@ export function CookingModeModal({
                     size="sm" 
                     className="w-8 h-8 rounded-full shrink-0 text-default-600 hover:text-foreground" 
                     onPress={onCloseModal}
-                    aria-label="Đóng chế độ nấu"
+                    aria-label={t('common.actions.close')}
                   >
                     <X className="w-4 h-4" />
                   </Button>
@@ -75,9 +77,7 @@ export function CookingModeModal({
                   </h2>
                 </div>
                 <div className="text-xs font-semibold px-2.5 py-1 bg-primary/15 text-primary rounded-full shrink-0 whitespace-nowrap">
-                  {currentCookingStep === -1 
-                    ? 'Chuẩn bị nguyên liệu' 
-                    : `Bước ${currentCookingStep + 1} / ${allSteps.length}`}
+                  {currentCookingStep === -1 ? t('recipes.cooking.prepIngredients') : t('recipes.cooking.stepProgress', { current: currentCookingStep + 1, total: allSteps.length })}
                 </div>
               </div>
             </DrawerHeader>
@@ -87,11 +87,11 @@ export function CookingModeModal({
               {currentCookingStep === -1 ? (
                 <div className="w-full flex flex-col gap-4">
                   <SectionTitle 
-                    title="Nguyên liệu cần chuẩn bị" 
+                    title={t('recipes.cooking.ingredientsNeeded')} 
                     icon={<Carrot className="w-5 h-5 text-success" />} 
                     action={
                       <span className="text-xs font-semibold text-default-500 bg-default-100 dark:bg-default-100/70 px-2.5 py-1 rounded-full">
-                        {checkedIngredients.size}/{recipe.ingredients?.length || 0} đã chọn
+                        {t('common.actions.selectedCount', { count: `${checkedIngredients.size}/${recipe.ingredients?.length || 0}` })}
                       </span>
                     }
                   />
@@ -150,7 +150,7 @@ export function CookingModeModal({
                               className="rounded-full pointer-events-auto bg-black/60 text-white backdrop-blur-md border-none z-10 w-8 h-8 min-w-0"
                               onPress={() => setCurrentImageIndex(Math.max(0, currentImageIndex - 1))}
                               isDisabled={currentImageIndex === 0}
-                              aria-label="Ảnh trước"
+                              aria-label={t('recipes.cooking.prevStep')}
                             >
                               <ChevronLeft className="w-4 h-4" />
                             </Button>
@@ -160,7 +160,7 @@ export function CookingModeModal({
                               className="rounded-full pointer-events-auto bg-black/60 text-white backdrop-blur-md border-none z-10 w-8 h-8 min-w-0"
                               onPress={() => setCurrentImageIndex(Math.min(allSteps[currentCookingStep].images.length - 1, currentImageIndex + 1))}
                               isDisabled={currentImageIndex === allSteps[currentCookingStep].images.length - 1}
-                              aria-label="Ảnh tiếp"
+                              aria-label={t('recipes.cooking.nextStep')}
                             >
                               <ChevronRight className="w-4 h-4" />
                             </Button>
@@ -193,12 +193,12 @@ export function CookingModeModal({
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[11px] font-semibold text-primary uppercase tracking-wider">
-                        Bước {currentCookingStep + 1}
+                        {t('recipes.cooking.stepProgress', { current: currentCookingStep + 1, total: allSteps.length })}
                       </span>
                       <h3 className="text-base font-bold text-foreground">
                         {allSteps[currentCookingStep].group && allSteps[currentCookingStep].group !== 'Các bước thực hiện'
                           ? allSteps[currentCookingStep].group
-                          : `Bước thực hiện ${currentCookingStep + 1}`}
+                          : `${t('recipes.cooking.stepsGroupDefault')} ${currentCookingStep + 1}`}
                       </h3>
                     </div>
                   </div>
@@ -241,7 +241,7 @@ export function CookingModeModal({
                 }}
                 endContent={currentCookingStep < allSteps.length - 1 ? <ChevronRight className="w-4 h-4"/> : <Check className="w-4 h-4 stroke-[2.5]"/>}
               >
-                {currentCookingStep === -1 ? 'Bắt đầu làm' : (currentCookingStep < allSteps.length - 1 ? 'Tiếp theo' : 'Hoàn thành')}
+                {currentCookingStep === -1 ? t('recipes.cooking.startCooking') : (currentCookingStep < allSteps.length - 1 ? t('recipes.cooking.nextStep') : t('recipes.cooking.finishCooking'))}
               </Button>
             </DrawerFooter>
           </div>

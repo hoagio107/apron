@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Button,
   Input,
@@ -40,6 +41,7 @@ const QUICK_SUGGESTIONS = [
 ];
 
 export function ShoppingListPage() {
+  const { t } = useTranslation();
   const {
     items,
     fetchItems,
@@ -94,7 +96,7 @@ export function ShoppingListPage() {
     const detectedCategory = autoCategorizeIngredient(targetName);
     addItem(targetName, 1, 'đơn vị', detectedCategory);
     setQuickInput('');
-    toast.success(`Đã thêm "${targetName}" vào danh sách!`);
+    toast.success(t('shopping.addIngredientsSuccess', { count: 1 }));
   };
 
   // Cập nhật số lượng
@@ -116,7 +118,7 @@ export function ShoppingListPage() {
   const handleClearCompleted = async () => {
     if (completedItems.length === 0) return;
     await clearCompleted();
-    toast.success(`Đã dọn dẹp ${completedItems.length} món đã mua.`);
+    toast.success(t('shopping.cleanUpSuccess', { count: completedItems.length }));
   };
 
   // Thêm hàng loạt từ công thức
@@ -125,13 +127,13 @@ export function ShoppingListPage() {
   ) => {
     if (recipeItems.length === 0) return;
     await addItems(recipeItems);
-    toast.success(`Đã thêm ${recipeItems.length} nguyên liệu vào danh sách!`);
+    toast.success(t('shopping.addIngredientsSuccess', { count: recipeItems.length }));
   };
 
   // Sao chép chia sẻ danh sách đi chợ
   const handleShareList = async () => {
     if (items.length === 0) {
-      toast.info('Danh sách đi chợ đang trống.');
+      toast.info(t('shopping.empty.title'));
       return;
     }
 
@@ -153,9 +155,9 @@ export function ShoppingListPage() {
 
     try {
       await navigator.clipboard.writeText(lines.join('\n'));
-      toast.success('Đã sao chép danh sách đi chợ vào bộ nhớ tạm!');
+      toast.success(t('shopping.copiedListSuccess'));
     } catch {
-      toast.error('Không thể sao chép danh sách.');
+      toast.error(t('shopping.copiedListError'));
     }
   };
 
@@ -165,11 +167,11 @@ export function ShoppingListPage() {
     <div className="flex flex-col min-h-full gap-6 w-full pt-6 pb-28 px-4 md:px-8">
       {/* 1. Header & Toolbar chuẩn hệ thống */}
       <PageHeader
-        title="Danh sách đi chợ"
+        title={t('shopping.title')}
         description={
           items.length === 0
-            ? 'Bạn chưa có nguyên liệu nào cần mua'
-            : `${activeItems.length} món cần mua • ${completedItems.length} món đã mua`
+            ? t('shopping.emptySubtitle')
+            : t('shopping.itemCountSummary', { active: activeItems.length, completed: completedItems.length })
         }
         actions={
           <div className="flex flex-col md:flex-row justify-end gap-3 w-full">
@@ -182,7 +184,7 @@ export function ShoppingListPage() {
               className="w-full md:max-w-[320px] flex items-center gap-2"
             >
               <Input
-                placeholder="Thêm nhanh nguyên liệu..."
+                placeholder={t('shopping.quickAddPlaceholder')}
                 variant="flat"
                 classNames={{
                   base: 'w-full',
@@ -200,7 +202,7 @@ export function ShoppingListPage() {
                 color="primary"
                 className="h-10 w-10 min-w-10 rounded-xl font-semibold shrink-0"
                 type="submit"
-                aria-label="Thêm nguyên liệu"
+                aria-label={t('shopping.addItem')}
               >
                 <Plus className="w-5 h-5" />
               </Button>
@@ -218,14 +220,14 @@ export function ShoppingListPage() {
                     endContent={<ChevronDown className="w-3.5 h-3.5 text-default-400 shrink-0" />}
                   >
                     <span className="truncate">
-                      {activeTab === 'all' && `Tất cả (${items.length})`}
-                      {activeTab === 'pending' && `Chưa mua (${activeItems.length})`}
-                      {activeTab === 'done' && `Đã mua (${completedItems.length})`}
+                      {activeTab === 'all' && t('shopping.filterAll', { count: items.length })}
+                      {activeTab === 'pending' && t('shopping.filterPending', { count: activeItems.length })}
+                      {activeTab === 'done' && t('shopping.filterDone', { count: completedItems.length })}
                     </span>
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu
-                  aria-label="Lọc trạng thái mua sắm"
+                  aria-label={t('shopping.filterStatusLabel')}
                   selectedKeys={new Set([activeTab])}
                   selectionMode="single"
                   disallowEmptySelection
@@ -234,21 +236,21 @@ export function ShoppingListPage() {
                     if (selected) setActiveTab(selected);
                   }}
                 >
-                  <DropdownItem key="all" textValue="Tất cả">
+                  <DropdownItem key="all" textValue={t('common.actions.all')}>
                     <div className="flex items-center justify-between w-full gap-4">
-                      <span>Tất cả</span>
+                      <span>{t('common.actions.all')}</span>
                       <span className="text-xs text-default-400 font-normal">({items.length})</span>
                     </div>
                   </DropdownItem>
-                  <DropdownItem key="pending" textValue="Chưa mua">
+                  <DropdownItem key="pending" textValue={t('shopping.pending')}>
                     <div className="flex items-center justify-between w-full gap-4">
-                      <span>Chưa mua</span>
+                      <span>{t('shopping.pending')}</span>
                       <span className="text-xs text-default-400 font-normal">({activeItems.length})</span>
                     </div>
                   </DropdownItem>
-                  <DropdownItem key="done" textValue="Đã mua">
+                  <DropdownItem key="done" textValue={t('shopping.bought')}>
                     <div className="flex items-center justify-between w-full gap-4">
-                      <span>Đã mua</span>
+                      <span>{t('shopping.bought')}</span>
                       <span className="text-xs text-default-400 font-normal">({completedItems.length})</span>
                     </div>
                   </DropdownItem>
@@ -262,7 +264,7 @@ export function ShoppingListPage() {
                 startContent={<ChefHat className="w-4 h-4" />}
                 onClick={() => setIsAddRecipeOpen(true)}
               >
-                Từ công thức
+                {t('shopping.fromRecipe')}
               </Button>
 
               <Button
@@ -270,7 +272,7 @@ export function ShoppingListPage() {
                 variant="flat"
                 className="h-10 w-10 min-w-10 rounded-xl text-default-600 shrink-0"
                 onClick={handleShareList}
-                aria-label="Chia sẻ danh sách"
+                aria-label={t('common.actions.share')}
               >
                 <Share2 className="w-4 h-4" />
               </Button>
@@ -282,7 +284,7 @@ export function ShoppingListPage() {
                   color="danger"
                   className="h-10 w-10 min-w-10 rounded-xl text-danger shrink-0"
                   onClick={handleClearCompleted}
-                  aria-label="Dọn dẹp món đã mua"
+                  aria-label={t('shopping.cleanUp')}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -296,7 +298,7 @@ export function ShoppingListPage() {
         {/* 2. Dải gợi ý nguyên liệu cơ bản lướt ngang */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
           <span className="text-[11px] font-semibold text-default-400 shrink-0">
-            Gợi ý:
+            {t('shopping.suggestions')}
           </span>
           {QUICK_SUGGESTIONS.map((item) => (
             <button
@@ -316,13 +318,13 @@ export function ShoppingListPage() {
             icon={<ShoppingCart className="w-10 h-10 text-default-400" />}
             title={
               isDoneTab
-                ? 'Chưa có món nào đã mua'
-                : 'Danh sách đi chợ trống'
+                ? t('shopping.empty.noCompletedTitle')
+                : t('shopping.empty.title')
             }
             description={
               isDoneTab
-                ? 'Đánh dấu các món đã mua trong danh sách để theo dõi.'
-                : 'Thêm nguyên liệu cần mua hoặc chọn nhanh từ các công thức nấu ăn của bạn.'
+                ? t('shopping.empty.noCompletedDesc')
+                : t('shopping.empty.emptyWithAction')
             }
             action={
               !isDoneTab ? (
@@ -332,7 +334,7 @@ export function ShoppingListPage() {
                   startContent={<ChefHat className="w-4 h-4" />}
                   onClick={() => setIsAddRecipeOpen(true)}
                 >
-                  Chọn từ công thức
+                  {t('shopping.selectFromRecipes')}
                 </Button>
               ) : undefined
             }
@@ -358,7 +360,7 @@ export function ShoppingListPage() {
                       </h3>
                     </div>
                     <span className="text-[11px] font-bold text-default-400">
-                      {groupItems.length} món
+                      {groupItems.length} {t('recipes.detail.ingredients', { defaultValue: 'món' })}
                     </span>
                   </div>
 
@@ -393,7 +395,7 @@ export function ShoppingListPage() {
                     className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors"
                   >
                     <span className="text-xs font-bold uppercase tracking-wider">
-                      Đã mua ({completedItems.length})
+                      {t('shopping.boughtCount', { count: completedItems.length })}
                     </span>
                     {isCompletedExpanded ? (
                       <ChevronUp className="w-4 h-4 text-default-400" />
@@ -407,7 +409,7 @@ export function ShoppingListPage() {
                     onClick={handleClearCompleted}
                     className="text-xs font-semibold text-danger hover:underline cursor-pointer"
                   >
-                    Dọn dẹp
+                    {t('shopping.cleanUp')}
                   </button>
                 </div>
 

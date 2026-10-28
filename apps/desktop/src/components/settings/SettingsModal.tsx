@@ -239,7 +239,7 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                   title={
                     <div className="flex items-center gap-2">
                       <HardDrive className="w-4 h-4" />
-                      <span>Cơ sở dữ liệu & Lưu trữ</span>
+                      <span>{t('settings.tabs.storage')}</span>
                     </div>
                   }
                 >
@@ -252,14 +252,14 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                             <Folder className="w-5 h-5" />
                           </div>
                           <div>
-                            <h4 className="font-bold text-sm text-foreground">Vị trí lưu trữ Database (BYOS)</h4>
-                            <p className="text-xs text-default-500">Tài khoản: <span className="font-semibold text-foreground">{accountName}</span></p>
+                            <h4 className="font-bold text-sm text-foreground">{t('settings.database.title')}</h4>
+                            <p className="text-xs text-default-500">{t('settings.database.account')}: <span className="font-semibold text-foreground">{accountName}</span></p>
                           </div>
                         </div>
 
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-success/15 text-success border border-success/30">
                           <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                          Đang hoạt động
+                          {t('settings.database.active')}
                         </span>
                       </div>
 
@@ -268,14 +268,14 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                         {/* Path Display Box */}
                         <div className="flex-1 flex items-center gap-2 bg-content1 px-3 py-1.5 rounded-xl border border-divider min-h-9 h-9 min-w-0">
                           <span className="font-mono text-xs text-foreground truncate select-all flex-1" title={baseDir}>
-                            {baseDir || 'Chưa thiết lập vị trí lưu trữ'}
+                            {baseDir || t('settings.database.notSet')}
                           </span>
                           <Button
                             isIconOnly
                             size="sm"
                             variant="light"
                             onPress={handleCopyPath}
-                            title="Sao chép đường dẫn"
+                            title={t('settings.data.copyLocation')}
                             className="shrink-0 text-default-400 hover:text-foreground bg-transparent min-w-0 w-6 h-6 p-0"
                           >
                             {copied ? <Check className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
@@ -289,7 +289,7 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                           startContent={<ExternalLink className="w-3.5 h-3.5" />}
                           className="font-medium text-xs rounded-xl h-9 px-3 shrink-0 bg-default-100 hover:bg-default-200 text-foreground"
                         >
-                          Mở thư mục
+                          {t('settings.database.openFolder')}
                         </Button>
 
                         <Button
@@ -301,7 +301,7 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                           startContent={!isChangingDir && <FolderOpen className="w-3.5 h-3.5" />}
                           className="font-medium text-xs rounded-xl h-9 px-3.5 shrink-0"
                         >
-                          Chọn thư mục khác
+                          {t('settings.database.chooseFolder')}
                         </Button>
                       </div>
                     </div>
@@ -311,7 +311,7 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                       <div className="p-4 rounded-xl border-2 border-warning/40 bg-warning/10 flex flex-col gap-3 animate-in fade-in duration-200">
                         <div className="flex items-center gap-2 text-warning font-semibold text-sm">
                           <AlertTriangle className="w-4 h-4 shrink-0" />
-                          <span>Xác nhận chuyển vị trí Database sang thư mục mới:</span>
+                          <span>{t('settings.database.switchConfirmTitle')}</span>
                         </div>
                         
                         <div className="font-mono text-xs bg-content1/80 p-2.5 rounded-lg border border-warning/30 break-all text-foreground select-all">
@@ -319,7 +319,7 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                         </div>
 
                         <p className="text-xs text-default-500">
-                          Ứng dụng sẽ lưu cài đặt và tự động khởi động lại để đọc toàn bộ dữ liệu từ thư mục mới này.
+                          {t('settings.database.switchConfirmDesc')}
                         </p>
 
                         <div className="flex items-center gap-2 pt-1">
@@ -331,7 +331,7 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                             startContent={<RefreshCw className="w-3.5 h-3.5" />}
                             className="font-semibold text-xs rounded-lg"
                           >
-                            Xác nhận & Khởi động lại
+                            {t('settings.database.confirmRestart')}
                           </Button>
                           <Button
                             size="sm"
@@ -339,7 +339,7 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                             onPress={() => setPendingDir(null)}
                             className="text-xs rounded-lg"
                           >
-                            Huỷ bỏ
+                            {t('common.actions.cancel')}
                           </Button>
                         </div>
                       </div>
@@ -400,8 +400,8 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                             <Sparkles className="w-4 h-4" />
                           </div>
                           <div>
-                            <h4 className="font-bold text-sm text-foreground">Dọn dẹp tệp tin & Ảnh thừa</h4>
-                            <p className="text-xs text-default-500">Tự động xoá ảnh không còn liên kết với công thức hay mẹo nào</p>
+                            <h4 className="font-bold text-sm text-foreground">{t('settings.mediaCleaner.title')}</h4>
+                            <p className="text-xs text-default-500">{t('settings.mediaCleaner.desc')}</p>
                           </div>
                         </div>
 
@@ -414,7 +414,7 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                           startContent={!isCleaning && <Trash2 className="w-3.5 h-3.5" />}
                           className="font-medium text-xs rounded-xl h-8 px-4 shrink-0"
                         >
-                          Dọn dẹp ngay
+                          {t('settings.mediaCleaner.cleanBtn')}
                         </Button>
                       </div>
 
@@ -422,7 +422,10 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                         <div className="flex items-center gap-2 text-xs text-success bg-success/10 p-3 rounded-xl border border-success/30">
                           <CheckCircle className="w-4 h-4 shrink-0" />
                           <span>
-                            Đã dọn {cleanResult.deletedCount} ảnh mồ côi, {cleanResult.tempFilesCleaned} file tạm (giải phóng {(cleanResult.freedBytes / (1024 * 1024)).toFixed(2)} MB).
+                            {t('settings.mediaCleaner.successResult', {
+                              count: cleanResult.deletedCount,
+                              size: (cleanResult.freedBytes / (1024 * 1024)).toFixed(2)
+                            })}
                           </span>
                         </div>
                       )}
@@ -436,8 +439,8 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                             <FileUp className="w-4 h-4" />
                           </div>
                           <div>
-                            <h4 className="font-bold text-sm text-foreground">Nhập dữ liệu sao lưu (JSON)</h4>
-                            <p className="text-xs text-default-500">Khôi phục hoặc nạp thêm công thức, mẹo vặt và đơn vị từ tệp JSON</p>
+                            <h4 className="font-bold text-sm text-foreground">{t('settings.data.importBackup')}</h4>
+                            <p className="text-xs text-default-500">{t('importJson.subtitle')}</p>
                           </div>
                         </div>
 
@@ -452,7 +455,7 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                           }}
                           className="font-semibold text-xs h-9 px-3.5 rounded-xl"
                         >
-                          Mở bảng nhập JSON
+                          {t('importJson.title')}
                         </Button>
                       </div>
                     </div>
@@ -465,7 +468,7 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                   title={
                     <div className="flex items-center gap-2">
                       <Palette className="w-4 h-4" />
-                      <span>Giao diện & Ngôn ngữ</span>
+                      <span>{t('settings.tabs.appearance')}</span>
                     </div>
                   }
                 >
@@ -473,7 +476,7 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                     {/* Theme Selector */}
                     <div>
                       <h4 className="text-xs font-bold uppercase tracking-wider text-default-500 mb-3">
-                        {t('Theme')}
+                        {t('settings.appearance.theme')}
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <button
@@ -487,8 +490,8 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                         >
                           <Sun className="w-6 h-6" />
                           <div className="flex flex-col">
-                            <span className="text-xs font-bold">{t('Light')}</span>
-                            <span className="text-[11px] text-default-400">Sáng & Tương phản</span>
+                            <span className="text-xs font-bold">{t('settings.appearance.light')}</span>
+                            <span className="text-[11px] text-default-400">{t('settings.appearance.lightDesc')}</span>
                           </div>
                         </button>
 
@@ -503,8 +506,8 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                         >
                           <Moon className="w-6 h-6" />
                           <div className="flex flex-col">
-                            <span className="text-xs font-bold">{t('Dark')}</span>
-                            <span className="text-[11px] text-default-400">Bảo vệ mắt ban đêm</span>
+                            <span className="text-xs font-bold">{t('settings.appearance.dark')}</span>
+                            <span className="text-[11px] text-default-400">{t('settings.appearance.darkDesc')}</span>
                           </div>
                         </button>
 
@@ -519,8 +522,8 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                         >
                           <Monitor className="w-6 h-6" />
                           <div className="flex flex-col">
-                            <span className="text-xs font-bold">{t('System')}</span>
-                            <span className="text-[11px] text-default-400">Theo hệ điều hành</span>
+                            <span className="text-xs font-bold">{t('settings.appearance.system')}</span>
+                            <span className="text-[11px] text-default-400">{t('settings.appearance.systemDesc')}</span>
                           </div>
                         </button>
                       </div>
@@ -529,7 +532,7 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                     {/* Language Selector */}
                     <div>
                       <h4 className="text-xs font-bold uppercase tracking-wider text-default-500 mb-3">
-                        {t('Language')}
+                        {t('settings.language.sectionTitle')}
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <button
@@ -543,8 +546,8 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                         >
                           <span className="text-2xl">🇻🇳</span>
                           <div className="flex flex-col min-w-0">
-                            <span className="text-xs font-bold">Tiếng Việt</span>
-                            <span className="text-[11px] text-default-400">Mặc định</span>
+                            <span className="text-xs font-bold">{t('settings.language.vi')}</span>
+                            <span className="text-[11px] text-default-400">{t('settings.language.defaultTag')}</span>
                           </div>
                         </button>
 
@@ -559,8 +562,8 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                         >
                           <span className="text-2xl">🇺🇸</span>
                           <div className="flex flex-col min-w-0">
-                            <span className="text-xs font-bold">English (US)</span>
-                            <span className="text-[11px] text-default-400">International</span>
+                            <span className="text-xs font-bold">{t('settings.language.en')}</span>
+                            <span className="text-[11px] text-default-400">{t('settings.language.intlTag')}</span>
                           </div>
                         </button>
                       </div>
@@ -574,7 +577,7 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                   title={
                     <div className="flex items-center gap-2">
                       <Info className="w-4 h-4" />
-                      <span>Thông tin</span>
+                      <span>{t('settings.tabs.about')}</span>
                     </div>
                   }
                 >
@@ -584,17 +587,17 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                         <img src="/logo.svg" alt="Apron Logo" className="w-8 h-8" />
                       </div>
                       <div className="flex flex-col min-w-0">
-                        <h3 className="font-bold text-base text-foreground">Apron Cookbook Desktop</h3>
-                        <p className="text-xs text-default-500">Phiên bản v1.0.0 Desktop • Bản quyền 2026</p>
+                        <h3 className="font-bold text-base text-foreground">{t('settings.about.appName')}</h3>
+                        <p className="text-xs text-default-500">{t('settings.about.versionText')}</p>
                       </div>
                     </div>
 
                     <div className="text-xs text-default-600 leading-relaxed space-y-2 p-4 rounded-xl bg-content2/20 border border-divider">
                       <p>
-                        <strong>Kiến trúc Local-First:</strong> Dữ liệu công thức nấu ăn, mẹo vặt và kế hoạch được lưu trữ 100% trên thiết bị của bạn. Bạn sở hữu hoàn toàn dữ liệu và có thể đồng bộ dễ dàng qua thư mục được chia sẻ (Google Drive, Dropbox, Syncthing, OneDrive, v.v.).
+                        <strong>{t('settings.about.localFirstTitle')}</strong> {t('settings.about.localFirstDesc')}
                       </p>
                       <p>
-                        <strong>Phím tắt nhanh:</strong> Nhấn <kbd className="px-1.5 py-0.5 bg-content1 border border-divider rounded text-[11px] font-mono">Ctrl + B</kbd> để bật/tắt thu gọn thanh điều hướng bên trái.
+                        <strong>{t('settings.about.shortcutsTitle')}</strong> {t('settings.about.shortcutsDesc')}
                       </p>
                     </div>
                   </div>

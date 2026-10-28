@@ -112,7 +112,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
               {accounts.map(acc => (
                 <button
                   key={acc.id}
-                  className="flex items-center gap-4 p-4 rounded-xl border border-default-200 hover:border-primary hover:bg-primary-50 transition-colors text-left"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-default-200 hover:border-primary hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors text-left"
                   onClick={async () => {
                     localStorage.setItem('account_name', acc.name);
                     const provider = getStorageProvider() as any;
@@ -169,7 +169,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
               </p>
               
               {storagePath ? (
-                <div className="flex items-center justify-between p-3 border border-success-200 bg-success-50 rounded-xl">
+                <div className="flex items-center justify-between p-3 border border-success-200 bg-success/10 dark:bg-success/20 rounded-xl">
                   <div className="flex items-center gap-2 overflow-hidden">
                     <Folder className="w-4 h-4 text-success-600 shrink-0" />
                     <span className="text-sm font-medium text-success-700 truncate" title={storagePath}>
@@ -201,7 +201,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
             </div>
 
             {error && (
-              <p className="text-danger text-sm text-center bg-danger-50 p-2 rounded-lg">{error}</p>
+              <p className="text-danger text-sm text-center bg-danger/10 dark:bg-danger/20 p-2 rounded-lg">{error}</p>
             )}
 
             <div className="flex flex-col gap-2 mt-4">

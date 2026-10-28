@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useMemo, useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -47,6 +48,7 @@ function TabHeader({ icon: Icon, label, hasError }: TabHeaderProps) {
 }
 
 export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
+  const { t } = useTranslation();
   const [isSaving, setIsSaving] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [activeStep, setActiveStep] = useState('info');
@@ -465,7 +467,7 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
 
         
         <PageHeader
-          title={bulkRecipes && bulkRecipes.length > 1 ? `Nhập ${bulkRecipes.length} công thức` : (initialData ? "Chỉnh sửa công thức" : "Tạo công thức mới")}
+          title={bulkRecipes && bulkRecipes.length > 1 ? t('recipes.form.bulkCreateTitle', { count: bulkRecipes.length }) : (initialData ? t('recipes.form.editTitle') : t('recipes.form.createTitle'))}
           showBackButton
           className="px-4 pt-4 pb-2"
           actions={
@@ -501,12 +503,12 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
                 <Layers className="w-4 h-4" />
-                <span>Danh sách món ({activeBulkIndex + 1}/{bulkRecipes.length}):</span>
+                <span>{t('recipes.form.bulkListTitle', { current: activeBulkIndex + 1, total: bulkRecipes.length })}</span>
               </div>
               <button
                 type="button"
                 onClick={() => {
-                  if (window.confirm('Bạn có chắc muốn thoát chế độ nhập hàng loạt? (Chỉ giữ lại món đang sửa)')) {
+                  if (window.confirm(t('recipes.form.bulkExitConfirm'))) {
                     setBulkRecipes(null);
                     setActiveBulkIndex(0);
                     toast.info('Đã chuyển về chế độ chỉnh sửa đơn lẻ');
@@ -586,15 +588,15 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
           >
             <Tab 
               key="info" 
-              title={<TabHeader icon={FileText} label="Thông tin" hasError={hasInfoError} />} 
+              title={<TabHeader icon={FileText} label={t('recipes.detail.overview')} hasError={hasInfoError} />} 
             />
             <Tab 
               key="ingredients" 
-              title={<TabHeader icon={Utensils} label="Nguyên liệu" hasError={hasIngredientsError} />} 
+              title={<TabHeader icon={Utensils} label={t('recipes.detail.ingredients')} hasError={hasIngredientsError} />} 
             />
             <Tab 
               key="steps" 
-              title={<TabHeader icon={ChefHat} label="Cách làm" hasError={hasStepsError} />} 
+              title={<TabHeader icon={ChefHat} label={t('recipes.detail.instructions')} hasError={hasStepsError} />} 
             />
           </Tabs>
         </div>
@@ -636,7 +638,7 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
             }
           }}
           isSaving={isSaving}
-          submitText={bulkRecipes && bulkRecipes.length > 1 ? `Lưu tất cả (${bulkRecipes.length} món)` : (initialData ? "Lưu thay đổi" : "Lưu công thức")}
+          submitText={bulkRecipes && bulkRecipes.length > 1 ? t('recipes.form.saveBulkRecipes', { count: bulkRecipes.length }) : (initialData ? t('common.actions.save') : t('recipes.form.saveRecipe'))}
           extraAction={
             <Button
               type="button"
@@ -645,7 +647,7 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
               isIconOnly
               onPress={() => setIsAiModalOpen(true)}
               className="shrink-0 h-12 w-12 rounded-xl"
-              aria-label="AI Nhập"
+              aria-label={t('recipes.form.aiAssist')}
             >
               <Sparkles className="w-5 h-5 text-secondary" />
             </Button>

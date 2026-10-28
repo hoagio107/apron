@@ -1,5 +1,6 @@
 /* eslint-disable max-lines */
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   Button, 
@@ -53,6 +54,7 @@ interface NoteItem {
 }
 
 export function CourseDetailPage() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { courses, fetchCourses } = useCourseStore();
@@ -190,10 +192,10 @@ export function CourseDetailPage() {
         delete next[lessonId];
         return next;
       });
-      toast.info('Đã bỏ đánh dấu hoàn thành');
+      toast.info(t('courses.unmarkedLesson'));
     } else {
       setCompletedLessons(prev => ({ ...prev, [lessonId]: true }));
-      toast.success('Đã hoàn thành bài học! 🎉');
+      toast.success(t('courses.completedLessonSuccess'));
     }
   };
 
@@ -212,7 +214,7 @@ export function CourseDetailPage() {
     ]);
     setNewNote('');
     setIsAddingNote(false);
-    toast.success('Đã lưu ghi chú mới!');
+    toast.success(t('courses.savedNoteSuccess'));
   };
 
   const handleUpdateNote = () => {
@@ -222,7 +224,7 @@ export function CourseDetailPage() {
     );
     setEditingNoteId(null);
     setEditingNoteContent('');
-    toast.success('Đã cập nhật ghi chú!');
+    toast.success(t('courses.updatedNoteSuccess'));
   };
 
   const toggleNote = (noteId: string) => {
@@ -231,7 +233,7 @@ export function CourseDetailPage() {
 
   const deleteNote = (noteId: string) => {
     setNotes(prev => prev.filter(n => n.id !== noteId));
-    toast.success('Đã xoá ghi chú');
+    toast.success(t('courses.deletedNoteSuccess'));
   };
 
   const activeNotes = activeLesson ? notes.filter(n => n.lessonId === activeLesson.id) : [];
@@ -247,7 +249,7 @@ export function CourseDetailPage() {
         });
       } else {
         await navigator.clipboard.writeText(window.location.href);
-        toast.success('Đã sao chép liên kết khoá học!');
+        toast.success(t('courses.copiedCourseLink'));
       }
     } catch {
       // User cancelled share
@@ -270,7 +272,7 @@ export function CourseDetailPage() {
             variant="light"
             radius="full"
             onPress={() => navigate('/courses')}
-            aria-label="Quay lại danh sách khoá học"
+            aria-label={t('recipes.backToList')}
             className="w-10 h-10 min-w-10 text-foreground shrink-0"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -292,7 +294,7 @@ export function CourseDetailPage() {
             variant="light"
             radius="full"
             onPress={() => navigate(`/courses/edit/${course.id}`)}
-            aria-label="Chỉnh sửa khoá học"
+            aria-label={t('common.edit')}
             className="w-9 h-9 min-w-9 text-foreground"
           >
             <Edit className="w-4 h-4" />
@@ -304,13 +306,13 @@ export function CourseDetailPage() {
                 isIconOnly
                 variant="light"
                 radius="full"
-                aria-label="Tùy chọn khác"
+                aria-label={t('common.actions')}
                 className="w-9 h-9 min-w-9 text-foreground"
               >
                 <MoreVertical className="w-5 h-5" />
               </Button>
             </DropdownTrigger>
-            <DropdownMenu aria-label="Tùy chọn khoá học" className="min-w-[200px]">
+            <DropdownMenu aria-label={t('common.actions')} className="min-w-[200px]">
               <DropdownItem
                 key="share"
                 startContent={<Share2 className="w-4 h-4 text-primary" />}
@@ -346,7 +348,7 @@ export function CourseDetailPage() {
       {/* Sleek Top Progress Bar */}
       <Progress
         value={progressPercent}
-        aria-label="Tiến độ khoá học"
+        aria-label={t('courses.progress')}
         size="sm"
         radius="none"
         color="primary"

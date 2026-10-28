@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Drawer, DrawerContent, DrawerBody, Button, Textarea } from '@/ui';
 import { Check, Star, Edit3, PartyPopper } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -10,6 +11,7 @@ interface CookingRatingModalProps {
 }
 
 export function CookingRatingModal({ isOpen, onClose, onComplete }: CookingRatingModalProps) {
+  const { t } = useTranslation();
   const [rating, setRating] = useState(0);
   const [notes, setNotes] = useState('');
   const [step, setStep] = useState<'rating' | 'confirm'>('rating');
@@ -72,8 +74,8 @@ export function CookingRatingModal({ isOpen, onClose, onComplete }: CookingRatin
                   <div className="w-12 h-12 bg-warning-100 dark:bg-warning-500/20 text-warning-600 dark:text-warning-400 rounded-2xl flex items-center justify-center mb-1">
                     <PartyPopper className="w-6 h-6" />
                   </div>
-                  <h3 className="text-xl font-bold text-foreground">Tuyệt vời!</h3>
-                  <p className="text-default-500 text-sm">Bạn đã hoàn thành món ăn. Hãy đánh giá thành quả nhé!</p>
+                  <h3 className="text-xl font-bold text-foreground">{t('recipes.cooking.congratsTitle')}</h3>
+                  <p className="text-default-500 text-sm">{t('recipes.cooking.congratsSubtitle')}</p>
                 </div>
                 
                 <div className="flex flex-col items-center gap-3">
@@ -94,7 +96,7 @@ export function CookingRatingModal({ isOpen, onClose, onComplete }: CookingRatin
                   </div>
                   
                   <Textarea
-                    placeholder="Ghi chú cho lần nấu này (VD: Lần sau nên cho ít muối hơn...)"
+                    placeholder={t('recipes.cooking.ratingNotesPlaceholder')}
                     value={notes}
                     onValueChange={setNotes}
                     minRows={2}
@@ -121,8 +123,8 @@ export function CookingRatingModal({ isOpen, onClose, onComplete }: CookingRatin
             ) : (
               <div className="flex flex-col gap-6 animate-appearance-in py-2">
                 <div className="flex flex-col gap-2 items-center">
-                  <h3 className="text-lg font-bold text-foreground">Bạn có muốn sửa lại công thức không?</h3>
-                  <p className="text-default-500 text-sm max-w-sm">Dựa vào ghi chú vừa rồi, bạn có thể điều chỉnh lại định lượng hoặc cách làm để món ăn ngon hơn trong lần tới.</p>
+                  <h3 className="text-lg font-bold text-foreground">{t('recipes.cooking.editPromptTitle')}</h3>
+                  <p className="text-default-500 text-sm max-w-sm">{t('recipes.cooking.editPromptDesc')}</p>
                 </div>
                 
                 <div className="flex justify-center gap-3 mt-2">

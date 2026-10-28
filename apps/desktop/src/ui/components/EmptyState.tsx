@@ -57,7 +57,7 @@ export function EmptyState({
               color={actionColor}
               variant={actionVariant}
               onPress={onAction}
-              className="mt-1"
+              className="mt-1 font-semibold"
             >
               {actionLabel}
             </Button>
@@ -76,15 +76,15 @@ export function EmptyState({
       <p className="app-body-text text-default-500 max-w-md">{description}</p>
       {action ?? (
         actionLabel && onAction ? (
-          <Button
-            size="md"
-            color={actionColor}
-            variant={actionVariant}
-            onPress={onAction}
-            className="mt-3"
-          >
-            {actionLabel}
-          </Button>
+            <Button
+              size="md"
+              color={actionColor}
+              variant={actionVariant}
+              onPress={onAction}
+              className="mt-3 font-semibold"
+            >
+              {actionLabel}
+            </Button>
         ) : null
       )}
     </div>

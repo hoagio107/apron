@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useRef } from 'react';
 import { Drawer, DrawerContent, DrawerHeader, DrawerBody, SectionTitle } from '@/ui';
 import { Carrot, ChefHat, Timer, Flame, Star, Info, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -66,6 +67,7 @@ const StepImageCarousel = ({ step }: { step: any }) => {
 };
 
 export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, notes }: RecipeSnapshotModalProps) {
+  const { t } = useTranslation();
   if (!snapshot) return null;
 
   const mainImage = snapshot.images?.[0] || snapshot.image_url;
@@ -149,8 +151,8 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
                       <Timer className="w-4 h-4 text-primary" />
                     </div>
                     <div>
-                      <div className="text-[11px] text-default-500 font-medium">Chuẩn bị</div>
-                      <div className="font-bold text-xs sm:text-sm text-foreground">{snapshot.prep_time || 0} phút</div>
+                      <div className="text-[11px] text-default-500 font-medium">{t('recipes.filter.prepTime')}</div>
+                      <div className="font-bold text-xs sm:text-sm text-foreground">{snapshot.prep_time || 0} {t('common.time.minutes')}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2.5">
@@ -158,8 +160,8 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
                       <ChefHat className="w-4 h-4 text-primary" />
                     </div>
                     <div>
-                      <div className="text-[11px] text-default-500 font-medium">Nấu</div>
-                      <div className="font-bold text-xs sm:text-sm text-foreground">{snapshot.cook_time || 0} phút</div>
+                      <div className="text-[11px] text-default-500 font-medium">{t('recipes.filter.cookingMethod')}</div>
+                      <div className="font-bold text-xs sm:text-sm text-foreground">{snapshot.cook_time || 0} {t('common.time.minutes')}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2.5">

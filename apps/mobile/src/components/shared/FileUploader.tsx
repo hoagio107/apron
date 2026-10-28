@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { Button } from '@/ui';
+import { Button, Progress } from '@/ui';
 import { CloudUpload, X, File as FileIcon, Loader2 } from 'lucide-react';
 import { FileManager } from '../../lib/file-manager';
 
@@ -73,7 +73,7 @@ export function FileUploader({ value = [], onChange, label = "Kéo thả file v�
       <div 
         className={`
           w-full rounded-xl border-2 border-dashed flex flex-col items-center justify-center p-6 transition-colors cursor-pointer
-          ${isDragging ? 'border-primary bg-primary-50' : 'border-default-300 bg-default-50 hover:bg-default-100'}
+          ${isDragging ? 'border-primary bg-primary/10 dark:bg-primary/20' : 'border-default-300 bg-default-50 hover:bg-default-100'}
         `}
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
         onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
@@ -103,7 +103,7 @@ export function FileUploader({ value = [], onChange, label = "Kéo thả file v�
         <div className="flex flex-col gap-2 max-h-48 overflow-y-auto custom-scrollbar p-1">
           {/* Pending / Uploading files */}
           {pendingUploads.map((u) => (
-            <div key={u.id} className={`flex flex-col p-2 rounded-lg border ${u.status === 'failed' ? 'border-danger-200 bg-danger-50' : 'border-primary-200 bg-primary-50'}`}>
+            <div key={u.id} className={`flex flex-col p-2 rounded-lg border ${u.status === 'failed' ? 'border-danger-200 bg-danger/10 dark:bg-danger/20' : 'border-primary-200 bg-primary/10 dark:bg-primary/20'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded flex items-center justify-center flex-shrink-0 ${u.status === 'failed' ? 'bg-danger-100 text-danger' : 'bg-white text-primary'}`}>
                   {u.status === 'complete' ? <FileIcon className="w-4 h-4" /> : <Loader2 className={`w-4 h-4 ${u.status === 'processing' ? 'animate-spin' : ''}`} />}
@@ -116,12 +116,7 @@ export function FileUploader({ value = [], onChange, label = "Kéo thả file v�
                 </div>
               </div>
               {u.status === 'processing' && (
-                <div className="mt-2 h-1 w-full bg-primary-100 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-primary transition-all duration-200" 
-                    style={{ width: `${u.progress}%` }} 
-                  />
-                </div>
+                <Progress size="sm" value={u.progress} color="primary" className="mt-2" aria-label="Upload progress" />
               )}
             </div>
           ))}

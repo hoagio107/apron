@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { Button, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Badge } from '@/ui';
@@ -14,6 +15,7 @@ import { TipDetailPanel } from './components/TipDetailPanel';
 import { TIP_CATEGORIES } from '@apron/core';
 
 export function TipListPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { tips, fetchTips, deleteBulkTips, deleteTip } = useTipStore();
   
@@ -127,8 +129,8 @@ export function TipListPage() {
     <div className="flex flex-col min-h-full gap-6 w-full pt-6 pb-28 px-4 md:px-8">
       {/* Header & Toolbar */}
       <PageHeader
-        title="Mẹo nhà bếp"
-        description={`${tips.length} mẹo đã lưu`}
+        title={t('tips.title')}
+        description={t('tips.subtitle', { count: tips.length })}
         actions={
           <div className="flex flex-col md:flex-row justify-end gap-3 w-full">
             <Input
@@ -137,7 +139,7 @@ export function TipListPage() {
                 base: "w-full md:max-w-[300px]",
                 input: "text-small",
               }}
-              placeholder="Tìm kiếm mẹo..."
+              placeholder={t('tips.searchPlaceholder')}
               size="md"
               startContent={<Search className="w-4 h-4" />}
               value={searchQuery}
@@ -149,7 +151,7 @@ export function TipListPage() {
                 isIconOnly
                 color="primary"
                 onPress={() => setIsFormModalOpen(true)}
-                aria-label="Thêm mẹo mới"
+                aria-label={t('tips.addTip')}
               >
                 <Plus className="w-5 h-5" />
               </Button>
@@ -175,7 +177,7 @@ export function TipListPage() {
                     setSelectedCategoryId(key === 'all' ? null : key);
                   }}
                   items={[
-                    { id: 'all', name: 'Tất cả danh mục' },
+                    { id: 'all', name: t('tips.categories.all') },
                     ...TIP_CATEGORIES
                   ]}
                 >
@@ -190,7 +192,7 @@ export function TipListPage() {
                 variant="flat" 
                 color={isSelectMode ? "primary" : "default"}
                 onPress={toggleSelectMode}
-                aria-label="Chọn nhiều"
+                aria-label={t('common.selectMultiple')}
               >
                 <CheckCircle2 className="w-5 h-5" />
               </Button>
@@ -201,7 +203,7 @@ export function TipListPage() {
               <Button
                 isIconOnly
                 variant="flat"
-                aria-label={viewMode === 'grid' ? 'Chuyển sang dạng 1 cột' : 'Chuyển sang dạng lưới 2 cột'}
+                aria-label={viewMode === 'grid' ? t('tips.views.switchToSingle') : t('tips.views.switchToGrid')}
                 onPress={() => handleViewModeChange(viewMode === 'grid' ? 'single' : 'grid')}
               >
                 {viewMode === 'grid' ? (
@@ -223,7 +225,7 @@ export function TipListPage() {
           onSelectAll={selectAll}
           onCancel={toggleSelectMode}
           actions={[
-            { key: 'delete', label: 'Xóa', icon: <Trash2 className="w-4 h-4" />, color: 'danger', onPress: handleBulkDelete },
+            { key: 'delete', label: t('common.delete'), icon: <Trash2 className="w-4 h-4" />, color: 'danger', onPress: handleBulkDelete },
           ]}
         />
       )}
@@ -232,8 +234,8 @@ export function TipListPage() {
       {filteredTips.length === 0 ? (
         <EmptyState
           icon={<Search className="w-10 h-10 text-default-300" />}
-          title="Không tìm thấy mẹo nào"
-          description="Thử thay đổi từ khóa tìm kiếm hoặc xóa bớt bộ lọc để xem kết quả khác."
+          title={t('tips.emptySearchTitle')}
+          description={t('tips.emptySearchDesc')}
         />
       ) : (
         <div className={
@@ -293,18 +295,18 @@ export function TipListPage() {
       <ConfirmModal
         isOpen={!!deleteTipId}
         onOpenChange={(open) => { if (!open) setDeleteTipId(null); }}
-        title="Xoá mẹo"
-        description="Bạn có chắc muốn xóa mẹo này không? Hành động này không thể hoàn tác."
-        confirmLabel="Xoá"
+        title={t('tips.deleteModalTitle')}
+        description={t('tips.confirmDelete')}
+        confirmLabel={t('common.delete')}
         confirmColor="danger"
         onConfirm={handleDeleteConfirm}
       />
       <ConfirmModal
         isOpen={isBulkDeleteOpen}
         onOpenChange={setIsBulkDeleteOpen}
-        title="Xoá nhiều mẹo"
-        description={`Bạn có chắc muốn xóa ${selectedIds.size} mẹo đã chọn? Hành động này không thể hoàn tác.`}
-        confirmLabel="Xoá tất cả"
+        title={t('tips.bulkDeleteModalTitle')}
+        description={t('tips.bulkDeleteModalDesc', { count: selectedIds.size })}
+        confirmLabel={t('common.deleteAll')}
         confirmColor="danger"
         onConfirm={handleBulkDeleteConfirm}
       />

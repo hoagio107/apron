@@ -21,7 +21,7 @@ export function LinkedTipsSection() {
   if (linkedTips.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-3 p-4 bg-primary-50/50 rounded-xl">
+    <div className="flex flex-col gap-3 p-4 bg-primary/10 dark:bg-primary/15 rounded-xl">
       <div className="flex items-center gap-2 text-primary-700">
         <Lightbulb className="w-5 h-5" />
         <h3 className="font-semibold">Mẹo nhà bếp liên kết</h3>

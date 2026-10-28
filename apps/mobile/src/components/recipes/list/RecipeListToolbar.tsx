@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Input, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Badge } from '@/ui';
 import { Search, LayoutGrid, Filter, ArrowUpDown, Grip, CheckSquare } from 'lucide-react';
 import type { RecipeViewType } from './RecipeCard';
@@ -25,11 +26,13 @@ export function RecipeListToolbar({
   onOpenFilter,
   onToggleSelectMode
 }: RecipeListToolbarProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col md:flex-row justify-end gap-3 w-full">
       {/* Search Input */}
       <Input
-        placeholder="Tìm kiếm công thức..."
+        placeholder={t('recipes.searchPlaceholder')}
         variant="flat"
         classNames={{
           base: "w-full md:max-w-[300px]",
@@ -69,10 +72,10 @@ export function RecipeListToolbar({
             selectionMode="single"
             onSelectionChange={(keys) => onSortOptionChange(Array.from(keys)[0] as string)}
           >
-            <DropdownItem key="newest">Mới nhất</DropdownItem>
-            <DropdownItem key="oldest">Cũ nhất</DropdownItem>
-            <DropdownItem key="highest_rated">Đánh giá cao</DropdownItem>
-            <DropdownItem key="quickest">Thời gian nhanh</DropdownItem>
+            <DropdownItem key="newest">{t('recipes.sort.newest')}</DropdownItem>
+            <DropdownItem key="oldest">{t('recipes.sort.oldest')}</DropdownItem>
+            <DropdownItem key="highest_rated">{t('recipes.sort.highestRated')}</DropdownItem>
+            <DropdownItem key="quickest">{t('recipes.sort.quickest')}</DropdownItem>
           </DropdownMenu>
         </Dropdown>
 
@@ -94,7 +97,7 @@ export function RecipeListToolbar({
         <Button
           isIconOnly
           variant="flat"
-          aria-label={viewType === 'grid-portrait' ? 'Chuyển sang dạng lưới vuông' : 'Chuyển sang dạng thẻ dọc'}
+          aria-label={viewType === 'grid-portrait' ? t('recipes.views.switchToSquare') : t('recipes.views.switchToPortrait')}
           onPress={() => onViewTypeChange(viewType === 'grid-portrait' ? 'grid-square' : 'grid-portrait')}
         >
           {viewType === 'grid-portrait' ? (

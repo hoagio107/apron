@@ -69,12 +69,12 @@ export function MainSidebar({ isPinned = false }: MainSidebarProps) {
     { name: t('nav.saved'), icon: Heart, path: '/saved' },
     { name: t('nav.shoppingList'), icon: ShoppingCart, path: '/shopping-list' },
     { name: t('nav.courses'), icon: GraduationCap, path: '/courses' },
-    { name: t('nav.collections', 'Bộ sưu tập'), icon: FolderHeart, path: '/collections' },
+    { name: t('nav.collections'), icon: FolderHeart, path: '/collections' },
     { name: t('nav.mealPlanner'), icon: CalendarDays, path: '/meal-planner' },
     { name: t('nav.kitchenTips'), icon: Lightbulb, path: '/tips' },
     { name: t('nav.units'), icon: Scale, path: '/units' },
     { 
-      name: t('nav.import', 'Nhập dữ liệu'), 
+      name: t('nav.import'), 
       icon: FileUp, 
       onClick: () => setIsImportOpen(true) 
     },
@@ -99,16 +99,16 @@ export function MainSidebar({ isPinned = false }: MainSidebarProps) {
               color="primary" 
               variant="solid"
               isIconOnly={!isExpanded}
-              className={`font-bold h-11 rounded-xl overflow-hidden transition-all duration-200 ${
+              className={`font-bold h-11 rounded-xl text-white overflow-hidden transition-all duration-200 ${
                 isExpanded 
                   ? 'w-full justify-start px-3.5 gap-2.5' 
                   : 'w-11 min-w-11 h-11 justify-center p-0 mx-auto'
               }`}
-              title={!isExpanded ? t('Add Recipe') : undefined}
+              title={!isExpanded ? t('nav.addRecipe') : undefined}
             >
-              <PlusCircle className="w-5 h-5 flex-shrink-0" />
+              <PlusCircle className="w-5 h-5 flex-shrink-0 text-white" />
               {isExpanded && (
-                <span className="whitespace-nowrap truncate">{t('Add Recipe')}</span>
+                <span className="whitespace-nowrap truncate text-white">{t('nav.addRecipe')}</span>
               )}
             </Button>
           </div>

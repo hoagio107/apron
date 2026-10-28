@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   Button, 
@@ -30,11 +31,12 @@ import { useTipStore } from '../../store/useTipStore';
 import { TIP_CATEGORIES, type Tip, TipRepository } from '@apron/core';
 import { ImageManager } from '../../lib/image-manager';
 import { format } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { vi, enUS } from 'date-fns/locale';
 import { TipFormModal } from './components/TipFormModal';
 import { ConfirmModal } from '../../components/shared/ConfirmModal';
 
 export function TipDetailPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { tips, fetchTips, deleteTip } = useTipStore();
@@ -123,10 +125,10 @@ export function TipDetailPage() {
     try {
       await navigator.clipboard.writeText(shareText);
       setIsCopied(true);
-      toast.success('Đã sao chép nội dung mẹo vào bộ nhớ tạm!');
+      toast.success(t('tips.copiedSuccess'));
       setTimeout(() => setIsCopied(false), FEEDBACK_RESET_DELAY_MS);
     } catch {
-      toast.error('Không thể sao chép văn bản.');
+      toast.error(t('tips.copyFailed'));
     }
   };
 
@@ -158,11 +160,11 @@ export function TipDetailPage() {
     setIsDeleting(true);
     try {
       await deleteTip(tip.id);
-      toast.success('Đã xóa mẹo thành công');
+      toast.success(t('tips.deletedSuccess'));
       navigate('/tips');
     } catch (err) {
       console.error(err);
-      toast.error('Có lỗi xảy ra khi xóa mẹo');
+      toast.error(t('tips.deleteError'));
     } finally {
       setIsDeleting(false);
       setIsDeleteConfirmOpen(false);
@@ -173,7 +175,7 @@ export function TipDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3 text-default-500 bg-background">
         <Spinner size="lg" color="primary" />
-        <p className="text-sm">Đang tải nội dung mẹo...</p>
+        <p className="text-sm">{t('common.loading')}</p>
       </div>
     );
   }
@@ -184,8 +186,8 @@ export function TipDetailPage() {
         <div className="w-16 h-16 rounded-3xl bg-default-100 flex items-center justify-center text-default-400 mb-4">
           <Lightbulb className="w-8 h-8" />
         </div>
-        <h2 className="text-2xl font-bold mb-2">Không tìm thấy mẹo</h2>
-        <p className="text-default-500 mb-6 max-w-sm">Mẹo này có thể đã bị xóa hoặc liên kết không còn chính xác.</p>
+        <h2 className="text-2xl font-bold mb-2">{t('tips.emptySearchTitle')}</h2>
+        <p className="text-default-500 mb-6 max-w-sm">{t('tips.emptySearchDesc')}</p>
         <Button color="primary" variant="flat" onPress={() => navigate('/tips')} startContent={<ArrowLeft className="w-4 h-4" />}>
           Quay lại danh sách
         </Button>
@@ -225,7 +227,7 @@ export function TipDetailPage() {
               isIconOnly 
               className="bg-background/80 backdrop-blur-md text-foreground rounded-full w-10 h-10 min-w-0 p-0 flex items-center justify-center border border-divider hover:bg-content1 active:scale-95 transition-all shadow-none"
               onPress={() => navigate('/tips')}
-              aria-label="Quay lại danh sách"
+              aria-label={t('recipes.backToList')}
             >
               <ArrowLeft className="w-5 h-5 text-foreground" />
             </Button>
@@ -238,7 +240,7 @@ export function TipDetailPage() {
                 <Button 
                   isIconOnly 
                   className="bg-background/80 backdrop-blur-md text-foreground rounded-full w-10 h-10 min-w-0 p-0 flex items-center justify-center border border-divider hover:bg-content1 active:scale-95 transition-all shadow-none"
-                  aria-label="Tùy chọn mẹo"
+                  aria-label={t('common.actions')}
                 >
                   <MoreVertical className="w-5 h-5 text-foreground" />
                 </Button>
@@ -264,7 +266,7 @@ export function TipDetailPage() {
           {tip.image_url && (
             <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md text-white/90 text-xs px-2.5 py-1 rounded-full flex items-center gap-1.5 pointer-events-none border border-white/15">
               <Maximize2 className="w-3.5 h-3.5" />
-              <span>Xem ảnh</span>
+              <span>{t('tips.viewDetails')}</span>
             </div>
           )}
         </div>
@@ -284,9 +286,9 @@ export function TipDetailPage() {
               </span>
             )}
             {category && <span className="text-default-400 font-bold">•</span>}
-            <span>{tip.created_at ? format(new Date(tip.created_at), 'dd/MM/yyyy', { locale: vi }) : 'Gần đây'}</span>
+            <span>{tip.created_at ? format(new Date(tip.created_at), 'dd/MM/yyyy', { locale: i18n.language === 'vi' ? vi : enUS }) : 'Gần đây'}</span>
             <span className="text-default-400 font-bold">•</span>
-            <span>~{readingTime} phút đọc</span>
+            <span>{t('tips.readingTime', { count: readingTime })}</span>
           </div>
 
           {/* Đường kẻ ngăn cách giữa các badge và nội dung chính của mẹo */}
@@ -366,7 +368,7 @@ export function TipDetailPage() {
           {tip.image_url && (
             <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-white font-medium text-sm">
               <Maximize2 className="w-5 h-5" />
-              <span>Bấm để phóng to ảnh</span>
+              <span>{t('tips.viewDetails')}</span>
             </div>
           )}
         </div>
@@ -386,7 +388,7 @@ export function TipDetailPage() {
                 </span>
               )}
               {category && <span className="text-default-400 font-bold">•</span>}
-              <span>{tip.created_at ? format(new Date(tip.created_at), 'dd MMMM, yyyy', { locale: vi }) : 'Gần đây'}</span>
+              <span>{tip.created_at ? format(new Date(tip.created_at), 'dd MMMM, yyyy', { locale: i18n.language === 'vi' ? vi : enUS }) : 'Gần đây'}</span>
               <span className="text-default-400 font-bold">•</span>
               <span>~{readingTime} phút đọc</span>
             </div>
@@ -400,7 +402,7 @@ export function TipDetailPage() {
                 startContent={isCopied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
                 onPress={handleCopyContent}
               >
-                {isCopied ? 'Đã sao chép' : 'Sao chép'}
+                {isCopied ? t('tips.copied') : t('tips.copy')}
               </Button>
               <Button 
                 variant="flat" 
@@ -427,7 +429,7 @@ export function TipDetailPage() {
                 color="danger"
                 className="bg-danger/10 text-danger hover:bg-danger/20"
                 onPress={() => setIsDeleteConfirmOpen(true)}
-                aria-label="Xóa mẹo"
+                aria-label={t('tips.deleteModalTitle')}
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
@@ -469,7 +471,7 @@ export function TipDetailPage() {
                 isIconOnly 
                 className="absolute top-4 right-4 z-50 bg-black/60 hover:bg-black/80 text-white rounded-full active:scale-95 transition-transform" 
                 onPress={onClose}
-                aria-label="Đóng ảnh"
+                aria-label={t('common.close')}
               >
                 <X className="w-5 h-5"/>
               </Button>
@@ -504,9 +506,9 @@ export function TipDetailPage() {
       <ConfirmModal
         isOpen={isDeleteConfirmOpen}
         onOpenChange={setIsDeleteConfirmOpen}
-        title="Xóa mẹo nhà bếp"
-        description={`Bạn có chắc chắn muốn xóa mẹo "${tip.title}"? Hành động này không thể hoàn tác.`}
-        confirmLabel="Xóa mẹo"
+        title={t('tips.deleteModalTitle')}
+        description={t('tips.deleteModalDesc', { title: tip.title })}
+        confirmLabel={t('common.delete')}
         confirmColor="danger"
         isLoading={isDeleting}
         onConfirm={handleDeleteConfirm}

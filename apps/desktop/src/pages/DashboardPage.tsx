@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, AppCard, StatCard, SectionTitle, EmptyState } from '@/ui';
@@ -5,7 +6,8 @@ import {
   ChefHat, Calendar, BookOpen, 
   Lightbulb, Plus, 
   Flame,
-  Utensils, Sunrise, Sun, Moon
+  Utensils, Sunrise, Sun, Moon,
+  ArrowRight
 } from 'lucide-react';
 import type { Recipe, MealPlan, Tip, Course } from '@apron/core';
 import { 
@@ -15,6 +17,7 @@ import { ImageManager } from '../lib/image-manager';
 import { RecipeCard } from '../components/recipes/list/RecipeCard';
 
 export function DashboardPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   // State
@@ -61,9 +64,9 @@ export function DashboardPage() {
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Chào buổi sáng';
-    if (hour < 18) return 'Chào buổi chiều';
-    return 'Chào buổi tối';
+    if (hour < 12) return t('dashboard.greetings.morning');
+    if (hour < 18) return t('dashboard.greetings.afternoon');
+    return t('dashboard.greetings.evening');
   };
 
   if (isLoading) {
@@ -87,7 +90,7 @@ export function DashboardPage() {
             {getGreeting()}, Chef! 👨‍🍳
           </h1>
           <p className="app-page-subtitle">
-            Hôm nay bạn muốn nấu món gì? Hãy khám phá tủ lạnh hoặc lên thực đơn nhé.
+            {t('dashboard.subtitle')}
           </p>
         </div>
         
@@ -115,7 +118,7 @@ export function DashboardPage() {
         <StatCard
           layout="vertical"
           icon={<ChefHat className="w-5 h-5 sm:w-6 sm:h-6" />}
-          label="Công thức của bạn"
+          label={t('dashboard.stats.recipes')}
           value={recipes.length}
           color="primary"
           onClick={() => navigate('/recipes')}
@@ -124,7 +127,7 @@ export function DashboardPage() {
         <StatCard
           layout="vertical"
           icon={<Calendar className="w-5 h-5 sm:w-6 sm:h-6" />}
-          label="Thực đơn hôm nay"
+          label={t('dashboard.todayMeals')}
           value={`${todayMealPlan ? todayMealPlan.meals.length : 0} món`}
           color="secondary"
           onClick={() => navigate('/meal-planner')}
@@ -133,8 +136,8 @@ export function DashboardPage() {
         <StatCard
           layout="vertical"
           icon={<Lightbulb className="w-5 h-5 sm:w-6 sm:h-6" />}
-          label="Mẹo vặt nhà bếp"
-          value={dailyTip ? 'Có sẵn' : 'Chưa có'}
+          label={t('tips.title')}
+          value={dailyTip ? t('common.status.loading').replace('...', '') : '-'}
           color="warning"
           onClick={() => navigate('/tips')}
         />
@@ -142,7 +145,7 @@ export function DashboardPage() {
         <StatCard
           layout="vertical"
           icon={<BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />}
-          label="Khóa học của bạn"
+          label={t('courses.title')}
           value={courses.length}
           color="success"
           onClick={() => navigate('/courses')}
@@ -157,9 +160,9 @@ export function DashboardPage() {
           {/* Recent Recipes */}
           <div className="flex flex-col gap-4">
             <SectionTitle
-              title="Công thức gần đây"
+              title={t('dashboard.recentRecipes')}
               icon={<Flame className="w-5 h-5 text-danger" />}
-              actionLabel="Xem tất cả"
+              actionLabel={t('dashboard.viewAll')}
               onAction={() => navigate('/recipes')}
             />
             
@@ -179,8 +182,8 @@ export function DashboardPage() {
                 <EmptyState
                   compact
                   icon={<ChefHat className="w-6 h-6" />}
-                  description="Chưa có công thức nào."
-                  actionLabel="Thêm công thức đầu tiên"
+                  description={t('recipes.empty.title')}
+                  actionLabel={t('recipes.empty.createFirst')}
                   onAction={() => navigate('/recipes/new')}
                 />
               </AppCard>
@@ -190,9 +193,9 @@ export function DashboardPage() {
           {/* Active Courses */}
           <div className="flex flex-col gap-4">
             <SectionTitle
-              title="Khóa học của bạn"
+              title={t('courses.title')}
               icon={<BookOpen className="w-5 h-5 text-primary" />}
-              actionLabel="Tất cả khóa học"
+              actionLabel={t('dashboard.viewAll')}
               onAction={() => navigate('/courses')}
             />
             
@@ -238,7 +241,7 @@ export function DashboardPage() {
                         {course.modules && course.modules.length > 0 && (
                           <span className="inline-flex items-center gap-2">
                             {course.level && <span className="text-white/40 select-none">•</span>}
-                            <span>{course.modules.length} chương</span>
+                            <span>{course.modules.length} {t('courses.modules', 'chương')}</span>
                           </span>
                         )}
 
@@ -247,7 +250,7 @@ export function DashboardPage() {
                             {(course.level || (course.modules && course.modules.length > 0)) && (
                               <span className="text-white/40 select-none">•</span>
                             )}
-                            <span>{course.modules.reduce((acc: any, m: any) => acc + (m.lessons?.length || 0), 0)} bài</span>
+                            <span>{course.modules.reduce((acc: any, m: any) => acc + (m.lessons?.length || 0), 0)} {t('courses.lessons', 'bài')}</span>
                           </span>
                         )}
                       </div>
@@ -260,8 +263,8 @@ export function DashboardPage() {
                 <EmptyState
                   compact
                   icon={<BookOpen className="w-6 h-6" />}
-                  description="Chưa có khóa học nào."
-                  actionLabel="Khám phá khóa học"
+                  description={t('courses.empty.title')}
+                  actionLabel={t('courses.empty.createFirst')}
                   onAction={() => navigate('/courses')}
                 />
               </AppCard>
@@ -276,9 +279,9 @@ export function DashboardPage() {
           {/* Today's Plan */}
           <div className="flex flex-col gap-4">
             <SectionTitle
-              title="Thực đơn hôm nay"
+              title={t('dashboard.todayMeals')}
               icon={<Utensils className="w-5 h-5 text-primary" />}
-              actionLabel={todayMealPlan ? "Chỉnh sửa" : "Lên thực đơn"}
+              actionLabel={todayMealPlan ? t('common.actions.edit') : t('dashboard.planAMeal')}
               onAction={() => navigate('/meal-planner')}
             />
             <AppCard className="p-4 sm:p-5 flex flex-col gap-4">
@@ -287,7 +290,7 @@ export function DashboardPage() {
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-1.5 text-warning-500">
                       <Sunrise className="w-4 h-4" />
-                      <span className="text-xs font-bold uppercase tracking-wider">Sáng</span>
+                      <span className="text-xs font-bold uppercase tracking-wider">{t('planner.slots.breakfast')}</span>
                     </div>
                     <div className="grid grid-cols-3 gap-3 mt-1">
                       {todayMealPlan.meals.filter(m => m.meal_type === 'breakfast').length > 0 ? (
@@ -298,13 +301,13 @@ export function DashboardPage() {
                           }
                           return <div key={i} className="text-sm font-medium py-1 border-l-2 border-primary pl-3 col-span-full">{m.notes || 'Món ăn'}</div>
                         })
-                      ) : <span className="text-sm text-default-400 italic col-span-full">Chưa lên món</span>}
+                      ) : <span className="text-sm text-default-400 italic col-span-full">{t('dashboard.noMealsToday')}</span>}
                     </div>
                   </div>
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-1.5 text-primary-500">
                       <Sun className="w-4 h-4" />
-                      <span className="text-xs font-bold uppercase tracking-wider">Trưa</span>
+                      <span className="text-xs font-bold uppercase tracking-wider">{t('planner.slots.lunch')}</span>
                     </div>
                     <div className="grid grid-cols-3 gap-3 mt-1">
                       {todayMealPlan.meals.filter(m => m.meal_type === 'lunch').length > 0 ? (
@@ -315,13 +318,13 @@ export function DashboardPage() {
                           }
                           return <div key={i} className="text-sm font-medium py-1 border-l-2 border-secondary pl-3 col-span-full">{m.notes || 'Món ăn'}</div>
                         })
-                      ) : <span className="text-sm text-default-400 italic col-span-full">Chưa lên món</span>}
+                      ) : <span className="text-sm text-default-400 italic col-span-full">{t('dashboard.noMealsToday')}</span>}
                     </div>
                   </div>
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-1.5 text-secondary-500">
                       <Moon className="w-4 h-4" />
-                      <span className="text-xs font-bold uppercase tracking-wider">Tối</span>
+                      <span className="text-xs font-bold uppercase tracking-wider">{t('planner.slots.dinner')}</span>
                     </div>
                     <div className="grid grid-cols-3 gap-3 mt-1">
                       {todayMealPlan.meals.filter(m => m.meal_type === 'dinner').length > 0 ? (
@@ -332,7 +335,7 @@ export function DashboardPage() {
                           }
                           return <div key={i} className="text-sm font-medium py-1 border-l-2 border-warning pl-3 col-span-full">{m.notes || 'Món ăn'}</div>
                         })
-                      ) : <span className="text-sm text-default-400 italic col-span-full">Chưa lên món</span>}
+                      ) : <span className="text-sm text-default-400 italic col-span-full">{t('dashboard.noMealsToday')}</span>}
                     </div>
                   </div>
                 </>
@@ -340,8 +343,8 @@ export function DashboardPage() {
                 <EmptyState
                   compact
                   icon={<Calendar className="w-6 h-6" />}
-                  description="Bạn chưa lên thực đơn cho hôm nay."
-                  actionLabel="Lên thực đơn ngay"
+                  description={t('dashboard.noMealsToday')}
+                  actionLabel={t('dashboard.planAMeal')}
                   onAction={() => navigate('/meal-planner')}
                 />
               )}
@@ -352,18 +355,56 @@ export function DashboardPage() {
           {dailyTip && (
             <div className="flex flex-col gap-4">
               <SectionTitle
-                title="Mẹo hay cho bạn"
+                title={t('tips.dailyTip')}
                 icon={<Lightbulb className="w-5 h-5 text-warning" />}
-                actionLabel="Tất cả mẹo hay"
+                actionLabel={t('dashboard.viewAll')}
                 onAction={() => navigate('/tips')}
               />
-              <AppCard className="p-4 sm:p-5 flex flex-col gap-3">
-                <h4 className="app-card-title text-foreground line-clamp-1">{dailyTip.title}</h4>
-                <p className="app-body-text text-default-600 line-clamp-3">{dailyTip.content.replace(/<[^>]*>?/gm, '')}</p>
-                <div className="pt-1">
-                  <Button size="sm" variant="flat" color="warning" onPress={() => navigate(`/tips/${dailyTip.id}`)}>
-                    Đọc mẹo này
-                  </Button>
+              <AppCard 
+                pressable 
+                onClick={() => navigate(`/tips/${dailyTip.id}`)}
+                className="p-3.5 sm:p-4 flex flex-row gap-3.5 sm:gap-4 items-center hover:bg-default-100/70 active:scale-[0.99] transition-all text-left cursor-pointer border border-divider/40"
+              >
+                {/* Ảnh đại diện mẹo bên trái */}
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden shrink-0 bg-warning/10 dark:bg-warning/20 flex items-center justify-center relative shadow-sm">
+                  <img 
+                    src={
+                      dailyTip.image_url && !dailyTip.image_url.includes('1603048297172')
+                        ? ImageManager.getAssetUrl(dailyTip.image_url)
+                        : 'https://images.unsplash.com/photo-1547592180-85f173990554?w=800&q=80'
+                    } 
+                    alt={dailyTip.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                  <div className="absolute inset-0 -z-10 flex flex-col items-center justify-center bg-warning/10 dark:bg-warning/20 text-warning">
+                    <Lightbulb className="w-8 h-8" />
+                  </div>
+                </div>
+
+                {/* Khối nội dung bên phải */}
+                <div className="flex-1 min-w-0 flex flex-col justify-center text-left items-start">
+                  <h4 className="app-card-title text-foreground line-clamp-1 text-sm font-bold text-left mb-1">
+                    {dailyTip.title}
+                  </h4>
+                  <p className="app-body-text text-default-500 text-xs leading-relaxed text-left line-clamp-3">
+                    {(() => {
+                      const plain = dailyTip.content.replace(/<[^>]*>?/gm, '').trim();
+                      const maxLen = 140;
+                      const text = plain.length > maxLen 
+                        ? (plain.substring(0, maxLen).lastIndexOf(' ') > 90 
+                            ? plain.substring(0, plain.substring(0, maxLen).lastIndexOf(' ')) 
+                            : plain.substring(0, maxLen)).trim() + '...'
+                        : plain;
+                      return text;
+                    })()}{' '}
+                    <span className="inline-flex items-center gap-0.5 font-bold text-warning whitespace-nowrap active:opacity-70 ml-1">
+                      {t('tips.readTip') || 'Đọc mẹo này'}
+                      <ArrowRight className="w-3.5 h-3.5 inline shrink-0" />
+                    </span>
+                  </p>
                 </div>
               </AppCard>
             </div>

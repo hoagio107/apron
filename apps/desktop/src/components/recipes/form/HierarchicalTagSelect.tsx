@@ -164,12 +164,12 @@ export function HierarchicalTagSelect({ selectedIds, onChange, error, dynamicTag
     const isExpanded = !!searchQuery.trim() || expandedIds.has(node.id);
     const isSelected = selectedIds.includes(node.id);
     const isEditing = editingId === node.id;
+    const depthPaddingClass = depth === 0 ? 'pl-2' : depth === 1 ? 'pl-8' : depth === 2 ? 'pl-14' : 'pl-20';
 
     return (
       <div key={node.id} className="flex flex-col gap-1 w-full">
         <div 
-          className={`flex items-center justify-between p-2 rounded-lg hover:bg-default-100 transition-colors ${isSelected ? 'bg-primary-50 dark:bg-primary-900/20' : ''}`}
-          style={{ paddingLeft: `${depth * 1.5 + 0.5}rem` }}
+          className={`flex items-center justify-between p-2 rounded-lg hover:bg-default-100 transition-colors ${depthPaddingClass} ${isSelected ? 'bg-primary/10 dark:bg-primary/20 text-primary' : ''}`}
         >
           <div className="flex items-center gap-2 flex-1 min-w-0">
             {hasChildren ? (

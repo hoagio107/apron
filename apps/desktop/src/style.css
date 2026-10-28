@@ -318,11 +318,207 @@ select,
   color: hsl(var(--heroui-default-400)) !important;
   opacity: 1;
 }
-
 .dark .tiptap p.is-editor-empty:first-child::before,
 .dark .tiptap.is-editor-empty::before,
 .dark .tiptap .is-empty::before {
   color: hsl(var(--heroui-default-400)) !important;
+}
+
+/* Chuẩn hoá độ tương phản cao trong chế độ tối (Dark Mode High Contrast) */
+.dark [data-variant="flat"][data-color="primary"],
+.dark button[data-variant="flat"][data-color="primary"],
+.dark button.bg-primary\/20,
+.dark .bg-primary\/20.text-primary-600,
+.dark button.text-primary-600 {
+  background-color: rgba(46, 196, 134, 0.18) !important;
+  color: #34d399 !important;
+}
+.dark [data-variant="flat"][data-color="primary"]:hover,
+.dark button[data-variant="flat"][data-color="primary"]:hover,
+.dark button.bg-primary\/20:hover,
+.dark .bg-primary\/20.text-primary-600:hover,
+.dark button.text-primary-600:hover {
+  background-color: rgba(46, 196, 134, 0.28) !important;
+  color: #6ee7b7 !important;
+}
+
+.dark [data-variant="flat"][data-color="primary"] svg,
+.dark button[data-variant="flat"][data-color="primary"] svg,
+.dark button.bg-primary\/20 svg {
+  color: currentColor !important;
+}
+
+.dark [data-variant="flat"][data-color="success"],
+.dark button[data-variant="flat"][data-color="success"],
+.dark button.bg-success\/20 {
+  background-color: rgba(46, 196, 134, 0.18) !important;
+  color: #34d399 !important;
+}
+.dark [data-variant="flat"][data-color="success"]:hover,
+.dark button[data-variant="flat"][data-color="success"]:hover,
+.dark button.bg-success\/20:hover {
+  background-color: rgba(46, 196, 134, 0.28) !important;
+  color: #6ee7b7 !important;
+}
+
+.dark [data-variant="flat"][data-color="warning"],
+.dark button[data-variant="flat"][data-color="warning"],
+.dark button.bg-warning\/20 {
+  background-color: rgba(234, 179, 8, 0.18) !important;
+  color: #facc15 !important;
+}
+
+.dark [data-variant="flat"][data-color="secondary"],
+.dark button[data-variant="flat"][data-color="secondary"],
+.dark button.bg-secondary\/20 {
+  background-color: rgba(168, 85, 247, 0.18) !important;
+  color: #c084fc !important;
+}
+
+.dark [data-variant="flat"][data-color="danger"],
+.dark button[data-variant="flat"][data-color="danger"],
+.dark button.bg-danger\/20 {
+  background-color: rgba(239, 68, 68, 0.18) !important;
+  color: #f87171 !important;
+}
+
+/* ==========================================================================
+   POPOVER & DROPDOWN FLICKER-FREE HARDWARE ACCELERATED ANIMATION
+   Khử triệt để lỗi giật / nhấp nháy do Framer-Motion layout recalculation
+   ========================================================================== */
+div[data-slot="content"][data-open="true"] {
+  animation: popover-smooth-appear 0.12s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes popover-smooth-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ==========================================================================
+   SOLID BUTTONS TEXT & ICON COLOR HARMONIZATION
+   Đảm bảo toàn bộ các nút solid (Primary & Success) luôn luôn có text & icon màu trắng
+   ========================================================================== */
+[data-variant="solid"][data-color="primary"],
+button[data-variant="solid"][data-color="primary"],
+[data-variant="solid"][data-color="success"],
+button[data-variant="solid"][data-color="success"],
+button[data-color="primary"]:not([data-variant="flat"]):not([data-variant="light"]):not([data-variant="bordered"]):not([data-variant="ghost"]),
+button[data-color="success"]:not([data-variant="flat"]):not([data-variant="light"]):not([data-variant="bordered"]):not([data-variant="ghost"]),
+.bg-primary.text-primary-foreground {
+  color: #ffffff !important;
+}
+
+[data-variant="solid"][data-color="primary"] svg,
+button[data-variant="solid"][data-color="primary"] svg,
+[data-variant="solid"][data-color="success"] svg,
+button[data-variant="solid"][data-color="success"] svg,
+button[data-color="primary"]:not([data-variant="flat"]):not([data-variant="light"]):not([data-variant="bordered"]):not([data-variant="ghost"]) svg,
+button[data-color="success"]:not([data-variant="flat"]):not([data-variant="light"]):not([data-variant="bordered"]):not([data-variant="ghost"]) svg,
+.bg-primary.text-primary-foreground svg {
+  color: #ffffff !important;
+  stroke: currentColor;
+}
+
+/* ==========================================================================
+   RECIPE PRINT & EXPORT STYLES (A4 Publishing Layout)
+   ========================================================================== */
+
+.recipe-print-document {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+/* Off-screen export container: keeps the template in DOM at exact 800px width for html2canvas */
+.recipe-export-offscreen {
+  position: fixed !important;
+  left: -99999px !important;
+  top: 0 !important;
+  width: 800px !important;
+  z-index: -9999 !important;
+  pointer-events: none !important;
+  visibility: visible !important;
+}
+
+@media print {
+  /* Hide the entire interactive application */
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  body > #root {
+    display: none !important;
+  }
+
+  /* Display only our recipe print portal */
+  #recipe-print-portal {
+    display: block !important;
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    border: none !important;
+    visibility: visible !important;
+  }
+
+  #recipe-print-template {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 12mm 15mm 15mm 15mm;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  .print-avoid-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
 }
 
 

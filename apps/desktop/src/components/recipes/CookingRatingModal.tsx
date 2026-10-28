@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, ModalContent, Button, Textarea } from '@/ui';
 import { Check, Star, Edit3, PartyPopper } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -10,6 +11,7 @@ interface CookingRatingModalProps {
 }
 
 export function CookingRatingModal({ isOpen, onClose, onComplete }: CookingRatingModalProps) {
+  const { t } = useTranslation();
   const [rating, setRating] = useState(0);
   const [notes, setNotes] = useState('');
   const [step, setStep] = useState<'rating' | 'confirm'>('rating');
@@ -64,8 +66,8 @@ export function CookingRatingModal({ isOpen, onClose, onComplete }: CookingRatin
                   <div className="w-16 h-16 bg-warning-100 text-warning-600 rounded-full flex items-center justify-center mb-2">
                     <PartyPopper className="w-8 h-8" />
                   </div>
-                  <h3 className="text-3xl font-bold text-foreground">Tuyệt vời!</h3>
-                  <p className="text-default-500 text-lg">Bạn đã hoàn thành món ăn. Hãy đánh giá thành quả nhé!</p>
+                  <h3 className="text-3xl font-bold text-foreground">{t('recipes.cooking.congratsTitle')}</h3>
+                  <p className="text-default-500 text-lg">{t('recipes.cooking.congratsSubtitle')}</p>
                 </div>
                 
                 <div className="flex flex-col items-center gap-4">
@@ -86,7 +88,7 @@ export function CookingRatingModal({ isOpen, onClose, onComplete }: CookingRatin
                   </div>
                   
                   <Textarea
-                    placeholder="Ghi chú cho lần nấu này (VD: Lần sau nên cho ít muối hơn...)"
+                    placeholder={t('recipes.cooking.ratingNotesPlaceholder')}
                     value={notes}
                     onValueChange={setNotes}
                     minRows={3}
@@ -112,8 +114,8 @@ export function CookingRatingModal({ isOpen, onClose, onComplete }: CookingRatin
             ) : (
               <div className="flex flex-col gap-8 animate-appearance-in py-4">
                 <div className="flex flex-col gap-3 items-center">
-                  <h3 className="text-2xl font-bold text-foreground">Bạn có muốn sửa lại công thức không?</h3>
-                  <p className="text-default-500">Dựa vào ghi chú vừa rồi, bạn có thể điều chỉnh lại định lượng hoặc cách làm để món ăn ngon hơn trong lần tới.</p>
+                  <h3 className="text-2xl font-bold text-foreground">{t('recipes.cooking.editPromptTitle')}</h3>
+                  <p className="text-default-500">{t('recipes.cooking.editPromptDesc')}</p>
                 </div>
                 
                 <div className="flex justify-center gap-4 mt-4">

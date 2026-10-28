@@ -2,11 +2,13 @@ import { Search, BookOpen, LayoutList, LayoutGrid } from 'lucide-react';
 import { useRecipeStore } from '../../../store/useRecipeStore';
 import { useEffect, useState } from 'react';
 import { Input } from '@/ui';
+import { useTranslation } from 'react-i18next';
 
 import { DraggableRecipe } from './DraggableRecipe';
 import { RecipeGroup } from './RecipeGroup';
 
 export function RecipeSidebar() {
+  const { t } = useTranslation();
   const { recipes, fetchRecipes } = useRecipeStore();
   const [search, setSearch] = useState('');
 
@@ -28,20 +30,20 @@ export function RecipeSidebar() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-primary" />
-            Công thức
+            {t('nav.recipes')}
           </h2>
           <div className="flex items-center bg-default-100 p-0.5 rounded-lg">
             <button 
               onClick={() => setViewMode('list')}
               className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-content1 text-foreground' : 'text-default-400 hover:text-foreground'}`}
-              title="Dạng danh sách"
+              title={t('planner.listLayout')}
             >
               <LayoutList className="w-4 h-4" />
             </button>
             <button 
               onClick={() => setViewMode('card')}
               className={`p-1.5 rounded-md transition-colors ${viewMode === 'card' ? 'bg-content1 text-foreground' : 'text-default-400 hover:text-foreground'}`}
-              title="Dạng thẻ"
+              title={t('planner.cardLayoutDesc')}
             >
               <LayoutGrid className="w-4 h-4" />
             </button>
@@ -50,7 +52,7 @@ export function RecipeSidebar() {
         <div className="relative">
           <Input 
             type="text"
-            placeholder="Tìm kiếm..."
+            placeholder={t('recipes.searchPlaceholder')}
             variant="flat"
             value={search}
             onValueChange={setSearch}
@@ -62,7 +64,7 @@ export function RecipeSidebar() {
       <div className={`flex-1 overflow-y-auto p-4 flex ${viewMode === 'card' ? 'flex-row flex-wrap items-start content-start' : 'flex-col'} gap-3 custom-scrollbar bg-content1 rounded-b-2xl`}>
         {filteredRecipes.length === 0 ? (
           <div className="text-center text-default-500 mt-10 w-full">
-            <p className="text-sm">Không tìm thấy công thức nào</p>
+            <p className="text-sm">{t('recipes.empty.title')}</p>
           </div>
         ) : (
           filteredRecipes.map((recipe) => {

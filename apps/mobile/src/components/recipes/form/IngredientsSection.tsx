@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useFormContext, useFieldArray, Controller } from 'react-hook-form';
 import { Button, Input, Autocomplete, AutocompleteItem } from '@/ui';
 import { Plus, Trash2, Users, GripVertical, X } from 'lucide-react';
@@ -6,6 +7,7 @@ import { useUnits } from '../../../hooks/useUnits';
 import { SortableList, SortableItem } from './SortableList';
 
 export function IngredientsSection() {
+  const { t } = useTranslation();
   const { control } = useFormContext<FormValues>();
   
   const { fields: sections, append: appendSection, remove: removeSection } = useFieldArray({
@@ -24,7 +26,7 @@ export function IngredientsSection() {
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2 text-sm text-default-600 font-medium">
                 <Users className="w-4 h-4 text-primary" />
-                <span>Khẩu phần</span>
+                <span>{t('recipes.form.servings')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Input
@@ -53,7 +55,7 @@ export function IngredientsSection() {
 
       {sections.length === 0 && (
         <div className="text-center text-default-400 py-8 text-sm">
-          Chưa có nguyên liệu nào. Hãy thêm nhóm nguyên liệu đầu tiên.
+          {t('recipes.form.noIngredients')}
         </div>
       )}
       
@@ -82,6 +84,7 @@ export function IngredientsSection() {
 }
 
 function IngredientGroup({ sectionIndex, onRemove }: { sectionIndex: number, onRemove: () => void }) {
+  const { t } = useTranslation();
   const { control } = useFormContext<FormValues>();
   
   const { fields: ingredients, append, remove, move } = useFieldArray({
@@ -102,7 +105,7 @@ function IngredientGroup({ sectionIndex, onRemove }: { sectionIndex: number, onR
               {...field}
               value={field.value || ''}
               variant="underlined"
-              placeholder="Tên nhóm nguyên liệu (VD: Phần sốt, Phần bánh...)"
+              placeholder={t('recipes.form.groupNamePlaceholder')}
               className="max-w-xs"
               classNames={{
                 inputWrapper: "shadow-none border-b-0 data-[hover=true]:border-b-0 after:bg-primary pb-0 min-h-8 h-8",
@@ -126,7 +129,7 @@ function IngredientGroup({ sectionIndex, onRemove }: { sectionIndex: number, onR
                 <div className={`flex gap-2 items-start group/ing w-full transition-shadow ${isDragging ? 'bg-default-100/80 rounded-xl p-1 shadow-lg ring-1 ring-primary/30' : ''}`}>
                   <div 
                     className="touch-none select-none cursor-grab active:cursor-grabbing p-2 -ml-2 text-default-300 hover:text-default-600 active:text-primary transition-colors shrink-0 mt-1"
-                    title="Kéo thả để đổi thứ tự"
+                    title={t('recipes.form.dragToReorder')}
                     {...attributes}
                     {...listeners}
                   >
@@ -188,12 +191,12 @@ function IngredientGroup({ sectionIndex, onRemove }: { sectionIndex: number, onR
                           <Autocomplete
                             {...field}
                             allowsCustomValue
-                            aria-label="Chọn đơn vị"
+                            aria-label={t('recipes.form.unitPlaceholder')}
                             onSelectionChange={(val) => field.onChange(val)}
                             onInputChange={(val) => field.onChange(val)}
                             selectedKey={field.value}
                             inputValue={field.value || ''}
-                            placeholder="Đơn vị"
+                            placeholder={t('recipes.form.unitPlaceholder')}
                             variant="flat"
                             isClearable={false}
                             className="flex-1"

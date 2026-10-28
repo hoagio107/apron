@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Button } from '@/ui';
@@ -13,6 +14,7 @@ const isVideo = (url?: string | null) => {
 };
 
 export function ImageSection() {
+  const { t } = useTranslation();
   const { watch, setValue } = useFormContext<FormValues>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -140,7 +142,7 @@ export function ImageSection() {
     <FormField
       label={
         <span className="flex items-center justify-between w-full">
-          <span>Ảnh đại diện</span>
+          <span>{t('recipes.form.coverImage')}</span>
           {allMedia.length > 0 && (
             <Button
               size="sm"
@@ -168,8 +170,8 @@ export function ImageSection() {
             <div className="w-12 h-12 bg-default-200/60 dark:bg-default-100/20 rounded-2xl flex items-center justify-center mb-2.5 text-default-400 group-hover:text-primary group-hover:scale-110 transition-all">
               <ImagePlus className="w-6 h-6" />
             </div>
-            <p className="font-semibold text-sm mb-1 text-center text-foreground group-hover:text-primary transition-colors">Tải ảnh đại diện</p>
-            <p className="text-xs text-default-400 text-center">Kéo thả file hoặc bấm để chọn ảnh/video</p>
+            <p className="font-semibold text-sm mb-1 text-center text-foreground group-hover:text-primary transition-colors">{t('recipes.form.uploadCover')}</p>
+            <p className="text-xs text-default-400 text-center">{t('recipes.form.dragDropMedia')}</p>
           </div>
         ) : (
           <div className="flex-1 aspect-square min-w-0 bg-default-100 dark:bg-default-50/40 rounded-2xl relative group overflow-hidden flex items-center justify-center shadow-inner border border-divider/60">
@@ -200,7 +202,7 @@ export function ImageSection() {
                 size="sm"
                 className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 backdrop-blur-md shadow-sm z-10 h-8 w-8 text-foreground" 
                 onPress={() => setSelectedIndex(selectedIndex - 1)}
-                aria-label="Ảnh trước"
+                aria-label={t('recipes.cooking.prevStep')}
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
@@ -212,7 +214,7 @@ export function ImageSection() {
                 size="sm"
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 backdrop-blur-md shadow-sm z-10 h-8 w-8 text-foreground" 
                 onPress={() => setSelectedIndex(selectedIndex + 1)}
-                aria-label="Ảnh sau"
+                aria-label={t('recipes.cooking.nextStep')}
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>

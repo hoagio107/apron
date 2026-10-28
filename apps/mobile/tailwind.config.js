@@ -83,7 +83,7 @@ export default {
               800: "#083e26",
               900: "#041f13",
               950: "#02100a",
-              DEFAULT: "#139a60",
+              DEFAULT: "#2ec486",
               foreground: "#ffffff",
             },
             success: {
@@ -98,7 +98,7 @@ export default {
               800: "#083e26",
               900: "#041f13",
               950: "#02100a",
-              DEFAULT: "#139a60",
+              DEFAULT: "#2ec486",
               foreground: "#ffffff",
             },
           },

@@ -1,4 +1,5 @@
 import { Button } from '@/ui';
+import { useTranslation } from 'react-i18next';
 import { Trash2, Edit3, Scale, Droplet, Hash, Package, UtensilsCrossed } from 'lucide-react';
 import type { Unit } from '@apron/core';
 
@@ -50,6 +51,7 @@ export function UnitCard({
   onEdit,
   onDelete
 }: UnitCardProps) {
+  const { t } = useTranslation();
   const theme = getUnitTheme(category);
   const Icon = theme.icon;
 
@@ -82,7 +84,7 @@ export function UnitCard({
             {usageCount > 0 ? (
               <span className="inline-flex items-center gap-1 text-[11px] font-medium text-primary">
                 <UtensilsCrossed className="w-3 h-3" />
-                <span>{usageCount} món</span>
+                <span>{t('units.usedInRecipes', { count: usageCount })}</span>
               </span>
             ) : (
               <span className="text-[11px] font-medium text-default-400">
@@ -101,7 +103,7 @@ export function UnitCard({
           variant="light"
           className="h-8 w-8 rounded-lg text-default-400 hover:text-primary"
           onPress={() => onEdit(unit)}
-          aria-label="Chỉnh sửa đơn vị"
+          aria-label={t('units.editUnit')}
         >
           <Edit3 className="w-4 h-4" />
         </Button>
@@ -115,7 +117,7 @@ export function UnitCard({
             e.stopPropagation();
             onDelete(unit);
           }}
-          aria-label="Xoá đơn vị"
+          aria-label={t('common.delete')}
         >
           <Trash2 className="w-4 h-4" />
         </Button>

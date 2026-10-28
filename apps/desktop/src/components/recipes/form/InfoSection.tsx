@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useState } from 'react';
 import { Input, Select, SelectItem } from '@/ui';
@@ -61,6 +62,7 @@ function EditableMetric({
 }
 
 export function InfoSection({ currentRecipeId: _currentRecipeId }: { currentRecipeId?: string }) {
+  const { t } = useTranslation();
   const { control } = useFormContext<FormValues>();
 
   return (
@@ -69,10 +71,10 @@ export function InfoSection({ currentRecipeId: _currentRecipeId }: { currentReci
         name="title"
         control={control}
         render={({ field, fieldState }) => (
-          <FormField label="Tên món ăn" icon={Type} error={fieldState.error?.message}>
+          <FormField label={t('recipes.form.titleLabel')} icon={Type} error={fieldState.error?.message}>
             <Input
               {...field}
-              placeholder="Ví dụ: Phở bò Hà Nội"
+              placeholder={t('recipes.form.titlePlaceholder')}
               variant="flat"
               size="lg"
               classNames={{ 
@@ -97,10 +99,10 @@ export function InfoSection({ currentRecipeId: _currentRecipeId }: { currentReci
               <div className="p-2 rounded-full bg-primary/10 text-primary mb-1">
                 <Gauge className="w-5 h-5" />
               </div>
-              <span className="text-default-500 text-xs font-medium">Độ khó</span>
+              <span className="text-default-500 text-xs font-medium">{t('recipes.filter.difficulty')}</span>
               <Select
-                aria-label="Độ khó"
-                placeholder="Chọn..."
+                aria-label={t('recipes.filter.difficulty')}
+                placeholder={t('common.actions.select')}
                 variant="flat"
                 classNames={{ 
                   trigger: "bg-transparent shadow-none border-none min-h-8 h-8 px-0 data-[hover=true]:bg-default-100 transition-colors",
@@ -153,11 +155,11 @@ export function InfoSection({ currentRecipeId: _currentRecipeId }: { currentReci
               <div className="p-2 rounded-full bg-secondary/10 text-secondary mb-1">
                 <Clock className="w-5 h-5" />
               </div>
-              <span className="text-default-500 text-xs font-medium">Sơ chế</span>
+              <span className="text-default-500 text-xs font-medium">{t('recipes.filter.prepTime')}</span>
               <EditableMetric 
                 value={field.value}
                 onChange={field.onChange}
-                unit="phút"
+                unit={t('common.time.minutes')}
                 placeholder="Phút..."
                 isInvalid={!!fieldState.error}
                 errorMessage={fieldState.error?.message}
@@ -174,11 +176,11 @@ export function InfoSection({ currentRecipeId: _currentRecipeId }: { currentReci
               <div className="p-2 rounded-full bg-success/10 text-success mb-1">
                 <Timer className="w-5 h-5" />
               </div>
-              <span className="text-default-500 text-xs font-medium">Nấu</span>
+              <span className="text-default-500 text-xs font-medium">{t('recipes.filter.cookingMethod')}</span>
               <EditableMetric 
                 value={field.value}
                 onChange={field.onChange}
-                unit="phút"
+                unit={t('common.time.minutes')}
                 placeholder="Phút..."
                 isInvalid={!!fieldState.error}
                 errorMessage={fieldState.error?.message}
@@ -192,11 +194,11 @@ export function InfoSection({ currentRecipeId: _currentRecipeId }: { currentReci
         name="notes"
         control={control}
         render={({ field, fieldState }) => (
-          <FormField label="Ghi chú & Mẹo" icon={Info} error={fieldState.error?.message}>
+          <FormField label={t('recipes.form.notesLabel')} icon={Info} error={fieldState.error?.message}>
             <RichTextEditor
               value={field.value || ''}
               onChange={field.onChange}
-              placeholder="Ghi chú thêm về công thức, mẹo nấu nướng, hoặc lưu ý..."
+              placeholder={t('recipes.form.notesPlaceholder')}
               isInvalid={!!fieldState.error}
             />
           </FormField>

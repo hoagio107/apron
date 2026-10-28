@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Checkbox, Button } from '@/ui';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { getCategoryTheme } from '../../../lib/categoryTheme';
@@ -13,11 +14,14 @@ interface ShoppingListItemCardProps {
 }
 
 export function ShoppingListItemCard({
+  // props
+
   item,
   onToggle,
   onRemove,
   onUpdateQuantity
 }: ShoppingListItemCardProps) {
+  const { t } = useTranslation();
   const currentQty = typeof item.quantity === 'number'
     ? item.quantity
     : parseInt(item.quantity?.toString() ?? '1', 10) || 1;
@@ -97,7 +101,7 @@ export function ShoppingListItemCard({
             variant="light"
             className="text-default-500 w-6 h-6 min-w-6 rounded-lg active:scale-90 transition-transform"
             onPress={handleDecrement}
-            aria-label="Giảm số lượng"
+            aria-label={t('common.actions.decrease', { defaultValue: 'Giảm số lượng' })}
           >
             <Minus className="w-3 h-3" />
           </Button>
@@ -112,7 +116,7 @@ export function ShoppingListItemCard({
             variant="light"
             className="text-primary w-6 h-6 min-w-6 rounded-lg active:scale-90 transition-transform"
             onPress={handleIncrement}
-            aria-label="Tăng số lượng"
+            aria-label={t('common.actions.increase', { defaultValue: 'Tăng số lượng' })}
           >
             <Plus className="w-3 h-3" />
           </Button>

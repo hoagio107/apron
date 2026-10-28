@@ -37,7 +37,7 @@ export function MainSidebar({ isExpanded, onToggle }: MainSidebarProps) {
     { name: t('nav.mealPlanner'), icon: CalendarDays, path: '/meal-planner' },
     { name: t('nav.kitchenTips'), icon: Lightbulb, path: '/tips' },
     { name: t('nav.units'), icon: Scale, path: '/units' },
-    { name: t('nav.import', 'Nhập dữ liệu'), icon: FileUp, path: '/import' },
+    { name: t('nav.import'), icon: FileUp, path: '/import' },
   ];
 
   return (
@@ -49,14 +49,14 @@ export function MainSidebar({ isExpanded, onToggle }: MainSidebarProps) {
         <div className={`flex items-center h-12 px-3 pt-2 ${isExpanded ? 'justify-between' : 'justify-center'}`}>
           {isExpanded ? (
             <>
-              <span className="font-bold text-xs tracking-wider text-default-400 uppercase px-2">Điều hướng</span>
+              <span className="font-bold text-xs tracking-wider text-default-400 uppercase px-2">{t('nav.navigation')}</span>
               {onToggle && (
                 <Button 
                   isIconOnly 
                   variant="light" 
                   size="sm" 
                   onPress={onToggle}
-                  title="Thu gọn menu"
+                  title={t('nav.collapseMenu')}
                   className="text-default-500 hover:text-foreground w-8 h-8 rounded-lg"
                 >
                   <PanelLeftClose className="w-4 h-4" />
@@ -70,7 +70,7 @@ export function MainSidebar({ isExpanded, onToggle }: MainSidebarProps) {
                 variant="light" 
                 size="sm" 
                 onPress={onToggle}
-                title="Mở rộng menu"
+                title={t('nav.expandMenu')}
                 className="text-default-500 hover:text-foreground w-8 h-8 rounded-lg"
               >
                 <PanelLeft className="w-4 h-4" />
@@ -85,12 +85,12 @@ export function MainSidebar({ isExpanded, onToggle }: MainSidebarProps) {
             to="/recipes/new"
             color="primary" 
             variant="solid"
-            className={`w-full font-bold h-11 flex items-center rounded-xl overflow-hidden transition-all duration-200 ${isExpanded ? 'justify-start px-3.5 gap-2.5' : 'justify-center px-0 gap-0 min-w-0'}`}
-            title={!isExpanded ? t('Add Recipe') : undefined}
+            className={`w-full font-bold h-11 flex items-center rounded-xl text-white overflow-hidden transition-all duration-200 ${isExpanded ? 'justify-start px-3.5 gap-2.5' : 'justify-center px-0 gap-0 min-w-0'}`}
+            title={!isExpanded ? t('nav.addRecipe') : undefined}
           >
-            <PlusCircle className="w-5 h-5 flex-shrink-0" />
+            <PlusCircle className="w-5 h-5 flex-shrink-0 text-white" />
             {isExpanded && (
-              <span className="whitespace-nowrap truncate">{t('Add Recipe')}</span>
+              <span className="whitespace-nowrap truncate text-white">{t('nav.addRecipe')}</span>
             )}
           </Button>
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input } from '@/ui';
 import { Search, Link as LinkIcon } from 'lucide-react';
 import type { Recipe } from '@apron/core';
@@ -13,6 +14,7 @@ interface ParentRecipeSelectModalProps {
 }
 
 export function ParentRecipeSelectModal({ isOpen, onOpenChange, recipes, onConfirm, recipeCount = 1 }: ParentRecipeSelectModalProps) {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
 
@@ -47,16 +49,16 @@ export function ParentRecipeSelectModal({ isOpen, onOpenChange, recipes, onConfi
         {(onClose) => (
           <>
             <ModalHeader className="flex flex-col gap-1">
-              Gán công thức gốc (Parent Recipe)
+              {t('recipes.actions.setParent')}
               {recipeCount > 1 && (
                 <span className="text-sm font-normal text-default-500">
-                  Sẽ gán {recipeCount} công thức được chọn làm biến thể của công thức dưới đây.
+                  {t('recipes.actions.settingParentRecipeCount', { count: recipeCount })}
                 </span>
               )}
             </ModalHeader>
             <ModalBody>
               <Input
-                placeholder="Tìm công thức..."
+                placeholder={t('recipes.searchPlaceholder')}
                 variant="flat"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -68,7 +70,7 @@ export function ParentRecipeSelectModal({ isOpen, onOpenChange, recipes, onConfi
 
               <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-2">
                 {filteredParents.length === 0 ? (
-                  <p className="text-sm text-default-400 italic text-center py-4">Không tìm thấy công thức nào.</p>
+                  <p className="text-sm text-default-400 italic text-center py-4">{t('recipes.empty.title')}</p>
                 ) : (
                   filteredParents.map(recipe => (
                     <div
@@ -100,10 +102,10 @@ export function ParentRecipeSelectModal({ isOpen, onOpenChange, recipes, onConfi
             </ModalBody>
             <ModalFooter>
               <Button variant="light" onPress={onClose}>
-                Hủy
+                {t('common.actions.cancel')}
               </Button>
               <Button color="primary" onPress={handleConfirm} isDisabled={!selectedParentId} startContent={<LinkIcon className="w-4 h-4" />}>
-                Xác nhận Gán
+                {t('common.actions.confirm')}
               </Button>
             </ModalFooter>
           </>

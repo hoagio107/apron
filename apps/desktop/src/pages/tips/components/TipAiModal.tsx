@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Modal, 
   ModalContent, 
@@ -34,6 +35,7 @@ interface TipAiModalProps {
 }
 
 export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }: TipAiModalProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'prompt' | 'result'>('prompt');
   const [inputText, setInputText] = useState(initialTopic);
   const [resultText, setResultText] = useState('');
@@ -57,7 +59,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
     try {
       await navigator.clipboard.writeText(generatedPrompt);
       setCopied(true);
-      toast.success('Đã sao chép Prompt!');
+      toast.success(t('tips.aiModal.copiedPrompt'));
       setTimeout(() => setCopied(false), 2500);
     } catch {
       const el = document.createElement('textarea');
@@ -83,10 +85,10 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
         setResultText(text);
         handleParse(text);
       } else {
-        toast.info('Bộ nhớ tạm trống');
+        toast.info(t('tips.aiModal.emptyClipboard'));
       }
     } catch {
-      toast.error('Không thể đọc bộ nhớ tạm. Vui lòng dán thủ công.');
+      toast.error(t('tips.aiModal.cannotReadClipboard'));
     }
   };
 
@@ -102,7 +104,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
       setError(null);
       const parsed = parseTipGeminiResponse(text);
       setParsedData(parsed);
-      toast.success('Đã trích xuất mẹo thành công!');
+      toast.success(t('tips.aiModal.extractSuccess'));
     } catch (err: any) {
       setError(err.message || 'Lỗi khi phân tích dữ liệu JSON.');
       setParsedData(null);
@@ -112,7 +114,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
   const handleApplyTip = (onClose: () => void) => {
     if (!parsedData) return;
     onApply(parsedData);
-    toast.success('Đã điền thông tin mẹo vào form!');
+    toast.success(t('tips.aiModal.appliedSuccess'));
     onClose();
     setInputText('');
     setResultText('');
@@ -148,7 +150,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                 <Sparkles className="w-5 h-5 text-secondary" />
               </div>
               <div className="flex flex-col text-left">
-                <h3 className="text-base sm:text-lg font-bold text-foreground">Trợ lý AI Mẹo vặt</h3>
+                <h3 className="text-base sm:text-lg font-bold text-foreground">{t('tips.aiModal.title')}</h3>
                 <p className="text-xs text-default-400 font-normal">Tự động gợi ý & chuẩn hóa mẹo nhà bếp khoa học từ Gemini Web</p>
               </div>
             </ModalHeader>
@@ -166,12 +168,12 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                   cursor: "w-full bg-primary"
                 }}
               >
-                <Tab key="prompt" title="1. Lấy Prompt gửi Gemini" />
+                <Tab key="prompt" title={t('tips.aiModal.promptTab')} />
                 <Tab 
                   key="result" 
                   title={
                     <div className="flex items-center gap-2">
-                      <span>2. Nhập kết quả</span>
+                      <span>{t('tips.aiModal.resultTab')}</span>
                       {parsedData && <span className="w-2 h-2 rounded-full bg-success" />}
                     </div>
                   } 
@@ -187,7 +189,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                     <div className="flex items-center justify-between">
                       <label className="text-sm font-semibold text-foreground flex items-center gap-2">
                         <FileText className="w-4 h-4 text-primary" />
-                        Chủ đề hoặc nội dung mẹo vặt cần tạo:
+                        {t('tips.aiModal.topicLabel')}
                       </label>
                       {inputText.trim() && (
                         <button
@@ -201,7 +203,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                     </div>
 
                     <Textarea
-                      placeholder="Ví dụ: Cách giữ rau củ tươi lâu trong tủ lạnh, Mẹo luộc trứng lòng đào dẻo ngon, Cách khử mùi tanh cá hồi..."
+                      placeholder={t('tips.aiModal.topicPlaceholder')}
                       value={inputText}
                       onValueChange={setInputText}
                       minRows={4}
@@ -224,7 +226,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                       startContent={copied ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4" />}
                       onPress={handleCopyPrompt}
                     >
-                      {copied ? 'Đã sao chép Prompt' : '1. Sao chép Prompt'}
+                      {copied ? t('tips.aiModal.copiedPrompt') : t('tips.aiModal.copyPrompt')}
                     </Button>
 
                     <Button
@@ -234,7 +236,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                       startContent={<ExternalLink className="w-4 h-4" />}
                       onPress={handleOpenGemini}
                     >
-                      2. Mở Gemini Web
+                      {t('tips.aiModal.openGemini')}
                     </Button>
                   </div>
                 </div>
@@ -247,7 +249,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                     <div className="flex items-center justify-between">
                       <label className="text-sm font-semibold text-foreground flex items-center gap-2">
                         <ClipboardPaste className="w-4 h-4 text-primary" />
-                        Dán kết quả JSON từ Gemini Web:
+                        {t('tips.aiModal.pasteResultLabel')}
                       </label>
                       <div className="flex items-center gap-2">
                         <Button
@@ -300,7 +302,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                   </div>
 
                   {error && (
-                    <div className="p-3 bg-danger-50 dark:bg-danger-900/20 text-danger border border-danger-200 dark:border-danger-800/40 rounded-xl text-xs flex items-center gap-2">
+                    <div className="p-3 bg-danger/10 dark:bg-danger/20 dark:bg-danger-900/20 text-danger border border-danger-200 dark:border-danger-800/40 rounded-xl text-xs flex items-center gap-2">
                       <span>⚠️ {error}</span>
                     </div>
                   )}
@@ -310,7 +312,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                     <div className="flex flex-col gap-3 p-4 bg-default-50 dark:bg-default-100/10 rounded-2xl border border-divider/60 animate-in fade-in slide-in-from-bottom-2 duration-300">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-success flex items-center gap-1.5">
-                          <CheckCircle2 className="w-4 h-4" /> Đã phân tích hợp lệ
+                          <CheckCircle2 className="w-4 h-4" /> {t('tips.aiModal.validResult')}
                         </span>
                         {matchedCategory && (
                           <Chip size="sm" variant="flat" color="primary" className="font-semibold text-xs">
@@ -351,7 +353,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                     onPress={() => setActiveTab('result')}
                     className="rounded-xl px-5 font-bold h-10"
                   >
-                    Tiếp tục sang bước 2 →
+                    {t('tips.aiModal.step2Next')}
                   </Button>
                 ) : (
                   <Button

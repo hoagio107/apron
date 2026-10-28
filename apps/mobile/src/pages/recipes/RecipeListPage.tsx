@@ -20,11 +20,22 @@ import { BatchImageDrawer } from './components/BatchImageDrawer';
 import { useMealPlanStore } from '../../store/useMealPlanStore';
 import { Link as LinkIcon, Image as ImageIcon } from 'lucide-react';
 
+import { useTranslation } from 'react-i18next';
+
+// Persistent list state across unmount / navigation
+let cachedMobileScrollTop = 0;
+let cachedMobileDisplayLimit = 24;
+let cachedMobileSearchQuery = '';
+let cachedMobileSortOption = 'newest';
+let cachedMobileFilters: RecipeFilterState = defaultFilterState;
+let cachedMobileViewType: RecipeViewType = 'grid-portrait';
+
 export function RecipeListPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [viewType, setViewType] = useState<RecipeViewType>('grid-portrait');
-  const [sortOption, setSortOption] = useState('newest');
+  const [searchQuery, setSearchQuery] = useState(cachedMobileSearchQuery);
+  const [viewType, setViewType] = useState<RecipeViewType>(cachedMobileViewType);
+  const [sortOption, setSortOption] = useState(cachedMobileSortOption);
   
   // Selection
   const [isSelectMode, setIsSelectMode] = useState(false);
@@ -32,7 +43,36 @@ export function RecipeListPage() {
   
   // Filter
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [filters, setFilters] = useState<RecipeFilterState>(defaultFilterState);
+  const [filters, setFilters] = useState<RecipeFilterState>(cachedMobileFilters);
+
+  const handleSearchChange = (val: string) => {
+    setSearchQuery(val);
+    cachedMobileSearchQuery = val;
+    cachedMobileScrollTop = 0;
+    cachedMobileDisplayLimit = 24;
+    setDisplayLimit(24);
+  };
+
+  const handleSortChange = (opt: string) => {
+    setSortOption(opt);
+    cachedMobileSortOption = opt;
+    cachedMobileScrollTop = 0;
+    cachedMobileDisplayLimit = 24;
+    setDisplayLimit(24);
+  };
+
+  const handleFiltersChange = (f: RecipeFilterState) => {
+    setFilters(f);
+    cachedMobileFilters = f;
+    cachedMobileScrollTop = 0;
+    cachedMobileDisplayLimit = 24;
+    setDisplayLimit(24);
+  };
+
+  const handleViewTypeChange = (v: RecipeViewType) => {
+    setViewType(v);
+    cachedMobileViewType = v;
+  };
 
   // Confirm modal
   const [deleteTarget, setDeleteTarget] = useState<Recipe | null>(null);
@@ -73,16 +113,10 @@ export function RecipeListPage() {
     (filters.maxTime !== null ? 1 : 0) + 
     ((filters.tags?.length || 0) > 0 ? 1 : 0) + 
     (filters.cookedStatus && filters.cookedStatus !== 'all' ? 1 : 0) + 
-    (filters.minRating ? 1 : 0) +
-    (filters.hideVariants ? 1 : 0);
+    (filters.minRating ? 1 : 0);
 
   const filteredAndSortedRecipes = useMemo(() => {
     let result = [...recipes];
-    
-    // Chỉ ẩn món biến thể khi người dùng chủ động chọn ẩn trong bộ lọc
-    if (filters.hideVariants && !searchQuery.trim()) {
-      result = result.filter(r => !r.parent_id || !recipes.some(parent => parent.id === r.parent_id));
-    }
 
     // Tìm kiếm theo từ khóa an toàn
     if (searchQuery.trim()) {
@@ -167,20 +201,55 @@ export function RecipeListPage() {
 
   const INITIAL_BATCH = 24;
   const BATCH_SIZE = 24;
-  const [displayLimit, setDisplayLimit] = useState(INITIAL_BATCH);
+  const [displayLimit, setDisplayLimit] = useState(cachedMobileDisplayLimit);
 
+  // Theo dõi vị trí cuộn trên mobile
   useEffect(() => {
-    setDisplayLimit(INITIAL_BATCH);
-  }, [searchQuery, sortOption, filters]);
+    const scrollEl = document.querySelector('main.overflow-y-auto') as HTMLElement | null;
+    if (!scrollEl) return;
+    const onScroll = () => {
+      cachedMobileScrollTop = scrollEl.scrollTop;
+    };
+    scrollEl.addEventListener('scroll', onScroll, { passive: true });
+    return () => scrollEl.removeEventListener('scroll', onScroll);
+  }, []);
 
   const displayedRecipes = useMemo(() => {
     return filteredAndSortedRecipes.slice(0, displayLimit);
   }, [filteredAndSortedRecipes, displayLimit]);
 
+  // Phục hồi lại vị trí cuộn chính xác khi quay lại trang
+  useEffect(() => {
+    if (cachedMobileScrollTop > 0 && displayedRecipes.length > 0) {
+      const scrollEl = document.querySelector('main.overflow-y-auto') as HTMLElement | null;
+      if (scrollEl) {
+        scrollEl.scrollTop = cachedMobileScrollTop;
+      }
+      const t1 = setTimeout(() => {
+        if (scrollEl && cachedMobileScrollTop > 0) {
+          scrollEl.scrollTop = cachedMobileScrollTop;
+        }
+      }, 50);
+      const t2 = setTimeout(() => {
+        if (scrollEl && cachedMobileScrollTop > 0) {
+          scrollEl.scrollTop = cachedMobileScrollTop;
+        }
+      }, 150);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
+    }
+  }, [displayedRecipes.length]);
+
   const hasMore = displayLimit < filteredAndSortedRecipes.length;
 
   const handleLoadMore = () => {
-    setDisplayLimit(prev => Math.min(prev + BATCH_SIZE, filteredAndSortedRecipes.length));
+    setDisplayLimit(prev => {
+      const next = Math.min(prev + BATCH_SIZE, filteredAndSortedRecipes.length);
+      cachedMobileDisplayLimit = next;
+      return next;
+    });
   };
 
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -192,7 +261,11 @@ export function RecipeListPage() {
 
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
-        setDisplayLimit(prev => Math.min(prev + BATCH_SIZE, filteredAndSortedRecipes.length));
+        setDisplayLimit(prev => {
+          const next = Math.min(prev + BATCH_SIZE, filteredAndSortedRecipes.length);
+          cachedMobileDisplayLimit = next;
+          return next;
+        });
       }
     }, { rootMargin: '300px' });
 
@@ -229,7 +302,12 @@ export function RecipeListPage() {
     if (isSelectMode) {
       toggleSelect(id);
     } else {
-      navigate(`/recipes/${id}`);
+      const scrollEl = document.querySelector('main.overflow-y-auto') as HTMLElement | null;
+      if (scrollEl) {
+        cachedMobileScrollTop = scrollEl.scrollTop;
+      }
+      cachedMobileDisplayLimit = displayLimit;
+      navigate(`/recipes/${id}`, { state: { from: '/recipes' } });
     }
   };
 
@@ -352,11 +430,11 @@ export function RecipeListPage() {
   return (
     <div className="flex flex-col min-h-full gap-6 w-full pt-6 pb-28 px-4 md:px-8">
       <PageHeader
-        title="Sổ tay Công thức"
+        title={t('recipes.title')}
         description={
           filteredAndSortedRecipes.length === recipes.length
-            ? `${recipes.length} công thức đã lưu`
-            : `Hiển thị ${filteredAndSortedRecipes.length} / ${recipes.length} công thức`
+            ? t('recipes.subtitle', { count: recipes.length })
+            : `${filteredAndSortedRecipes.length} / ${recipes.length}`
         }
         prefix={
           <Button 
@@ -371,11 +449,11 @@ export function RecipeListPage() {
         actions={
           <RecipeListToolbar 
             searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
+            onSearchChange={handleSearchChange}
             viewType={viewType}
-            onViewTypeChange={setViewType}
+            onViewTypeChange={handleViewTypeChange}
             sortOption={sortOption}
-            onSortOptionChange={setSortOption}
+            onSortOptionChange={handleSortChange}
             filterCount={activeFilterCount}
             onOpenFilter={() => setIsFilterOpen(true)}
             onToggleSelectMode={toggleSelectMode}
@@ -387,7 +465,7 @@ export function RecipeListPage() {
         isOpen={isFilterOpen}
         onOpenChange={setIsFilterOpen}
         filters={filters}
-        onFilterChange={setFilters}
+        onFilterChange={handleFiltersChange}
         availableTags={availableTags}
       />
 
@@ -401,40 +479,40 @@ export function RecipeListPage() {
           actions={[
             { 
               key: 'meal-plan', 
-              label: 'Thực đơn', 
-              description: 'Lên kế hoạch nấu cho các món đã chọn',
+              label: t('recipes.actions.addToMealPlan'), 
+              description: t('recipes.actions.addingRecipeCount', { count: selectedIds.size }),
               icon: <CalendarDays className="w-4 h-4" />, 
               color: 'primary', 
               onPress: () => setIsMealPlannerModalOpen(true) 
             },
             { 
               key: 'tags', 
-              label: 'Gắn thẻ', 
-              description: 'Gắn nhãn phân loại hàng loạt',
+              label: t('recipes.actions.addTags'), 
+              description: t('recipes.actions.taggingRecipeCount', { count: selectedIds.size }),
               icon: <Tags className="w-4 h-4" />, 
               color: 'secondary', 
               onPress: () => setIsTagModalOpen(true) 
             },
             { 
               key: 'images', 
-              label: 'Chèn ảnh cho từng món', 
-              description: 'Chọn hoặc tải ảnh riêng cho từng món',
+              label: t('recipes.actions.addImages'), 
+              description: t('recipes.actions.addImages'),
               icon: <ImageIcon className="w-4 h-4" />, 
               color: 'warning', 
               onPress: () => setIsBatchImageDrawerOpen(true) 
             },
             { 
               key: 'parent', 
-              label: 'Gán công thức cha', 
-              description: 'Liên kết thành nhóm biến thể',
+              label: t('recipes.actions.setParent'), 
+              description: t('recipes.actions.settingParentRecipeCount', { count: selectedIds.size }),
               icon: <LinkIcon className="w-4 h-4" />, 
               color: 'default', 
               onPress: () => setIsParentModalOpen(true) 
             },
             { 
               key: 'delete', 
-              label: 'Xoá công thức', 
-              description: 'Xoá vĩnh viễn các món đã chọn',
+              label: t('common.actions.delete'), 
+              description: t('common.confirm.bulkDeleteMessage', { count: selectedIds.size }),
               icon: <Trash2 className="w-4 h-4" />, 
               color: 'danger', 
               onPress: handleBulkDelete 
@@ -447,13 +525,13 @@ export function RecipeListPage() {
       {isLoading && recipes.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <Spinner size="lg" color="primary" />
-          <p className="text-sm text-default-400">Đang tải danh sách công thức...</p>
+          <p className="text-sm text-default-400">{t('common.status.loading')}</p>
         </div>
       ) : filteredAndSortedRecipes.length === 0 ? (
         <EmptyState
           icon={<Search className="w-10 h-10 text-default-300" />}
-          title="Không tìm thấy công thức"
-          description="Thử thay đổi từ khóa tìm kiếm hoặc xóa bớt bộ lọc để xem các công thức khác."
+          title={t('recipes.empty.title')}
+          description={t('recipes.empty.description')}
         />
       ) : (
         <div className={`
@@ -486,7 +564,7 @@ export function RecipeListPage() {
                 onPress={handleLoadMore}
                 className="text-xs text-default-500 font-medium bg-default-100 dark:bg-default-50/20"
               >
-                Tải thêm ({displayedRecipes.length}/{filteredAndSortedRecipes.length} món)
+                {t('common.actions.more')} ({displayedRecipes.length}/{filteredAndSortedRecipes.length})
               </Button>
             </div>
           )}
@@ -525,24 +603,24 @@ export function RecipeListPage() {
       <ConfirmModal
         isOpen={!!deleteTarget}
         onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
-        title="Xoá công thức"
-        description={`Bạn có chắc muốn xoá công thức "${deleteTarget?.title}"? Hành động này không thể hoàn tác.`}
-        confirmLabel="Xoá"
+        title={t('recipes.actions.delete')}
+        description={t('recipes.actions.deleteConfirm', { title: deleteTarget?.title })}
+        confirmLabel={t('common.actions.delete')}
         confirmColor="danger"
         onConfirm={async () => {
           if (deleteTarget) {
             await deleteRecipe(deleteTarget.id!);
             setDeleteTarget(null);
-            toast.success('Đã xoá công thức thành công!');
+            toast.success(t('common.status.deletedSuccessfully'));
           }
         }}
       />
       <ConfirmModal
         isOpen={isBulkDeleteOpen}
         onOpenChange={setIsBulkDeleteOpen}
-        title="Xoá nhiều công thức"
-        description={`Bạn có chắc chắn muốn xóa ${selectedIds.size} công thức đã chọn? Hành động này không thể hoàn tác.`}
-        confirmLabel="Xoá tất cả"
+        title={t('common.confirm.deleteTitle')}
+        description={t('recipes.actions.bulkDeleteConfirm', { count: selectedIds.size })}
+        confirmLabel={t('common.actions.delete')}
         confirmColor="danger"
         onConfirm={handleBulkDeleteConfirm}
       />

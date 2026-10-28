@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sunrise, Sun, Moon, Clock, Flame, Utensils, Plus } from 'lucide-react';
@@ -19,17 +20,17 @@ interface SlotConfig {
 const SLOTS: SlotConfig[] = [
   {
     type: 'breakfast',
-    label: 'Sáng',
+    label: 'breakfast',
     icon: <Sunrise className="w-3.5 h-3.5 text-amber-500 shrink-0" />,
   },
   {
     type: 'lunch',
-    label: 'Trưa',
+    label: 'lunch',
     icon: <Sun className="w-3.5 h-3.5 text-emerald-500 shrink-0" />,
   },
   {
     type: 'dinner',
-    label: 'Tối',
+    label: 'dinner',
     icon: <Moon className="w-3.5 h-3.5 text-indigo-500 shrink-0" />,
   },
 ];
@@ -39,6 +40,7 @@ const SLOTS: SlotConfig[] = [
  * ngăn cách bằng đường kẻ dọc có khoảng đệm (padding) với top/bottom, badge không viền/nền và badge thời gian đặt trên ảnh đại diện.
  */
 export function HorizontalMealSlots({ mealPlan, recipes }: HorizontalMealSlotsProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
@@ -85,7 +87,7 @@ export function HorizontalMealSlots({ mealPlan, recipes }: HorizontalMealSlotsPr
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
                       {slot.icon}
-                      <span>{slot.label}</span>
+                      <span>{t(`planner.slots.${slot.label}`)}</span>
                     </div>
                     {slotEntries.length > 1 && (
                       <span className="text-[10px] font-bold text-primary px-1 rounded bg-primary/10">
@@ -155,12 +157,12 @@ export function HorizontalMealSlots({ mealPlan, recipes }: HorizontalMealSlotsPr
                   </div>
 
                   <h4 className="font-bold text-xs sm:text-sm text-foreground line-clamp-2 leading-snug text-left mb-1">
-                    {primaryEntry.notes || 'Món tự chọn'}
+                    {primaryEntry.notes || t('planner.customDish')}
                   </h4>
                 </div>
 
                 <div className="text-[10px] sm:text-xs text-default-400 italic pt-1">
-                  Ghi chú món
+                  {t('recipes.detail.notes')}
                 </div>
 
                 {verticalDivider}
@@ -188,16 +190,16 @@ export function HorizontalMealSlots({ mealPlan, recipes }: HorizontalMealSlotsPr
 
                 <div className="w-full aspect-4/3 rounded-lg border border-dashed border-divider/80 bg-default-50/50 dark:bg-default-50/5 flex flex-col items-center justify-center text-default-400 group-hover:text-primary group-hover:border-primary/50 transition-colors mb-2">
                   <Plus className="w-4 h-4 mb-0.5" />
-                  <span className="text-[10px] sm:text-[11px] font-medium">Thêm món</span>
+                  <span className="text-[10px] sm:text-[11px] font-medium">{t('planner.addMeal')}</span>
                 </div>
 
                 <h4 className="text-xs text-default-400 italic line-clamp-1 text-left mb-1">
-                  Chưa lên món
+                  {t('dashboard.noMealsToday')}
                 </h4>
               </div>
 
               <div className="text-[11px] text-primary font-medium pt-1 flex items-center gap-0.5">
-                Lên món &rarr;
+                {t('dashboard.planAMeal')} &rarr;
               </div>
 
               {verticalDivider}

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui';
 import { BookOpen, Star, User, Link as LinkIcon, Trash2, Edit2 } from 'lucide-react';
 import type { Course } from '@apron/core';
@@ -18,7 +19,8 @@ interface CourseCardProps {
 /**
  * CourseCard — Card hiển thị thông tin khoá học với thiết kế đồng nhất RecipeCard.
  */
-export function CourseCard({ 
+export function CourseCard({
+  // props 
   course, 
   showActions = false, 
   onDelete,
@@ -27,6 +29,7 @@ export function CourseCard({
   onSelect,
   className
 }: CourseCardProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleClick = (_e?: React.MouseEvent | React.KeyboardEvent) => {
@@ -106,7 +109,7 @@ export function CourseCard({
         <div className="absolute top-2.5 right-2.5 z-20 flex gap-2">
           <div className="bg-black/40 backdrop-blur-md rounded-full p-1 border border-white/20 shadow-sm">
             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-primary border-primary text-white' : 'border-white/60 bg-transparent'}`}>
-              {isSelected && <span className="w-2 h-2 bg-white rounded-full" />}
+              {isSelected && <span className="w-2 h-2 bg-primary-foreground rounded-full" />}
             </div>
           </div>
         </div>
@@ -164,7 +167,7 @@ export function CourseCard({
           {course.modules && course.modules.length > 0 && (
             <span className="inline-flex items-center gap-2">
               {(course.level || course.rating) && <span className="text-white/40 select-none">•</span>}
-              <span>{course.modules.length} chương</span>
+              <span>{course.modules.length} {t('courses.modules')}</span>
             </span>
           )}
 
@@ -173,7 +176,7 @@ export function CourseCard({
               {(course.level || course.rating || (course.modules && course.modules.length > 0)) && (
                 <span className="text-white/40 select-none">•</span>
               )}
-              <span>{totalLessons} bài</span>
+              <span>{totalLessons} {t('courses.lessons')}</span>
             </span>
           )}
         </div>

@@ -1,6 +1,12 @@
 export * from "@heroui/react";
 export { Button } from "./components/Button";
 export type { ButtonProps } from "./components/Button";
+export { Dropdown } from "./components/Dropdown";
+export type { DropdownProps } from "./components/Dropdown";
+export { Popover } from "./components/Popover";
+export type { PopoverProps } from "./components/Popover";
+export { Tooltip } from "./components/Tooltip";
+export type { TooltipProps } from "./components/Tooltip";
 export { AppCard } from "./components/AppCard";
 export type { AppCardProps } from "./components/AppCard";
 export { StatCard } from "./components/StatCard";

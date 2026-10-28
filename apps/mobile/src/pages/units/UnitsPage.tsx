@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Button, 
   PageHeader, 
@@ -17,6 +18,7 @@ import { UnitCard } from './components/UnitCard';
 import { UnitModal } from './components/UnitModal';
 
 export function UnitsPage() {
+  const { t } = useTranslation();
   const { units, addUnit, updateUnit, removeUnit, seedDefaultUnits } = useUnitStore();
   const { recipes, fetchRecipes } = useRecipeStore();
 
@@ -132,10 +134,10 @@ export function UnitsPage() {
   const handleSaveUnit = (unitData: Omit<Unit, 'id'>, id?: string) => {
     if (id) {
       updateUnit(id, unitData);
-      toast.success(`Đã cập nhật đơn vị "${unitData.name}"`);
+      toast.success(t('units.updatedSuccess', { name: unitData.name }));
     } else {
       addUnit(unitData);
-      toast.success(`Đã thêm đơn vị "${unitData.name}"`);
+      toast.success(t('units.addedSuccess', { name: unitData.name }));
     }
   };
 
@@ -148,16 +150,16 @@ export function UnitsPage() {
   const handleConfirmDelete = () => {
     if (!deletingUnit) return;
     removeUnit(deletingUnit.id);
-    toast.success(`Đã xoá đơn vị "${deletingUnit.name}"`);
+    toast.success(t('units.deletedSuccess', { name: deletingUnit.name }));
     setDeletingUnit(null);
   };
 
   // Filter options for standard ListToolbar
   const filterItems = useMemo(() => {
     const list: ToolbarFilterItem[] = [
-      { key: 'all', label: 'Tất cả đơn vị', count: units.length },
-      { key: 'used', label: '🍳 Đang dùng', count: usedCount },
-      { key: 'unused', label: 'Chưa dùng', count: unusedCount },
+      { key: 'all', label: t('units.filterAll'), count: units.length },
+      { key: 'used', label: t('units.filterUsed'), count: usedCount },
+      { key: 'unused', label: t('units.filterUnused'), count: unusedCount },
     ];
     for (const cat of UNIT_CATEGORIES) {
       list.push({
@@ -191,26 +193,26 @@ export function UnitsPage() {
   };
 
   const sortItems = [
-    { key: 'name-asc', label: 'Tên A - Z' },
-    { key: 'name-desc', label: 'Tên Z - A' },
-    { key: 'most-used', label: 'Dùng nhiều nhất' },
+    { key: 'name-asc', label: t('units.sortNameAsc') },
+    { key: 'name-desc', label: t('units.sortNameDesc') },
+    { key: 'most-used', label: t('units.sortMostUsed') },
   ];
 
   return (
     <div className="flex flex-col min-h-full gap-6 w-full pt-6 pb-28 px-4 md:px-8">
       {/* 1. Header & Toolbar chuẩn hệ thống */}
       <PageHeader
-        title="Đơn vị tính"
+        title={t('units.title')}
         description={
           filteredUnits.length === units.length
-            ? `${units.length} đơn vị đo lường`
-            : `Hiển thị ${filteredUnits.length} / ${units.length} đơn vị`
+            ? t('units.subtitle', { count: units.length })
+            : t('units.showingSubtitle', { filtered: filteredUnits.length, total: units.length })
         }
         actions={
           <ListToolbar
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
-            searchPlaceholder="Tìm đơn vị tính..."
+            searchPlaceholder={t('units.searchPlaceholder')}
             filterItems={filterItems}
             selectedFilter={selectedFilterKey}
             onFilterChange={handleFilterChange}
@@ -218,7 +220,7 @@ export function UnitsPage() {
             selectedSort={sortBy}
             onSortChange={(key) => setSortBy(key as any)}
             onAdd={handleOpenAdd}
-            addLabel="Thêm đơn vị"
+            addLabel={t('units.addUnit')}
           />
         }
       />
@@ -228,15 +230,15 @@ export function UnitsPage() {
         {units.length === 0 ? (
           <EmptyState
             icon={<Scale className="w-12 h-12 text-default-300" />}
-            title="Chưa có đơn vị tính nào"
-            description="Hãy nạp bộ đơn vị tính chuẩn (g, kg, ml, muỗng...) hoặc tự thêm đơn vị mới để sử dụng."
+            title={t('units.empty.title')}
+            description={t('units.empty.description')}
             action={
               <div className="flex flex-col gap-2 w-full max-w-xs items-center">
                 <Button
                   color="primary"
                   onPress={() => {
                     const count = seedDefaultUnits();
-                    toast.success(`Đã nạp ${count} đơn vị nấu ăn chuẩn!`);
+                    toast.success(t('units.seededSuccess', { count }));
                   }}
                   startContent={<Sparkles className="w-4 h-4" />}
                   className="h-11 rounded-xl px-5 font-semibold text-sm shadow-xs w-full"
@@ -259,9 +261,9 @@ export function UnitsPage() {
             <div className="w-12 h-12 rounded-2xl bg-default-100 flex items-center justify-center text-default-400 mb-3">
               <Search className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-base text-foreground">Không tìm thấy đơn vị</h3>
+            <h3 className="font-bold text-base text-foreground">{t('units.emptySearchTitle')}</h3>
             <p className="text-xs text-default-500 max-w-xs mt-1 mb-4">
-              Không có đơn vị nào khớp với từ khoá hoặc nhóm phân loại đang chọn.
+              {t('units.emptySearchDesc')}
             </p>
             <Button
               variant="flat"
@@ -302,13 +304,13 @@ export function UnitsPage() {
       <ConfirmModal
         isOpen={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
-        title="Xoá đơn vị tính"
+        title={t('units.deleteModalTitle')}
         description={
           deletingUnit && (usageMap.get(deletingUnit.id) || 0) > 0
-            ? `Đơn vị "${deletingUnit.name}" đang được sử dụng trong ${usageMap.get(deletingUnit.id)} công thức. Bạn có chắc chắn muốn xoá đơn vị này?`
-            : `Bạn có chắc chắn muốn xoá đơn vị "${deletingUnit?.name}"? Thao tác này không thể hoàn tác.`
+            ? t('units.deleteInUseDesc', { name: deletingUnit.name, count: usageMap.get(deletingUnit.id) })
+            : t('units.deleteModalDesc', { name: deletingUnit?.name || '' })
         }
-        confirmLabel="Xoá đơn vị"
+        confirmLabel={t('common.delete')}
         confirmColor="danger"
         onConfirm={handleConfirmDelete}
       />

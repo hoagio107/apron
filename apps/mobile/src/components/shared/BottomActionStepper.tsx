@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui';
 import { Save } from 'lucide-react';
 import { TAP_COOLDOWN_DELAY_MS } from '../../constants';
@@ -21,11 +22,13 @@ export function BottomActionStepper({
   isLastStep,
   onNext,
   onSubmit,
-  submitText = "Lưu",
+  submitText,
   isSaving = false,
   extraAction,
   className = ""
 }: BottomActionStepperProps) {
+  const { t } = useTranslation();
+  const effectiveSubmitText = submitText || t('common.actions.save');
   // Chống click-bleed / tap-through khi nút "Tiếp tục" chuyển thành nút "Lưu"
   const [isSubmitReady, setIsSubmitReady] = useState(false);
 
@@ -64,7 +67,7 @@ export function BottomActionStepper({
         isDisabled={!canGoBack}
         className="flex-1 font-semibold"
       >
-        Quay lại
+        {t('common.actions.back')}
       </Button>
 
       {!isLastStep ? (
@@ -76,7 +79,7 @@ export function BottomActionStepper({
           onPress={onNext}
           className="flex-1 font-semibold"
         >
-          Tiếp tục
+          {t('common.actions.continue')}
         </Button>
       ) : (
         <Button 
@@ -89,7 +92,7 @@ export function BottomActionStepper({
           startContent={!isSaving && <Save className="w-5 h-5" />}
           className="flex-1 font-semibold"
         >
-          {submitText}
+          {effectiveSubmitText}
         </Button>
       )}
     </div>

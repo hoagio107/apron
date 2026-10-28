@@ -458,7 +458,7 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
                   </div>
 
                   {error && (
-                    <div className="p-3 bg-danger-50 dark:bg-danger-950/30 border border-danger-200 dark:border-danger-900/50 text-danger-700 dark:text-danger-300 rounded-xl flex items-start gap-2.5 text-xs">
+                    <div className="p-3 bg-danger/10 dark:bg-danger/20 dark:bg-danger/20 border border-danger-200 dark:border-danger-900/50 text-danger-700 dark:text-danger-300 rounded-xl flex items-start gap-2.5 text-xs">
                       <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                       <div className="flex-1 font-medium">{error}</div>
                     </div>

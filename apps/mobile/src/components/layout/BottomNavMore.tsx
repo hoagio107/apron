@@ -15,14 +15,14 @@ export function BottomNavMore({ isOpen, onClose }: BottomNavMoreProps) {
   const { t } = useTranslation();
 
   const moreItems = [
-    { name: t('nav.collections', 'Bộ sưu tập'), icon: FolderHeart, path: '/collections' },
+    { name: t('nav.collections'), icon: FolderHeart, path: '/collections' },
     { name: t('nav.mealPlanner'), icon: CalendarDays, path: '/meal-planner' },
     { name: t('nav.shoppingList'), icon: ShoppingCart, path: '/shopping-list' },
     { name: t('nav.courses'), icon: GraduationCap, path: '/courses' },
     { name: t('nav.saved'), icon: Heart, path: '/saved' },
     { name: t('nav.kitchenTips'), icon: Lightbulb, path: '/tips' },
     { name: t('nav.units'), icon: Scale, path: '/units' },
-    { name: t('nav.import', 'Nhập dữ liệu JSON'), icon: FileUp, path: '/import' },
+    { name: t('nav.import'), icon: FileUp, path: '/import' },
   ];
 
   if (!isOpen) return null;

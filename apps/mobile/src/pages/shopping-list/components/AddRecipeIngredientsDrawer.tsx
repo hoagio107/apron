@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Drawer,
   DrawerContent,
@@ -21,10 +22,13 @@ interface AddRecipeIngredientsDrawerProps {
 }
 
 export function AddRecipeIngredientsDrawer({
+  // props
+
   isOpen,
   onClose,
   onAddIngredients
 }: AddRecipeIngredientsDrawerProps) {
+  const { t } = useTranslation();
   const { recipes, fetchRecipes } = useRecipeStore();
   const [search, setSearch] = useState('');
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
@@ -119,12 +123,12 @@ export function AddRecipeIngredientsDrawer({
               )}
               <div>
                 <h3 className="text-base sm:text-lg font-bold text-foreground">
-                  {selectedRecipe ? selectedRecipe.title : 'Thêm từ công thức'}
+                  {selectedRecipe ? selectedRecipe.title : t('shopping.addRecipeTitle')}
                 </h3>
                 <p className="text-xs text-default-400 font-medium">
                   {selectedRecipe
-                    ? `Chọn nguyên liệu cần mua (${selectedIngredients.size}/${selectedRecipe.ingredients?.length || 0})`
-                    : 'Chọn công thức để thêm nguyên liệu vào giỏ đi chợ'}
+                    ? t('shopping.selectIngredientsTitle', { selected: selectedIngredients.size, total: selectedRecipe.ingredients?.length || 0 })
+                    : t('shopping.selectRecipePrompt')}
                 </p>
               </div>
             </div>
@@ -148,7 +152,7 @@ export function AddRecipeIngredientsDrawer({
                 <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-default-400" />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm công thức nấu ăn..."
+                  placeholder={t('recipes.searchPlaceholder')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 bg-default-100 dark:bg-default-50/20 text-foreground placeholder:text-default-400 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/40 font-medium transition-all"
@@ -160,7 +164,7 @@ export function AddRecipeIngredientsDrawer({
                 {filteredRecipes.length === 0 ? (
                   <div className="py-12 text-center text-default-400">
                     <ChefHat className="w-10 h-10 opacity-30 mx-auto mb-2" />
-                    <p className="text-sm font-medium">Không tìm thấy công thức nào</p>
+                    <p className="text-sm font-medium">{t('recipes.empty.title')}</p>
                   </div>
                 ) : (
                   filteredRecipes.map((r) => {
@@ -217,7 +221,7 @@ export function AddRecipeIngredientsDrawer({
               {/* Select all toggle */}
               <div className="flex items-center justify-between px-1 pb-2 border-b border-divider/40">
                 <span className="text-xs font-semibold text-default-500">
-                  Tất cả nguyên liệu ({selectedRecipe.ingredients?.length || 0})
+                  {t('shopping.allIngredients', { count: selectedRecipe.ingredients?.length || 0 })}
                 </span>
                 <button
                   type="button"
@@ -233,8 +237,8 @@ export function AddRecipeIngredientsDrawer({
                   className="text-xs font-bold text-primary hover:underline"
                 >
                   {selectedIngredients.size === (selectedRecipe.ingredients?.length || 0)
-                    ? 'Bỏ chọn tất cả'
-                    : 'Chọn tất cả'}
+                    ? t('common.actions.deselectAll')
+                    : t('common.actions.selectAll')}
                 </button>
               </div>
 
@@ -288,7 +292,7 @@ export function AddRecipeIngredientsDrawer({
                 disabled={selectedIngredients.size === 0}
                 onClick={handleConfirmAdd}
               >
-                Thêm {selectedIngredients.size} nguyên liệu vào giỏ
+                {t('shopping.addIngredientsToCart', { count: selectedIngredients.size })}
               </Button>
             </div>
           )}

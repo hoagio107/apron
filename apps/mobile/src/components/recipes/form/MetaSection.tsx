@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { Input, Avatar, Checkbox, Button, Drawer, DrawerContent, DrawerHeader, DrawerBody, useDisclosure } from '@/ui';
@@ -17,6 +18,7 @@ interface MetaSectionProps {
 }
 
 export function MetaSection({ dynamicTags, currentRecipeId }: MetaSectionProps) {
+  const { t } = useTranslation();
   const { control, watch, setValue } = useFormContext<FormValues>();
   const { recipes } = useRecipeStore();
   
@@ -65,7 +67,7 @@ export function MetaSection({ dynamicTags, currentRecipeId }: MetaSectionProps) 
           name="video_url"
           control={control}
           render={({ field, fieldState }) => (
-            <FormField label="Video URL (YouTube/Tiktok)" icon={Youtube} error={fieldState.error?.message} className="flex-1">
+            <FormField label={t('recipes.form.videoUrl')} icon={Youtube} error={fieldState.error?.message} className="flex-1">
               <Input
                 {...field}
                 value={field.value || ''}
@@ -83,11 +85,11 @@ export function MetaSection({ dynamicTags, currentRecipeId }: MetaSectionProps) 
           name="source"
           control={control}
           render={({ field, fieldState }) => (
-            <FormField label="Nguồn tham khảo" icon={LinkIcon} error={fieldState.error?.message} className="flex-1">
+            <FormField label={t('recipes.form.source')} icon={LinkIcon} error={fieldState.error?.message} className="flex-1">
               <Input
                 {...field}
                 value={field.value || ''}
-                placeholder="Tên tác giả, trang web..."
+                placeholder={t('recipes.form.sourcePlaceholder')}
                 variant="flat"
                 classNames={{
                   inputWrapper: "bg-default-100 hover:bg-default-200 border-none shadow-none"
@@ -107,7 +109,7 @@ export function MetaSection({ dynamicTags, currentRecipeId }: MetaSectionProps) 
             <FormField 
               label={
                 <div className="flex items-center justify-between w-full">
-                  <span>Biến thể?</span>
+                  <span>{t('recipes.form.isVariant')}</span>
                   <Checkbox 
                     isSelected={isVariant} 
                     onValueChange={(checked) => {
@@ -158,7 +160,7 @@ export function MetaSection({ dynamicTags, currentRecipeId }: MetaSectionProps) 
                           <DrawerHeader className="flex flex-col gap-1.5 px-4 pt-3 pb-3 border-b border-divider z-10 bg-content1 rounded-t-3xl">
                             <div className="w-10 h-1 rounded-full bg-default-300 dark:bg-default-600 mx-auto -mt-0.5 mb-1" />
                             <div className="flex items-center justify-between">
-                              <span className="text-lg font-bold">Chọn công thức gốc</span>
+                              <span className="text-lg font-bold">{t('recipes.actions.setParent')}</span>
                               <Button isIconOnly variant="light" size="md" onPress={onClose} className="bg-default-100 w-8 h-8 rounded-full">
                                 <X className="w-4 h-4" />
                               </Button>
@@ -168,7 +170,7 @@ export function MetaSection({ dynamicTags, currentRecipeId }: MetaSectionProps) 
                             <div className="flex gap-2 mb-6">
                               <Input
                                 autoFocus
-                                placeholder="Tìm kiếm công thức gốc..."
+                                placeholder={t('recipes.form.searchParent')}
                                 value={searchValue}
                                 onValueChange={setSearchValue}
                                 startContent={<Search className="w-4 h-4 text-default-400" />}
@@ -207,7 +209,7 @@ export function MetaSection({ dynamicTags, currentRecipeId }: MetaSectionProps) 
                                 ))}
                                 {filteredRecipes.length === 0 && (
                                   <div className="col-span-2 text-center text-default-500 py-12">
-                                    Không tìm thấy công thức nào
+                                    {t('common.status.noResults')}
                                   </div>
                                 )}
                               </div>
@@ -243,7 +245,7 @@ export function MetaSection({ dynamicTags, currentRecipeId }: MetaSectionProps) 
                                 ))}
                                 {filteredRecipes.length === 0 && (
                                   <div className="text-center text-default-500 py-12">
-                                    Không tìm thấy công thức nào
+                                    {t('common.status.noResults')}
                                   </div>
                                 )}
                               </div>
@@ -265,13 +267,13 @@ export function MetaSection({ dynamicTags, currentRecipeId }: MetaSectionProps) 
                       <h4 className="font-medium text-sm line-clamp-1 pr-6">{parentRecipe.title}</h4>
                       <div className="flex items-center gap-2 text-[10px] text-default-500">
                         {parentRecipe.taste_score ? (
-                          <span className="flex items-center gap-0.5" title="Đánh giá"><Star className="w-3 h-3 text-warning" />{parentRecipe.taste_score}</span>
+                          <span className="flex items-center gap-0.5" title={t('recipes.filter.tasteScore', 'Đánh giá')}><Star className="w-3 h-3 text-warning" />{parentRecipe.taste_score}</span>
                         ) : null}
                         {parentRecipe.calories ? (
                           <span className="flex items-center gap-0.5" title="Calories"><Flame className="w-3 h-3 text-danger" />{parentRecipe.calories} kcal</span>
                         ) : null}
                         {parentRecipe.difficulty ? (
-                          <span className="flex items-center gap-0.5" title="Độ khó"><ChefHat className="w-3 h-3 text-primary" />{parentRecipe.difficulty}</span>
+                          <span className="flex items-center gap-0.5" title={t('recipes.filter.difficulty')}><ChefHat className="w-3 h-3 text-primary" />{parentRecipe.difficulty}</span>
                         ) : null}
                       </div>
                     </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Input, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
 import { Search, LayoutGrid, Filter, ArrowUpDown, Grip, CheckSquare } from 'lucide-react';
 import type { RecipeViewType } from './RecipeCard';
@@ -25,12 +26,14 @@ export function RecipeListToolbar({
   onOpenFilter,
   onToggleSelectMode
 }: RecipeListToolbarProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col sm:flex-row gap-4 items-center justify-end py-2">
       <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
         <div className="w-full sm:w-64 shrink-0 mr-2">
           <Input
-            placeholder="Tìm kiếm công thức..."
+            placeholder={t('recipes.searchPlaceholder')}
             variant="flat"
             value={searchQuery}
             onValueChange={onSearchChange}
@@ -45,14 +48,14 @@ export function RecipeListToolbar({
           startContent={<Filter className="w-4 h-4" />}
           onPress={onOpenFilter}
         >
-          Lọc {filterCount > 0 && `(${filterCount})`}
+          {t('common.actions.filter')} {filterCount > 0 && `(${filterCount})`}
         </Button>
 
         {/* Sort */}
         <Dropdown>
           <DropdownTrigger>
             <Button variant="flat" startContent={<ArrowUpDown className="w-4 h-4" />}>
-              Sắp xếp
+              {t('recipes.sort.label')}
             </Button>
           </DropdownTrigger>
           <DropdownMenu 
@@ -61,10 +64,10 @@ export function RecipeListToolbar({
             selectionMode="single"
             onSelectionChange={(keys) => onSortOptionChange(Array.from(keys)[0] as string)}
           >
-            <DropdownItem key="newest">Mới nhất</DropdownItem>
-            <DropdownItem key="oldest">Cũ nhất</DropdownItem>
-            <DropdownItem key="highest_rated">Đánh giá cao</DropdownItem>
-            <DropdownItem key="quickest">Thời gian nhanh</DropdownItem>
+            <DropdownItem key="newest">{t('recipes.sort.newest')}</DropdownItem>
+            <DropdownItem key="oldest">{t('recipes.sort.oldest')}</DropdownItem>
+            <DropdownItem key="highest_rated">{t('recipes.sort.highestRated')}</DropdownItem>
+            <DropdownItem key="quickest">{t('recipes.sort.quickest')}</DropdownItem>
           </DropdownMenu>
         </Dropdown>
 
@@ -77,7 +80,7 @@ export function RecipeListToolbar({
           startContent={<CheckSquare className="w-4 h-4 text-default-500" />}
           onPress={onToggleSelectMode}
         >
-          Chọn nhiều
+          {t('common.actions.selectMultiple')}
         </Button>
 
         <div className="w-px h-6 bg-default-200 mx-1 shrink-0" />
@@ -86,7 +89,7 @@ export function RecipeListToolbar({
         <Button
           isIconOnly
           variant="flat"
-          aria-label={viewType === 'grid-portrait' ? 'Chuyển sang dạng lưới vuông' : 'Chuyển sang dạng thẻ dọc'}
+          aria-label={viewType === 'grid-portrait' ? t('recipes.views.switchToSquare') : t('recipes.views.switchToPortrait')}
           onPress={() => onViewTypeChange(viewType === 'grid-portrait' ? 'grid-square' : 'grid-portrait')}
         >
           {viewType === 'grid-portrait' ? (

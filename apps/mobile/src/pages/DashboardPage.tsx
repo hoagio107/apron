@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppCard, EmptyState } from '@/ui';
@@ -19,6 +20,7 @@ import { StatCard } from '../components/shared/StatCard';
 import { HorizontalMealSlots } from '../components/dashboard/HorizontalMealSlots';
 
 export function DashboardPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   // State
@@ -67,9 +69,9 @@ export function DashboardPage() {
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Chào buổi sáng';
-    if (hour < 18) return 'Chào buổi chiều';
-    return 'Chào buổi tối';
+    if (hour < 12) return t('dashboard.greetings.morning');
+    if (hour < 18) return t('dashboard.greetings.afternoon');
+    return t('dashboard.greetings.evening');
   };
 
   // Lọc duy nhất theo tên món để tránh các món trùng tên hiển thị cạnh nhau trên trang chủ
@@ -122,7 +124,7 @@ export function DashboardPage() {
       
       {/* 1. Welcome Banner */}
       <div className="flex items-center gap-3.5 sm:gap-4">
-        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white dark:bg-default-100 p-2 shadow-sm shrink-0 flex items-center justify-center">
+        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-content1 dark:bg-default-100 p-2 shadow-sm shrink-0 flex items-center justify-center">
           <img src="/logo.svg" alt="apron logo" className="w-full h-full object-contain" />
         </div>
         <div className="flex flex-col">
@@ -130,7 +132,7 @@ export function DashboardPage() {
             {getGreeting()}, Chef!
           </h1>
           <p className="app-page-subtitle">
-            Hôm nay bạn muốn nấu món gì? Hãy khám phá tủ lạnh hoặc lên thực đơn nhé.
+            {t('dashboard.subtitle')}
           </p>
         </div>
       </div>
@@ -140,7 +142,7 @@ export function DashboardPage() {
         <StatCard
           layout="vertical"
           icon={<ChefHat className="w-4 h-4 sm:w-5 sm:h-5" />}
-          label="Công thức"
+          label={t('nav.recipes')}
           value={recipes.length}
           color="primary"
           onClick={() => navigate('/recipes')}
@@ -148,7 +150,7 @@ export function DashboardPage() {
         <StatCard
           layout="vertical"
           icon={<Calendar className="w-4 h-4 sm:w-5 sm:h-5" />}
-          label="Thực đơn"
+          label={t('nav.planner')}
           value={todayMealPlan ? todayMealPlan.meals.length : 0}
           color="secondary"
           onClick={() => navigate('/meal-planner')}
@@ -156,7 +158,7 @@ export function DashboardPage() {
         <StatCard
           layout="vertical"
           icon={<Lightbulb className="w-4 h-4 sm:w-5 sm:h-5" />}
-          label="Mẹo hay"
+          label={t('nav.tips')}
           value={tipsCount}
           color="warning"
           onClick={() => navigate('/tips')}
@@ -164,7 +166,7 @@ export function DashboardPage() {
         <StatCard
           layout="vertical"
           icon={<BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />}
-          label="Khóa học"
+          label={t('nav.courses')}
           value={courses.length}
           color="success"
           onClick={() => navigate('/courses')}
@@ -179,9 +181,9 @@ export function DashboardPage() {
           {/* Today's Meal Plan — Bố cục dàn ngang 3 bữa (Sáng, Trưa, Tối) */}
           <div className="flex flex-col gap-4">
             <SectionTitle
-              title="Thực đơn hôm nay"
+              title={t('dashboard.todayMeals')}
               icon={<Utensils className="w-5 h-5 text-primary" />}
-              actionLabel={todayMealPlan ? "Xem tất cả thực đơn" : undefined}
+              actionLabel={todayMealPlan ? t('dashboard.viewAll') : undefined}
               onAction={todayMealPlan ? () => navigate('/meal-planner') : undefined}
             />
             {todayMealPlan ? (
@@ -191,9 +193,9 @@ export function DashboardPage() {
                 <EmptyState
                   layout="horizontal"
                   icon={<Calendar className="w-5 h-5 text-primary" />}
-                  title="Chưa lên thực đơn hôm nay"
-                  description="Lên kế hoạch các bữa ăn để nấu nướng thảnh thơi"
-                  actionLabel="Lên thực đơn"
+                  title={t('dashboard.todayMeals')}
+                  description={t('dashboard.noMealsToday')}
+                  actionLabel={t('dashboard.planAMeal')}
                   actionColor="primary"
                   onAction={() => navigate('/meal-planner')}
                 />
@@ -208,9 +210,9 @@ export function DashboardPage() {
               return (
                 <>
                   <SectionTitle
-                    title="Công thức gần đây"
+                    title={t('dashboard.recentRecipes')}
                     icon={<Flame className="w-5 h-5 text-danger" />}
-                    actionLabel={hasRecentRecipes ? "Xem tất cả" : undefined}
+                    actionLabel={hasRecentRecipes ? t('dashboard.viewAll') : undefined}
                     onAction={hasRecentRecipes ? () => navigate('/recipes') : undefined}
                   />
                   
@@ -231,9 +233,9 @@ export function DashboardPage() {
                       <EmptyState
                         layout="horizontal"
                         icon={<ChefHat className="w-5 h-5 text-primary" />}
-                        title="Chưa có công thức nào"
-                        description="Thêm công thức đầu tiên của bạn"
-                        actionLabel="Thêm món"
+                        title={t('recipes.empty.title')}
+                        description={t('recipes.empty.description')}
+                        actionLabel={t('recipes.addRecipe')}
                         actionColor="primary"
                         onAction={() => navigate('/recipes/new')}
                       />
@@ -256,9 +258,9 @@ export function DashboardPage() {
               return (
                 <>
                   <SectionTitle
-                    title="Khóa học của bạn"
+                    title={t('courses.title')}
                     icon={<BookOpen className="w-5 h-5 text-primary" />}
-                    actionLabel={hasCourses ? "Tất cả khóa học" : undefined}
+                    actionLabel={hasCourses ? t('dashboard.viewAll') : undefined}
                     onAction={hasCourses ? () => navigate('/courses') : undefined}
                   />
                   
@@ -272,9 +274,9 @@ export function DashboardPage() {
                       <EmptyState
                         layout="horizontal"
                         icon={<BookOpen className="w-5 h-5 text-primary" />}
-                        title="Chưa tham gia khóa học nào"
-                        description="Khám phá các khóa học nấu ăn cùng chuyên gia"
-                        actionLabel="Khám phá"
+                        title={t('courses.empty.title')}
+                        description={t('courses.empty.description')}
+                        actionLabel={t('courses.empty.createFirst')}
                         actionColor="primary"
                         onAction={() => navigate('/courses')}
                       />
@@ -289,9 +291,9 @@ export function DashboardPage() {
           {dailyTip && (
             <div className="flex flex-col gap-4">
               <SectionTitle
-                title="Mẹo hay cho bạn"
+                title={t('tips.dailyTip')}
                 icon={<Lightbulb className="w-5 h-5 text-warning" />}
-                actionLabel="Tất cả mẹo hay"
+                actionLabel={t('dashboard.viewAll')}
                 onAction={() => navigate('/tips')}
               />
               <AppCard 

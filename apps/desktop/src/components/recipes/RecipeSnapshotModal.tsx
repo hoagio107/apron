@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useRef } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody } from '@/ui';
 import { Carrot, ChefHat, Timer, Flame, Star, MessageSquare, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -61,6 +62,7 @@ const StepImageCarousel = ({ step }: { step: any }) => {
 };
 
 export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, notes }: RecipeSnapshotModalProps) {
+  const { t } = useTranslation();
   if (!snapshot) return null;
 
   return (
@@ -87,9 +89,7 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
               <div className="flex flex-col flex-1 min-w-0">
                 <h2 className="text-2xl font-bold mb-1">{snapshot.title}</h2>
                 <p className="text-sm text-default-500 font-normal mb-4">
-                  Bản lưu của lần nấu ngày {new Date(date).toLocaleDateString('vi-VN', {
-                    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                  })}
+                  {t('recipes.cooking.snapshotSubtitle', { date: new Date(date).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) })}
                 </p>
                 
                 <div className="flex flex-col gap-2 mt-auto">
@@ -101,7 +101,7 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
                     </div>
                   ) : null}
                   <p className={`whitespace-pre-wrap text-sm sm:text-base ${notes ? 'text-default-700' : 'text-default-400 italic'}`}>
-                    {notes || "Không có nhận xét"}
+                    {notes || t('recipes.cooking.noNotes')}
                   </p>
                 </div>
               </div>
@@ -116,8 +116,8 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
                       <Timer className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <div className="text-xs text-default-500 font-medium">Chuẩn bị</div>
-                      <div className="font-bold text-sm sm:text-base">{snapshot.prep_time || 0} phút</div>
+                      <div className="text-xs text-default-500 font-medium">{t('recipes.filter.prepTime')}</div>
+                      <div className="font-bold text-sm sm:text-base">{snapshot.prep_time || 0} {t('common.time.minutes')}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 md:px-6 flex-1 justify-center md:justify-start">
@@ -125,8 +125,8 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
                       <ChefHat className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <div className="text-xs text-default-500 font-medium">Nấu</div>
-                      <div className="font-bold text-sm sm:text-base">{snapshot.cook_time || 0} phút</div>
+                      <div className="text-xs text-default-500 font-medium">{t('recipes.filter.cookingMethod')}</div>
+                      <div className="font-bold text-sm sm:text-base">{snapshot.cook_time || 0} {t('common.time.minutes')}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 md:px-6 flex-1 justify-center md:justify-start">
@@ -192,7 +192,7 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
 
                 {/* Recipe Notes */}
                 {snapshot.notes && (
-                  <div className="bg-warning-50 p-6 rounded-2xl border border-warning-100">
+                  <div className="bg-warning/10 dark:bg-warning/20 p-6 rounded-2xl border border-warning-100">
                     <h3 className="text-xl font-bold flex items-center gap-2 mb-4 text-warning-600">
                       <MessageSquare className="w-6 h-6" />
                       Ghi chú món ăn

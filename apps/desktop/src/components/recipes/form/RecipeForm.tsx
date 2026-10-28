@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useMemo, useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,6 +25,7 @@ interface RecipeFormProps {
 }
 
 export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
+  const { t } = useTranslation();
   const [isSaving, setIsSaving] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
@@ -390,7 +392,7 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
       >
         <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-md py-2 -my-2">
           <PageHeader 
-            title={initialData ? 'Sửa công thức' : (bulkRecipes && bulkRecipes.length > 1 ? `Nhập ${bulkRecipes.length} công thức` : 'Thêm công thức mới')} 
+            title={initialData ? t('recipes.form.editTitle') : (bulkRecipes && bulkRecipes.length > 1 ? t('recipes.form.bulkCreateTitle', { count: bulkRecipes.length }) : t('recipes.form.createTitle'))} 
             className="pt-2 pb-2"
             actions={
               <>
@@ -411,7 +413,7 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
                   isLoading={isSaving}
                   startContent={!isSaving && <Save className="w-4 h-4" />}
                 >
-                  {bulkRecipes && bulkRecipes.length > 1 ? `Lưu ${bulkRecipes.length} Công Thức` : 'Lưu Công Thức'}
+                  {bulkRecipes && bulkRecipes.length > 1 ? t('recipes.form.saveBulkRecipes', { count: bulkRecipes.length }) : t('recipes.form.saveRecipe')}
                 </Button>
               </>
             }
@@ -423,12 +425,12 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm font-semibold text-primary">
                 <Layers className="w-4 h-4" />
-                <span>Danh sách món đang nhập ({activeBulkIndex + 1}/{bulkRecipes.length}):</span>
+                <span>{t('recipes.form.bulkListTitle', { current: activeBulkIndex + 1, total: bulkRecipes.length })}</span>
               </div>
               <button
                 type="button"
                 onClick={() => {
-                  if (window.confirm('Bạn có chắc muốn thoát chế độ nhập hàng loạt? (Chỉ giữ lại món đang sửa)')) {
+                  if (window.confirm(t('recipes.form.bulkExitConfirm'))) {
                     setBulkRecipes(null);
                     setActiveBulkIndex(0);
                     toast.info('Đã chuyển về chế độ chỉnh sửa đơn lẻ');

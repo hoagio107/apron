@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, ModalContent, Button, Checkbox } from '@/ui';
 import { X, Carrot, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { ImageManager } from '../../lib/image-manager';
@@ -24,6 +25,7 @@ export function CookingModeModal({
   scaleQuantity,
   onFinish
 }: CookingModeModalProps) {
+  const { t } = useTranslation();
   const [currentCookingStep, setCurrentCookingStep] = useState(-1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -55,9 +57,7 @@ export function CookingModeModal({
                  <div className="font-bold text-lg">{recipe.title}</div>
                </div>
                <div className="text-sm font-semibold text-primary">
-                 {currentCookingStep === -1 
-                   ? 'Chuẩn bị nguyên liệu' 
-                   : `Bước ${currentCookingStep + 1} / ${allSteps.length}`}
+                 {currentCookingStep === -1 ? t('recipes.cooking.prepIngredients') : t('recipes.cooking.stepProgress', { current: currentCookingStep + 1, total: allSteps.length })}
                </div>
              </div>
              
@@ -66,7 +66,7 @@ export function CookingModeModal({
                  <div className="max-w-4xl w-full flex flex-col gap-6">
                    <h3 className="text-2xl font-bold flex items-center gap-2">
                      <Carrot className="w-6 h-6 text-primary" />
-                     Nguyên liệu cần chuẩn bị
+                     {t('recipes.cooking.ingredientsNeeded')}
                    </h3>
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                      {recipe.ingredients?.map((ing: any, idx: number) => (
@@ -152,7 +152,7 @@ export function CookingModeModal({
                    <div className="w-full flex flex-col gap-4 pt-4 px-4 md:px-0">
                      <div className="w-full text-left">
                        <h4 className="text-primary font-bold text-xl md:text-2xl uppercase tracking-wide">
-                         {allSteps[currentCookingStep].group || 'Các bước thực hiện'}
+                         {allSteps[currentCookingStep].group || t('recipes.cooking.stepsGroupDefault')}
                        </h4>
                      </div>
                      <div className="w-full flex gap-4 md:gap-6 items-start text-left">
@@ -193,7 +193,7 @@ export function CookingModeModal({
                     }}
                     endContent={currentCookingStep < allSteps.length - 1 ? <ChevronRight className="w-5 h-5"/> : <Check className="w-5 h-5"/>}
                   >
-                    {currentCookingStep === -1 ? 'Bắt đầu làm' : (currentCookingStep < allSteps.length - 1 ? 'Tiếp theo' : 'Hoàn thành')}
+                    {currentCookingStep === -1 ? t('recipes.cooking.startCooking') : (currentCookingStep < allSteps.length - 1 ? t('recipes.cooking.nextStep') : t('recipes.cooking.finishCooking'))}
                   </Button>
                </div>
           </div>

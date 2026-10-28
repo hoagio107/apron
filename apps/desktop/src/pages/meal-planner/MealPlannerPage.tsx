@@ -13,10 +13,12 @@ import type { Recipe, MealType } from '@apron/core';
 
 import { useMealPlanStore } from '../../store/useMealPlanStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { useTranslation } from 'react-i18next';
 import { WeeklyCalendar } from './components/WeeklyCalendar';
 import { RecipeSidebar } from './components/RecipeSidebar';
 
 export function MealPlannerPage() {
+  const { t, i18n } = useTranslation();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [activeRecipe, setActiveRecipe] = useState<Recipe | null>(null);
   
@@ -127,25 +129,25 @@ export function MealPlannerPage() {
               <CalendarDays className="w-7 h-7" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground leading-tight">Thực đơn tuần</h1>
-              <p className="text-default-500">Kéo thả công thức vào các bữa ăn trong tuần</p>
+              <h1 className="text-3xl font-bold text-foreground leading-tight">{t('planner.title')}</h1>
+              <p className="text-default-500">{t('planner.subtitle')}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-3 bg-content1 p-2 rounded-xl relative">
-            <Button isIconOnly variant="light" size="sm" onPress={handlePrevWeek}>
+            <Button isIconOnly variant="light" size="sm" onPress={handlePrevWeek} aria-label={t('planner.prevWeek')}>
               <ChevronLeft className="w-5 h-5" />
             </Button>
             <div className="text-sm font-semibold min-w-[140px] text-center">
-              {days[0].toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })} - {days[6].toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })}
+              {days[0].toLocaleDateString(i18n.language.startsWith('vi') ? 'vi-VN' : 'en-US', { day: '2-digit', month: '2-digit' })} - {days[6].toLocaleDateString(i18n.language.startsWith('vi') ? 'vi-VN' : 'en-US', { day: '2-digit', month: '2-digit' })}
             </div>
-            <Button isIconOnly variant="light" size="sm" onPress={handleNextWeek}>
+            <Button isIconOnly variant="light" size="sm" onPress={handleNextWeek} aria-label={t('planner.nextWeek')}>
               <ChevronRight className="w-5 h-5" />
             </Button>
             
             <div className="w-px h-6 bg-default-200 mx-1"></div>
             
-            <Button isIconOnly variant="light" size="sm" onPress={() => setShowSettings(!showSettings)} className={showSettings ? "bg-default-100" : ""}>
+            <Button isIconOnly variant="light" size="sm" onPress={() => setShowSettings(!showSettings)} className={showSettings ? "bg-default-100" : ""} aria-label={t('planner.slotSettings')}>
               <Settings className="w-4 h-4 text-default-600" />
             </Button>
             
@@ -155,25 +157,25 @@ export function MealPlannerPage() {
                 <div className="absolute top-full right-0 mt-2 w-72 bg-content1 border border-default-200 rounded-xl shadow-lg z-50 p-3 flex flex-col gap-3">
                   <h3 className="text-sm font-semibold text-foreground px-1 flex items-center gap-1.5">
                     <Settings className="w-4 h-4 text-default-500" />
-                    Cài đặt hiển thị
+                    {t('planner.slotSettings')}
                   </h3>
                 
                 <div className="flex flex-col gap-1">
-                  <span className="text-xs text-default-500 font-medium px-1">Giao diện thẻ</span>
+                  <span className="text-xs text-default-500 font-medium px-1">{t('planner.cardLayout')}</span>
                   <div className="flex bg-default-100 rounded-lg p-1 gap-1">
                     <button 
                       onClick={() => setViewMode('list')}
                       className={`flex-1 flex items-center justify-center gap-2 py-1.5 px-2 rounded-md text-xs font-medium transition-colors ${viewMode === 'list' ? 'bg-background shadow-sm text-foreground' : 'text-default-500 hover:text-default-700'}`}
                     >
                       <LayoutList className="w-3.5 h-3.5" />
-                      Danh sách
+                      {t('planner.listLayout')}
                     </button>
                     <button 
                       onClick={() => setViewMode('card')}
                       className={`flex-1 flex items-center justify-center gap-2 py-1.5 px-2 rounded-md text-xs font-medium transition-colors ${viewMode === 'card' ? 'bg-background shadow-sm text-foreground' : 'text-default-500 hover:text-default-700'}`}
                     >
                       <LayoutGrid className="w-3.5 h-3.5" />
-                      Dạng Card
+                      {t('planner.cardLayoutDesc')}
                     </button>
                   </div>
                 </div>
@@ -181,7 +183,7 @@ export function MealPlannerPage() {
                 <div className="flex items-center justify-between px-1">
                   <div className="flex items-center gap-2">
                     <Calculator className="w-4 h-4 text-default-500" />
-                    <span className="text-xs font-medium">Thống kê Ngày</span>
+                    <span className="text-xs font-medium">{t('planner.dayStats')}</span>
                   </div>
                   <button 
                     onClick={() => setShowDailyAggregates(!showDailyAggregates)}
@@ -193,13 +195,13 @@ export function MealPlannerPage() {
 
                 {/* Default slots manager */}
                 <div className="flex flex-col gap-2 mt-1 border-t border-default-200 pt-3">
-                  <span className="text-xs text-default-500 font-medium px-1">Cấu trúc bữa mẫu (cho ngày trống)</span>
+                  <span className="text-xs text-default-500 font-medium px-1">{t('planner.templateSlots')}</span>
                   <div className="flex flex-col gap-1 max-h-[150px] overflow-y-auto pr-1">
                     {defaultSlots.map(slot => (
                       <div key={slot.id} className="flex items-center justify-between bg-default-50 p-1.5 px-2 rounded-md">
                         <span className="text-xs font-medium text-default-700">{slot.name}</span>
                         {defaultSlots.length > 1 && (
-                          <button onClick={() => removeDefaultSlot(slot.id)} className="text-default-400 hover:text-danger p-0.5 rounded-md hover:bg-danger-50">
+                          <button onClick={() => removeDefaultSlot(slot.id)} className="text-default-400 hover:text-danger p-0.5 rounded-md hover:bg-danger/10 dark:hover:bg-danger/20">
                             <X className="w-3.5 h-3.5" />
                           </button>
                         )}
@@ -210,7 +212,7 @@ export function MealPlannerPage() {
                     <input 
                       type="text" 
                       className="flex-1 bg-default-50 text-xs px-2 py-1.5 rounded-md border border-default-200 outline-none focus:border-primary" 
-                      placeholder="Tên bữa..."
+                      placeholder={t('planner.slotNamePlaceholder')}
                       value={newDefaultSlotName}
                       onChange={(e) => setNewDefaultSlotName(e.target.value)}
                       onKeyDown={(e) => {

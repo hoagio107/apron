@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Drawer,
   DrawerContent,
@@ -58,6 +59,7 @@ interface SortableSlotItemProps {
 }
 
 function SortableSlotItem({ slot, canRemove, onRemove }: SortableSlotItemProps) {
+  const { t } = useTranslation();
   const {
     attributes,
     listeners,
@@ -92,7 +94,7 @@ function SortableSlotItem({ slot, canRemove, onRemove }: SortableSlotItemProps) 
           {...attributes}
           {...listeners}
           className="p-1 -ml-1 text-default-400 hover:text-foreground active:text-primary cursor-grab active:cursor-grabbing touch-none select-none rounded-lg"
-          aria-label="Kéo để sắp xếp vị trí"
+          aria-label={t('recipes.form.dragToReorder')}
         >
           <GripVertical className="w-4 h-4" />
         </button>
@@ -106,8 +108,8 @@ function SortableSlotItem({ slot, canRemove, onRemove }: SortableSlotItemProps) 
           type="button"
           onClick={() => onRemove(slot.id)}
           className="p-1.5 rounded-lg text-default-400 hover:text-danger hover:bg-danger/10 dark:hover:bg-danger/20 transition-colors shrink-0"
-          title="Xóa bữa này"
-          aria-label={`Xóa ${slot.name}`}
+          title={t('planner.removeSlot')}
+          aria-label={`${t('common.actions.delete')} ${slot.name}`}
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -124,6 +126,7 @@ export function MealSlotSettingsDrawer({
   onRemoveSlot,
   onReorderSlots
 }: MealSlotSettingsDrawerProps) {
+  const { t } = useTranslation();
   const [newSlotNameInput, setNewSlotNameInput] = useState('');
 
   const pointerSensor = useSensor(PointerSensor, {
@@ -176,13 +179,13 @@ export function MealSlotSettingsDrawer({
           <div className="w-10 h-1 rounded-full bg-default-300 mx-auto mb-2" />
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-foreground">
-              Cài đặt cấu trúc bữa ăn
+              {t('planner.slotSettings')}
             </h3>
             <button
               type="button"
               onClick={onClose}
               className="p-1.5 rounded-full text-default-400 hover:text-foreground"
-              aria-label="Đóng"
+              aria-label={t('common.actions.close')}
             >
               <X className="w-5 h-5" />
             </button>
@@ -191,7 +194,7 @@ export function MealSlotSettingsDrawer({
 
         <DrawerBody>
           <p className="text-xs text-default-500">
-            Kéo thả biểu tượng để đổi thứ tự các bữa ăn hoặc thêm bữa mới:
+            {t('planner.slotSettingsDesc')}
           </p>
 
           {/* List slots with DND */}
@@ -221,7 +224,7 @@ export function MealSlotSettingsDrawer({
           <div className="flex items-center gap-2 pt-2 border-t border-divider/40">
             <input
               type="text"
-              placeholder="Tên bữa mới (vd: Bữa khuya, Ăn xế)..."
+              placeholder={t('planner.newSlotPlaceholder')}
               value={newSlotNameInput}
               onChange={(e) => setNewSlotNameInput(e.target.value)}
               onKeyDown={(e) => {
@@ -237,7 +240,7 @@ export function MealSlotSettingsDrawer({
               disabled={!newSlotNameInput.trim()}
               onClick={handleAdd}
             >
-              Thêm
+              {t('common.actions.add')}
             </Button>
           </div>
         </DrawerBody>

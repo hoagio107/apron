@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, AppCard, Input, EmptyState, toast } from '@/ui';
 import { Plus, Trash2, Edit2, Check, X, Scale, Sparkles } from 'lucide-react';
 import { PageHeader } from '../../components/layout/PageHeader';
@@ -6,6 +7,7 @@ import { useUnitStore } from '../../store/useUnitStore';
 import type { Unit } from '@apron/core';
 
 export function UnitsPage() {
+  const { t } = useTranslation();
   const { units, addUnit, updateUnit, removeUnit, seedDefaultUnits } = useUnitStore();
   const [isAdding, setIsAdding] = useState(false);
   const [newUnitName, setNewUnitName] = useState('');
@@ -44,33 +46,36 @@ export function UnitsPage() {
   };
 
   return (
-    <div className="flex flex-col h-full pt-6">
-      <PageHeader
-        title="Đơn vị tính"
-        className="pt-0"
-        actions={
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="flat" 
-              color="secondary" 
-              startContent={<Sparkles className="w-4 h-4" />}
-              onClick={() => {
-                const count = seedDefaultUnits();
-                if (count > 0) {
-                  toast.success(`Đã thêm ${count} đơn vị nấu ăn chuẩn`);
-                } else {
-                  toast.info('Tất cả đơn vị nấu ăn chuẩn đã có trong danh sách');
-                }
-              }}
-            >
-              Đơn vị chuẩn
-            </Button>
-            <Button color="primary" onClick={() => setIsAdding(true)} startContent={<Plus className="w-4 h-4" />}>
-              Thêm đơn vị
-            </Button>
-          </div>
-        }
-      />
+    <div className="flex flex-col h-full pb-8">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-6 pb-4 -mx-8 px-8 border-b border-divider/50 shadow-2xs">
+        <PageHeader
+          title={t('units.title')}
+          className="pt-0 pb-0"
+          actions={
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="flat" 
+                color="secondary" 
+                startContent={<Sparkles className="w-4 h-4" />}
+                onClick={() => {
+                  const count = seedDefaultUnits();
+                  if (count > 0) {
+                    toast.success(t('units.seededSuccess', { count }));
+                  } else {
+                    toast.info(t('units.alreadySeeded'));
+                  }
+                }}
+              >
+                Đơn vị chuẩn
+              </Button>
+              <Button color="primary" onClick={() => setIsAdding(true)} startContent={<Plus className="w-4 h-4" />}>
+                Thêm đơn vị
+              </Button>
+            </div>
+          }
+        />
+      </div>
       
       <div className="flex-1 overflow-y-auto mt-4 pb-12">
         <div className="max-w-2xl mx-auto flex flex-col gap-4">
@@ -79,7 +84,7 @@ export function UnitsPage() {
               <div className="flex flex-row items-center gap-2">
                 <Input
                   autoFocus
-                  placeholder="Nhập tên đơn vị mới..."
+                  placeholder={t('units.newUnitPlaceholder')}
                   value={newUnitName}
                   onChange={(e) => setNewUnitName(e.target.value)}
                   onKeyDown={(e) => handleKeyDown(e, handleAdd)}
@@ -134,12 +139,12 @@ export function UnitsPage() {
           {units.length === 0 && !isAdding && (
             <EmptyState
               icon={<Scale className="w-10 h-10 text-default-400" />}
-              title="Chưa có đơn vị tính nào"
-              description="Hãy nạp bộ đơn vị tính chuẩn (g, kg, ml, muỗng...) hoặc tự thêm đơn vị mới để sử dụng trong công thức nấu ăn."
-              actionLabel="Nạp đơn vị chuẩn"
+              title={t('units.empty.title')}
+              description={t('units.empty.description')}
+              actionLabel={t('units.seedButton')}
               onAction={() => {
                 const count = seedDefaultUnits();
-                toast.success(`Đã nạp ${count} đơn vị chuẩn!`);
+                toast.success(t('units.seededSuccess', { count }));
               }}
             />
           )}

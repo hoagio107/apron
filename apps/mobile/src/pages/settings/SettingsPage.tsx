@@ -78,12 +78,12 @@ export function SettingsPage() {
         textArea.remove();
       }
       setCopied(true);
-      toast.success('Đã sao chép vị trí database vào clipboard!');
+      toast.success(t('settings.database.copySuccess'));
       setTimeout(() => {
         setCopied(false);
       }, FEEDBACK_RESET_DELAY_MS);
     } catch {
-      toast.error('Không thể sao chép vị trí database');
+      toast.error(t('settings.database.copyFailed'));
     }
   };
 
@@ -105,15 +105,15 @@ export function SettingsPage() {
       a.download = `apron-backup-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success('Đã xuất tệp sao lưu dữ liệu JSON thành công!');
+      toast.success(t('settings.data.exportSuccess'));
     } catch {
-      toast.error('Có lỗi xảy ra khi xuất dữ liệu');
+      toast.error(t('settings.data.exportError'));
     }
   };
 
   const handleResetData = () => {
     localStorage.clear();
-    toast.success('Đã đặt lại dữ liệu ứng dụng.');
+    toast.success(t('settings.data.resetSuccess'));
     setTimeout(() => {
       window.location.reload();
     }, RESET_APP_RELOAD_DELAY_MS);

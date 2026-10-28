@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui';
 import { Plus, Sparkles } from 'lucide-react';
 import { useShoppingListStore } from '../../../store/useShoppingListStore';
@@ -32,6 +33,7 @@ const SUGGESTIONS = [
 ];
 
 export function SuggestedIngredientsSidebar() {
+  const { t } = useTranslation();
   const { addItem } = useShoppingListStore();
 
   return (
@@ -39,7 +41,7 @@ export function SuggestedIngredientsSidebar() {
       <div className="p-4">
         <h2 className="app-card-title mb-4 flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-warning" />
-          Gợi ý thường mua
+          {t('shopping.commonSuggestions')}
         </h2>
       </div>
       
@@ -58,7 +60,7 @@ export function SuggestedIngredientsSidebar() {
                     variant="flat"
                     size="sm"
                     color="default"
-                    className="bg-default-100 hover:bg-primary-50 hover:text-primary transition-colors text-xs font-medium"
+                    className="bg-default-100 hover:bg-primary/10 dark:hover:bg-primary/20 hover:text-primary transition-colors text-xs font-medium"
                     startContent={<Plus className="w-3 h-3" />}
                     onPress={() => addItem(item)}
                   >

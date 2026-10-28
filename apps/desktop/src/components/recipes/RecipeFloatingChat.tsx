@@ -101,8 +101,8 @@ ${recipe.steps.map((s: any, i: number) => `Bước ${i + 1}: ${s.instruction}`).
               <div className="flex justify-start">
                 <div className="bg-content2 border border-divider rounded-2xl rounded-tl-sm px-4 py-3 flex gap-1 items-center">
                   <div className="w-2 h-2 rounded-full bg-default-300 animate-bounce" />
-                  <div className="w-2 h-2 rounded-full bg-default-300 animate-bounce" style={{ animationDelay: '0.2s' }} />
-                  <div className="w-2 h-2 rounded-full bg-default-300 animate-bounce" style={{ animationDelay: '0.4s' }} />
+                  <div className="w-2 h-2 rounded-full bg-default-300 animate-bounce animation-delay-200" />
+                  <div className="w-2 h-2 rounded-full bg-default-300 animate-bounce animation-delay-400" />
                 </div>
               </div>
             )}

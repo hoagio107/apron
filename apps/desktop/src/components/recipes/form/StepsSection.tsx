@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useFormContext, useFieldArray, Controller } from 'react-hook-form';
 import { Button, Card, CardBody, Input } from '@/ui';
@@ -10,6 +11,7 @@ import { ImageManager } from '../../../lib/image-manager';
 import { RichTextEditor } from './RichTextEditor';
 
 export function StepsSection() {
+  const { t } = useTranslation();
   const { control, setValue, getValues } = useFormContext<FormValues>();
   
   const { fields: sections, append: appendSection, remove: removeSection } = useFieldArray({
@@ -31,12 +33,12 @@ export function StepsSection() {
   return (
     <Card className="w-full app-card" shadow="none">
       <SectionHeader
-        title="Các bước thực hiện"
+        title={t('recipes.form.stepsTitle')}
         icon={ListOrdered}
       />
       <CardBody className="gap-0">
         {sections.length === 0 && (
-          <div className="text-center text-default-500 py-4">Chưa có bước thực hiện nào. Hãy thêm giai đoạn đầu tiên.</div>
+          <div className="text-center text-default-500 py-4">{t('recipes.form.noSteps')}</div>
         )}
         
         {sections.map((section, sectionIndex) => (
@@ -73,6 +75,7 @@ export function StepsSection() {
 }
 
 function StepGroup({ sectionIndex, onRemove, onOpenImageModal }: { sectionIndex: number, onRemove: () => void, onOpenImageModal: (stepIndex: number) => void }) {
+  const { t } = useTranslation();
   const { control, getValues, setValue } = useFormContext<FormValues>();
   
   const { fields: steps, append, remove, move } = useFieldArray({
@@ -91,7 +94,7 @@ function StepGroup({ sectionIndex, onRemove, onOpenImageModal }: { sectionIndex:
               {...field}
               value={field.value || ''}
               variant="underlined"
-              placeholder="Tên giai đoạn (VD: Sơ chế, Chế biến...)"
+              placeholder={t('recipes.form.stageNamePlaceholder')}
               className="max-w-xs"
               classNames={{
                 inputWrapper: "shadow-none border-b-0 data-[hover=true]:border-b-0 after:bg-primary pb-0 min-h-8 h-8",
@@ -115,7 +118,7 @@ function StepGroup({ sectionIndex, onRemove, onOpenImageModal }: { sectionIndex:
                 <div className={`flex items-start gap-4 p-2 rounded-lg hover:bg-default-50 transition-colors group/step ${isDragging ? 'bg-default-100/80 shadow-lg ring-1 ring-primary/30' : ''}`}>
                   <div 
                     className="touch-none select-none cursor-grab active:cursor-grabbing p-1.5 -ml-1 text-default-300 hover:text-default-600 active:text-primary transition-colors shrink-0 mt-1"
-                    title="Kéo thả để đổi thứ tự bước"
+                    title={t('recipes.form.dragToReorder')}
                     {...attributes}
                     {...listeners}
                   >
@@ -130,7 +133,7 @@ function StepGroup({ sectionIndex, onRemove, onOpenImageModal }: { sectionIndex:
                   <RichTextEditor
                     value={field.value || ''}
                     onChange={field.onChange}
-                    placeholder={`Bước ${index + 1}...`}
+                    placeholder={t('recipes.form.stepPlaceholder', { number: index + 1 })}
                     isInvalid={!!fieldState.error}
                     errorMessage={fieldState.error?.message}
                   />

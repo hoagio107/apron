@@ -13,17 +13,23 @@ interface ConfirmModalProps {
   isLoading?: boolean;
 }
 
+import { useTranslation } from 'react-i18next';
+
 export function ConfirmModal({
   isOpen,
   onOpenChange,
-  title = 'Xác nhận',
+  title,
   description,
-  confirmLabel = 'Xác nhận',
-  cancelLabel = 'Hủy',
+  confirmLabel,
+  cancelLabel,
   confirmColor = 'danger',
   onConfirm,
   isLoading = false,
 }: ConfirmModalProps) {
+  const { t } = useTranslation();
+  const displayTitle = title || t('common.actions.confirm');
+  const displayConfirm = confirmLabel || t('common.actions.confirm');
+  const displayCancel = cancelLabel || t('common.actions.cancel');
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="center" size="sm">
       <ModalContent>
@@ -33,7 +39,7 @@ export function ConfirmModal({
               <div className="w-9 h-9 rounded-full bg-danger/10 flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-5 h-5 text-danger" />
               </div>
-              <span className="font-bold text-base">{title}</span>
+              <span className="font-bold text-base">{displayTitle}</span>
             </ModalHeader>
             <ModalBody className="pt-0 pb-2">
               <p className="text-sm text-default-600">{description}</p>
@@ -44,7 +50,7 @@ export function ConfirmModal({
                 onPress={onClose}
                 isDisabled={isLoading}
               >
-                {cancelLabel}
+                {displayCancel}
               </Button>
               <Button
                 color={confirmColor}
@@ -54,7 +60,7 @@ export function ConfirmModal({
                 }}
                 isLoading={isLoading}
               >
-                {confirmLabel}
+                {displayConfirm}
               </Button>
             </ModalFooter>
           </>

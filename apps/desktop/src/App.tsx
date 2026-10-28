@@ -5,6 +5,7 @@ import { MainSidebar } from './components/layout/MainSidebar';
 import { Titlebar } from './components/layout/Titlebar';
 import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import { OnboardingScreen } from './components/onboarding/OnboardingScreen';
+import { ScrollRestorationHandler } from './components/shared/ScrollRestorationHandler';
 import { ImageManager } from './lib/image-manager';
 
 // Lazy-loaded pages for code splitting & faster initial launch
@@ -96,6 +97,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollRestorationHandler containerSelector="main .overflow-y-auto" />
       <div className="flex flex-col h-screen bg-content1 text-foreground overflow-hidden">
         <Titlebar />
         

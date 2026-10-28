@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter, 
   Button, Input, Badge, Spinner, Popover, PopoverTrigger, PopoverContent,
@@ -41,6 +42,7 @@ export function BatchImageDrawer({
   selectedRecipes,
   onSave
 }: BatchImageDrawerProps) {
+  const { t } = useTranslation();
   // Map of recipeId -> current working image URL
   const [assignedImages, setAssignedImages] = useState<Record<string, string>>({});
   // Track loading state for each recipe (e.g. during file conversion)
@@ -80,7 +82,7 @@ export function BatchImageDrawer({
       setAssignedImages(prev => ({ ...prev, [recipeId]: webpUrl }));
     } catch (err) {
       console.error('Error processing image:', err);
-      toast.error('Không thể xử lý hình ảnh này. Vui lòng thử lại!');
+      toast.error(t('recipes.form.imageUploadFailed') || 'Failed to process image.');
     } finally {
       setProcessingIds(prev => ({ ...prev, [recipeId]: false }));
       // Reset input value so same file can be re-selected if needed
@@ -159,7 +161,7 @@ export function BatchImageDrawer({
       onOpenChange(false);
     } catch (e) {
       console.error(e);
-      toast.error('Có lỗi xảy ra khi lưu ảnh.');
+      toast.error(t('recipes.form.imageUploadFailed') || 'Failed to save image.');
     } finally {
       setIsSaving(false);
     }
@@ -198,7 +200,7 @@ export function BatchImageDrawer({
                   </div>
                 <div>
                   <h2 className="text-base md:text-lg font-bold text-foreground">
-                    Chèn ảnh cho từng món
+                    {t('recipes.actions.addImages')}
                   </h2>
                 </div>
               </div>
@@ -218,11 +220,11 @@ export function BatchImageDrawer({
             <div className="px-5 py-3 bg-default-50/70 border-b border-divider flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-medium text-default-600">
-                  Đã có ảnh: <strong className="text-foreground">{withImagesCount} / {selectedRecipes.length}</strong> món
+                  <strong className="text-foreground">{withImagesCount} / {selectedRecipes.length}</strong>
                 </span>
                 {changedCount > 0 && (
                   <Badge color="success" variant="flat" size="sm" className="text-[11px] font-semibold">
-                    {changedCount} món có thay đổi
+                    {changedCount}
                   </Badge>
                 )}
               </div>
@@ -237,13 +239,13 @@ export function BatchImageDrawer({
                     startContent={<Sparkles className="w-3.5 h-3.5" />}
                     onPress={handleAutoSuggestMissing}
                   >
-                    Gợi ý tự động món thiếu ảnh
+                    AI Auto Suggest
                   </Button>
                 )}
                 {selectedRecipes.length > 4 && (
                   <Input
                     size="sm"
-                    placeholder="Lọc món ăn..."
+                    placeholder={t('common.actions.filter')}
                     value={searchFilter}
                     onValueChange={setSearchFilter}
                     startContent={<Search className="w-3.5 h-3.5 text-default-400" />}
@@ -278,7 +280,7 @@ export function BatchImageDrawer({
                       {isProcessing ? (
                         <div className="w-full h-full flex flex-col items-center justify-center gap-1 bg-default-100 dark:bg-default-50/20">
                           <Spinner size="sm" color="primary" />
-                          <span className="text-[10px] text-default-500">Đang nén WebP</span>
+                          <span className="text-[10px] text-default-500">{t('recipes.compressingImage') || 'Compressing WebP'}</span>
                         </div>
                       ) : currentImg ? (
                         <img 
@@ -293,7 +295,7 @@ export function BatchImageDrawer({
                           className="w-full h-full flex flex-col items-center justify-center gap-1.5 border-2 border-dashed border-divider hover:border-primary hover:bg-primary/5 transition-all text-default-400 hover:text-primary p-2 text-center"
                         >
                           <Camera className="w-5 h-5 text-default-400" />
-                          <span className="text-[10px] font-medium leading-tight">Chưa có ảnh</span>
+                          <span className="text-[10px] font-medium leading-tight">{t('common.status.empty')}</span>
                         </button>
                       )}
                     </div>
@@ -307,17 +309,17 @@ export function BatchImageDrawer({
                         </h3>
                         {isChanged && (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-success/15 text-success border border-success/20 shrink-0">
-                            <Check className="w-3 h-3 stroke-[2.5]" /> Sẵn sàng lưu
+                            <Check className="w-3 h-3 stroke-[2.5]" /> OK
                           </span>
                         )}
                       </div>
 
-                      {/* Row 2: Stats (with Lucide icons instead of emojis) */}
+                      {/* Row 2: Stats */}
                       <div className="flex flex-wrap items-center gap-2.5 text-xs text-default-500">
                         {recipe.prep_time || recipe.cook_time ? (
                           <span className="flex items-center gap-1">
                             <Clock className="w-3.5 h-3.5 text-default-400 shrink-0" />
-                            <span>{(recipe.prep_time || 0) + (recipe.cook_time || 0)} phút</span>
+                            <span>{(recipe.prep_time || 0) + (recipe.cook_time || 0)} {t('common.time.minutes')}</span>
                           </span>
                         ) : null}
                         {recipe.calories ? (
@@ -333,12 +335,12 @@ export function BatchImageDrawer({
                         )}
                         {!currentImg && (
                           <span className="text-warning font-medium flex items-center gap-1 text-[11px]">
-                            <AlertCircle className="w-3.5 h-3.5 shrink-0" /> Cần ảnh bìa
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" /> Photo needed
                           </span>
                         )}
                       </div>
 
-                      {/* Row 3: Action Buttons (Right below stats, no dividing line, high contrast) */}
+                      {/* Row 3: Action Buttons */}
                       <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
                         {/* 1. Upload File Button */}
                         <Button
@@ -349,7 +351,7 @@ export function BatchImageDrawer({
                           onPress={() => fileInputRefs.current[recipeId]?.click()}
                           isLoading={isProcessing}
                         >
-                          Chọn ảnh
+                          {t('common.actions.upload') || 'Upload'}
                         </Button>
                         <input
                           type="file"
@@ -386,7 +388,7 @@ export function BatchImageDrawer({
                           <PopoverContent className="p-3 w-80 max-w-[calc(100vw-3rem)] rounded-2xl border border-divider shadow-xl">
                             <div className="flex flex-col gap-2 w-full">
                               <span className="text-xs font-semibold text-foreground">
-                                Dán liên kết ảnh cho &ldquo;{recipe.title}&rdquo;
+                                URL &ldquo;{recipe.title}&rdquo;
                               </span>
                               <Input
                                 size="sm"
@@ -397,7 +399,7 @@ export function BatchImageDrawer({
                               />
                               <div className="flex justify-end gap-2 mt-1">
                                 <Button size="sm" variant="light" onPress={() => setUrlModalRecipeId(null)}>
-                                  Hủy
+                                  {t('common.actions.cancel')}
                                 </Button>
                                 <Button 
                                   size="sm" 
@@ -405,14 +407,14 @@ export function BatchImageDrawer({
                                   isDisabled={!urlInputValue.trim()}
                                   onPress={() => handleConfirmUrl(recipeId)}
                                 >
-                                  Áp dụng
+                                  {t('common.actions.apply')}
                                 </Button>
                               </div>
                             </div>
                           </PopoverContent>
                         </Popover>
 
-                        {/* 3. Revert Button (if changed) */}
+                        {/* 3. Revert Button */}
                         {isChanged && (
                           <Button
                             size="sm"
@@ -421,7 +423,7 @@ export function BatchImageDrawer({
                             startContent={<RotateCcw className="w-3 h-3" />}
                             onPress={() => handleRevert(recipe)}
                           >
-                            Hoàn tác
+                            {t('common.actions.reset')}
                           </Button>
                         )}
 
@@ -434,7 +436,6 @@ export function BatchImageDrawer({
                             className="h-7 sm:h-8 px-2 text-xs rounded-xl"
                             isIconOnly
                             onPress={() => handleRemoveImage(recipeId)}
-                            title="Xóa ảnh món này"
                           >
                             <Trash2 className="w-3.5 h-3.5 text-danger" />
                           </Button>
@@ -450,9 +451,9 @@ export function BatchImageDrawer({
             <DrawerFooter className="flex items-center justify-between shrink-0">
               <div className="text-xs text-default-500 font-medium">
                 {changedCount > 0 ? (
-                  <span>Đã chuẩn bị cập nhật ảnh cho <strong className="text-primary">{changedCount}</strong> món</span>
+                  <span><strong className="text-primary">{changedCount}</strong></span>
                 ) : (
-                  <span>Chưa có thay đổi nào</span>
+                  <span>{t('common.status.empty')}</span>
                 )}
               </div>
               <div className="flex items-center gap-2">
@@ -461,7 +462,7 @@ export function BatchImageDrawer({
                   size="md"
                   onPress={onClose}
                 >
-                  Hủy
+                  {t('common.actions.cancel')}
                 </Button>
                 <Button 
                   color="primary" 
@@ -471,7 +472,7 @@ export function BatchImageDrawer({
                   isLoading={isSaving}
                   isDisabled={changedCount === 0}
                 >
-                  Lưu thay đổi ({changedCount})
+                  {t('common.actions.save')} ({changedCount})
                 </Button>
               </div>
             </DrawerFooter>

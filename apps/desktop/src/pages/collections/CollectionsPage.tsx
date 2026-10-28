@@ -8,6 +8,7 @@ import {
   Plus, FolderHeart, Trash2, Edit2, Search, 
   MoreVertical, Layers
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useCollectionStore } from '../../store/useCollectionStore';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { PageHeader } from '../../components/layout/PageHeader';
@@ -17,6 +18,7 @@ import { CollectionModal } from './components/CollectionModal';
 import type { Collection } from '@apron/core';
 
 export function CollectionsPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { collections, isLoading, fetchCollections, addCollection, updateCollection, deleteCollection } = useCollectionStore();
   
@@ -72,20 +74,22 @@ export function CollectionsPage() {
 
   return (
     <div className="flex flex-col h-full gap-6 w-full pb-8">
-      {/* PageHeader */}
-      <PageHeader
-        title="Bộ sưu tập"
-        description={`${collections.length} bộ sưu tập thực đơn & hình ảnh`}
-        showBackButton={false}
-        actions={
-          <div className="flex items-center gap-3">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-6 pb-4 -mx-8 px-8 border-b border-divider/50 shadow-2xs">
+        <PageHeader
+          className="pt-0 pb-0"
+          title={t('collections.title')}
+          description={t('collections.subtitle', { count: collections.length })}
+          showBackButton={false}
+          actions={
+            <div className="flex items-center gap-3">
             <Input
               variant="flat"
               className="w-72"
               classNames={{
                 inputWrapper: "h-10 min-h-10",
               }}
-              placeholder="Tìm kiếm bộ sưu tập..."
+              placeholder={t('collections.searchPlaceholder')}
               startContent={<Search className="w-4 h-4 text-default-400" />}
               value={searchQuery}
               onValueChange={setSearchQuery}
@@ -98,11 +102,12 @@ export function CollectionsPage() {
               startContent={<Plus className="w-4 h-4" />}
               onPress={handleOpenAdd}
             >
-              Tạo bộ sưu tập
+              {t('collections.addCollection')}
             </Button>
           </div>
         }
       />
+      </div>
 
       {isLoading ? (
         <div className="flex justify-center py-20">
@@ -111,8 +116,8 @@ export function CollectionsPage() {
       ) : collections.length === 0 ? (
         <EmptyState
           icon={<FolderHeart className="w-10 h-10 text-default-300" />}
-          title="Chưa có bộ sưu tập nào"
-          description="Tạo bộ sưu tập đầu tiên để gom nhóm các thực đơn ảnh, món ăn gia đình hay ăn dặm."
+          title={t('collections.emptyTitle')}
+          description={t('collections.emptyDesc')}
           action={
             <Button 
               color="primary" 
@@ -120,7 +125,7 @@ export function CollectionsPage() {
               startContent={<Plus className="w-4 h-4" />}
               onPress={handleOpenAdd}
             >
-              Tạo bộ sưu tập
+              {t('collections.addCollection')}
             </Button>
           }
         />
@@ -161,10 +166,10 @@ export function CollectionsPage() {
                   <div className="flex items-center gap-1.5">
                     <div className="bg-black/55 backdrop-blur-md text-white text-[10px] font-semibold px-2 py-0.5 rounded-full border border-white/10 flex items-center gap-1 shadow-sm">
                       <Layers className="w-3 h-3 text-primary" />
-                      <span>{totalFolders} thư mục</span>
+                      <span>{totalFolders} {t('collections.folders')}</span>
                     </div>
                     <div className="bg-black/55 backdrop-blur-md text-white text-[10px] font-semibold px-2 py-0.5 rounded-full border border-white/10 shadow-sm">
-                      {totalDishes} món
+                      {totalDishes} {t('collections.dishes')}
                     </div>
                   </div>
 
@@ -177,23 +182,23 @@ export function CollectionsPage() {
                         variant="flat"
                         className="rounded-full w-7 h-7 min-w-7 bg-black/40 text-white backdrop-blur-md hover:bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={(e) => e.stopPropagation()}
-                        aria-label="Tùy chọn bộ sưu tập"
+                        aria-label={t('common.actions.more')}
                       >
                         <MoreVertical className="w-3.5 h-3.5" />
                       </Button>
                     </DropdownTrigger>
                     <DropdownMenu
-                      aria-label="Tùy chọn"
+                      aria-label={t('common.actions.more')}
                       onAction={(key) => {
                         if (key === 'edit') handleOpenEdit(col);
                         if (key === 'delete') setDeleteColId(col.id);
                       }}
                     >
                       <DropdownItem key="edit" startContent={<Edit2 className="w-4 h-4" />}>
-                        Chỉnh sửa bộ sưu tập
+                        {t('collections.editCollection')}
                       </DropdownItem>
                       <DropdownItem key="delete" className="text-danger" color="danger" startContent={<Trash2 className="w-4 h-4" />}>
-                        Xoá bộ sưu tập
+                        {t('collections.deleteCollection')}
                       </DropdownItem>
                     </DropdownMenu>
                   </Dropdown>
@@ -217,7 +222,7 @@ export function CollectionsPage() {
                     size="sm"
                     onPress={() => navigate(`/collections/${col.id}`)}
                   >
-                    <span className="truncate">Xem chi tiết</span>
+                    <span className="truncate">{t('common.actions.viewDetails')}</span>
                   </Button>
                 </div>
               </div>
@@ -230,9 +235,9 @@ export function CollectionsPage() {
       <ConfirmModal
         isOpen={deleteColId !== null}
         onOpenChange={(open) => !open && setDeleteColId(null)}
-        title="Xoá bộ sưu tập"
-        description="Bạn có chắc chắn muốn xoá bộ sưu tập này không? Tất cả thư mục và món ăn bên trong sẽ bị xoá vĩnh viễn."
-        confirmLabel="Xoá bộ sưu tập"
+        title={t('collections.deleteCollection')}
+        description={t('collections.deleteConfirmDesc')}
+        confirmLabel={t('common.actions.delete')}
         confirmColor="danger"
         onConfirm={async () => {
           if (deleteColId) {

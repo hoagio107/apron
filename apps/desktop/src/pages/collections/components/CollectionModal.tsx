@@ -7,6 +7,7 @@ import {
   FolderHeart, Image as ImageIcon, ImagePlus, 
   Trash2, Save
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ImageManager } from '../../../lib/image-manager';
 import type { Collection } from '@apron/core';
 
@@ -23,6 +24,7 @@ export function CollectionModal({
   collection,
   onSave
 }: CollectionModalProps) {
+  const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [coverImageUrl, setCoverImageUrl] = useState('');
@@ -50,17 +52,17 @@ export function CollectionModal({
 
   const processFile = async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      toast.error('Vui lòng chọn file hình ảnh hợp lệ (PNG, JPG, WebP...)');
+      toast.error(t('collections.invalidImage'));
       return;
     }
     try {
       const tempPath = await ImageManager.saveToTemp(file);
       const committedPath = await ImageManager.commitImage(tempPath);
       setCoverImageUrl(committedPath);
-      toast.success('Đã tải ảnh bìa');
+      toast.success(t('collections.uploadImageSuccess'));
     } catch (e) {
       console.error('Lỗi tải ảnh:', e);
-      toast.error('Không thể lưu ảnh bìa. Vui lòng thử lại.');
+      toast.error(t('collections.uploadImageError'));
     }
   };
 
@@ -83,7 +85,7 @@ export function CollectionModal({
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      toast.error('Vui lòng nhập tên bộ sưu tập');
+      toast.error(t('collections.nameRequired'));
       return;
     }
 
@@ -94,11 +96,11 @@ export function CollectionModal({
         description: description.trim(),
         cover_image_url: coverImageUrl.trim(),
       });
-      toast.success(collection ? 'Cập nhật bộ sưu tập thành công' : 'Tạo bộ sưu tập mới thành công');
+      toast.success(t('collections.saveSuccess'));
       onClose();
     } catch (e: any) {
       console.error('Failed to save collection:', e);
-      toast.error(e.message || 'Có lỗi xảy ra khi lưu bộ sưu tập');
+      toast.error(e.message || t('common.status.errorOccurred'));
     } finally {
       setIsLoading(false);
     }
@@ -124,12 +126,12 @@ export function CollectionModal({
               </div>
               <div className="flex flex-col text-left">
                 <h3 className="text-lg font-bold">
-                  {isEditing ? 'Chỉnh sửa bộ sưu tập' : 'Tạo bộ sưu tập mới'}
+                  {isEditing ? t('collections.modalTitleEdit') : t('collections.modalTitleNew')}
                 </h3>
                 <p className="text-xs text-default-400 font-normal">
                   {isEditing 
-                    ? 'Cập nhật tiêu đề, mô tả và ảnh bìa cho bộ sưu tập' 
-                    : 'Tập hợp thực đơn, công thức hoặc hình ảnh món ăn theo chủ đề'}
+                    ? t('collections.descLabel') 
+                    : t('collections.emptyDesc')}
                 </p>
               </div>
             </ModalHeader>
@@ -140,7 +142,7 @@ export function CollectionModal({
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-foreground flex items-center gap-2">
                   <ImageIcon className="w-4 h-4 text-default-500" />
-                  Ảnh bìa bộ sưu tập
+                  {t('collections.coverImageLabel')}
                 </label>
 
                 {coverImageUrl ? (
@@ -158,7 +160,7 @@ export function CollectionModal({
                         onPress={handlePickImage}
                         startContent={<ImagePlus className="w-4 h-4" />}
                       >
-                        Đổi ảnh
+                        {t('collections.changeImage')}
                       </Button>
                       <Button
                         size="sm"
@@ -167,7 +169,7 @@ export function CollectionModal({
                         variant="flat"
                         className="bg-background/80 backdrop-blur-md"
                         onPress={() => setCoverImageUrl('')}
-                        title="Xoá ảnh bìa"
+                        title={t('collections.removeImage')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -192,10 +194,10 @@ export function CollectionModal({
                       <ImagePlus className="w-6 h-6" />
                     </div>
                     <p className="font-semibold text-sm mb-1 text-center text-foreground group-hover:text-primary transition-colors">
-                      Tải ảnh bìa bộ sưu tập
+                      {t('collections.uploadCover')}
                     </p>
                     <p className="text-xs text-default-400 text-center">
-                      Kéo thả file vào đây hoặc bấm để chọn ảnh từ máy (JPG, PNG, WebP)
+                      {t('collections.dragDropCover')}
                     </p>
                   </div>
                 )}
@@ -208,15 +210,15 @@ export function CollectionModal({
                   onChange={handleFileInputChange}
                 />
                 <p className="text-xs text-default-400">
-                  * Mẹo: Nếu để trống, ảnh của món đầu tiên sẽ tự động được hiển thị làm ảnh bìa.
+                  {t('collections.coverTip')}
                 </p>
               </div>
 
               {/* Title */}
               <Input
-                label="Tên bộ sưu tập"
+                label={t('collections.nameLabel')}
                 labelPlacement="outside"
-                placeholder="Ví dụ: Thực đơn Ăn dặm cho bé, Món ngon cuối tuần..."
+                placeholder={t('collections.namePlaceholder')}
                 value={title}
                 onValueChange={setTitle}
                 variant="flat"
@@ -226,9 +228,9 @@ export function CollectionModal({
 
               {/* Description */}
               <Textarea
-                label="Mô tả bộ sưu tập"
+                label={t('collections.descLabel')}
                 labelPlacement="outside"
-                placeholder="Giới thiệu nội dung, nguồn thực đơn hoặc mục đích của bộ sưu tập này..."
+                placeholder={t('collections.descPlaceholder')}
                 value={description}
                 onValueChange={setDescription}
                 variant="flat"
@@ -242,7 +244,7 @@ export function CollectionModal({
                 variant="flat"
                 onPress={onClose}
               >
-                Hủy
+                {t('common.actions.cancel')}
               </Button>
               <Button
                 color="primary"
@@ -251,7 +253,7 @@ export function CollectionModal({
                 isLoading={isLoading}
                 isDisabled={!title.trim()}
               >
-                {isEditing ? 'Lưu thay đổi' : 'Tạo bộ sưu tập'}
+                {isEditing ? t('common.actions.save') : t('collections.saveCollection')}
               </Button>
             </ModalFooter>
           </>

@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Drawer, 
   DrawerContent, 
@@ -34,6 +35,7 @@ interface TipAiModalProps {
 }
 
 export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }: TipAiModalProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'prompt' | 'result'>('prompt');
   const [inputText, setInputText] = useState(initialTopic);
   const [resultText, setResultText] = useState('');
@@ -57,7 +59,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
     try {
       await navigator.clipboard.writeText(generatedPrompt);
       setCopied(true);
-      toast.success('Đã sao chép Prompt!');
+      toast.success(t('tips.aiModal.copiedPrompt'));
       setTimeout(() => setCopied(false), 2500);
     } catch {
       const el = document.createElement('textarea');
@@ -83,10 +85,10 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
         setResultText(text);
         handleParse(text);
       } else {
-        toast.info('Bộ nhớ tạm trống');
+        toast.info(t('tips.aiModal.emptyClipboard'));
       }
     } catch {
-      toast.error('Không thể đọc bộ nhớ tạm. Vui lòng dán thủ công.');
+      toast.error(t('tips.aiModal.cannotReadClipboard'));
     }
   };
 
@@ -102,7 +104,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
       setError(null);
       const parsed = parseTipGeminiResponse(text);
       setParsedData(parsed);
-      toast.success('Đã trích xuất mẹo thành công!');
+      toast.success(t('tips.aiModal.extractSuccess'));
     } catch (err: any) {
       setError(err.message || 'Lỗi khi phân tích dữ liệu JSON.');
       setParsedData(null);
@@ -112,7 +114,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
   const handleApplyTip = (onClose: () => void) => {
     if (!parsedData) return;
     onApply(parsedData);
-    toast.success('Đã điền thông tin mẹo vào form!');
+    toast.success(t('tips.aiModal.appliedSuccess'));
     onClose();
     setInputText('');
     setResultText('');
@@ -151,7 +153,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                   <Sparkles className="w-5 h-5 text-secondary" />
                 </div>
                 <div className="flex flex-col text-left">
-                  <h3 className="text-base sm:text-lg font-bold text-foreground">Trợ lý AI Mẹo vặt</h3>
+                  <h3 className="text-base sm:text-lg font-bold text-foreground">{t('tips.aiModal.title')}</h3>
                   <p className="text-xs text-default-400 font-normal">Tự động trích xuất mẹo nhà bếp từ Gemini Web</p>
                 </div>
               </div>
@@ -170,12 +172,12 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                   cursor: "w-full bg-primary"
                 }}
               >
-                <Tab key="prompt" title="1. Lấy Prompt gửi Gemini" />
+                <Tab key="prompt" title={t('tips.aiModal.promptTab')} />
                 <Tab 
                   key="result" 
                   title={
                     <div className="flex items-center gap-2">
-                      <span>2. Nhập kết quả</span>
+                      <span>{t('tips.aiModal.resultTab')}</span>
                       {parsedData && <span className="w-2 h-2 rounded-full bg-success" />}
                     </div>
                   } 

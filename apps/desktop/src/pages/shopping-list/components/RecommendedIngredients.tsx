@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { Button } from '@/ui';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -8,6 +9,7 @@ import { CATEGORIES } from '@apron/core';
 import { getCategoryTheme } from '../../../lib/categoryTheme';
 
 export function RecommendedIngredients() {
+  const { t } = useTranslation();
   const { addItem, items } = useShoppingListStore();
   const recipes = useRecipeStore(s => s.recipes);
 
@@ -64,7 +66,7 @@ export function RecommendedIngredients() {
 
   return (
     <div className="flex flex-col gap-3">
-      <SectionTitle title="Gợi ý từ công thức" />
+      <SectionTitle title={t('shopping.fromRecipes')} />
 
       <div className="relative group -mx-2 px-2">
         {canScrollLeft && (
@@ -92,8 +94,7 @@ export function RecommendedIngredients() {
         <div 
           ref={scrollRef}
           onScroll={checkScroll}
-          className="flex gap-4 overflow-x-auto pb-4 snap-x [&::-webkit-scrollbar]:hidden"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className="flex gap-4 overflow-x-auto pb-4 snap-x no-scrollbar"
         >
         {suggestions.map((item, idx) => {
           const theme = getCategoryTheme(item.group || CATEGORIES.OTHERS);

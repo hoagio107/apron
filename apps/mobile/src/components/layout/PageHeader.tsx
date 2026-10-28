@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/ui';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { twMerge } from 'tailwind-merge';
 import { clsx } from 'clsx';
 
@@ -25,6 +26,7 @@ export function PageHeader({
   className = ""
 }: PageHeaderProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const rootClass = twMerge(clsx('flex flex-col xl:flex-row xl:items-center justify-between gap-4 shrink-0', className));
 
@@ -47,7 +49,7 @@ export function PageHeader({
             radius="full"
             className="text-foreground shrink-0"
             onPress={handleBack}
-            aria-label="Quay lại"
+            aria-label={t('common.actions.back')}
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>

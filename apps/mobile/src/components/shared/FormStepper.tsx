@@ -34,7 +34,7 @@ export function FormStepper({ steps, currentStep, onStepChange, className }: For
                   "w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 z-10 outline-none",
                   {
                     "bg-primary text-white": isCompleted,
-                    "bg-white border-2 border-primary text-primary": isActive,
+                    "bg-background border-2 border-primary text-primary": isActive,
                     "bg-default-200 text-white": !isActive && !isCompleted
                   }
                 )}

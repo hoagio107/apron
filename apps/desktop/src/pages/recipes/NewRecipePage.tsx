@@ -57,7 +57,7 @@ export function NewRecipePage() {
   const handleSubmit = async (data: any) => {
     if (Array.isArray(data)) {
       await addBulkRecipes(data);
-      navigate('/recipes');
+      navigate('/recipes', { replace: true });
     } else {
       let targetId = editId;
       if (editId && editRecipe) {
@@ -68,9 +68,9 @@ export function NewRecipePage() {
       }
 
       if (targetId) {
-        navigate(`/recipes/${targetId}`);
+        navigate(`/recipes/${targetId}`, { replace: true, state: { from: '/recipes' } });
       } else {
-        navigate('/recipes');
+        navigate('/recipes', { replace: true });
       }
     }
   };

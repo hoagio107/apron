@@ -245,7 +245,7 @@ export function ImagePickerModal({ isOpen, onOpenChange, onSelectMedia }: ImageP
                     <div 
                       className={`
                         w-full rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-8 transition-colors
-                        ${isDragging ? 'border-primary bg-primary-50 dark:bg-primary-900/20' : 'border-default-300 bg-default-50'}
+                        ${isDragging ? 'border-primary bg-primary/10 dark:bg-primary/20 dark:bg-primary-900/20' : 'border-default-300 bg-default-50'}
                       `}
                       onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                       onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
@@ -254,7 +254,7 @@ export function ImagePickerModal({ isOpen, onOpenChange, onSelectMedia }: ImageP
                       <CloudUpload className={`w-12 h-12 mb-4 ${isDragging ? 'text-primary' : 'text-default-400'}`} />
                       <p className="text-base font-semibold text-default-700">Kéo thả file vào đây</p>
                       <p className="text-sm text-default-500 mt-1 mb-4">Hỗ trợ Ảnh (Dưới {MAX_FILE_SIZE_MB}MB) hoặc Video (Dưới {MAX_VIDEO_SIZE_MB}MB)</p>
-                      <p className="text-xs text-primary bg-primary-50 px-3 py-1 rounded-full mb-4 font-medium">Ảnh sẽ tự động convert sang WebP</p>
+                      <p className="text-xs text-primary bg-primary/10 dark:bg-primary/20 px-3 py-1 rounded-full mb-4 font-medium">Ảnh sẽ tự động convert sang WebP</p>
                       
                       <Button color="primary" variant="flat" onPress={() => fileInputRef.current?.click()}>
                         Chọn File
@@ -280,7 +280,7 @@ export function ImagePickerModal({ isOpen, onOpenChange, onSelectMedia }: ImageP
                             key={u.id} 
                             className={`
                               flex items-center gap-4 p-3 rounded-xl border
-                              ${u.status === 'failed' ? 'border-danger-200 bg-danger-50' : 'border-divider bg-content2'}
+                              ${u.status === 'failed' ? 'border-danger-200 bg-danger/10 dark:bg-danger/20' : 'border-divider bg-content2'}
                             `}
                           >
                             <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-default-100 flex-shrink-0">

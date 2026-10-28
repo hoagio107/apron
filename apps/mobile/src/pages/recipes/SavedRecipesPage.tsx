@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { BulkActionBar } from '../../components/shared/BulkActionBar';
@@ -17,6 +18,7 @@ import type { Recipe } from '@apron/core';
 import { EmptyState } from '../../components/shared/EmptyState';
 
 export function SavedRecipesPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [viewType, setViewType] = useState<RecipeViewType>('grid-portrait');
@@ -196,8 +198,8 @@ export function SavedRecipesPage() {
   return (
     <div className="flex flex-col min-h-full gap-6 w-full pt-6 pb-28 px-4 md:px-8">
       <PageHeader
-        title="Đã lưu"
-        description={`${filteredAndSortedRecipes.length} công thức đã lưu`}
+        title={t('recipes.savedTitle')}
+        description={t('recipes.savedSubtitle', { count: filteredAndSortedRecipes.length })}
         actions={
           <RecipeListToolbar 
             searchQuery={searchQuery}
@@ -229,7 +231,7 @@ export function SavedRecipesPage() {
           onSelectAll={selectAll}
           onCancel={toggleSelectMode}
           actions={[
-            { key: 'unsave', label: 'Bỏ lưu', icon: <Heart className="w-4 h-4 fill-current" />, color: 'danger', onPress: handleBulkUnsave },
+            { key: 'unsave', label: t('recipes.actions.unfavorite'), icon: <Heart className="w-4 h-4 fill-current" />, color: 'danger', onPress: handleBulkUnsave },
           ]}
         />
       )}
@@ -241,8 +243,8 @@ export function SavedRecipesPage() {
         ) : filteredAndSortedRecipes.length === 0 ? (
           <EmptyState
             icon={<Heart className="w-12 h-12 text-default-300" />}
-            title="Chưa có công thức nào được lưu"
-            description="Những công thức bạn yêu thích sẽ xuất hiện ở đây."
+            title={t('recipes.savedEmpty.title')}
+            description={t('recipes.savedEmpty.description')}
           />
         ) : (
           <div className={viewType === 'grid-portrait' 
@@ -269,9 +271,9 @@ export function SavedRecipesPage() {
       <ConfirmModal
         isOpen={!!deleteTarget}
         onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
-        title="Xoá công thức"
-        description={`Bạn có chắc muốn xoá công thức "${deleteTarget?.title}"? Hành động này không thể hoàn tác.`}
-        confirmLabel="Xoá"
+        title={t('recipes.actions.delete')}
+        description={t('recipes.actions.deleteConfirm', { title: deleteTarget?.title })}
+        confirmLabel={t('common.actions.delete')}
         confirmColor="danger"
         onConfirm={async () => {
           if (deleteTarget) {
@@ -283,9 +285,9 @@ export function SavedRecipesPage() {
       <ConfirmModal
         isOpen={isBulkUnsaveOpen}
         onOpenChange={setIsBulkUnsaveOpen}
-        title="Bỏ lưu công thức"
-        description={`Bạn có chắc chắn muốn bỏ lưu ${selectedIds.size} công thức đã chọn?`}
-        confirmLabel="Bỏ lưu"
+        title={t('recipes.actions.unfavorite')}
+        description={t('recipes.actions.bulkDeleteConfirm', { count: selectedIds.size })}
+        confirmLabel={t('recipes.actions.unfavorite')}
         confirmColor="danger"
         onConfirm={handleBulkUnsaveConfirm}
       />

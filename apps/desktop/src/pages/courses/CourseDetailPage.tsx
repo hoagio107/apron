@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   Card, CardBody, Button, Accordion, AccordionItem, Divider,
@@ -13,6 +14,7 @@ import { ImageManager } from '../../lib/image-manager';
 import { IconRenderer } from '../../components/shared/IconPicker';
 
 export function CourseDetailPage() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { courses, fetchCourses } = useCourseStore();
@@ -120,7 +122,7 @@ export function CourseDetailPage() {
       <div className="-mt-8">
         <PageHeader 
           title={course.title}
-          description="Chế độ học tập"
+          description={t('courses.studyMode')}
           showBackButton
           onBack={() => navigate('/courses')}
           actions={
@@ -144,15 +146,15 @@ export function CourseDetailPage() {
             <h3 className="font-bold text-base sticky top-0 bg-background py-2 z-10 flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-primary" />
-                Nội dung khoá học
+                {t('courses.syllabus')}
               </div>
               <div className="flex flex-col gap-1.5 pb-1">
                 <div className="flex justify-between items-center text-[11px] font-medium text-default-500 uppercase tracking-wider">
-                  <span>Tiến độ</span>
-                  <span>{completedCount}/{totalLessons} bài học</span>
+                  <span>{t('courses.progress')}</span>
+                  <span>{t('courses.lessonsProgress', { completed: completedCount, total: totalLessons })}</span>
                 </div>
                 <Progress 
-                  aria-label="Tiến độ khoá học"
+                  aria-label={t('courses.progress')}
                   value={totalLessons ? (completedCount / totalLessons) * 100 : 0} 
                   size="sm" 
                   color="success" 
@@ -186,7 +188,7 @@ export function CourseDetailPage() {
                   }
                   aria-label={module.title}
                 >
-                  <div className="flex flex-col gap-1 mt-1 ml-6 border-l-2 border-divider pl-2">
+                  <div className="flex flex-col gap-1 mt-1 ml-2">
                     {module.lessons?.map((lesson, lIdx) => {
                       const isActive = activeLessonId === lesson.id;
                       const isCompleted = completedLessons[lesson.id];
@@ -287,17 +289,17 @@ export function CourseDetailPage() {
                         <span>{course.modules?.[activeModuleIndex]?.title}</span>
                       </div>
                       <ChevronRight className="w-4 h-4" />
-                      <span>Bài {activeLessonIndex + 1}</span>
+                      <span>{t('courses.lessonNum', { num: activeLessonIndex + 1 })}</span>
                     </div>
                   </div>
                   
                   <h1 className="text-2xl md:text-3xl font-bold">{activeLesson.title}</h1>
                   
                   <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-default-500">
-                    <span className="flex items-center gap-1.5"><Star className="w-4 h-4 text-warning fill-warning" /> {activeLesson.rating || 0} Đánh giá</span>
-                    <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {activeLesson.duration_minutes || 0} phút</span>
-                    <span className="flex items-center gap-1.5"><Paperclip className="w-4 h-4" /> {activeLesson.attachments?.length || 0} file đính kèm</span>
-                    <span className="flex items-center gap-1.5"><StickyNote className="w-4 h-4" /> {activeLesson.notes ? 1 : 0} ghi chú</span>
+                    <span className="flex items-center gap-1.5"><Star className="w-4 h-4 text-warning fill-warning" /> {activeLesson.rating || 0} {t('recipes.rating')}</span>
+                    <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {activeLesson.duration_minutes || 0} {t('recipes.mins')}</span>
+                    <span className="flex items-center gap-1.5"><Paperclip className="w-4 h-4" /> {t('courses.attachmentsCount', { count: activeLesson.attachments?.length || 0 })}</span>
+                    <span className="flex items-center gap-1.5"><StickyNote className="w-4 h-4" /> {t('courses.notesCount', { count: activeLesson.notes ? 1 : 0 })}</span>
                   </div>
                 </div>
 
@@ -311,7 +313,7 @@ export function CourseDetailPage() {
                   ) : (
                     <div className="flex flex-col items-center justify-center h-40 text-default-400">
                       <FileText className="w-12 h-12 mb-2 opacity-20" />
-                      <p>Chưa có nội dung bài học</p>
+                      <p>{t('courses.emptyLessonContent')}</p>
                     </div>
                   )}
                 </div>
@@ -355,7 +357,7 @@ export function CourseDetailPage() {
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-default-400 p-8">
                 <BookOpen className="w-16 h-16 mb-4 opacity-20" />
-                <p>Chọn một bài học từ danh sách bên trái để bắt đầu</p>
+                <p>{t('courses.selectLessonPrompt')}</p>
               </div>
             )}
           </div>
@@ -375,7 +377,7 @@ export function CourseDetailPage() {
                 panel: "flex-1 overflow-y-auto custom-scrollbar px-4 pb-4 h-full pt-4"
               }}
             >
-              <Tab key="info" title="Thông tin">
+              <Tab key="info" title={t('common.info')}>
                 <div className="flex flex-col gap-5 pt-2 pb-4">
                   
                   {activeLesson ? (
@@ -512,7 +514,7 @@ export function CourseDetailPage() {
                             rel="noopener noreferrer"
                             className="flex items-center gap-3 p-3 bg-default-50 rounded-lg hover:bg-default-100 transition-colors text-sm shadow-none"
                           >
-                            <div className="w-8 h-8 rounded bg-primary-50 flex items-center justify-center text-primary shrink-0">
+                            <div className="w-8 h-8 rounded bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary shrink-0">
                               <FileText className="w-4 h-4" />
                             </div>
                             <span className="flex-1 truncate hover:text-primary transition-colors">{url.split('/').pop() || `Tài liệu ${i + 1}`}</span>

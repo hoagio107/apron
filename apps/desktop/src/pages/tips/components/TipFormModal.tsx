@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -54,7 +55,14 @@ interface TipFormModalProps {
   onSuccess?: () => void;
 }
 
-export function TipFormModal({ isOpen, onOpenChange, tipId, initialData, onSuccess }: TipFormModalProps) {
+export function TipFormModal({
+  isOpen,
+  onOpenChange,
+  tipId,
+  initialData,
+  onSuccess
+}: TipFormModalProps) {
+  const { t } = useTranslation();
   const { addTip, updateTip } = useTipStore();
   
   const [isLoading, setIsLoading] = useState(false);
@@ -226,7 +234,7 @@ export function TipFormModal({ isOpen, onOpenChange, tipId, initialData, onSucce
                   </div>
                   <div className="flex flex-col text-left">
                     <h3 className="text-base sm:text-lg font-bold text-foreground">
-                      {tipId ? 'Chỉnh sửa mẹo vặt' : 'Thêm mẹo vặt mới'}
+                      {tipId ? t('tips.form.editTitle') : t('tips.form.createTitle')}
                     </h3>
                     <p className="text-xs text-default-400 font-normal">
                       {tipId ? 'Cập nhật nội dung và hình ảnh cho mẹo nhà bếp' : 'Chia sẻ mẹo hay, kinh nghiệm nấu nướng hữu ích'}
@@ -260,7 +268,7 @@ export function TipFormModal({ isOpen, onOpenChange, tipId, initialData, onSucce
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
                       {/* Cột trái: Ảnh đại diện (1:1) */}
                       <div className="md:col-span-1 flex flex-col gap-1.5">
-                        <FormField label="Ảnh đại diện" icon={ImageIcon} error={errors.image_url?.message}>
+                        <FormField label={t('tips.form.imageLabel')} icon={ImageIcon} error={errors.image_url?.message}>
                           {selectedImage ? (
                             <div className="w-full aspect-square bg-default-100 dark:bg-default-50/40 rounded-2xl relative group overflow-hidden flex items-center justify-center shadow-inner">
                               <img src={selectedImage} alt="Cover preview" className="w-full h-full object-cover" />
@@ -320,10 +328,10 @@ export function TipFormModal({ isOpen, onOpenChange, tipId, initialData, onSucce
                           name="title"
                           control={control}
                           render={({ field, fieldState }) => (
-                            <FormField label="Tên mẹo vặt" icon={Type} error={fieldState.error?.message}>
+                            <FormField label={t('tips.form.titleLabel')} icon={Type} error={fieldState.error?.message}>
                               <Input
                                 {...field}
-                                placeholder="Ví dụ: Cách bảo quản rau củ tươi lâu..."
+                                placeholder={t('tips.form.titlePlaceholder')}
                                 variant="flat"
                                 size="lg"
                                 classNames={{ 
@@ -341,10 +349,10 @@ export function TipFormModal({ isOpen, onOpenChange, tipId, initialData, onSucce
                           name="category_id"
                           control={control}
                           render={({ field, fieldState }) => (
-                            <FormField label="Danh mục" icon={FolderTree} error={fieldState.error?.message}>
+                            <FormField label={t('tips.form.categoryLabel')} icon={FolderTree} error={fieldState.error?.message}>
                               <Select
                                 aria-label="Danh mục mẹo"
-                                placeholder="Chọn danh mục phù hợp..."
+                                placeholder={t('tips.form.selectCategory')}
                                 variant="flat"
                                 classNames={{ 
                                   trigger: "bg-default-100 hover:bg-default-200 border-none shadow-none min-h-12 h-12 px-3",
@@ -375,12 +383,12 @@ export function TipFormModal({ isOpen, onOpenChange, tipId, initialData, onSucce
                         name="content"
                         control={control}
                         render={({ field, fieldState }) => (
-                          <FormField label="Nội dung chi tiết" icon={FileText} error={fieldState.error?.message}>
+                          <FormField label={t('tips.form.contentLabel')} icon={FileText} error={fieldState.error?.message}>
                             <div className="w-full">
                               <RichTextEditor
                                 value={field.value}
                                 onChange={field.onChange}
-                                placeholder="Viết nội dung mẹo vặt của bạn tại đây (hướng dẫn chi tiết, các lưu ý quan trọng)..."
+                                placeholder={t('tips.form.contentPlaceholder')}
                                 isInvalid={!!fieldState.error}
                                 errorMessage={fieldState.error?.message}
                               />
@@ -409,7 +417,7 @@ export function TipFormModal({ isOpen, onOpenChange, tipId, initialData, onSucce
                   isLoading={isLoading}
                   className="rounded-xl px-5 font-bold shadow-none text-white h-10"
                 >
-                  {tipId ? 'Lưu thay đổi' : 'Lưu mẹo vặt'}
+                  {tipId ? t('common.saveChanges') : t('tips.form.saveTip')}
                 </Button>
               </ModalFooter>
             </>

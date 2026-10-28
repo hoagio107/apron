@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Modal,
   ModalContent,
@@ -33,6 +34,7 @@ export function UnitModal({
   onSave,
   onDeleteRequest
 }: UnitModalProps) {
+  const { t } = useTranslation();
   const isEditing = Boolean(unit);
 
   const [name, setName] = useState('');
@@ -113,22 +115,22 @@ export function UnitModal({
                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${theme.bg}`}>
                   <Icon className={`w-4 h-4 ${theme.text}`} />
                 </div>
-                <span>{isEditing ? 'Chỉnh sửa đơn vị' : 'Thêm đơn vị mới'}</span>
+                <span>{isEditing ? t('units.editUnit') : t('units.addUnit')}</span>
               </div>
 
               {isEditing && usageCount > 0 && (
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
                   <UtensilsCrossed className="w-3 h-3" />
-                  {usageCount} món đang dùng
+                  {t('units.usedInRecipes', { count: usageCount })}
                 </span>
               )}
             </ModalHeader>
 
             <ModalBody className="flex flex-col gap-4">
               {/* Tên đơn vị */}
-              <FormField label="Tên đơn vị" icon={Tag}>
+              <FormField label={t('units.fields.name')} icon={Tag}>
                 <Input
-                  placeholder="VD: gam, kg, muỗng cà phê, quả..."
+                  placeholder="e.g. g, kg, tsp, tbsp..."
                   value={name}
                   onValueChange={handleNameChange}
                   isRequired
@@ -142,7 +144,7 @@ export function UnitModal({
               </FormField>
 
               {/* Nhóm đơn vị */}
-              <FormField label="Nhóm đơn vị" icon={Layers}>
+              <FormField label={t('units.fields.category')} icon={Layers}>
                 <Select
                   aria-label="Chọn nhóm đơn vị"
                   selectedKeys={[category]}
@@ -184,12 +186,12 @@ export function UnitModal({
               <div className="p-3 rounded-2xl bg-default-50 dark:bg-default-50/10 border border-divider/60 flex flex-col gap-3">
                 <div className="flex items-center gap-2 text-xs font-semibold text-default-700 dark:text-default-300">
                   <ArrowRightLeft className="w-4 h-4 text-primary" />
-                  <span>Quy đổi tỷ lệ (Tùy chọn)</span>
+                  <span>{t('units.conversionRatioOptional')}</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <Input
-                    label="Tỷ lệ"
+                    label={t('units.fields.ratio')}
                     placeholder="VD: 1000"
                     type="number"
                     value={conversionRate}
@@ -201,8 +203,8 @@ export function UnitModal({
                     }}
                   />
                   <Input
-                    label="Đơn vị cơ sở"
-                    placeholder="VD: g hoặc ml"
+                    label={t('units.fields.symbol')}
+                    placeholder="e.g. g, ml"
                     value={baseUnit}
                     onValueChange={setBaseUnit}
                     size="sm"
@@ -215,7 +217,7 @@ export function UnitModal({
 
                 {conversionRate && baseUnit && name && (
                   <p className="text-[11px] text-default-500 bg-background/80 p-2 rounded-xl border border-divider/40">
-                    💡 Quy đổi: <strong>1 {name}</strong> = <strong>{conversionRate} {baseUnit}</strong>
+                    {t('units.conversionHint', { name, ratio: conversionRate, baseUnit })}
                   </p>
                 )}
               </div>
@@ -229,7 +231,7 @@ export function UnitModal({
                   variant="flat"
                   className="h-12 w-12 rounded-xl shrink-0"
                   onPress={() => onDeleteRequest(unit)}
-                  aria-label="Xoá đơn vị"
+                  aria-label={t('common.delete')}
                 >
                   <Trash2 className="w-5 h-5" />
                 </Button>
@@ -253,7 +255,7 @@ export function UnitModal({
                   isDisabled={!name.trim()}
                   className="h-12 rounded-xl px-6 text-sm font-semibold shadow-xs"
                 >
-                  {isEditing ? 'Lưu thay đổi' : 'Thêm đơn vị'}
+                  {isEditing ? t('common.saveChanges') : t('units.addUnit')}
                 </Button>
               </div>
             </ModalFooter>

@@ -1,5 +1,6 @@
 import { Sparkles, RefreshCw, List, Circle, CheckCircle2, ShoppingCart, Smartphone, Printer, Plus, ChevronRight } from 'lucide-react';
 import { Button } from '@/ui';
+import { useTranslation } from 'react-i18next';
 import { useShoppingListStore } from '../../../store/useShoppingListStore';
 
 // MOCK DATA for AI suggestions
@@ -12,6 +13,7 @@ const MOCK_AI_SUGGESTIONS = [
 ];
 
 export function ShoppingListSidebar() {
+  const { t } = useTranslation();
   const { items } = useShoppingListStore();
   const totalItems = items.length;
   const pendingItems = items.filter(item => !item.checked).length;
@@ -25,15 +27,15 @@ export function ShoppingListSidebar() {
         <div className="p-4 pb-2 flex items-center justify-between">
           <h2 className="text-sm font-bold flex items-center gap-2 text-primary">
             <Sparkles className="w-4 h-4 text-primary" />
-            AI gợi ý bạn cần mua
+            {t('shopping.aiSuggestions')}
           </h2>
           <Button variant="light" size="sm" className="text-xs text-default-500 hover:text-primary px-2 min-w-0" endContent={<RefreshCw className="w-3 h-3" />}>
-            Cập nhật
+            {t('common.actions.refresh', { defaultValue: 'Cập nhật' })}
           </Button>
         </div>
         <div className="px-4 pb-3">
           <p className="text-xs text-default-500 leading-relaxed">
-            Dựa trên nguyên liệu trong tủ lạnh, bạn có thể cần thêm những món sau:
+            {t('shopping.aiSuggestionsDesc')}
           </p>
         </div>
         
@@ -54,7 +56,7 @@ export function ShoppingListSidebar() {
                 isIconOnly
                 size="sm"
                 variant="flat"
-                className="bg-primary-50 text-primary w-8 h-8 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                className="bg-primary/10 dark:bg-primary/20 text-primary w-8 h-8 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <Plus className="w-4 h-4" />
               </Button>
@@ -64,7 +66,7 @@ export function ShoppingListSidebar() {
         
         <div className="p-3 pt-1 border-t border-divider">
           <Button variant="light" className="w-full text-xs text-primary font-medium flex justify-center items-center gap-1">
-            Xem tất cả gợi ý (8) <ChevronRight className="w-3 h-3" />
+            {t('shopping.seeAllSuggestions', { count: 8 })} <ChevronRight className="w-3 h-3" />
           </Button>
         </div>
       </div>
@@ -74,58 +76,58 @@ export function ShoppingListSidebar() {
         <div className="p-4 border-b border-divider">
           <h2 className="text-sm font-bold flex items-center gap-2 text-foreground">
             <List className="w-4 h-4 text-primary" />
-            Tổng quan
+            {t('shopping.overview')}
           </h2>
         </div>
         
         <div className="p-4 grid grid-cols-3 gap-2">
-          <div className="flex flex-col items-center justify-center bg-primary-50 rounded-xl py-3 border border-primary-100">
+          <div className="flex flex-col items-center justify-center bg-primary/10 dark:bg-primary/20 rounded-xl py-3 border border-primary-100">
             <div className="flex flex-col items-center">
               <span className="text-xs text-primary font-medium flex items-center gap-1 mb-1">
                 <List className="w-3 h-3" /> {totalItems}
               </span>
-              <span className="text-[10px] text-default-500">Tổng mục</span>
+              <span className="text-[10px] text-default-500">{t('shopping.totalItems')}</span>
             </div>
           </div>
-          <div className="flex flex-col items-center justify-center bg-warning-50 rounded-xl py-3 border border-warning-100">
+          <div className="flex flex-col items-center justify-center bg-warning/10 dark:bg-warning/20 rounded-xl py-3 border border-warning-100">
             <div className="flex flex-col items-center">
               <span className="text-xs text-warning-600 font-medium flex items-center gap-1 mb-1">
                 <Circle className="w-3 h-3" /> {pendingItems}
               </span>
-              <span className="text-[10px] text-default-500">Chưa mua</span>
+              <span className="text-[10px] text-default-500">{t('shopping.pending')}</span>
             </div>
           </div>
-          <div className="flex flex-col items-center justify-center bg-success-50 rounded-xl py-3 border border-success-100">
+          <div className="flex flex-col items-center justify-center bg-success/10 dark:bg-success/20 rounded-xl py-3 border border-success-100">
             <div className="flex flex-col items-center">
               <span className="text-xs text-success font-medium flex items-center gap-1 mb-1">
                 <CheckCircle2 className="w-3 h-3" /> {completedItems}
               </span>
-              <span className="text-[10px] text-default-500">Đã mua</span>
+              <span className="text-[10px] text-default-500">{t('shopping.bought')}</span>
             </div>
           </div>
         </div>
 
         <div className="px-4 pb-2">
-          <h3 className="text-xs font-bold text-default-700 mb-2">Gợi ý thông minh</h3>
+          <h3 className="text-xs font-bold text-default-700 mb-2">{t('shopping.smartSuggestions')}</h3>
           <div className="flex flex-col">
             <Button variant="light" className="justify-between px-2 h-9 text-xs text-default-600 hover:text-foreground hover:bg-default-100 rounded-lg">
               <div className="flex items-center gap-2">
                 <ShoppingCart className="w-4 h-4 text-default-400" />
-                Mua theo khu vực trong siêu thị
+                {t('shopping.shopByAisle')}
               </div>
               <ChevronRight className="w-4 h-4 text-default-300" />
             </Button>
             <Button variant="light" className="justify-between px-2 h-9 text-xs text-default-600 hover:text-foreground hover:bg-default-100 rounded-lg">
               <div className="flex items-center gap-2">
                 <Smartphone className="w-4 h-4 text-default-400" />
-                Chuyển danh sách thành đơn hàng online
+                {t('shopping.orderOnline')}
               </div>
               <ChevronRight className="w-4 h-4 text-default-300" />
             </Button>
             <Button variant="light" className="justify-between px-2 h-9 text-xs text-default-600 hover:text-foreground hover:bg-default-100 rounded-lg">
               <div className="flex items-center gap-2">
                 <Printer className="w-4 h-4 text-default-400" />
-                In danh sách
+                {t('shopping.printList')}
               </div>
               <ChevronRight className="w-4 h-4 text-default-300" />
             </Button>

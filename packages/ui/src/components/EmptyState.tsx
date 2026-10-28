@@ -89,7 +89,7 @@ export function EmptyState({
               color={actionColor}
               variant={actionVariant}
               onPress={onAction}
-              className="mt-1"
+              className="mt-1 font-semibold"
             >
               {actionLabel}
             </Button>
@@ -113,7 +113,7 @@ export function EmptyState({
             color={actionColor}
             variant={actionVariant}
             onPress={onAction}
-            className="mt-3"
+            className="mt-3 font-semibold"
           >
             {actionLabel}
           </Button>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Tabs, Tab, EmptyState, Pagination, Input } from '@/ui';
 import { Plus, ArrowDownUp, Share2, ListTodo, ShoppingCart, Search } from 'lucide-react';
 import { PageHeader } from '../../components/layout/PageHeader';
+import { useTranslation } from 'react-i18next';
 import { useShoppingListStore } from '../../store/useShoppingListStore';
 import { CATEGORIES } from '@apron/core';
 import { useRecipeStore } from '../../store/useRecipeStore';
@@ -12,6 +13,7 @@ import { ShoppingListOmnibox } from './components/ShoppingListOmnibox';
 import { RecipeCard } from '../../components/recipes/list/RecipeCard';
 
 export function ShoppingListPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { items, fetchItems, addItems, toggleItem, removeItems, updateItem } = useShoppingListStore();
   const { recipes, fetchRecipes } = useRecipeStore();
@@ -93,7 +95,7 @@ export function ShoppingListPage() {
             title={
               <div className="flex items-center gap-2">
                 <ListTodo className="w-6 h-6 text-primary" />
-                <span>Danh sách đi chợ</span>
+                <span>{t('shopping.title')}</span>
               </div>
             }
             showBackButton={false}
@@ -104,7 +106,7 @@ export function ShoppingListPage() {
                   isIconOnly 
                   variant="flat" 
                   color="default"
-                  onPress={() => navigator.clipboard.writeText(window.location.href).then(() => alert('Đã sao chép liên kết vào bộ nhớ tạm!'))}
+                  onPress={() => navigator.clipboard.writeText(window.location.href).then(() => alert(t('shopping.copiedListSuccess')))}
                 >
                   <Share2 className="w-4 h-4" />
                 </Button>
@@ -125,10 +127,10 @@ export function ShoppingListPage() {
                 tabContent: "text-default-500 group-data-[selected=true]:text-foreground font-medium"
               }}
             >
-              <Tab key="all" title={`Tất cả (${items.length})`} />
-              <Tab key="pending" title={`Chưa mua (${baseActiveItems.length})`} />
-              <Tab key="done" title={`Đã mua (${baseCompletedItems.length})`} />
-              <Tab key="supplies" title="Đồ dùng" />
+              <Tab key="all" title={t('shopping.filterAll', { count: items.length })} />
+              <Tab key="pending" title={t('shopping.filterPending', { count: baseActiveItems.length })} />
+              <Tab key="done" title={t('shopping.filterDone', { count: baseCompletedItems.length })} />
+              <Tab key="supplies" title={t('shopping.supplies', { defaultValue: 'Đồ dùng' })} />
             </Tabs>
             
             <div className="flex items-center gap-2 mb-2">
@@ -150,8 +152,8 @@ export function ShoppingListPage() {
             {items.length === 0 ? (
               <EmptyState
                 icon={<ShoppingCart className="w-10 h-10" />}
-                title="Danh sách trống"
-                description="Bạn chưa có nguyên liệu nào cần mua. Hãy thêm vào danh sách để chuẩn bị cho bữa ăn của mình nhé."
+                title={t('shopping.empty.title')}
+                description={t('shopping.empty.description')}
               />
             ) : (
               <div className="flex flex-col gap-3">
@@ -170,7 +172,7 @@ export function ShoppingListPage() {
                 {/* Completed Items */}
                 {displayedCompletedItems.length > 0 && (
                   <div className="flex flex-col gap-3 mt-4">
-                    <h3 className="text-sm font-bold text-default-500 uppercase tracking-wider ml-1">Đã mua</h3>
+                    <h3 className="text-sm font-bold text-default-500 uppercase tracking-wider ml-1">{t('shopping.bought')}</h3>
                     {displayedCompletedItems.map(item => (
                       <ShoppingListItemCard 
                         key={item.id}
@@ -195,7 +197,7 @@ export function ShoppingListPage() {
           <div className="mt-8 flex-1 flex flex-col min-h-0">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold">Tất cả công thức</h3>
+                <h3 className="text-lg font-bold">{t('recipes.title')}</h3>
                 <span className="text-xs text-default-400 font-medium">({filteredRecipes.length})</span>
               </div>
               <Button 
@@ -204,7 +206,7 @@ export function ShoppingListPage() {
                 className="text-primary font-medium hover:underline px-2 h-7"
                 onPress={() => navigate('/recipes')}
               >
-                Xem thêm →
+                {t('common.actions.more')} →
               </Button>
             </div>
 
@@ -213,7 +215,7 @@ export function ShoppingListPage() {
               <Input
                 size="sm"
                 variant="flat"
-                placeholder="Tìm nhanh công thức..."
+                placeholder={t('recipes.searchPlaceholder')}
                 value={recipeSearch}
                 onValueChange={handleRecipeSearchChange}
                 startContent={<Search className="w-3.5 h-3.5 text-default-400" />}
@@ -228,7 +230,7 @@ export function ShoppingListPage() {
             <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
               {filteredRecipes.length === 0 ? (
                 <div className="text-center py-8 text-xs text-default-400">
-                  {recipeSearch ? 'Không tìm thấy công thức phù hợp.' : 'Chưa có công thức nào.'}
+                  {recipeSearch ? t('recipes.empty.title') : t('recipes.empty.description')}
                 </div>
               ) : (
                 <div className="grid grid-cols-2 xl:grid-cols-3 gap-3">

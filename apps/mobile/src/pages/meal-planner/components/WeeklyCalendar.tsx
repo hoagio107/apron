@@ -3,6 +3,7 @@ import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-
 import { CSS } from '@dnd-kit/utilities';
 import { ChefHat, X, ChevronLeft, ChevronRight, ShoppingCart, Plus, BookOpen, Clock, Flame, Check } from 'lucide-react';
 import { Button } from '@/ui';
+import { useTranslation } from 'react-i18next';
 import { ImageManager } from '../../../lib/image-manager';
 import type { MealPlan, MealPlanEntry } from '@apron/core';
 import { useRecipeStore } from '../../../store/useRecipeStore';
@@ -19,6 +20,7 @@ interface MealSlotProps {
 }
 
 function MealSlot({ date, mealType, label, entries, onRemoveEntry, viewMode = 'list' }: MealSlotProps) {
+  const { t } = useTranslation();
   const { setNodeRef, isOver, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: `slot-${date}-${mealType}`,
     data: {
@@ -60,11 +62,11 @@ function MealSlot({ date, mealType, label, entries, onRemoveEntry, viewMode = 'l
         </span>
         <div className="flex items-center gap-1 opacity-0 group-hover/slot:opacity-100 transition-opacity">
           {isEmpty && (
-            <button onClick={() => removeMealSlot(date, mealType)} className="p-1 text-default-400 active:bg-danger-50 active:text-danger rounded" title="Xoá bữa này">
+            <button onClick={() => removeMealSlot(date, mealType)} className="p-1 text-default-400 active:bg-danger/10 dark:active:bg-danger/20 active:text-danger rounded" title={t('planner.removeSlot')}>
               <X className="w-3.5 h-3.5" />
             </button>
           )}
-          <button className="p-1 text-primary active:bg-primary-50 rounded" title="Đi chợ cho bữa này">
+          <button className="p-1 text-primary active:bg-primary/10 dark:active:bg-primary/20 rounded" title={t('planner.shopMeal')}>
             <ShoppingCart className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -85,7 +87,7 @@ function MealSlot({ date, mealType, label, entries, onRemoveEntry, viewMode = 'l
                 )}
                 {viewMode === 'card' && (
                   <div className="absolute right-1 bottom-1 flex items-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                    <button className="p-1 text-primary active:text-primary-600 transition-colors drop-shadow-md" title="Thêm vào giỏ đi chợ">
+                    <button className="p-1 text-primary active:text-primary-600 transition-colors drop-shadow-md" title={t('planner.addToShopping')}>
                       <ShoppingCart className="w-4 h-4" />
                     </button>
                   </div>
@@ -100,15 +102,15 @@ function MealSlot({ date, mealType, label, entries, onRemoveEntry, viewMode = 'l
                 
                 {viewMode === 'card' && (
                   <div className="flex items-center justify-center gap-2 text-[10px] text-default-500 mt-1">
-                    <div className="flex items-center gap-0.5" title="Thời gian">
+                    <div className="flex items-center gap-0.5" title={t('recipes.card.prepTime', { defaultValue: 'Time' })}>
                       <Clock className="w-2.5 h-2.5 text-blue-500" />
                       <span>{recipe.prep_time + recipe.cook_time}m</span>
                     </div>
-                    <div className="flex items-center gap-0.5" title="Độ khó">
+                    <div className="flex items-center gap-0.5" title={t('recipes.filter.difficulty')}>
                       <ChefHat className="w-2.5 h-2.5 text-green-500" />
                       <span>{recipe.difficulty.charAt(0).toUpperCase()}</span>
                     </div>
-                    <div className="flex items-center gap-0.5" title="Lượng Calories">
+                    <div className="flex items-center gap-0.5" title={t('recipes.card.calories')}>
                       <Flame className="w-2.5 h-2.5 text-orange-500" />
                       <span>{recipe.calories || '?'}</span>
                     </div>
@@ -117,7 +119,7 @@ function MealSlot({ date, mealType, label, entries, onRemoveEntry, viewMode = 'l
               </div>
               {viewMode === 'list' && (
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                  <button className="p-1.5 text-primary active:bg-primary-50 rounded-md transition-colors" title="Thêm vào giỏ đi chợ">
+                  <button className="p-1.5 text-primary active:bg-primary/10 dark:active:bg-primary/20 rounded-md transition-colors" title={t('planner.addToShopping')}>
                     <ShoppingCart className="w-4 h-4" />
                   </button>
                 </div>
@@ -129,7 +131,7 @@ function MealSlot({ date, mealType, label, entries, onRemoveEntry, viewMode = 'l
                   onRemoveEntry(entry.id!);
                 }}
                 className="absolute -top-1.5 -right-1.5 p-0.5 bg-background border border-default-200 text-default-400 active:text-danger active:border-danger rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-sm z-20" 
-                title="Xoá"
+                title={t('common.actions.delete')}
               >
                 <X className="w-3 h-3" />
               </button>
@@ -138,7 +140,7 @@ function MealSlot({ date, mealType, label, entries, onRemoveEntry, viewMode = 'l
         })}
         {entries.length === 0 && (
           <div className="flex-1 flex items-center justify-center opacity-0 group-hover:opacity-100">
-            <span className="text-xs text-default-400">Kéo thả vào đây</span>
+            <span className="text-xs text-default-400">{t('planner.dragDropHere')}</span>
           </div>
         )}
       </div>
@@ -155,6 +157,7 @@ interface WeeklyCalendarProps {
 }
 
 export function WeeklyCalendar({ days, mealPlans, onRemoveEntry, viewMode = 'list', showDailyAggregates = true }: WeeklyCalendarProps) {
+  const { t, i18n } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
   
   const addMealSlot = useMealPlanStore(state => state.addMealSlot);
@@ -223,21 +226,21 @@ export function WeeklyCalendar({ days, mealPlans, onRemoveEntry, viewMode = 'lis
               return sum + (recipe?.calories || 0);
             }, 0) || 0;
             
-            let maxDifficulty = 'Dễ';
+            let maxDifficulty = t('recipes.filter.easy', { defaultValue: 'Dễ' });
             if (numMeals > 0) {
               const difficulties = plan?.meals.map(m => {
                 const recipe = useRecipeStore.getState().recipes.find(r => r.id === m.recipe_id);
                 return recipe?.difficulty;
               }).filter(Boolean);
-              if (difficulties?.includes('Khó')) maxDifficulty = 'Khó';
-              else if (difficulties?.includes('Vừa')) maxDifficulty = 'Vừa';
+              if (difficulties?.includes('Khó')) maxDifficulty = t('recipes.filter.hard', { defaultValue: 'Khó' });
+              else if (difficulties?.includes('Vừa')) maxDifficulty = t('recipes.filter.medium', { defaultValue: 'Vừa' });
               else if (difficulties?.length) maxDifficulty = difficulties[0] as string;
             }
 
             return (
               <div key={i} className={`group/day relative text-center py-2 px-1 rounded-xl flex flex-col items-center justify-center min-h-[80px] ${isToday ? 'bg-primary text-primary-foreground' : 'bg-content1'}`}>
                 <div className="text-sm font-semibold">
-                  {day.toLocaleDateString('vi-VN', { weekday: 'short' })}
+                  {day.toLocaleDateString(i18n.language.startsWith('vi') ? 'vi-VN' : 'en-US', { weekday: 'short' })}
                 </div>
                 <div className="text-2xl font-bold mt-1 mb-1">
                   {day.getDate()}
@@ -247,7 +250,7 @@ export function WeeklyCalendar({ days, mealPlans, onRemoveEntry, viewMode = 'lis
                   <div className={`flex items-center justify-center gap-1.5 mt-1 text-[10px] ${isToday ? 'text-primary-foreground/90' : 'text-default-500'}`}>
                     <div className="flex items-center gap-0.5">
                       <BookOpen className={`w-3 h-3 ${isToday ? '' : 'text-green-600'}`} />
-                      <span>{numMeals} món</span>
+                      <span>{numMeals} {t('planner.dishesCount', { count: numMeals })}</span>
                     </div>
                     <span className="text-default-300">|</span>
                     <div className="flex items-center gap-0.5">
@@ -262,7 +265,7 @@ export function WeeklyCalendar({ days, mealPlans, onRemoveEntry, viewMode = 'lis
                   </div>
                 )}
                 
-                <button className={`absolute top-2 right-2 p-1.5 rounded-md opacity-0 group-hover/day:opacity-100 transition-opacity ${isToday ? 'text-primary-foreground active:bg-white/20' : 'text-primary active:bg-primary-50'}`} title="Đi chợ cho ngày này">
+                <button className={`absolute top-2 right-2 p-1.5 rounded-md opacity-0 group-hover/day:opacity-100 transition-opacity ${isToday ? 'text-primary-foreground active:bg-white/20' : 'text-primary active:bg-primary/10 dark:active:bg-primary/20'}`} title={t('planner.shopDay')}>
                   <ShoppingCart className="w-4 h-4" />
                 </button>
               </div>
@@ -297,12 +300,12 @@ export function WeeklyCalendar({ days, mealPlans, onRemoveEntry, viewMode = 'lis
                   })}
                 </SortableContext>
                 {isAddingSlot ? (
-                  <div className="h-10 mt-2 px-2 rounded-xl border border-primary flex items-center gap-1 bg-primary-50 shrink-0">
+                  <div className="h-10 mt-2 px-2 rounded-xl border border-primary flex items-center gap-1 bg-primary/10 dark:bg-primary/20 shrink-0">
                     <input 
                       type="text" 
                       autoFocus
                       className="flex-1 min-w-0 bg-transparent text-sm font-medium outline-none text-foreground placeholder:text-primary-300"
-                      placeholder="Tên bữa..."
+                      placeholder={t('planner.slotNamePlaceholder')}
                       value={newSlotName}
                       onChange={(e) => setNewSlotName(e.target.value)}
                       onKeyDown={(e) => {
@@ -313,7 +316,7 @@ export function WeeklyCalendar({ days, mealPlans, onRemoveEntry, viewMode = 'lis
                     <button onClick={() => handleAddSlot(dateStr)} className="p-1 text-primary active:bg-primary-100 rounded-md">
                       <Check className="w-4 h-4" />
                     </button>
-                    <button onClick={() => setAddingSlotDate(null)} className="p-1 text-default-400 active:text-danger active:bg-danger-50 rounded-md">
+                    <button onClick={() => setAddingSlotDate(null)} className="p-1 text-default-400 active:text-danger active:bg-danger/10 dark:active:bg-danger/20 rounded-md">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
@@ -321,7 +324,7 @@ export function WeeklyCalendar({ days, mealPlans, onRemoveEntry, viewMode = 'lis
                   <button 
                     onClick={() => setAddingSlotDate(dateStr)}
                     className="h-10 mt-2 rounded-xl border-2 border-dashed border-default-200 flex items-center justify-center text-default-400 active:text-default-600 active:border-default-300 active:bg-default-50 transition-colors shrink-0" 
-                    title="Thêm bữa ăn tuỳ chọn"
+                    title={t('planner.addCustomMeal')}
                   >
                     <Plus className="w-5 h-5" />
                   </button>

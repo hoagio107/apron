@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Key } from 'react';
 import { Autocomplete, AutocompleteItem, Tabs, Tab, Avatar } from '@/ui';
 import { Search, Plus, BookOpen } from 'lucide-react';
@@ -9,6 +10,7 @@ import { getCategoryTheme } from '../../../lib/categoryTheme';
 import { ImageManager } from '../../../lib/image-manager';
 
 export function ShoppingListOmnibox() {
+  const { t } = useTranslation();
   const [inputValue, setInputValue] = useState('');
   const [searchTab, setSearchTab] = useState('all');
   
@@ -60,8 +62,8 @@ export function ShoppingListOmnibox() {
   return (
     <div className="w-full lg:w-[320px]">
       <Autocomplete
-        aria-label="Tìm kiếm đa năng"
-        placeholder="Thêm nguyên liệu, công thức..."
+        aria-label={t('shopping.omniboxPlaceholder')}
+        placeholder={t('shopping.omniboxPlaceholder')}
         startContent={<Search className="w-4 h-4 text-default-400" />}
         inputValue={inputValue}
         onInputChange={setInputValue}
@@ -86,9 +88,9 @@ export function ShoppingListOmnibox() {
                   tabList: "w-full",
                 }}
               >
-                <Tab key="all" title="Tất cả" />
-                <Tab key="recipes" title="Công thức" />
-                <Tab key="in_list" title="Đã có" />
+                <Tab key="all" title={t('shopping.tabAll')} />
+                <Tab key="recipes" title={t('shopping.tabRecipes')} />
+                <Tab key="in_list" title={t('shopping.tabInList')} />
               </Tabs>
             </div>
           )
@@ -108,7 +110,7 @@ export function ShoppingListOmnibox() {
                     </div>
                     <div className="flex flex-col">
                       <span className="text-sm font-medium">{item.name}</span>
-                      <span className="text-xs text-default-400">Đã có trong danh sách • {item.quantity} {item.unit}</span>
+                      <span className="text-xs text-default-400">{t('shopping.alreadyInList', { qty: item.quantity, unit: item.unit })}</span>
                     </div>
                   </div>
                 </AutocompleteItem>
@@ -128,7 +130,7 @@ export function ShoppingListOmnibox() {
                       fallback={<BookOpen className="w-5 h-5 text-default-400" />}
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-md flex-shrink-0 bg-primary-50 flex items-center justify-center text-primary-600">
+                    <div className="w-10 h-10 rounded-md flex-shrink-0 bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary-600">
                       <BookOpen className="w-5 h-5" />
                     </div>
                   )}
@@ -149,13 +151,13 @@ export function ShoppingListOmnibox() {
                   <div className="w-10 h-10 rounded-md flex-shrink-0 bg-secondary/10 flex items-center justify-center">
                     <Plus className="w-5 h-5" />
                   </div>
-                  <span className="text-sm font-medium">Thêm "{inputValue}"</span>
+                  <span className="text-sm font-medium">{t('shopping.addItemPrompt', { name: inputValue })}</span>
                 </div>
               </AutocompleteItem>
             ) : null
           ].flat().filter(Boolean) as any
         ) : (
-          <AutocompleteItem key="empty" className="hidden">Không có dữ liệu</AutocompleteItem>
+          <AutocompleteItem key="empty" className="hidden">{t('shopping.noData')}</AutocompleteItem>
         )}
       </Autocomplete>
     </div>

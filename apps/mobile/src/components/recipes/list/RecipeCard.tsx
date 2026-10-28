@@ -1,5 +1,6 @@
 import { useState, useEffect, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import type { Recipe } from '@apron/core';
 import { Clock, Star, Flame, Image as ImageIcon, MoreVertical, Heart, Trash2, CalendarDays, Edit2 } from 'lucide-react';
 import { Checkbox, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button, toast } from '@/ui';
@@ -38,6 +39,7 @@ function RecipeCardComponent({
   actionIcon,
   onActionClick
 }: RecipeCardProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   
   const handleSelectClick = (e: React.MouseEvent) => {
@@ -119,7 +121,7 @@ function RecipeCardComponent({
           navigate('/meal-planner');
           break;
         case 'delete':
-          if (window.confirm(`Bạn có chắc muốn xoá công thức "${recipe.title}"?`)) {
+          if (window.confirm(t('recipes.actions.deleteConfirm', { title: recipe.title }))) {
             try {
               await useRecipeStore.getState().deleteRecipe(recipe.id);
             } catch (e) {
@@ -149,16 +151,16 @@ function RecipeCardComponent({
         onAction={handleMenuAction}
       >
         <DropdownItem key="meal_plan" startContent={<CalendarDays className="w-4 h-4 text-primary" />}>
-          Thêm vào thực đơn
+          {t('recipes.actions.addToMealPlan')}
         </DropdownItem>
         <DropdownItem key="favorite" startContent={<Heart className={`w-4 h-4 ${recipe.is_favorite ? 'fill-danger text-danger' : 'text-default-500'}`} />}>
-          {recipe.is_favorite ? 'Bỏ yêu thích' : 'Yêu thích'}
+          {recipe.is_favorite ? t('recipes.actions.unfavorite') : t('recipes.actions.favorite')}
         </DropdownItem>
         <DropdownItem key="edit" startContent={<Edit2 className="w-4 h-4 text-default-500" />}>
-          Chỉnh sửa
+          {t('common.actions.edit')}
         </DropdownItem>
         <DropdownItem key="delete" className="text-danger" color="danger" startContent={<Trash2 className="w-4 h-4" />}>
-          Xoá công thức
+          {t('recipes.actions.delete')}
         </DropdownItem>
       </DropdownMenu>
     )
@@ -209,7 +211,7 @@ function RecipeCardComponent({
           )}
           {variantCount > 0 && (
             <div className="bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
-              +{variantCount} biến thể
+              {t('recipes.actions.variantsCount', { count: variantCount })}
             </div>
           )}
         </div>
@@ -247,20 +249,20 @@ function RecipeCardComponent({
             {recipe.title}
           </h3>
           
-          <div className={`flex flex-wrap items-center gap-y-1 font-medium text-white/90 ${size === 'sm' ? 'text-[10px] gap-x-2' : 'text-[11px] gap-x-2.5'}`}>
-            <div className="flex items-center gap-1 shrink-0">
-              <Clock className="w-3 h-3 text-white/80" />
+          <div className={`flex flex-wrap items-center gap-y-1 font-medium text-white/90 ${size === 'sm' ? 'text-[9px] gap-x-1.5' : 'text-[10px] gap-x-2'}`}>
+            <div className="flex items-center gap-0.5 shrink-0">
+              <Clock className="w-2.5 h-2.5 text-white/80" />
               <span>{formatTime(totalTime)}</span>
             </div>
             
             <div className="flex items-center gap-0.5 shrink-0">
-              <Star className="w-3 h-3 text-warning fill-warning" />
+              <Star className="w-2.5 h-2.5 text-warning fill-warning" />
               <span>{averageRating > 0 ? averageRating : '0'}</span>
             </div>
 
             {recipe.calories > 0 && (
               <div className="flex items-center gap-0.5 shrink-0">
-                <Flame className="w-3 h-3 text-danger" />
+                <Flame className="w-2.5 h-2.5 text-danger" />
                 <span>{recipe.calories} kcal</span>
               </div>
             )}
@@ -287,8 +289,8 @@ function RecipeCardComponent({
             <button
               type="button"
               onClick={handleToggleFavorite}
-              title="Bỏ yêu thích"
-              aria-label="Bỏ yêu thích"
+              title={t('recipes.actions.unfavorite')}
+              aria-label={t('recipes.actions.unfavorite')}
               className="w-7 h-7 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-danger shadow-sm transition-transform active:scale-90 border border-white/10"
             >
               <Heart className="w-3.5 h-3.5 fill-danger text-danger drop-shadow-sm" />
@@ -296,7 +298,7 @@ function RecipeCardComponent({
           )}
           {variantCount > 0 && (
             <div className="bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
-              +{variantCount} biến thể
+              {t('recipes.actions.variantsCount', { count: variantCount })}
             </div>
           )}
         </div>
@@ -349,20 +351,20 @@ function RecipeCardComponent({
           {recipe.title}
         </h3>
         
-        <div className={`flex flex-wrap items-center gap-y-1 mt-0.5 ${size === 'sm' ? 'text-[10px] text-default-400 gap-x-2' : 'text-[11px] text-default-500 gap-x-2.5'}`}>
-          <div className="flex items-center gap-1 shrink-0">
-            <Clock className="w-3 h-3" />
+        <div className={`flex flex-wrap items-center gap-y-1 mt-0.5 ${size === 'sm' ? 'text-[9px] text-default-400 gap-x-1.5' : 'text-[10px] text-default-500 gap-x-2'}`}>
+          <div className="flex items-center gap-0.5 shrink-0">
+            <Clock className="w-2.5 h-2.5" />
             <span>{formatTime(totalTime)}</span>
           </div>
           
           <div className="flex items-center gap-0.5 shrink-0">
-            <Star className="w-3 h-3 text-warning fill-warning" />
+            <Star className="w-2.5 h-2.5 text-warning fill-warning" />
             <span>{averageRating > 0 ? averageRating : '0'}</span>
           </div>
 
           {recipe.calories > 0 && (
             <div className="flex items-center gap-0.5 shrink-0">
-              <Flame className="w-3 h-3 text-danger" />
+              <Flame className="w-2.5 h-2.5 text-danger" />
               <span>{recipe.calories} kcal</span>
             </div>
           )}

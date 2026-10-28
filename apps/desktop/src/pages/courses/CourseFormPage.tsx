@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   Input, Button, 
@@ -22,6 +23,7 @@ import { ImageManager } from '../../lib/image-manager';
 const generateId = () => crypto.randomUUID();
 
 export function CourseFormPage() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { courses, addCourse, updateCourse } = useCourseStore();
@@ -84,7 +86,7 @@ export function CourseFormPage() {
 
   const handleSave = async () => {
     if (!formData.title) {
-      alert('Vui lòng nhập tên khoá học');
+      alert(t('courses.enterCourseNamePrompt'));
       return;
     }
     
@@ -98,7 +100,7 @@ export function CourseFormPage() {
       navigate('/courses');
     } catch (e) {
       console.error('Save failed', e);
-      alert('Đã xảy ra lỗi khi lưu khoá học');
+      alert(t('courses.saveCourseError'));
     }
   };
 
@@ -187,7 +189,7 @@ export function CourseFormPage() {
       <div className="flex flex-col gap-8 w-full pt-6 pb-14">
         <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-md py-2 -my-2">
         <PageHeader 
-          title={isEditing ? 'Sửa khoá học' : 'Thêm khoá học mới'}
+          title={isEditing ? t('courses.form.editTitle') : t('courses.form.createTitle')}
           showBackButton
           onBack={() => navigate('/courses')}
           className="pt-2 pb-2"
@@ -212,13 +214,13 @@ export function CourseFormPage() {
                   <div className="w-full aspect-[4/3] flex items-center justify-center">
                     <div 
                       onClick={() => setImageUploadTarget('course-cover')}
-                      className="w-full h-full border-2 border-dashed border-primary/50 rounded-2xl flex flex-col items-center justify-center bg-primary-50/50 text-primary-600 hover:bg-primary-50 hover:border-primary transition-all cursor-pointer group"
+                      className="w-full h-full border-2 border-dashed border-primary/50 rounded-2xl flex flex-col items-center justify-center bg-primary/10 dark:bg-primary/15 text-primary-600 hover:bg-primary/10 dark:hover:bg-primary/20 hover:border-primary transition-all cursor-pointer group"
                     >
                       <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <ImagePlus className="w-8 h-8 text-primary" />
                       </div>
-                      <p className="font-bold text-xl mb-1">Tải lên hoặc chọn ảnh/video</p>
-                      <p className="text-sm text-primary-500/80 text-center px-4">Kéo thả file hoặc nhập URL</p>
+                      <p className="font-bold text-xl mb-1">{t('courses.uploadMediaPrompt')}</p>
+                      <p className="text-sm text-primary-500/80 text-center px-4">{t('courses.dragMediaPrompt')}</p>
                     </div>
                   </div>
                 ) : (
@@ -248,9 +250,9 @@ export function CourseFormPage() {
             </div>
 
             <div className="flex flex-col gap-6">
-              <FormField label="Tên khoá học" icon={Type}>
+              <FormField label={t('courses.form.titleLabel')} icon={Type}>
                 <Input
-                  placeholder="VD: Nhập môn làm bánh"
+                  placeholder={t('courses.form.titlePlaceholder')}
                   value={formData.title}
                   onChange={(e) => handleTitleChange(e.target.value)}
                   isRequired
@@ -266,7 +268,7 @@ export function CourseFormPage() {
               <div className="flex flex-col gap-2">
                 <span className="text-default-700 text-sm font-medium flex items-center gap-1">
                   <Gauge className="w-4 h-4 text-default-500" />
-                  Cấp độ khoá học
+                  {t('courses.form.levelLabel')}
                 </span>
                 <div className="grid grid-cols-3 gap-3">
                   {(['Cơ bản', 'Nâng cao', 'Chuyên gia'] as const).map(level => {
@@ -278,7 +280,7 @@ export function CourseFormPage() {
                         onClick={() => setFormData(prev => ({ ...prev, level }))}
                         className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all ${
                           isSelected 
-                            ? 'border-primary bg-primary-50 text-primary' 
+                            ? 'border-primary bg-primary/10 dark:bg-primary/20 text-primary' 
                             : 'border-default-200 hover:border-primary/50 text-default-500'
                         }`}
                       >
@@ -289,7 +291,7 @@ export function CourseFormPage() {
                 </div>
               </div>
 
-              <FormField label="Mô tả khoá học" icon={Info}>
+              <FormField label={t('courses.form.descLabel')} icon={Info}>
                 <div className="bg-default-100 rounded-xl overflow-auto border-none shadow-none p-3 resize-y min-h-[150px] max-h-[500px]">
                   <BlockEditor 
                     value={formData.description}
@@ -301,7 +303,7 @@ export function CourseFormPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              <FormField label="Nguồn khoá học" icon={LinkIcon}>
+              <FormField label={t('courses.courseSource')} icon={LinkIcon}>
                 <Input
                   placeholder="VD: YouTube, Udemy..."
                   value={formData.source || ''}
@@ -410,7 +412,7 @@ export function CourseFormPage() {
                   color="primary"
                   startContent={<Plus className="w-4 h-4" />}
                   onPress={addModule}
-                  className="w-full border-dashed border-2 bg-transparent hover:bg-primary-50"
+                  className="w-full border-dashed border-2 bg-transparent hover:bg-primary/10 dark:hover:bg-primary/20"
                 >
                   Thêm Chương Mới
                 </Button>

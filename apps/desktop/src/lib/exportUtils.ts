@@ -1,65 +1,113 @@
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
+/**
+ * Đợi tất cả hình ảnh trong container tải xong trước khi render canvas
+ */
+async function waitForImages(container: HTMLElement): Promise<void> {
+  const images = Array.from(container.querySelectorAll('img'));
+  if (images.length === 0) return;
+
+  await Promise.all(
+    images.map((img) => {
+      if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
+      return new Promise<void>((resolve) => {
+        const onDone = () => {
+          img.removeEventListener('load', onDone);
+          img.removeEventListener('error', onDone);
+          resolve();
+        };
+        img.addEventListener('load', onDone);
+        img.addEventListener('error', onDone);
+        // Timeout an toàn 3s nếu ảnh hỏng hoặc mạng chậm
+        setTimeout(onDone, 3000);
+      });
+    })
+  );
+}
+
+/**
+ * Xuất công thức ra tệp ảnh PNG với độ phân giải cao (2.5x retina print)
+ */
 export async function exportToPng(elementId: string, filename: string = 'recipe.png') {
   const element = document.getElementById(elementId);
-  if (!element) throw new Error(`Element with id ${elementId} not found`);
+  if (!element) throw new Error(`Không tìm thấy phần tử xuất: ${elementId}`);
 
   try {
+    await waitForImages(element);
+
     const canvas = await html2canvas(element, {
-      scale: 2,
+      scale: 2.5,
       useCORS: true,
-      backgroundColor: '#ffffff'
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
     });
-    
+
     const link = document.createElement('a');
-    link.download = filename;
-    link.href = canvas.toDataURL('image/png');
+    link.download = filename.endsWith('.png') ? filename : `${filename}.png`;
+    link.href = canvas.toDataURL('image/png', 1.0);
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
   } catch (err) {
-    console.error('Lỗi khi xuất ảnh:', err);
+    console.error('Lỗi khi xuất ảnh PNG:', err);
     throw err;
   }
 }
 
+/**
+ * Xuất công thức ra tệp PDF chuẩn khổ A4 chất lượng cao
+ */
 export async function exportToPdf(elementId: string, filename: string = 'recipe.pdf') {
   const element = document.getElementById(elementId);
-  if (!element) throw new Error(`Element with id ${elementId} not found`);
+  if (!element) throw new Error(`Không tìm thấy phần tử xuất: ${elementId}`);
 
   try {
+    await waitForImages(element);
+
     const canvas = await html2canvas(element, {
-      scale: 2,
+      scale: 2.0,
       useCORS: true,
-      backgroundColor: '#ffffff'
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
     });
 
-    const imgData = canvas.toDataURL('image/png');
-    
-    // A4 size in mm
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+    // Kích thước chuẩn khổ A4 tính theo mm (210mm x 297mm)
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pdfWidth = pdf.internal.pageSize.getWidth();
-    let pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    
-    let position = 0;
     const pageHeight = pdf.internal.pageSize.getHeight();
-    
-    // Xử lý trang dài
-    if (pdfHeight > pageHeight) {
-      while (pdfHeight > 0) {
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, (canvas.height * pdfWidth) / canvas.width);
-        pdfHeight -= pageHeight;
-        position -= pageHeight;
-        if (pdfHeight > 0) {
-          pdf.addPage();
-        }
-      }
-    } else {
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    let heightLeft = pdfHeight;
+    let position = 0;
+
+    // Trang 1
+    pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
+    heightLeft -= pageHeight;
+
+    // Nếu công thức dài hơn 1 trang A4, tự động phân trang
+    while (heightLeft > 0) {
+      position = heightLeft - pdfHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pageHeight;
     }
-    
-    pdf.save(filename);
+
+    const cleanFilename = filename.endsWith('.pdf') ? filename : `${filename}.pdf`;
+    pdf.save(cleanFilename);
   } catch (err) {
     console.error('Lỗi khi xuất PDF:', err);
     throw err;
   }
+}
+
+/**
+ * Kích hoạt hộp thoại in công thức theo chuẩn A4
+ */
+export function printRecipe() {
+  window.print();
 }

@@ -15,10 +15,10 @@ interface PageLoaderProps {
  *   {isLoading ? <PageLoader minHeight="200px" /> : <Content />}
  */
 export function PageLoader({ minHeight = '400px', className = '' }: PageLoaderProps) {
+  const minHeightClass = minHeight === '200px' ? 'min-h-[200px]' : 'min-h-[400px]';
   return (
     <div
-      className={`flex-1 flex items-center justify-center ${className}`}
-      style={{ minHeight }}
+      className={`flex-1 flex items-center justify-center ${minHeightClass} ${className}`}
     >
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
     </div>

@@ -1,22 +1,28 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { Button, Modal, ModalContent, ModalBody, useDisclosure, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tabs, Tab, Spinner, toast } from '@/ui';
-import { ArrowLeft, Edit, Clock, Star, Flame, Play, Info, Share, Check, Image as ImageIcon, Plus, Gauge, Timer, Minus, Carrot, ChefHat, Link as LinkIcon, Video, Tag, X, Calendar, ShoppingCart, Printer, Download, ImageDown, ChevronDown, ChevronUp, History, GitFork, Sparkles } from 'lucide-react';
+import { ArrowLeft, Edit, Clock, Star, Flame, Play, Info, Share, Check, Image as ImageIcon, Plus, Gauge, Timer, Minus, Carrot, ChefHat, Link as LinkIcon, Video, Tag, X, Calendar, ShoppingCart, Printer, Download, ImageDown, ChevronDown, ChevronUp, History, GitFork, Sparkles, Trash2 } from 'lucide-react';
 import { useRecipeStore } from '../../store/useRecipeStore';
 import { useShoppingListStore } from '../../store/useShoppingListStore';
 import { useMealPlanStore } from '../../store/useMealPlanStore';
 import { ImageManager } from '../../lib/image-manager';
 import { DEFAULT_TAGS } from '@apron/core';
-import { exportToPdf, exportToPng } from '../../lib/exportUtils';
+import { exportToPdf, exportToPng, printRecipe } from '../../lib/exportUtils';
 import { CookingModeModal } from '../../components/recipes/CookingModeModal';
 import { CookingRatingModal } from '../../components/recipes/CookingRatingModal';
 import { RecipeSnapshotModal } from '../../components/recipes/RecipeSnapshotModal';
+import { RecipePrintTemplate } from '../../components/recipes/RecipePrintTemplate';
 import { MealPlannerSelectModal } from './components/MealPlannerSelectModal';
+import { ConfirmModal } from '../../components/shared/ConfirmModal';
+import { useTranslation } from 'react-i18next';
 
 export function RecipeDetailPage() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
-  const { recipes, updateRecipe, fetchRecipes, isLoading } = useRecipeStore();
+  const location = useLocation();
+  const { recipes, updateRecipe, deleteRecipe, fetchRecipes, isLoading } = useRecipeStore();
   
   useEffect(() => {
     if (recipes.length === 0) {
@@ -40,6 +46,30 @@ export function RecipeDetailPage() {
   const { addItems } = useShoppingListStore();
   const { addMealPlanEntry } = useMealPlanStore();
   const [isMealPlannerModalOpen, setIsMealPlannerModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const handleBack = () => {
+    const state = location.state as { from?: string } | null;
+    if (state?.from) {
+      navigate(state.from);
+    } else if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate('/recipes');
+    }
+  };
+
+  const handleDeleteRecipe = async () => {
+    if (!recipe?.id) return;
+    try {
+      await deleteRecipe(recipe.id);
+      toast.success(t('common.status.deletedSuccessfully', { defaultValue: 'Đã xoá công thức thành công' }));
+      navigate('/recipes', { replace: true });
+    } catch (e) {
+      console.error(e);
+      toast.error(t('common.status.errorOccurred'));
+    }
+  };
 
   const handleAddToShoppingList = async () => {
     if (!recipe?.ingredients) return;
@@ -50,10 +80,10 @@ export function RecipeDetailPage() {
     }));
     try {
       await addItems(items);
-      toast.success('Đã thêm nguyên liệu vào giỏ đi chợ!');
+      toast.success(t('recipes.detail.addedToShoppingSuccess'));
     } catch (e) {
       console.error(e);
-      toast.error('Có lỗi xảy ra khi thêm vào giỏ đi chợ.');
+      toast.error(t('common.status.errorOccurred'));
     }
   };
 
@@ -61,25 +91,59 @@ export function RecipeDetailPage() {
     if (!recipe) return;
     let text = `🍳 ${recipe.title}\n\n`;
     if (recipe.ingredients && recipe.ingredients.length > 0) {
-      text += `🛒 Nguyên liệu:\n`;
+      text += `🛒 ${t('recipes.detail.ingredients')}:\n`;
       recipe.ingredients.forEach(ing => {
         text += `- ${scaleQuantity(ing.quantity) || ''} ${ing.unit || ''} ${ing.name}\n`;
       });
       text += `\n`;
     }
     if (recipe.steps && recipe.steps.length > 0) {
-      text += `📝 Cách làm:\n`;
+      text += `📝 ${t('recipes.detail.instructions')}:\n`;
       recipe.steps.forEach((step, idx) => {
         text += `${idx + 1}. ${step.instruction}\n`;
       });
     }
     try {
       await navigator.clipboard.writeText(text);
-      toast.success('Đã sao chép công thức vào khay nhớ tạm!');
+      toast.success(t('recipes.detail.copiedRecipeSuccess'));
     } catch (e) {
       console.error(e);
-      toast.error('Không thể sao chép công thức.');
+      toast.error(t('common.status.errorOccurred'));
     }
+  };
+
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportPng = async () => {
+    if (!recipe) return;
+    try {
+      setIsExporting(true);
+      await exportToPng('recipe-print-template', `${recipe.title}.png`);
+      toast.success('Đã xuất ảnh công thức!');
+    } catch (err) {
+      console.error(err);
+      toast.error('Không thể xuất ảnh công thức. Vui lòng thử lại.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportPdf = async () => {
+    if (!recipe) return;
+    try {
+      setIsExporting(true);
+      await exportToPdf('recipe-print-template', `${recipe.title}.pdf`);
+      toast.success('Đã xuất PDF công thức!');
+    } catch (err) {
+      console.error(err);
+      toast.error('Không thể xuất PDF công thức. Vui lòng thử lại.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handlePrint = () => {
+    printRecipe();
   };
 
   const handleAddToMealPlan = async (date: string, slotId: string) => {
@@ -89,10 +153,10 @@ export function RecipeDetailPage() {
         recipe_id: recipe.id!,
         meal_type: slotId,
       });
-      toast.success('Đã thêm món vào thực đơn!');
+      toast.success(t('recipes.detail.addedToMealPlanSuccess'));
     } catch (e) {
       console.error(e);
-      toast.error('Có lỗi xảy ra khi thêm vào thực đơn.');
+      toast.error(t('common.status.errorOccurred'));
     }
   };
 
@@ -259,14 +323,14 @@ export function RecipeDetailPage() {
       return (
         <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3">
           <Spinner size="lg" color="primary" />
-          <p className="text-default-500 text-sm">Đang tải công thức...</p>
+          <p className="text-default-500 text-sm">{t('common.status.loading')}</p>
         </div>
       );
     }
     return (
       <div className="flex flex-col items-center justify-center h-full">
-        <h2 className="text-xl font-bold">Không tìm thấy công thức</h2>
-        <Button className="mt-4" onPress={() => navigate('/recipes')}>Quay lại</Button>
+        <h2 className="text-xl font-bold">{t('recipes.empty.title')}</h2>
+        <Button className="mt-4" onPress={() => navigate('/recipes')}>{t('common.actions.back')}</Button>
       </div>
     );
   }
@@ -294,7 +358,7 @@ export function RecipeDetailPage() {
                 title={
                   <div className="flex items-center gap-1.5">
                     {!v.parent_id ? <Sparkles className="w-3.5 h-3.5 text-amber-500" /> : <GitFork className="w-3.5 h-3.5 text-secondary-500" />}
-                    <span>{!v.parent_id ? `⭐ Bản gốc (${v.title})` : `Biến thể: ${v.title}`}</span>
+                    <span>{!v.parent_id ? `⭐ ${v.title}` : v.title}</span>
                   </div>
                 }
               />
@@ -338,8 +402,8 @@ export function RecipeDetailPage() {
              <Button 
                isIconOnly 
                className="bg-background/80 dark:bg-black/60 backdrop-blur-md shadow-md text-foreground rounded-full w-10 h-10 min-w-0 p-0 flex items-center justify-center border border-white/20 dark:border-white/10 hover:bg-background active:scale-95 transition-all"
-               onPress={() => navigate('/recipes')}
-               aria-label="Quay lại"
+               onPress={handleBack}
+                aria-label={t('common.actions.back')}
              >
                <ArrowLeft className="w-5 h-5" />
              </Button>
@@ -351,7 +415,7 @@ export function RecipeDetailPage() {
                  <Button 
                   isIconOnly 
                   className="bg-background/80 dark:bg-black/60 backdrop-blur-md shadow-md text-foreground rounded-full w-10 h-10 min-w-0 p-0 flex items-center justify-center border border-white/20 dark:border-white/10 hover:bg-background active:scale-95 transition-all"
-                  aria-label="Tùy chọn"
+                  aria-label={t('common.actions.more')}
                 >
                    <div className="flex gap-1">
                       <div className="w-1 h-1 bg-current rounded-full" />
@@ -361,11 +425,12 @@ export function RecipeDetailPage() {
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu>
-                  <DropdownItem key="cook" startContent={<Play className="w-4 h-4"/>} onPress={() => setIsCookingModeOpen(true)}>Bắt đầu nấu</DropdownItem>
-                  <DropdownItem key="plan" startContent={<Calendar className="w-4 h-4"/>} onPress={() => setIsMealPlannerModalOpen(true)}>Lên kế hoạch</DropdownItem>
-                  <DropdownItem key="cart" startContent={<ShoppingCart className="w-4 h-4"/>} onPress={handleAddToShoppingList}>Đi chợ</DropdownItem>
-                  <DropdownItem key="share" startContent={<Share className="w-4 h-4"/>} onPress={handleShare}>Chia sẻ</DropdownItem>
-                  <DropdownItem key="edit" startContent={<Edit className="w-4 h-4"/>} onPress={() => navigate(`/recipes/new?edit=${recipe.id}`)}>Chỉnh sửa</DropdownItem>
+                  <DropdownItem key="cook" startContent={<Play className="w-4 h-4"/>} onPress={() => setIsCookingModeOpen(true)}>{t('recipes.detail.cookMode')}</DropdownItem>
+                  <DropdownItem key="plan" startContent={<Calendar className="w-4 h-4"/>} onPress={() => setIsMealPlannerModalOpen(true)}>{t('recipes.actions.addToMealPlan')}</DropdownItem>
+                  <DropdownItem key="cart" startContent={<ShoppingCart className="w-4 h-4"/>} onPress={handleAddToShoppingList}>{t('recipes.detail.addToShopping')}</DropdownItem>
+                  <DropdownItem key="share" startContent={<Share className="w-4 h-4"/>} onPress={handleShare}>{t('common.actions.share')}</DropdownItem>
+                  <DropdownItem key="edit" startContent={<Edit className="w-4 h-4"/>} onPress={() => navigate(`/recipes/new?edit=${recipe.id}`, { state: { from: '/recipes' } })}>{t('common.actions.edit')}</DropdownItem>
+                  <DropdownItem key="delete" color="danger" className="text-danger" startContent={<Trash2 className="w-4 h-4" />} onPress={() => setIsDeleteModalOpen(true)}>{t('common.actions.delete')}</DropdownItem>
                 </DropdownMenu>
               </Dropdown>
             </div>
@@ -444,7 +509,42 @@ export function RecipeDetailPage() {
               <span className="text-[14px] leading-none font-semibold text-foreground">
                 {averageRating > 0 ? averageRating : 'N/A'}
               </span>
-            </div>
+    
+
+          {/* Quick Actions row on mobile */}
+          <div className="flex items-center gap-2 mt-2 pt-2 border-t border-divider/40 overflow-x-auto no-scrollbar">
+            <Button size="sm" color="primary" variant="solid" className="font-semibold text-xs shrink-0" startContent={<Play className="w-3.5 h-3.5"/>} onPress={() => setIsCookingModeOpen(true)}>
+              {t('recipes.detail.cookMode')}
+            </Button>
+            <Button size="sm" variant="flat" className="font-semibold text-xs border border-default-200 shrink-0" startContent={<Calendar className="w-3.5 h-3.5"/>} onPress={() => setIsMealPlannerModalOpen(true)}>
+              {t('recipes.actions.addToMealPlan')}
+            </Button>
+            <Button size="sm" variant="flat" className="font-semibold text-xs border border-default-200 shrink-0" startContent={<ShoppingCart className="w-3.5 h-3.5 text-success"/>} onPress={handleAddToShoppingList}>
+              {t('recipes.detail.addToShopping')}
+            </Button>
+            <Button 
+              size="sm" 
+              isIconOnly 
+              variant="flat" 
+              className="border border-default-200 text-primary shrink-0" 
+              title={t('common.actions.edit')}
+              onPress={() => navigate(`/recipes/new?edit=${recipe.id}`, { state: { from: '/recipes' } })}
+            >
+              <Edit className="w-3.5 h-3.5" />
+            </Button>
+            <Button 
+              size="sm" 
+              isIconOnly 
+              variant="flat" 
+              color="danger" 
+              className="border border-danger-200 dark:border-danger-900/50 text-danger shrink-0" 
+              title={t('common.actions.delete')}
+              onPress={() => setIsDeleteModalOpen(true)}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        </div>
           </div>
         </div>
       </div>
@@ -470,17 +570,17 @@ export function RecipeDetailPage() {
             title={
               <div className="flex items-center justify-center gap-1.5">
                 <Carrot className="w-4 h-4 shrink-0" />
-                <span className="font-semibold text-sm tracking-tight">Nguyên liệu</span>
+                <span className="font-semibold text-sm tracking-tight">{t('recipes.detail.ingredients')}</span>
               </div>
             }
           >
              <div className="p-4 pt-3">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-bold flex items-center gap-2">
-                    <Carrot className="w-5 h-5 text-success" /> Nguyên liệu
+                    <Carrot className="w-5 h-5 text-success" /> {t('recipes.detail.ingredients')}
                   </h2>
                   <div className="flex items-center gap-2 bg-default-100 dark:bg-default-100/70 border border-default-200/50 dark:border-divider px-2 py-1 rounded-full text-sm font-medium">
-                    <span className="text-default-500 mr-1 hidden sm:inline ml-2">Khẩu phần</span>
+                    <span className="text-default-500 mr-1 hidden sm:inline ml-2">{t('recipes.detail.scaleServings')}</span>
                     <div className="w-6 h-6 flex items-center justify-center bg-content1 dark:bg-default-200 rounded-full cursor-pointer shadow-xs text-foreground active:text-primary transition-all shrink-0 border border-divider/40 active:scale-95" onClick={() => setTargetServingsStr(Math.max(0.1, targetServings - 1).toString())}><Minus className="w-3 h-3" /></div>
                     <input type="number" className="w-12 text-center bg-transparent border-none outline-none text-sm font-bold p-0 text-foreground" value={targetServingsStr} onChange={(e) => setTargetServingsStr(e.target.value)} />
                     <div className="w-6 h-6 flex items-center justify-center bg-content1 dark:bg-default-200 rounded-full cursor-pointer shadow-xs text-foreground active:text-primary transition-all shrink-0 border border-divider/40 active:scale-95" onClick={() => setTargetServingsStr((targetServings + 1).toString())}><Plus className="w-3 h-3" /></div>
@@ -517,20 +617,20 @@ export function RecipeDetailPage() {
             title={
               <div className="flex items-center justify-center gap-1.5">
                 <ChefHat className="w-4 h-4 shrink-0" />
-                <span className="font-semibold text-sm tracking-tight">Cách làm</span>
+                <span className="font-semibold text-sm tracking-tight">{t('recipes.detail.instructions')}</span>
               </div>
             }
           >
              <div className="p-4 pt-3">
                 <h2 className="text-xl font-bold flex items-center gap-2 mb-4">
-                  <ChefHat className="w-5 h-5 text-success" /> Cách làm
+                  <ChefHat className="w-5 h-5 text-success" /> {t('recipes.detail.instructions')}
                 </h2>
                 <div className="flex flex-col gap-2">
                   {Object.entries(stepGroups).map(([group, steps]) => (
                     <div key={group} className="flex flex-col">
                       {group !== 'Các bước thực hiện' && (
                         <div className="flex items-center gap-2 mb-3.5 mt-2 first:mt-0">
-                          <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
+                          <span className="w-2-h-2 rounded-full bg-primary shrink-0" />
                           <h3 className="text-base font-bold text-foreground tracking-tight">{group}</h3>
                         </div>
                       )}
@@ -574,14 +674,14 @@ export function RecipeDetailPage() {
             title={
               <div className="flex items-center justify-center gap-1.5">
                 <Info className="w-4 h-4 shrink-0" />
-                <span className="font-semibold text-sm tracking-tight">Khác</span>
+                <span className="font-semibold text-sm tracking-tight">{t('recipes.detail.overview')}</span>
               </div>
             }
           >
              <div className="p-4 pt-3 flex flex-col gap-6">
                 {recipe.notes && (
                   <div className="flex flex-col gap-2">
-                     <h3 className="font-bold text-sm flex items-center gap-2"><Info className="w-4 h-4 text-warning-500" /> Ghi chú</h3>
+                     <h3 className="font-bold text-sm flex items-center gap-2"><Info className="w-4 h-4 text-warning-500" /> {t('recipes.detail.notes')}</h3>
                      <div 
                        className="text-sm leading-relaxed text-amber-950 dark:text-amber-100 bg-amber-500/10 dark:bg-amber-500/15 p-4 rounded-xl border border-amber-500/30 prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 [&_*]:text-amber-950 dark:[&_*]:text-amber-100 [&_strong]:text-amber-950 dark:[&_strong]:text-amber-50 [&_b]:text-amber-950 dark:[&_b]:text-amber-50 [&_li]:text-amber-950/90 dark:[&_li]:text-amber-100/90" 
                        dangerouslySetInnerHTML={{ __html: recipe.notes }} 
@@ -590,7 +690,7 @@ export function RecipeDetailPage() {
                 )}
                 {recipe.tags && recipe.tags.length > 0 && (
                   <div className="flex flex-col gap-2">
-                     <h3 className="font-bold text-sm flex items-center gap-2"><Tag className="w-4 h-4 text-default-500" /> Tags</h3>
+                     <h3 className="font-bold text-sm flex items-center gap-2"><Tag className="w-4 h-4 text-default-500" /> {t('recipes.filter.tags')}</h3>
                      <div className="flex flex-wrap gap-2">
                        {recipe.tags.map(tagId => {
                           const t = DEFAULT_TAGS.find(x => x.id === tagId || x.slug === tagId);
@@ -602,7 +702,7 @@ export function RecipeDetailPage() {
                 )}
                 {recipe.video_url && (
                    <div className="flex flex-col gap-2">
-                      <h3 className="font-bold text-sm flex items-center gap-2"><Video className="w-4 h-4 text-primary" /> Video Hướng Dẫn</h3>
+                      <h3 className="font-bold text-sm flex items-center gap-2"><Video className="w-4 h-4 text-primary" /> Video</h3>
                       <div className="w-full aspect-video bg-default-100 rounded-2xl flex items-center justify-center overflow-hidden relative cursor-pointer" onClick={() => handleOpenLightbox('video', recipe.video_url!)}>
                          {currentDisplayImage && <img src={ImageManager.getAssetUrl(currentDisplayImage)} className="w-full h-full object-cover blur-sm opacity-50" />}
                          <div className="absolute inset-0 flex items-center justify-center">
@@ -616,11 +716,11 @@ export function RecipeDetailPage() {
                 <div className="flex flex-col gap-2 mt-2">
                     <div className="flex items-center justify-between">
                       <h3 className="font-bold text-sm flex items-center gap-2">
-                        <History className="w-4 h-4 text-primary" /> Lịch sử nấu
+                        <History className="w-4 h-4 text-primary" /> {t('recipes.detail.ratingHistory')}
                       </h3>
                       {recipe.cooking_history && recipe.cooking_history.length > 0 && (
                         <span className="bg-primary/10 text-primary px-2.5 py-0.5 rounded-full text-xs font-semibold">
-                          {recipe.cooking_history.length} lần
+                          {recipe.cooking_history.length}
                         </span>
                       )}
                     </div>
@@ -644,7 +744,7 @@ export function RecipeDetailPage() {
                             >
                               <div className="flex justify-between items-center">
                                 <span className="text-sm text-default-500 font-medium">
-                                  {new Date(history.date).toLocaleDateString('vi-VN', { 
+                                  {new Date(history.date).toLocaleDateString(undefined, { 
                                     day: '2-digit', month: '2-digit', year: 'numeric',
                                     hour: '2-digit', minute: '2-digit'
                                   })}
@@ -664,7 +764,7 @@ export function RecipeDetailPage() {
                       ) : (
                         <div className="py-6 flex flex-col items-center justify-center text-center gap-2 text-default-400 bg-default-50 dark:bg-default-100/30 border border-dashed border-default-200 dark:border-divider rounded-xl">
                           <History className="w-5 h-5" />
-                          <span className="text-sm text-default-400">Chưa có lịch sử nấu nào.<br/>Nhấn "Bắt đầu nấu" để lưu lại!</span>
+                          <span className="text-sm text-default-400">{t('recipes.detail.noCookingHistory')}</span>
                         </div>
                       )}
                     </div>
@@ -682,11 +782,11 @@ export function RecipeDetailPage() {
             <Button
               variant="light"
               size="sm"
-              onPress={() => navigate('/recipes')}
+              onPress={handleBack}
               startContent={<ArrowLeft className="w-4 h-4" />}
               className="text-default-600 dark:text-default-400 hover:text-foreground font-medium -ml-2"
             >
-              Quay lại danh sách
+              {t('recipes.detail.backToList')}
             </Button>
           </div>
           
@@ -747,38 +847,54 @@ export function RecipeDetailPage() {
                  {averageRating > 0 ? (
                    <span className="text-foreground font-bold">{averageRating}</span>
                  ) : (
-                   <span className="text-default-500 font-medium text-sm italic">Chưa có đánh giá</span>
+                   <span className="text-default-500 font-medium text-sm italic">{t('common.status.empty')}</span>
                  )}
                </div>
                
                <div className="flex flex-wrap gap-2 mt-2">
                  <Button color="primary" variant="solid" className="font-semibold px-6" startContent={<Play className="w-4 h-4"/>} onPress={() => setIsCookingModeOpen(true)}>
-                   Bắt đầu nấu
+                   {t('recipes.detail.cookMode')}
                  </Button>
                  <Button variant="flat" className="font-semibold border border-default-200" startContent={<Calendar className="w-4 h-4"/>} onPress={() => setIsMealPlannerModalOpen(true)}>
-                   Kế hoạch
+                   {t('recipes.actions.addToMealPlan')}
                  </Button>
                  <Button variant="flat" className="font-semibold border border-default-200" startContent={<ShoppingCart className="w-4 h-4 text-success"/>} onPress={handleAddToShoppingList}>
-                   Đi chợ
+                   {t('recipes.detail.addToShopping')}
                  </Button>
                  
                  <Dropdown>
                    <DropdownTrigger>
-                     <Button isIconOnly variant="flat" className="border border-default-200">
+                     <Button isIconOnly variant="flat" className="border border-default-200" isLoading={isExporting}>
                        <Share className="w-4 h-4" />
                      </Button>
                    </DropdownTrigger>
                    <DropdownMenu aria-label="Export Actions">
-                     <DropdownItem key="copy" startContent={<Share className="w-4 h-4"/>} onPress={handleShare}>Copy công thức</DropdownItem>
-                     <DropdownItem key="png" startContent={<ImageDown className="w-4 h-4"/>} onPress={() => exportToPng('recipe-content', `${recipe.title}.png`)}>Lưu ảnh (PNG)</DropdownItem>
-                     <DropdownItem key="pdf" startContent={<Download className="w-4 h-4"/>} onPress={() => exportToPdf('recipe-content', `${recipe.title}.pdf`)}>Xuất PDF</DropdownItem>
-                     <DropdownItem key="print" startContent={<Printer className="w-4 h-4"/>} onPress={() => window.print()}>In ấn</DropdownItem>
+                     <DropdownItem key="copy" startContent={<Share className="w-4 h-4"/>} onPress={handleShare}>{t('common.actions.copy')}</DropdownItem>
+                     <DropdownItem key="png" startContent={<ImageDown className="w-4 h-4"/>} onPress={handleExportPng}>{t('recipes.detail.exportPng')}</DropdownItem>
+                     <DropdownItem key="pdf" startContent={<Download className="w-4 h-4"/>} onPress={handleExportPdf}>{t('recipes.detail.exportPdf')}</DropdownItem>
+                     <DropdownItem key="print" startContent={<Printer className="w-4 h-4"/>} onPress={handlePrint}>{t('common.actions.print')}</DropdownItem>
                    </DropdownMenu>
                  </Dropdown>
                  
-                 <Button isIconOnly variant="flat" className="border border-default-200 text-primary" onPress={() => navigate(`/recipes/new?edit=${recipe.id}`)}>
-                   <Edit className="w-4 h-4" />
-                 </Button>
+                 <Button 
+                    isIconOnly 
+                    variant="flat" 
+                    className="border border-default-200 text-primary" 
+                    title={t('common.actions.edit')}
+                    onPress={() => navigate(`/recipes/new?edit=${recipe.id}`, { state: { from: '/recipes' } })}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    isIconOnly 
+                    variant="flat" 
+                    color="danger" 
+                    className="border border-danger-200 dark:border-danger-900/50 text-danger hover:bg-danger/10 dark:hover:bg-danger/20 dark:hover:bg-danger-900/20" 
+                    title={t('common.actions.delete')}
+                    onPress={() => setIsDeleteModalOpen(true)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                </div>
                
                {/* Meta Stats Row instead of Notes */}
@@ -787,8 +903,8 @@ export function RecipeDetailPage() {
                     <div className="p-2 rounded-full bg-primary/10 text-primary mb-1">
                       <Gauge className="w-5 h-5" />
                     </div>
-                    <span className="text-xs text-default-500 font-medium">Độ khó</span>
-                    <span className="font-bold text-foreground">{recipe.difficulty || 'Chưa rõ'}</span>
+                    <span className="text-xs text-default-500 font-medium">{t('recipes.filter.difficulty')}</span>
+                    <span className="font-bold text-foreground">{recipe.difficulty || '-'}</span>
                   </div>
                   
                   <div className="app-card flex flex-col items-center justify-center gap-1 p-4">
@@ -803,16 +919,16 @@ export function RecipeDetailPage() {
                     <div className="p-2 rounded-full bg-secondary/10 text-secondary mb-1">
                       <Clock className="w-5 h-5" />
                     </div>
-                    <span className="text-xs text-default-500 font-medium">Sơ chế</span>
-                    <span className="font-bold text-foreground">{recipe.prep_time || 0} phút</span>
+                    <span className="text-xs text-default-500 font-medium">{t('recipes.filter.prepTime')}</span>
+                    <span className="font-bold text-foreground">{recipe.prep_time || 0} {t('common.time.minutes')}</span>
                   </div>
                   
                   <div className="app-card flex flex-col items-center justify-center gap-1 p-4">
                     <div className="p-2 rounded-full bg-success/10 text-success mb-1">
                       <Timer className="w-5 h-5" />
                     </div>
-                    <span className="text-xs text-default-500 font-medium">Nấu</span>
-                    <span className="font-bold text-foreground">{recipe.cook_time || 0} phút</span>
+                    <span className="text-xs text-default-500 font-medium">{t('recipes.filter.cookingMethod')}</span>
+                    <span className="font-bold text-foreground">{recipe.cook_time || 0} {t('common.time.minutes')}</span>
                   </div>
                </div>
 
@@ -820,7 +936,7 @@ export function RecipeDetailPage() {
                {recipe.tags && recipe.tags.length > 0 && (
                  <div className="flex flex-wrap items-center gap-2">
                    <div className="flex items-center gap-1.5 text-sm font-semibold text-default-500 mr-1">
-                     <Tag className="w-4 h-4" /> Tags:
+                     <Tag className="w-4 h-4" /> {t('recipes.filter.tags')}:
                    </div>
                    {recipe.tags.map(tag => {
                       const t = DEFAULT_TAGS.find(x => x.id === tag || x.slug === tag || x.name.toLowerCase() === tag.toLowerCase());
@@ -860,10 +976,10 @@ export function RecipeDetailPage() {
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold flex items-center gap-2">
                   <Carrot className="w-6 h-6 text-success" />
-                  Nguyên liệu
+                  {t('recipes.detail.ingredients')}
                 </h2>
                 <div className="flex items-center gap-2 bg-default-100 dark:bg-default-100/70 border border-default-200/50 dark:border-divider px-2 py-1 rounded-full text-sm font-medium">
-                  <span className="text-default-500 mr-1 hidden sm:inline ml-2">Khẩu phần</span>
+                  <span className="text-default-500 mr-1 hidden sm:inline ml-2">{t('recipes.detail.scaleServings')}</span>
                   <div 
                     className="w-6 h-6 flex items-center justify-center bg-content1 dark:bg-default-200 rounded-full cursor-pointer shadow-xs text-foreground active:text-primary transition-all shrink-0 border border-divider/40 active:scale-95"
                     onClick={() => {
@@ -931,7 +1047,7 @@ export function RecipeDetailPage() {
             <div className="app-card xl:col-span-3 flex flex-col gap-6 p-6">
                <h2 className="text-2xl font-bold flex items-center gap-2">
                  <ChefHat className="w-6 h-6 text-success" />
-                 Cách làm
+                 {t('recipes.detail.instructions')}
                </h2>
                
                <div className="flex flex-col gap-2">
@@ -1006,12 +1122,12 @@ export function RecipeDetailPage() {
           <div className="app-card p-4 flex flex-col w-full">
             <Tabs aria-label="Recipe Sidebar Tabs" color="primary" variant="underlined" fullWidth classNames={{ cursor: "w-full bg-primary", tabList: "w-full relative rounded-none p-0 border-b border-default-200", tab: "px-0 h-12" }}>
               
-              <Tab key="overview" title={<span className="text-base font-medium">Tổng quan</span>}>
+              <Tab key="overview" title={<span className="text-base font-medium">{t('recipes.detail.overview')}</span>}>
                 <div className="flex flex-col divide-y divide-default-100 mt-2">
                   {/* Video */}
                   {recipe.video_url && (
                      <div className="py-5 first:pt-2 last:pb-0 flex flex-col gap-4">
-                        <h3 className="font-bold text-base flex items-center gap-2"><Video className="w-5 h-5 text-primary" /> Video Hướng Dẫn</h3>
+                        <h3 className="font-bold text-base flex items-center gap-2"><Video className="w-5 h-5 text-primary" /> Video</h3>
                         <div 
                           className="w-full aspect-video bg-default-100 rounded-2xl flex items-center justify-center overflow-hidden relative cursor-pointer group"
                           onClick={() => handleOpenLightbox('video', recipe.video_url!)}
@@ -1036,7 +1152,7 @@ export function RecipeDetailPage() {
                           onClick={() => setIsRelatedExpanded(!isRelatedExpanded)}
                         >
                           <h3 className="font-bold text-base flex items-center gap-2">
-                            <LinkIcon className="w-5 h-5 text-primary" /> Công thức liên kết
+                            <LinkIcon className="w-5 h-5 text-primary" /> {t('recipes.detail.relatedRecipes')}
                           </h3>
                           <div className="p-1 rounded-full active:bg-default-100 transition-colors">
                             {isRelatedExpanded ? (
@@ -1063,13 +1179,13 @@ export function RecipeDetailPage() {
                                     <span className="font-medium text-sm line-clamp-2 leading-tight">{rel.title}</span>
                                     <div className="flex items-center gap-2 text-[10px] text-default-500 mt-1">
                                       {extra?.taste_score ? (
-                                        <span className="flex items-center gap-0.5" title="Đánh giá"><Star className="w-3 h-3 text-warning" />{extra.taste_score}</span>
+                                        <span className="flex items-center gap-0.5" title={t('recipes.filter.tasteScore', 'Đánh giá')}><Star className="w-3 h-3 text-warning" />{extra.taste_score}</span>
                                       ) : null}
                                       {extra?.calories ? (
                                         <span className="flex items-center gap-0.5" title="Calories"><Flame className="w-3 h-3 text-danger" />{extra.calories}</span>
                                       ) : null}
                                       {extra?.difficulty ? (
-                                        <span className="flex items-center gap-0.5" title="Độ khó"><ChefHat className="w-3 h-3 text-primary" />{extra.difficulty}</span>
+                                        <span className="flex items-center gap-0.5" title={t('recipes.filter.difficulty')}><ChefHat className="w-3 h-3 text-primary" />{extra.difficulty}</span>
                                       ) : null}
                                     </div>
                                   </div>
@@ -1084,7 +1200,7 @@ export function RecipeDetailPage() {
                   {/* Notes */}
                   {recipe.notes && (
                     <div className="py-5 first:pt-2 last:pb-0 flex flex-col gap-3">
-                       <h3 className="font-bold text-base flex items-center gap-2"><Info className="w-5 h-5 text-warning-500" /> Ghi chú</h3>
+                       <h3 className="font-bold text-base flex items-center gap-2"><Info className="w-5 h-5 text-warning-500" /> {t('recipes.detail.notes')}</h3>
                        <div 
                          className="text-sm leading-relaxed text-amber-950 dark:text-amber-100 bg-amber-500/10 dark:bg-amber-500/15 p-4 rounded-2xl border border-amber-500/30 prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 [&_*]:text-amber-950 dark:[&_*]:text-amber-100 [&_strong]:text-amber-950 dark:[&_strong]:text-amber-50 [&_b]:text-amber-950 dark:[&_b]:text-amber-50 [&_li]:text-amber-950/90 dark:[&_li]:text-amber-100/90"
                          dangerouslySetInnerHTML={{ __html: recipe.notes }}
@@ -1096,7 +1212,7 @@ export function RecipeDetailPage() {
 
               <Tab key="history" title={
                 <div className="flex items-center gap-2">
-                  <span className="text-base font-medium">Lịch sử nấu</span>
+                  <span className="text-base font-medium">{t('recipes.detail.ratingHistory')}</span>
                   {recipe.cooking_history && recipe.cooking_history.length > 0 && (
                     <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs font-bold">
                       {recipe.cooking_history.length}
@@ -1124,7 +1240,7 @@ export function RecipeDetailPage() {
                         >
                           <div className="flex justify-between items-center">
                             <span className="text-sm text-default-500 font-medium">
-                              {new Date(history.date).toLocaleDateString('vi-VN', { 
+                              {new Date(history.date).toLocaleDateString(undefined, { 
                                 day: '2-digit', month: '2-digit', year: 'numeric',
                                 hour: '2-digit', minute: '2-digit'
                               })}
@@ -1143,8 +1259,7 @@ export function RecipeDetailPage() {
                     </div>
                   ) : (
                     <div className="text-center py-8">
-                      <p className="text-default-500">Bạn chưa ghi nhận lần nấu nào cho món này.</p>
-                      <p className="text-default-400 text-sm mt-1">Hãy bấm "Bắt đầu nấu" và hoàn thành để lưu lại đánh giá nhé!</p>
+                      <p className="text-default-500">{t('recipes.detail.noCookingHistory')}</p>
                     </div>
                   )}
                 </div>
@@ -1237,7 +1352,7 @@ export function RecipeDetailPage() {
           onPress={() => setIsCookingModeOpen(true)}
           startContent={<Play className="w-5 h-5 fill-current" />}
         >
-          Bắt đầu nấu
+          {t('recipes.detail.cookMode')}
         </Button>
       </div>
       <MealPlannerSelectModal 
@@ -1245,6 +1360,26 @@ export function RecipeDetailPage() {
         onOpenChange={setIsMealPlannerModalOpen} 
         onConfirm={handleAddToMealPlan} 
       />
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        onConfirm={handleDeleteRecipe}
+        title={t('recipes.actions.deleteConfirmTitle', { defaultValue: 'Xoá công thức' })}
+        description={t('recipes.actions.deleteConfirm', { title: recipe?.title || '' })}
+      />
+
+      {/* Dedicated Printable & Export Template (mounted via Portal for pristine A4 export & printing) */}
+      {recipe && typeof document !== 'undefined' && createPortal(
+        <div id="recipe-print-portal" className="recipe-export-offscreen">
+          <RecipePrintTemplate 
+            recipe={recipe} 
+            scaledServings={targetServings} 
+            id="recipe-print-template" 
+          />
+        </div>,
+        document.body
+      )}
     </div>
   );
 }

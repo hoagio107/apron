@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input } from '@/ui';
 import { Tags, Plus, Check } from 'lucide-react';
 
@@ -11,6 +12,7 @@ interface TagSelectModalProps {
 }
 
 export function TagSelectModal({ isOpen, onOpenChange, availableTags, onConfirm, recipeCount = 1 }: TagSelectModalProps) {
+  const { t } = useTranslation();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [newTagInput, setNewTagInput] = useState('');
 
@@ -56,10 +58,10 @@ export function TagSelectModal({ isOpen, onOpenChange, availableTags, onConfirm,
         {(onClose) => (
           <>
             <ModalHeader className="flex flex-col gap-1">
-              Gắn thẻ
+              {t('recipes.actions.addTags')}
               {recipeCount > 1 && (
                 <span className="text-sm font-normal text-default-500">
-                  Đang gắn thẻ cho {recipeCount} công thức
+                  {t('recipes.actions.taggingRecipeCount', { count: recipeCount })}
                 </span>
               )}
             </ModalHeader>
@@ -67,7 +69,7 @@ export function TagSelectModal({ isOpen, onOpenChange, availableTags, onConfirm,
               <div className="flex flex-col gap-4">
                 <div className="flex gap-2 items-center">
                   <Input 
-                    placeholder="Thêm thẻ mới..."
+                    placeholder={t('recipes.actions.addNewTag')}
                     variant="flat"
                     value={newTagInput}
                     onChange={(e) => setNewTagInput(e.target.value)}
@@ -89,9 +91,9 @@ export function TagSelectModal({ isOpen, onOpenChange, availableTags, onConfirm,
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <span className="text-sm font-medium text-foreground">Thẻ có sẵn</span>
+                  <span className="text-sm font-medium text-foreground">{t('recipes.filter.tags')}</span>
                   {sessionTags.length === 0 ? (
-                    <p className="text-sm text-default-400 italic">Chưa có thẻ nào được tạo.</p>
+                    <p className="text-sm text-default-400 italic">{t('common.status.empty')}</p>
                   ) : (
                     <div className="flex flex-wrap gap-2">
                       {sessionTags.map(tag => {
@@ -117,10 +119,10 @@ export function TagSelectModal({ isOpen, onOpenChange, availableTags, onConfirm,
             </ModalBody>
             <ModalFooter>
               <Button variant="light" onPress={onClose}>
-                Hủy
+                {t('common.actions.cancel')}
               </Button>
               <Button color="primary" onPress={handleConfirm} isDisabled={selectedTags.length === 0}>
-                Xác nhận
+                {t('common.actions.confirm')}
               </Button>
             </ModalFooter>
           </>

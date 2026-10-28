@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Checkbox, Button, Autocomplete, AutocompleteItem } from '@/ui';
 import { Minus, Plus, MoreVertical, Trash2 } from 'lucide-react';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
@@ -12,7 +13,10 @@ interface ShoppingListItemCardProps {
   onUpdateUnit?: (id: string, newUnit: string) => void;
 }
 
-export function ShoppingListItemCard({ item, onToggle, onRemove, onUpdateQuantity, onUpdateUnit }: ShoppingListItemCardProps) {
+export function ShoppingListItemCard({
+  // props
+ item, onToggle, onRemove, onUpdateQuantity, onUpdateUnit }: ShoppingListItemCardProps) {
+  const { t } = useTranslation();
   const { units } = useUnitStore();
 
   const handleIncrement = () => {

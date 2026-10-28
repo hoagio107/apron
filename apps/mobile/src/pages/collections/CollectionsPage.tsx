@@ -9,6 +9,7 @@ import {
   Plus, FolderHeart, Trash2, Edit2, Search, 
   MoreVertical, Layers 
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useCollectionStore } from '../../store/useCollectionStore';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { ConfirmModal } from '../../components/shared/ConfirmModal';
@@ -17,6 +18,7 @@ import { CollectionModal } from './components/CollectionModal';
 import type { Collection } from '@apron/core';
 
 export function CollectionsPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { collections, isLoading, fetchCollections, addCollection, updateCollection, deleteCollection } = useCollectionStore();
 
@@ -74,8 +76,8 @@ export function CollectionsPage() {
     <div className="flex flex-col min-h-full gap-4 w-full pt-4 pb-28 px-4">
       {/* Header */}
       <PageHeader
-        title="Bộ sưu tập"
-        description={`${collections.length} bộ sưu tập thực đơn & ảnh`}
+        title={t('collections.title')}
+        description={t('collections.subtitle', { count: collections.length })}
         actions={
           <div className="flex items-center gap-2 w-full">
             <Input
@@ -85,7 +87,7 @@ export function CollectionsPage() {
                 input: "text-small",
                 inputWrapper: "h-10 min-h-10",
               }}
-              placeholder="Tìm kiếm bộ sưu tập..."
+              placeholder={t('collections.searchPlaceholder')}
               startContent={<Search className="w-4 h-4 text-default-400" />}
               value={searchQuery}
               onValueChange={setSearchQuery}
@@ -97,7 +99,7 @@ export function CollectionsPage() {
               color="primary"
               className="rounded-xl shadow-sm shrink-0 h-10 w-10 min-w-10"
               onPress={handleOpenAdd}
-              aria-label="Tạo bộ sưu tập mới"
+              aria-label={t('collections.addCollection')}
             >
               <Plus className="w-5 h-5" />
             </Button>
@@ -112,8 +114,8 @@ export function CollectionsPage() {
       ) : collections.length === 0 ? (
         <EmptyState
           icon={<FolderHeart className="w-10 h-10 text-default-300" />}
-          title="Chưa có bộ sưu tập nào"
-          description="Tạo bộ sưu tập đầu tiên để gom nhóm các thực đơn ảnh hay món ăn."
+          title={t('collections.emptyTitle')}
+          description={t('collections.emptyDesc')}
           action={
             <Button
               color="primary"
@@ -121,7 +123,7 @@ export function CollectionsPage() {
               startContent={<Plus className="w-4 h-4" />}
               onPress={handleOpenAdd}
             >
-              Tạo bộ sưu tập
+              {t('collections.addCollection')}
             </Button>
           }
         />
@@ -165,7 +167,7 @@ export function CollectionsPage() {
                       <span>{totalFolders}</span>
                     </div>
                     <div className="bg-black/55 backdrop-blur-md text-white text-[10px] font-semibold px-2 py-0.5 rounded-full border border-white/10 shadow-sm">
-                      {totalDishes} món
+                      {totalDishes} {t('collections.dishes')}
                     </div>
                   </div>
 
@@ -178,23 +180,23 @@ export function CollectionsPage() {
                           size="sm"
                           variant="flat"
                           className="rounded-full w-7 h-7 min-w-7 bg-black/40 text-white backdrop-blur-md active:bg-black/60"
-                          aria-label="Tùy chọn"
+                          aria-label={t('common.actions.more')}
                         >
                           <MoreVertical className="w-3.5 h-3.5" />
                         </Button>
                       </DropdownTrigger>
                       <DropdownMenu
-                        aria-label="Tùy chọn"
+                        aria-label={t('common.actions.more')}
                         onAction={(key) => {
                           if (key === 'edit') handleOpenEdit(col);
                           if (key === 'delete') setDeleteColId(col.id);
                         }}
                       >
                         <DropdownItem key="edit" startContent={<Edit2 className="w-4 h-4" />}>
-                          Chỉnh sửa bộ sưu tập
+                          {t('collections.editCollection')}
                         </DropdownItem>
                         <DropdownItem key="delete" className="text-danger" color="danger" startContent={<Trash2 className="w-4 h-4" />}>
-                          Xoá bộ sưu tập
+                          {t('collections.deleteCollection')}
                         </DropdownItem>
                       </DropdownMenu>
                     </Dropdown>
@@ -219,7 +221,7 @@ export function CollectionsPage() {
                     size="sm"
                     onPress={() => navigate(`/collections/${col.id}`)}
                   >
-                    <span className="truncate">Xem chi tiết</span>
+                    <span className="truncate">{t('common.actions.viewDetails')}</span>
                   </Button>
                 </div>
               </div>
@@ -232,9 +234,9 @@ export function CollectionsPage() {
       <ConfirmModal
         isOpen={deleteColId !== null}
         onOpenChange={(open) => !open && setDeleteColId(null)}
-        title="Xoá bộ sưu tập"
-        description="Bạn có chắc chắn muốn xoá bộ sưu tập này? Tất cả thư mục và món ăn bên trong sẽ bị xoá."
-        confirmLabel="Xoá"
+        title={t('collections.deleteCollection')}
+        description={t('collections.deleteConfirmDesc')}
+        confirmLabel={t('common.actions.delete')}
         confirmColor="danger"
         onConfirm={async () => {
           if (deleteColId) {

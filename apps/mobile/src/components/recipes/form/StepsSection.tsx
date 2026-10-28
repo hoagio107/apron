@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect } from 'react';
 import { useFormContext, useFieldArray, Controller } from 'react-hook-form';
 import { Button, Input } from '@/ui';
@@ -9,6 +10,7 @@ import { ImageManager } from '../../../lib/image-manager';
 import { RichTextEditor } from './RichTextEditor';
 
 export function StepsSection() {
+  const { t } = useTranslation();
   const { control, setValue, getValues } = useFormContext<FormValues>();
   
   const { fields: sections, append: appendSection, remove: removeSection } = useFieldArray({
@@ -31,7 +33,7 @@ export function StepsSection() {
     <div className="flex flex-col gap-6 w-full">
       {sections.length === 0 && (
         <div className="text-center text-default-400 py-8 text-sm">
-          Chưa có bước thực hiện nào. Hãy thêm giai đoạn đầu tiên.
+          {t('recipes.form.noSteps')}
         </div>
       )}
       
@@ -69,6 +71,7 @@ export function StepsSection() {
 }
 
 function StepGroup({ sectionIndex, onRemove, onOpenImageModal }: { sectionIndex: number, onRemove: () => void, onOpenImageModal: (stepIndex: number) => void }) {
+  const { t } = useTranslation();
   const { control } = useFormContext<FormValues>();
   
   const { fields: steps, append, remove, move } = useFieldArray({
@@ -87,7 +90,7 @@ function StepGroup({ sectionIndex, onRemove, onOpenImageModal }: { sectionIndex:
               {...field}
               value={field.value || ''}
               variant="underlined"
-              placeholder="Tên giai đoạn (VD: Sơ chế, Chế biến...)"
+              placeholder={t('recipes.form.stageNamePlaceholder')}
               className="max-w-xs"
               classNames={{
                 inputWrapper: "shadow-none border-b-0 data-[hover=true]:border-b-0 after:bg-primary pb-0 min-h-8 h-8",
@@ -152,6 +155,7 @@ function StepRow({
   onRemove: () => void;
   onOpenImageModal: () => void;
 }) {
+  const { t } = useTranslation();
   const { control, getValues, setValue } = useFormContext<FormValues>();
   const [isFocused, setIsFocused] = useState(false);
   const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -182,7 +186,7 @@ function StepRow({
     <div className={`flex items-start gap-2 group/step w-full transition-shadow ${isDragging ? 'bg-default-100/80 rounded-xl p-1 shadow-lg ring-1 ring-primary/30' : ''}`}>
       <div 
         className="touch-none select-none cursor-grab active:cursor-grabbing p-2 -ml-2 text-default-300 hover:text-default-600 active:text-primary transition-colors shrink-0 mt-1"
-        title="Kéo thả để đổi thứ tự bước"
+        title={t('recipes.form.dragToReorder')}
         {...attributes}
         {...listeners}
       >
@@ -199,7 +203,7 @@ function StepRow({
               onChange={field.onChange}
               onFocus={handleFocus}
               onBlur={handleBlur}
-              placeholder={`Bước ${index + 1}...`}
+              placeholder={t('recipes.form.stepPlaceholder', { number: index + 1 })}
               isInvalid={!!fieldState.error}
               errorMessage={fieldState.error?.message}
             />

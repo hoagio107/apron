@@ -9,7 +9,7 @@ export function NewRecipePage() {
   const { id: paramId } = useParams();
   const [searchParams] = useSearchParams();
   const editId = searchParams.get('edit') || paramId;
-  const { addRecipe, addBulkRecipes, updateRecipe, recipes, fetchRecipes } = useRecipeStore();
+  const { addRecipe, addBulkRecipes, updateRecipe, recipes, fetchRecipes, fetchRecipeDetail } = useRecipeStore();
   
   const [editRecipe, setEditRecipe] = useState<Recipe | undefined>();
 
@@ -20,10 +20,14 @@ export function NewRecipePage() {
 
   useEffect(() => {
     if (editId) {
-      const existing = recipes.find(r => r.id === editId);
-      if (existing) {
-        setEditRecipe(existing);
-      }
+      fetchRecipeDetail(editId).then((r) => {
+        if (r) {
+          setEditRecipe(r);
+        } else {
+          const existing = recipes.find(item => item.id === editId);
+          if (existing) setEditRecipe(existing);
+        }
+      });
     } else {
       const titleParam = searchParams.get('title');
       const imageParam = searchParams.get('image');
@@ -34,13 +38,20 @@ export function NewRecipePage() {
           image_url: imageParam || '',
           servings: 2,
           ingredients: [],
-          instructions: []
-        } as any);
+          steps: [],
+          slug: '',
+          prep_time: 0,
+          cook_time: 0,
+          difficulty: 'Dễ',
+          calories: 0,
+          taste_score: 0,
+          author_id: 'local',
+        });
       }
     }
-  }, [editId, searchParams, recipes]);
+  }, [editId, searchParams, recipes, fetchRecipeDetail]);
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: Recipe | Recipe[]) => {
     if (Array.isArray(data)) {
       await addBulkRecipes(data);
       navigate('/recipes', { replace: true });
@@ -61,9 +72,8 @@ export function NewRecipePage() {
     }
   };
 
-  // Nếu đang edit mà chưa load xong recipe (ví dụ reload trang), có thể render loading
   if (editId && !editRecipe && recipes.length > 0) {
-    return null; // Hoặc loading spinner
+    return null;
   }
 
   return (

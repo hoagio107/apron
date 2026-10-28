@@ -6,8 +6,9 @@ import type { ShoppingListItem } from '../types/shopping-list';
 interface ShoppingListState {
   items: ShoppingListItem[];
   isLoading: boolean;
-  
-  fetchItems: () => Promise<void>;
+  hasFetched: boolean;
+
+  fetchItems: (force?: boolean) => Promise<void>;
   addItem: (name: string, quantity?: number | string, unit?: string, group?: string) => Promise<void>;
   addItems: (items: Omit<ShoppingListItem, 'id' | 'checked' | 'created_at'>[]) => Promise<void>;
   updateItem: (id: string, updates: Partial<ShoppingListItem>) => Promise<void>;
@@ -19,12 +20,17 @@ interface ShoppingListState {
 export const useShoppingListStore = create<ShoppingListState>((set, get) => ({
   items: [],
   isLoading: false,
+  hasFetched: false,
 
-  fetchItems: async () => {
+  fetchItems: async (force = false) => {
+    if (!force && get().hasFetched && get().items.length > 0) {
+      return;
+    }
+
     set({ isLoading: true });
     try {
       const items = await ShoppingListRepository.getAll();
-      set({ items });
+      set({ items, hasFetched: true });
     } finally {
       set({ isLoading: false });
     }
@@ -38,9 +44,9 @@ export const useShoppingListStore = create<ShoppingListState>((set, get) => ({
       unit,
       group: group || autoCategorizeIngredient(name),
       checked: false,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
-    
+
     const newItems = [...get().items, newItem];
     set({ items: newItems });
     await ShoppingListRepository.saveAll(newItems);
@@ -48,29 +54,27 @@ export const useShoppingListStore = create<ShoppingListState>((set, get) => ({
 
   addItems: async (newItemsData) => {
     const timestamp = new Date().toISOString();
-    const newItems = newItemsData.map(item => ({
+    const newItems = newItemsData.map((item) => ({
       ...item,
       group: item.group || autoCategorizeIngredient(item.name),
       id: crypto.randomUUID(),
       checked: false,
-      created_at: timestamp
+      created_at: timestamp,
     }));
-    
+
     const updatedList = [...get().items, ...newItems];
     set({ items: updatedList });
     await ShoppingListRepository.saveAll(updatedList);
   },
 
   updateItem: async (id, updates) => {
-    const newItems = get().items.map(item => 
-      item.id === id ? { ...item, ...updates } : item
-    );
+    const newItems = get().items.map((item) => (item.id === id ? { ...item, ...updates } : item));
     set({ items: newItems });
     await ShoppingListRepository.saveAll(newItems);
   },
 
   toggleItem: async (id) => {
-    const newItems = get().items.map(item => 
+    const newItems = get().items.map((item) =>
       item.id === id ? { ...item, checked: !item.checked } : item
     );
     set({ items: newItems });
@@ -78,14 +82,16 @@ export const useShoppingListStore = create<ShoppingListState>((set, get) => ({
   },
 
   removeItems: async (ids) => {
-    const newItems = get().items.filter(item => !ids.includes(item.id));
+    const idSet = new Set(ids);
+    const newItems = get().items.filter((item) => !idSet.has(item.id));
     set({ items: newItems });
     await ShoppingListRepository.saveAll(newItems);
   },
 
   clearCompleted: async () => {
-    const newItems = get().items.filter(item => !item.checked);
+    const newItems = get().items.filter((item) => !item.checked);
     set({ items: newItems });
     await ShoppingListRepository.saveAll(newItems);
-  }
+  },
 }));
+

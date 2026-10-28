@@ -6,27 +6,34 @@ interface TipState {
   tips: Tip[];
   isLoading: boolean;
   error: string | null;
-  
+  hasFetched: boolean;
+
   // Actions
-  fetchTips: () => Promise<void>;
+  fetchTips: (force?: boolean) => Promise<void>;
   addTip: (tip: Tip) => Promise<void>;
   updateTip: (tip: Tip) => Promise<void>;
   deleteTip: (id: string) => Promise<void>;
   deleteBulkTips: (ids: string[]) => Promise<void>;
 }
 
-export const useTipStore = create<TipState>((set, _get) => ({
+export const useTipStore = create<TipState>((set, get) => ({
   tips: [],
   isLoading: false,
   error: null,
+  hasFetched: false,
 
-  fetchTips: async () => {
+  fetchTips: async (force = false) => {
+    if (!force && get().hasFetched && get().tips.length > 0) {
+      return;
+    }
+
     set({ isLoading: true, error: null });
     try {
       const data = await TipRepository.getAll();
-      set({ tips: data, isLoading: false });
-    } catch (e: any) {
-      set({ error: e.message || 'Failed to fetch tips', isLoading: false });
+      set({ tips: data, isLoading: false, hasFetched: true });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Failed to fetch tips';
+      set({ error: msg, isLoading: false });
     }
   },
 
@@ -35,8 +42,9 @@ export const useTipStore = create<TipState>((set, _get) => ({
       await TipRepository.save(tip);
       const newTip = { ...tip, id: tip.id || crypto.randomUUID() };
       set((state) => ({ tips: [newTip, ...state.tips] }));
-    } catch (e: any) {
-      set({ error: e.message || 'Failed to add tip' });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Failed to add tip';
+      set({ error: msg });
       throw e;
     }
   },
@@ -45,10 +53,11 @@ export const useTipStore = create<TipState>((set, _get) => ({
     try {
       await TipRepository.save(tip);
       set((state) => ({
-        tips: state.tips.map(t => t.id === tip.id ? tip : t)
+        tips: state.tips.map((t) => (t.id === tip.id ? tip : t)),
       }));
-    } catch (e: any) {
-      set({ error: e.message || 'Failed to update tip' });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Failed to update tip';
+      set({ error: msg });
       throw e;
     }
   },
@@ -57,10 +66,11 @@ export const useTipStore = create<TipState>((set, _get) => ({
     try {
       await TipRepository.delete(id);
       set((state) => ({
-        tips: state.tips.filter(t => t.id !== id)
+        tips: state.tips.filter((t) => t.id !== id),
       }));
-    } catch (e: any) {
-      set({ error: e.message || 'Failed to delete tip' });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Failed to delete tip';
+      set({ error: msg });
       throw e;
     }
   },
@@ -68,12 +78,14 @@ export const useTipStore = create<TipState>((set, _get) => ({
   deleteBulkTips: async (ids: string[]) => {
     try {
       await TipRepository.deleteBulk(ids);
+      const idSet = new Set(ids);
       set((state) => ({
-        tips: state.tips.filter(t => !ids.includes(t.id))
+        tips: state.tips.filter((t) => !idSet.has(t.id)),
       }));
-    } catch (e: any) {
-      set({ error: e.message || 'Failed to bulk delete tips' });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Failed to bulk delete tips';
+      set({ error: msg });
       throw e;
     }
-  }
+  },
 }));

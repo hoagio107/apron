@@ -1,4 +1,3 @@
-import { useTranslation } from 'react-i18next';
 import { Checkbox, Button, Autocomplete, AutocompleteItem } from '@/ui';
 import { Minus, Plus, MoreVertical, Trash2 } from 'lucide-react';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
@@ -15,8 +14,7 @@ interface ShoppingListItemCardProps {
 
 export function ShoppingListItemCard({
   // props
- item, onToggle, onRemove, onUpdateQuantity, onUpdateUnit }: ShoppingListItemCardProps) {
-  const { t } = useTranslation();
+  item, onToggle, onRemove, onUpdateQuantity, onUpdateUnit }: ShoppingListItemCardProps) {
   const { units } = useUnitStore();
 
   const handleIncrement = () => {
@@ -38,7 +36,7 @@ export function ShoppingListItemCard({
 
   return (
     <div className={`flex items-center gap-4 p-3 app-card transition-all ${item.checked ? 'opacity-60' : 'hover:bg-content2'}`}>
-      <Checkbox 
+      <Checkbox
         isSelected={item.checked}
         onValueChange={() => onToggle(item.id)}
         size="lg"
@@ -47,7 +45,7 @@ export function ShoppingListItemCard({
         }}
         radius="full"
       />
-      
+
       <div className={`w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center ${theme.bg} ${theme.text}`}>
         <Icon className="w-6 h-6" />
       </div>
@@ -63,28 +61,28 @@ export function ShoppingListItemCard({
 
       <div className="flex items-center gap-0">
         <div className="flex items-center gap-0">
-        <Button 
-          isIconOnly 
-          size="sm" 
-          variant="light" 
-          className="text-default-500 w-6 h-6 min-w-6"
-          onPress={handleDecrement}
-        >
-          <Minus className="w-3 h-3" />
-        </Button>
-        <span className="text-sm font-medium w-6 text-center">{item.quantity || 1}</span>
-        <Button 
-          isIconOnly 
-          size="sm" 
-          variant="light" 
-          className="text-primary w-6 h-6 min-w-6"
-          onPress={handleIncrement}
-        >
-          <Plus className="w-3 h-3" />
-        </Button>
+          <Button
+            isIconOnly
+            size="sm"
+            variant="light"
+            className="text-default-500 w-6 h-6 min-w-6"
+            onPress={handleDecrement}
+          >
+            <Minus className="w-3 h-3" />
+          </Button>
+          <span className="text-sm font-medium w-6 text-center">{item.quantity || 1}</span>
+          <Button
+            isIconOnly
+            size="sm"
+            variant="light"
+            className="text-primary w-6 h-6 min-w-6"
+            onPress={handleIncrement}
+          >
+            <Plus className="w-3 h-3" />
+          </Button>
         </div>
-        
-        <Autocomplete 
+
+        <Autocomplete
           size="sm"
           variant="flat"
           className="w-36"
@@ -101,7 +99,7 @@ export function ShoppingListItemCard({
             onUpdateUnit?.(item.id, val);
           }}
           aria-label="Đơn vị"
-          classNames={{ 
+          classNames={{
             base: "w-36 h-8",
             clearButton: "hover:bg-transparent data-[hover=true]:bg-transparent",
             selectorButton: "hidden"
@@ -128,10 +126,10 @@ export function ShoppingListItemCard({
           </Button>
         </DropdownTrigger>
         <DropdownMenu aria-label="Item actions">
-          <DropdownItem 
-            key="delete" 
-            className="text-danger" 
-            color="danger" 
+          <DropdownItem
+            key="delete"
+            className="text-danger"
+            color="danger"
             startContent={<Trash2 className="w-4 h-4" />}
             onPress={() => onRemove(item.id)}
           >

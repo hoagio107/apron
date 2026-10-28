@@ -109,6 +109,10 @@ export function RecipeListPage() {
     return Array.from(tags).sort();
   }, [recipes]);
 
+  const rootRecipes = useMemo(() => {
+    return recipes.filter(r => !r.parent_id);
+  }, [recipes]);
+
   const activeFilterCount = (filters.difficulties.length > 0 ? 1 : 0) + 
     (filters.maxTime !== null ? 1 : 0) + 
     ((filters.tags?.length || 0) > 0 ? 1 : 0) + 
@@ -116,7 +120,8 @@ export function RecipeListPage() {
     (filters.minRating ? 1 : 0);
 
   const filteredAndSortedRecipes = useMemo(() => {
-    let result = [...recipes];
+    // Chỉ hiển thị các món gốc / không phải biến thể ở sổ tay công thức
+    let result = recipes.filter(r => !r.parent_id);
 
     // Tìm kiếm theo từ khóa an toàn
     if (searchQuery.trim()) {
@@ -199,7 +204,6 @@ export function RecipeListPage() {
     return map;
   }, [recipes]);
 
-  const INITIAL_BATCH = 24;
   const BATCH_SIZE = 24;
   const [displayLimit, setDisplayLimit] = useState(cachedMobileDisplayLimit);
 
@@ -353,9 +357,9 @@ export function RecipeListPage() {
 
   const handleBulkAddToMealPlan = async (date: string, slotId: string) => {
     try {
-      for (const id of Array.from(selectedIds)) {
-        await addMealPlanEntry(date, { recipe_id: id, meal_type: slotId });
-      }
+      await Promise.all(
+        Array.from(selectedIds).map(id => addMealPlanEntry(date, { recipe_id: id, meal_type: slotId }))
+      );
       toast.success(`Đã thêm ${selectedIds.size} công thức vào thực đơn!`);
       toggleSelectMode();
     } catch (e) {
@@ -366,14 +370,17 @@ export function RecipeListPage() {
 
   const handleBulkAddTags = async (tags: string[]) => {
     try {
-      for (const id of Array.from(selectedIds)) {
-        const recipe = recipes.find(r => r.id === id);
-        if (recipe) {
-          const currentTags = recipe.tags || [];
-          const newTags = Array.from(new Set([...currentTags, ...tags]));
-          await updateRecipe({ ...recipe, tags: newTags });
-        }
-      }
+      const recipeMap = new Map(recipes.map(r => [r.id, r]));
+      await Promise.all(
+        Array.from(selectedIds).map(async id => {
+          const recipe = recipeMap.get(id);
+          if (recipe) {
+            const currentTags = recipe.tags || [];
+            const newTags = Array.from(new Set([...currentTags, ...tags]));
+            await updateRecipe({ ...recipe, tags: newTags });
+          }
+        })
+      );
       toast.success(`Đã gắn thẻ cho ${selectedIds.size} công thức!`);
       toggleSelectMode();
     } catch (e) {
@@ -384,14 +391,17 @@ export function RecipeListPage() {
 
   const handleBulkSetParent = async (parentId: string) => {
     try {
-      for (const id of Array.from(selectedIds)) {
-        if (id !== parentId) {
-          const recipe = recipes.find(r => r.id === id);
-          if (recipe) {
-            await updateRecipe({ ...recipe, parent_id: parentId });
+      const recipeMap = new Map(recipes.map(r => [r.id, r]));
+      await Promise.all(
+        Array.from(selectedIds).map(async id => {
+          if (id !== parentId) {
+            const recipe = recipeMap.get(id);
+            if (recipe) {
+              await updateRecipe({ ...recipe, parent_id: parentId });
+            }
           }
-        }
-      }
+        })
+      );
       toast.success(`Đã gán món cha cho ${selectedIds.size} công thức!`);
       toggleSelectMode();
     } catch (e) {
@@ -402,23 +412,26 @@ export function RecipeListPage() {
 
   const handleBulkSaveImages = async (updates: { recipeId: string; imageUrl: string }[]) => {
     try {
-      for (const update of updates) {
-        const recipe = recipes.find(r => r.id === update.recipeId);
-        if (recipe) {
-          const currentImages = recipe.images || [];
-          let updatedImages = [...currentImages];
-          if (update.imageUrl) {
-            updatedImages = [update.imageUrl, ...updatedImages.filter(img => img !== update.imageUrl && img !== recipe.image_url)];
-          } else {
-            updatedImages = updatedImages.filter(img => img !== recipe.image_url);
+      const recipeMap = new Map(recipes.map(r => [r.id, r]));
+      await Promise.all(
+        updates.map(async update => {
+          const recipe = recipeMap.get(update.recipeId);
+          if (recipe) {
+            const currentImages = recipe.images || [];
+            let updatedImages = [...currentImages];
+            if (update.imageUrl) {
+              updatedImages = [update.imageUrl, ...updatedImages.filter(img => img !== update.imageUrl && img !== recipe.image_url)];
+            } else {
+              updatedImages = updatedImages.filter(img => img !== recipe.image_url);
+            }
+            await updateRecipe({
+              ...recipe,
+              image_url: update.imageUrl || '',
+              images: updatedImages,
+            });
           }
-          await updateRecipe({
-            ...recipe,
-            image_url: update.imageUrl || '',
-            images: updatedImages,
-          });
-        }
-      }
+        })
+      );
       toast.success(`Đã cập nhật ảnh thành công cho ${updates.length} công thức!`);
       toggleSelectMode();
     } catch (e) {
@@ -432,9 +445,9 @@ export function RecipeListPage() {
       <PageHeader
         title={t('recipes.title')}
         description={
-          filteredAndSortedRecipes.length === recipes.length
-            ? t('recipes.subtitle', { count: recipes.length })
-            : `${filteredAndSortedRecipes.length} / ${recipes.length}`
+          filteredAndSortedRecipes.length === rootRecipes.length
+            ? t('recipes.subtitle', { count: rootRecipes.length })
+            : `${filteredAndSortedRecipes.length} / ${rootRecipes.length}`
         }
         prefix={
           <Button 

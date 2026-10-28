@@ -1,6 +1,6 @@
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Capacitor } from '@capacitor/core';
-import { convertUrlToWebPDataUrl } from './image-utils';
+import { convertUrlToWebPDataUrl, toRelativeImagePath } from './image-utils';
 
 export class ImageManager {
   private static cachedBaseUri: string = typeof localStorage !== 'undefined' 
@@ -8,27 +8,7 @@ export class ImageManager {
     : '';
 
   static toRelativePath(path: string): string {
-    if (!path) return '';
-    if (
-      path.startsWith('http://') || 
-      path.startsWith('https://') || 
-      path.startsWith('data:') || 
-      path.startsWith('blob:')
-    ) {
-      return path;
-    }
-
-    const normalized = path.replace(/\\/g, '/');
-    const match = normalized.match(/(?:^|\/)images\/([^/]+)$/i);
-    if (match) {
-      return `images/${match[1]}`;
-    }
-
-    if (/^[a-zA-Z0-9_.-]+\.(webp|png|jpg|jpeg|gif|svg)$/i.test(normalized)) {
-      return `images/${normalized}`;
-    }
-
-    return normalized;
+    return toRelativeImagePath(path);
   }
 
   static async initDirs() {
@@ -96,9 +76,11 @@ export class ImageManager {
             recursive: true
           });
 
+          URL.revokeObjectURL(tempPath);
           return `images/${filename}`;
         }
 
+        URL.revokeObjectURL(tempPath);
         // Fallback môi trường web browser
         return dataUrl;
       } catch (e) {
@@ -173,9 +155,7 @@ export class ImageManager {
   }
 
   static async deleteImages(filePaths: string[]) {
-    for (const p of filePaths) {
-      await this.deleteImage(p);
-    }
+    await Promise.all(filePaths.map((p) => this.deleteImage(p)));
   }
 
   static async processAndSaveImage(file: File): Promise<string> {

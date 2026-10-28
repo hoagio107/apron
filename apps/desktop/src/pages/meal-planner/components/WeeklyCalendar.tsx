@@ -192,7 +192,7 @@ export function WeeklyCalendar({ days, mealPlans, onRemoveEntry, viewMode = 'lis
         className="absolute left-0 top-0 bottom-0 w-16 z-10 flex items-center justify-start pl-2 opacity-0 hover:opacity-100 transition-opacity cursor-pointer" 
         onClick={scrollLeft}
       >
-        <Button isIconOnly variant="shadow" size="sm" className="bg-background/80 backdrop-blur-md rounded-full shadow-lg border border-default-200 pointer-events-none">
+        <Button isIconOnly variant="shadow" size="sm" className="bg-background/80 backdrop-blur-md rounded-full shadow-lg pointer-events-none">
           <ChevronLeft className="w-4 h-4" />
         </Button>
       </div>
@@ -202,7 +202,7 @@ export function WeeklyCalendar({ days, mealPlans, onRemoveEntry, viewMode = 'lis
         className="absolute right-0 top-0 bottom-0 w-16 z-10 flex items-center justify-end pr-2 opacity-0 hover:opacity-100 transition-opacity cursor-pointer" 
         onClick={scrollRight}
       >
-        <Button isIconOnly variant="shadow" size="sm" className="bg-background/80 backdrop-blur-md rounded-full shadow-lg border border-default-200 pointer-events-none">
+        <Button isIconOnly variant="shadow" size="sm" className="bg-background/80 backdrop-blur-md rounded-full shadow-lg pointer-events-none">
           <ChevronRight className="w-4 h-4" />
         </Button>
       </div>

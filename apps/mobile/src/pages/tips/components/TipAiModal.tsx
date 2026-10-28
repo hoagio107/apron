@@ -25,7 +25,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { buildTipPrompt, parseTipGeminiResponse, type ParseTipResult } from '../../../lib/gemini';
-import { TIP_CATEGORIES } from '@apron/core';
+import { TIP_CATEGORIES, sanitizeHtml } from '@apron/core';
 
 interface TipAiModalProps {
   isOpen: boolean;
@@ -352,7 +352,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                           </span>
                           <div 
                             className="p-3 bg-content1 rounded-xl border border-divider text-xs text-foreground/90 leading-relaxed max-h-36 overflow-y-auto"
-                            dangerouslySetInnerHTML={{ __html: parsedData.content }}
+                            dangerouslySetInnerHTML={{ __html: sanitizeHtml(parsedData.content) }}
                           />
                         </div>
                       </div>

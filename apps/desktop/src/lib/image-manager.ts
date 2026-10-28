@@ -1,11 +1,11 @@
 import { appDataDir, join } from '@tauri-apps/api/path';
 import { mkdir, writeFile, readFile, remove, exists } from '@tauri-apps/plugin-fs';
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { convertUrlToWebPDataUrl } from './image-utils';
+import { convertUrlToWebPDataUrl, toRelativeImagePath } from './image-utils';
 
 export class ImageManager {
-  private static cachedBaseDir: string = typeof localStorage !== 'undefined' 
-    ? (localStorage.getItem('byos_base_dir') || '') 
+  private static cachedBaseDir: string = typeof localStorage !== 'undefined'
+    ? (localStorage.getItem('byos_base_dir') || '')
     : '';
 
   static async getBaseDir(): Promise<string> {
@@ -20,27 +20,7 @@ export class ImageManager {
   }
 
   static toRelativePath(path: string): string {
-    if (!path) return '';
-    if (
-      path.startsWith('http://') || 
-      path.startsWith('https://') || 
-      path.startsWith('data:') || 
-      path.startsWith('blob:')
-    ) {
-      return path;
-    }
-
-    const normalized = path.replace(/\\/g, '/');
-    const match = normalized.match(/(?:^|\/)images\/([^/]+)$/i);
-    if (match) {
-      return `images/${match[1]}`;
-    }
-
-    if (/^[a-zA-Z0-9_.-]+\.(webp|png|jpg|jpeg|gif|svg)$/i.test(normalized)) {
-      return `images/${normalized}`;
-    }
-
-    return normalized;
+    return toRelativeImagePath(path);
   }
 
   static async initDirs() {
@@ -73,12 +53,12 @@ export class ImageManager {
 
   static async commitImage(tempPath: string): Promise<string> {
     if (!tempPath) return tempPath;
-    
+
     // If it's a URL (http/https) or data URL
     if (tempPath.startsWith('http://') || tempPath.startsWith('https://') || tempPath.startsWith('data:')) {
       return tempPath;
     }
-    
+
     // Check if it's already a relative images path or inside the images directory (not in temp)
     const rel = this.toRelativePath(tempPath);
     const baseDir = await this.getBaseDir();
@@ -94,70 +74,75 @@ export class ImageManager {
 
     try {
       await this.initDirs();
-      
+
       // Kiểm tra nếu file temp không tồn tại thì fallback
       if (!(await exists(tempPath))) {
         return this.toRelativePath(tempPath);
       }
-      
+
       const bytes = await readFile(tempPath);
-      
+
       let mimeType = 'image/jpeg';
       const ext = tempPath.split('.').pop()?.toLowerCase();
       if (ext === 'png') mimeType = 'image/png';
       else if (ext === 'webp') mimeType = 'image/webp';
       else if (ext === 'gif') mimeType = 'image/gif';
-      
+
       const blob = new Blob([bytes], { type: mimeType });
       const url = URL.createObjectURL(blob);
 
-      const webpDataUrl = await convertUrlToWebPDataUrl(url);
-      const res = await fetch(webpDataUrl);
-      const webpBuffer = await res.arrayBuffer();
-      const webpBytes = new Uint8Array(webpBuffer);
-
-      const filename = `${crypto.randomUUID()}.webp`;
-      const outPath = await join(baseDir, 'images', filename);
-      await writeFile(outPath, webpBytes);
-
       try {
-        await remove(tempPath);
-      } catch (e) {
-        console.error('Failed to remove temp file', e);
+        const webpDataUrl = await convertUrlToWebPDataUrl(url);
+        const res = await fetch(webpDataUrl);
+        const webpBuffer = await res.arrayBuffer();
+        const webpBytes = new Uint8Array(webpBuffer);
+
+        const filename = `${crypto.randomUUID()}.webp`;
+        const outPath = await join(baseDir, 'images', filename);
+        await writeFile(outPath, webpBytes);
+
+        try {
+          await remove(tempPath);
+        } catch (e) {
+          console.error('Failed to remove temp file', e);
+        }
+
+        return `images/${filename}`;
+      } finally {
+        URL.revokeObjectURL(url);
       }
-      
-      URL.revokeObjectURL(url);
-      return `images/${filename}`;
     } catch (e) {
       console.error('Failed to commit image', tempPath, e);
-      return this.toRelativePath(tempPath); 
+      return this.toRelativePath(tempPath);
     }
   }
 
   static async deleteImages(paths: string[]) {
     const baseDir = await this.getBaseDir();
-    for (const p of paths) {
-      if (!p || p.startsWith('http') || p.startsWith('data:')) continue;
-      try {
-        const rel = this.toRelativePath(p);
-        const targetPath = rel.startsWith('images/') 
-          ? await join(baseDir, 'images', rel.substring(7))
-          : p;
-        if (await exists(targetPath)) {
-          await remove(targetPath);
+    await Promise.all(
+      paths.map(async (p) => {
+        if (!p || p.startsWith('http') || p.startsWith('data:')) return;
+        try {
+          const rel = this.toRelativePath(p);
+          const targetPath = rel.startsWith('images/')
+            ? await join(baseDir, 'images', rel.substring(7))
+            : p;
+          if (await exists(targetPath)) {
+            await remove(targetPath);
+          }
+        } catch (e) {
+          console.error('Failed to remove image', p, e);
         }
-      } catch (e) {
-        console.error('Failed to remove image', p, e);
-      }
-    }
+      })
+    );
   }
 
   static getAssetUrl(path: string): string {
     if (!path) return '';
     if (
-      path.startsWith('http://') || 
-      path.startsWith('https://') || 
-      path.startsWith('data:') || 
+      path.startsWith('http://') ||
+      path.startsWith('https://') ||
+      path.startsWith('data:') ||
       path.startsWith('blob:')
     ) {
       return path;

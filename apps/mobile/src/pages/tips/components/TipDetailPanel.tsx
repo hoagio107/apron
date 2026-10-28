@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Drawer, DrawerContent, DrawerHeader, DrawerBody, Button } from '@/ui';
 import { Calendar, Edit, Trash2 } from 'lucide-react';
 import type { Tip } from '@apron/core';
-import { TIP_CATEGORIES } from '@apron/core';
+import { TIP_CATEGORIES, sanitizeHtml } from '@apron/core';
 import { format } from 'date-fns';
 import { vi, enUS } from 'date-fns/locale';
 import { ImageManager } from '../../../lib/image-manager';
@@ -16,7 +16,7 @@ interface TipDetailPanelProps {
 }
 
 export function TipDetailPanel({ tip, isOpen, onOpenChange, onEdit, onDelete }: TipDetailPanelProps) {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   if (!tip) return null;
 
   const category = TIP_CATEGORIES.find(c => c.id === tip.category_id);
@@ -103,7 +103,7 @@ export function TipDetailPanel({ tip, isOpen, onOpenChange, onEdit, onDelete }: 
                 <div className="p-8 flex-1 bg-content1 text-foreground">
                   <div 
                     className="prose prose-primary dark:prose-invert max-w-none leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: tip.content }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(tip.content) }}
                   />
                 </div>
               </div>

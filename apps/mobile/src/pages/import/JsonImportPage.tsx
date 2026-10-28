@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Button, 
@@ -37,9 +37,14 @@ export function JsonImportPage() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { recipes } = useRecipeStore();
-  const { tips } = useTipStore();
+  const { recipes, fetchRecipes } = useRecipeStore();
+  const { tips, fetchTips } = useTipStore();
   const { units } = useUnitStore();
+
+  useEffect(() => {
+    if (recipes.length === 0) fetchRecipes();
+    if (tips.length === 0) fetchTips();
+  }, [recipes.length, tips.length, fetchRecipes, fetchTips]);
 
   const [inputTab, setInputTab] = useState<'file' | 'paste'>('file');
   const [pastedJson, setPastedJson] = useState('');
@@ -129,9 +134,9 @@ export function JsonImportPage() {
       );
       setImportSummary(summary);
       toast.success(t('importJson.successToast', {
-        recipes: summary.importedCount,
-        tips: summary.updatedCount,
-        units: summary.skippedCount,
+        recipes: summary.recipesCount,
+        tips: summary.tipsCount,
+        units: summary.unitsCount,
       }));
     } catch (e: unknown) {
       const err = e as Error;

@@ -1,13 +1,13 @@
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
-import type { StorageProvider, FileInfo } from './types';
+import { sanitizeRelativePath, type StorageProvider, type FileInfo } from './types';
 
 // Tên thư mục gốc của app bên trong thư mục Documents của thiết bị
 const APP_FOLDER_NAME = 'CookbookData';
 
 export class CapacitorStorageProvider implements StorageProvider {
-  
   private resolvePath(relativePath: string): string {
-    return `${APP_FOLDER_NAME}/${relativePath}`;
+    const safeRelative = sanitizeRelativePath(relativePath);
+    return `${APP_FOLDER_NAME}/${safeRelative}`;
   }
 
   async initialize(): Promise<boolean> {
@@ -33,7 +33,8 @@ export class CapacitorStorageProvider implements StorageProvider {
             recursive: true
           });
         } catch (mkdirErr) {
-          console.warn('Could not create CookbookData directory:', mkdirErr);
+          console.error('Could not create CookbookData directory:', mkdirErr);
+          return false;
         }
       }
       return true;
@@ -49,7 +50,6 @@ export class CapacitorStorageProvider implements StorageProvider {
       directory: Directory.Documents,
       encoding: Encoding.UTF8
     });
-    // Trả về kết quả dưới dạng string
     return typeof result.data === 'string' ? result.data : '';
   }
 
@@ -59,7 +59,7 @@ export class CapacitorStorageProvider implements StorageProvider {
       data: content,
       directory: Directory.Documents,
       encoding: Encoding.UTF8,
-      recursive: true // Tạo các thư mục cha nếu chưa có
+      recursive: true
     });
   }
 

@@ -20,4 +20,17 @@ export default defineConfig({
       ignored: ['**/src-tauri/**'],
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('@tiptap') || id.includes('prosemirror')) return 'vendor-tiptap';
+            if (id.includes('@heroui') || id.includes('framer-motion')) return 'vendor-heroui';
+            if (id.includes('react-dom') || id.includes('react-router')) return 'vendor-react';
+          }
+        },
+      },
+    },
+  },
 })

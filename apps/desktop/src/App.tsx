@@ -42,6 +42,7 @@ function PageLoadingFallback() {
 }
 
 function App() {
+  const [isInitializing, setIsInitializing] = useState(true);
   const [isStorageReady, setIsStorageReady] = useState(false);
   // Sidebar auto expands/collapses on hover by default; user can pin with Ctrl+B
   const [isSidebarPinned, setIsSidebarPinned] = useState<boolean>(() => {
@@ -81,7 +82,7 @@ function App() {
       } catch (e) {
         console.error('Failed to init storage', e);
       } finally {
-        setIsStorageReady(true);
+        setIsInitializing(false);
       }
     };
     initStorage();
@@ -90,6 +91,10 @@ function App() {
   const handleOnboardingComplete = () => {
     setIsStorageReady(true);
   };
+
+  if (isInitializing) {
+    return <PageLoadingFallback />;
+  }
 
   if (!isStorageReady) {
     return <OnboardingScreen onComplete={handleOnboardingComplete} />;
@@ -106,7 +111,7 @@ function App() {
           
           {/* Main Content Area */}
           <main className={`flex-1 flex flex-col overflow-hidden bg-content1 transition-[padding] duration-300 ${isSidebarPinned ? 'md:pl-64' : 'md:pl-20'}`}>
-            <div className="flex-1 overflow-y-auto px-8 pb-8 pt-0 m-2 bg-background rounded-2xl border border-divider">
+            <div className="flex-1 overflow-y-auto px-8 pb-8 pt-0 my-2 mr-2 ml-2 md:ml-0 bg-background rounded-2xl">
               <ErrorBoundary>
                 <Suspense fallback={<PageLoadingFallback />}>
                   <Routes>

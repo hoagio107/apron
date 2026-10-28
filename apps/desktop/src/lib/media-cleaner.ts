@@ -53,7 +53,8 @@ export class MediaCleaner {
   }
 
   /**
-   * Thu thập tất cả các tên file ảnh đang được ứng dụng tham chiếu
+   * Thu thập tất cả các tên file ảnh đang được ứng dụng tham chiếu.
+   * Ném lỗi nếu bất kỳ repository nào đọc thất bại để ngăn xoá nhầm ảnh.
    */
   static async collectAllReferencedImageFilenames(): Promise<Set<string>> {
     const referencedFilenames = new Set<string>();
@@ -67,52 +68,40 @@ export class MediaCleaner {
       if (filename) referencedFilenames.add(filename);
     };
 
-    // 1. Recipes
-    try {
-      const recipes = await RecipeRepository.getAll();
-      for (const r of recipes) {
-        addPath(r.image_url);
-        addPath(r.thumbnail_url);
-        if (Array.isArray(r.images)) r.images.forEach(addPath);
-        if (Array.isArray(r.steps)) {
-          r.steps.forEach(s => {
-            addPath(s.image_url);
-            if (Array.isArray(s.images)) s.images.forEach(addPath);
-          });
-        }
+    const [recipes, tips, courses] = await Promise.all([
+      RecipeRepository.getAll(),
+      TipRepository.getAll(),
+      CourseRepository.getAll(),
+    ]);
+
+    for (const r of recipes) {
+      addPath(r.image_url);
+      addPath(r.thumbnail_url);
+      if (Array.isArray(r.images)) r.images.forEach(addPath);
+      if (Array.isArray(r.steps)) {
+        r.steps.forEach(s => {
+          addPath(s.image_url);
+          if (Array.isArray(s.images)) s.images.forEach(addPath);
+        });
       }
-    } catch (e) {
-      console.error('Failed to collect recipe images:', e);
     }
 
-    // 2. Tips
-    try {
-      const tips = await TipRepository.getAll();
-      for (const t of tips) {
-        addPath(t.image_url);
-      }
-    } catch (e) {
-      console.error('Failed to collect tip images:', e);
+    for (const t of tips) {
+      addPath(t.image_url);
     }
 
-    // 3. Courses
-    try {
-      const courses = await CourseRepository.getAll();
-      for (const c of courses) {
-        addPath(c.thumbnail_url);
-        if (Array.isArray(c.modules)) {
-          c.modules.forEach(m => {
-            if (Array.isArray(m.lessons)) {
-              m.lessons.forEach((l: any) => {
-                addPath(l.thumbnail_url);
-                addPath(l.video_url);
-              });
-            }
-          });
-        }
+    for (const c of courses) {
+      addPath(c.thumbnail_url);
+      if (Array.isArray(c.modules)) {
+        c.modules.forEach(m => {
+          if (Array.isArray(m.lessons)) {
+            m.lessons.forEach((l: any) => {
+              addPath(l.thumbnail_url);
+              addPath(l.video_url);
+            });
+          }
+        });
       }
-    } catch (e) {
-      console.error('Failed to collect course images:', e);
     }
 
     return referencedFilenames;
@@ -168,21 +157,22 @@ export class MediaCleaner {
     try {
       if (await exists(imagesDir)) {
         const entries = await readDir(imagesDir);
-        for (const entry of entries) {
-          if (entry.isFile && entry.name) {
-            if (!referencedFilenames.has(entry.name)) {
-              const filePath = await join(imagesDir, entry.name);
-              try {
-                const info = await stat(filePath);
-                await remove(filePath);
-                deletedCount++;
-                freedBytes += info.size || 0;
-              } catch (err) {
-                console.error(`Failed to remove orphaned image: ${filePath}`, err);
-              }
+        const orphanEntries = entries.filter(
+          entry => entry.isFile && entry.name && !referencedFilenames.has(entry.name)
+        );
+        await Promise.all(
+          orphanEntries.map(async entry => {
+            const filePath = await join(imagesDir, entry.name!);
+            try {
+              const info = await stat(filePath);
+              await remove(filePath);
+              deletedCount++;
+              freedBytes += info.size || 0;
+            } catch (err) {
+              console.error(`Failed to remove orphaned image: ${filePath}`, err);
             }
-          }
-        }
+          })
+        );
       }
     } catch (e) {
       console.error('Failed to prune images directory:', e);
@@ -192,9 +182,10 @@ export class MediaCleaner {
     try {
       if (await exists(tempDir)) {
         const tempEntries = await readDir(tempDir);
-        for (const entry of tempEntries) {
-          if (entry.isFile && entry.name) {
-            const tempFilePath = await join(tempDir, entry.name);
+        const tempFiles = tempEntries.filter(entry => entry.isFile && entry.name);
+        await Promise.all(
+          tempFiles.map(async entry => {
+            const tempFilePath = await join(tempDir, entry.name!);
             try {
               const info = await stat(tempFilePath);
               await remove(tempFilePath);
@@ -203,8 +194,8 @@ export class MediaCleaner {
             } catch (err) {
               console.error(`Failed to remove temp file: ${tempFilePath}`, err);
             }
-          }
-        }
+          })
+        );
       }
     } catch (e) {
       console.error('Failed to prune temp directory:', e);

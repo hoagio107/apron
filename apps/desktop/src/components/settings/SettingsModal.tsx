@@ -30,7 +30,8 @@ import {
   Sparkles,
   HardDrive,
   ExternalLink,
-  FileUp
+  FileUp,
+  Globe
 } from "lucide-react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
@@ -243,9 +244,9 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                     </div>
                   }
                 >
-                  <div className="flex flex-col gap-5 pt-3">
-                    {/* Thẻ Vị trí Database Hiện Tại */}
-                    <div className="app-card p-5 bg-content2/40 flex flex-col gap-4">
+                  <div className="flex flex-col gap-4 pt-3">
+                    {/* Vị trí Database Hiện Tại */}
+                    <div className="py-2 flex flex-col gap-4">
                       <div className="flex items-start justify-between gap-3 flex-wrap">
                         <div className="flex items-center gap-2.5">
                           <div className="w-9 h-9 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0">
@@ -266,7 +267,7 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                       {/* Path & Actions Bar */}
                       <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
                         {/* Path Display Box */}
-                        <div className="flex-1 flex items-center gap-2 bg-content1 px-3 py-1.5 rounded-xl border border-divider min-h-9 h-9 min-w-0">
+                        <div className="flex-1 flex items-center gap-2 bg-default-100/60 px-3 py-1.5 rounded-xl border border-divider min-h-9 h-9 min-w-0">
                           <span className="font-mono text-xs text-foreground truncate select-all flex-1" title={baseDir}>
                             {baseDir || t('settings.database.notSet')}
                           </span>
@@ -347,62 +348,65 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
 
                     {/* Danh sách Vaults/Tài khoản đã lưu (nếu có > 1) */}
                     {accounts.length > 1 && (
-                      <div className="flex flex-col gap-2">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-default-500">
-                          Danh sách Vaults đã đăng ký ({accounts.length})
-                        </h4>
-                        <div className="flex flex-col gap-2 max-h-40 overflow-y-auto custom-scrollbar">
-                          {accounts.map(acc => {
-                            const isCurrent = acc.path === baseDir;
-                            return (
-                              <div 
-                                key={acc.id}
-                                className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${
-                                  isCurrent ? 'bg-primary/5 border-primary/40' : 'bg-content2/30 border-divider hover:bg-content2/60'
-                                }`}
-                              >
-                                <div className="flex flex-col min-w-0 pr-3">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-semibold text-xs text-foreground">{acc.name}</span>
-                                    {isCurrent && (
-                                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/20 text-primary font-medium">Hiện tại</span>
-                                    )}
+                      <>
+                        <div className="border-b border-divider/60 mx-2" />
+                        <div className="py-2 flex flex-col gap-2">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-default-500">
+                            Danh sách Vaults đã đăng ký ({accounts.length})
+                          </h4>
+                          <div className="flex flex-col gap-2 max-h-40 overflow-y-auto custom-scrollbar">
+                            {accounts.map(acc => {
+                              const isCurrent = acc.path === baseDir;
+                              return (
+                                <div 
+                                  key={acc.id}
+                                  className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${
+                                    isCurrent ? 'bg-primary/5 border-primary/40' : 'border-divider hover:bg-default-100/40'
+                                  }`}
+                                >
+                                  <div className="flex flex-col min-w-0 pr-3">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-semibold text-xs text-foreground">{acc.name}</span>
+                                      {isCurrent && (
+                                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/20 text-primary font-medium">Hiện tại</span>
+                                      )}
+                                    </div>
+                                    <span className="font-mono text-[11px] text-default-500 truncate">{acc.path}</span>
                                   </div>
-                                  <span className="font-mono text-[11px] text-default-500 truncate">{acc.path}</span>
-                                </div>
 
-                                {!isCurrent && (
-                                  <Button
-                                    size="sm"
-                                    variant="flat"
-                                    color="primary"
-                                    onPress={() => {
-                                      localStorage.setItem('account_name', acc.name);
-                                      handleConfirmSwitch(acc.path);
-                                    }}
-                                    className="shrink-0 text-xs h-7 px-3 rounded-lg"
-                                  >
-                                    Chuyển
-                                  </Button>
-                                )}
-                              </div>
-                            );
-                          })}
+                                  {!isCurrent && (
+                                    <Button
+                                      size="sm"
+                                      variant="flat"
+                                      color="primary"
+                                      onPress={() => {
+                                        localStorage.setItem('account_name', acc.name);
+                                        handleConfirmSwitch(acc.path);
+                                      }}
+                                      className="shrink-0 text-xs h-7 px-3 rounded-lg"
+                                    >
+                                      Chuyển
+                                    </Button>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
+                      </>
                     )}
 
+                    {/* Đường ngăn cách có padding 2 bên */}
+                    <div className="border-b border-divider/60 mx-2" />
+
                     {/* Dọn dẹp bộ nhớ ảnh mồ côi (Media Cleaner) */}
-                    <div className="app-card p-5 bg-content2/30 flex flex-col gap-3">
-                      <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <div className="py-2 flex flex-col gap-3">
+                      <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2.5">
                           <div className="w-8 h-8 rounded-lg bg-secondary/15 text-secondary flex items-center justify-center shrink-0">
                             <Sparkles className="w-4 h-4" />
                           </div>
-                          <div>
-                            <h4 className="font-bold text-sm text-foreground">{t('settings.mediaCleaner.title')}</h4>
-                            <p className="text-xs text-default-500">{t('settings.mediaCleaner.desc')}</p>
-                          </div>
+                          <h4 className="font-bold text-sm text-foreground">{t('settings.mediaCleaner.title')}</h4>
                         </div>
 
                         <Button
@@ -431,33 +435,31 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                       )}
                     </div>
 
-                    {/* Nhập dữ liệu sao lưu (JSON) */}
-                    <div className="app-card p-5 bg-content2/30 flex flex-col gap-3">
-                      <div className="flex items-center justify-between gap-3 flex-wrap">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0">
-                            <FileUp className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <h4 className="font-bold text-sm text-foreground">{t('settings.data.importBackup')}</h4>
-                            <p className="text-xs text-default-500">{t('importJson.subtitle')}</p>
-                          </div>
-                        </div>
+                    {/* Đường ngăn cách có padding 2 bên */}
+                    <div className="border-b border-divider/60 mx-2" />
 
-                        <Button
-                          size="sm"
-                          color="primary"
-                          variant="flat"
-                          startContent={<FileUp className="w-4 h-4" />}
-                          onPress={() => {
-                            onOpenChange(false);
-                            window.dispatchEvent(new CustomEvent('open-json-import'));
-                          }}
-                          className="font-semibold text-xs h-9 px-3.5 rounded-xl"
-                        >
-                          {t('importJson.title')}
-                        </Button>
+                    {/* Nhập dữ liệu sao lưu (JSON) */}
+                    <div className="py-2 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0">
+                          <FileUp className="w-4 h-4" />
+                        </div>
+                        <h4 className="font-bold text-sm text-foreground">{t('settings.data.importBackup')}</h4>
                       </div>
+
+                      <Button
+                        size="sm"
+                        color="primary"
+                        variant="flat"
+                        startContent={<FileUp className="w-4 h-4" />}
+                        onPress={() => {
+                          onOpenChange(false);
+                          window.dispatchEvent(new CustomEvent('open-json-import'));
+                        }}
+                        className="font-semibold text-xs h-9 px-3.5 rounded-xl"
+                      >
+                        {t('importJson.title')}
+                      </Button>
                     </div>
                   </div>
                 </Tab>
@@ -472,99 +474,99 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                     </div>
                   }
                 >
-                  <div className="flex flex-col gap-6 pt-3">
+                  <div className="flex flex-col gap-3 pt-2">
                     {/* Theme Selector */}
-                    <div>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-default-500 mb-3">
-                        {t('settings.appearance.theme')}
-                      </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="py-1.5 flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
+                      <div className="flex items-center gap-2.5 shrink-0">
+                        <div className="w-8 h-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0">
+                          <Palette className="w-4 h-4" />
+                        </div>
+                        <h4 className="font-bold text-sm text-foreground">
+                          {t('settings.appearance.theme')}
+                        </h4>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <button
                           type="button"
                           onClick={() => setTheme('light')}
-                          className={`flex flex-col items-center gap-2.5 p-4 rounded-xl border text-center transition-all ${
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs transition-all ${
                             theme === 'light'
-                              ? 'border-2 border-primary bg-primary/10 text-primary shadow-sm'
-                              : 'border-divider bg-content2/40 text-default-600 hover:border-default-400'
+                              ? 'border-primary bg-primary/10 text-primary font-semibold shadow-sm'
+                              : 'border-divider hover:border-default-400 text-default-600 hover:text-foreground bg-transparent'
                           }`}
                         >
-                          <Sun className="w-6 h-6" />
-                          <div className="flex flex-col">
-                            <span className="text-xs font-bold">{t('settings.appearance.light')}</span>
-                            <span className="text-[11px] text-default-400">{t('settings.appearance.lightDesc')}</span>
-                          </div>
+                          <Sun className="w-3.5 h-3.5" />
+                          <span>{t('settings.appearance.light')}</span>
                         </button>
 
                         <button
                           type="button"
                           onClick={() => setTheme('dark')}
-                          className={`flex flex-col items-center gap-2.5 p-4 rounded-xl border text-center transition-all ${
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs transition-all ${
                             theme === 'dark'
-                              ? 'border-2 border-primary bg-primary/10 text-primary shadow-sm'
-                              : 'border-divider bg-content2/40 text-default-600 hover:border-default-400'
+                              ? 'border-primary bg-primary/10 text-primary font-semibold shadow-sm'
+                              : 'border-divider hover:border-default-400 text-default-600 hover:text-foreground bg-transparent'
                           }`}
                         >
-                          <Moon className="w-6 h-6" />
-                          <div className="flex flex-col">
-                            <span className="text-xs font-bold">{t('settings.appearance.dark')}</span>
-                            <span className="text-[11px] text-default-400">{t('settings.appearance.darkDesc')}</span>
-                          </div>
+                          <Moon className="w-3.5 h-3.5" />
+                          <span>{t('settings.appearance.dark')}</span>
                         </button>
 
                         <button
                           type="button"
                           onClick={() => setTheme('system')}
-                          className={`flex flex-col items-center gap-2.5 p-4 rounded-xl border text-center transition-all ${
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs transition-all ${
                             theme === 'system'
-                              ? 'border-2 border-primary bg-primary/10 text-primary shadow-sm'
-                              : 'border-divider bg-content2/40 text-default-600 hover:border-default-400'
+                              ? 'border-primary bg-primary/10 text-primary font-semibold shadow-sm'
+                              : 'border-divider hover:border-default-400 text-default-600 hover:text-foreground bg-transparent'
                           }`}
                         >
-                          <Monitor className="w-6 h-6" />
-                          <div className="flex flex-col">
-                            <span className="text-xs font-bold">{t('settings.appearance.system')}</span>
-                            <span className="text-[11px] text-default-400">{t('settings.appearance.systemDesc')}</span>
-                          </div>
+                          <Monitor className="w-3.5 h-3.5" />
+                          <span>{t('settings.appearance.system')}</span>
                         </button>
                       </div>
                     </div>
 
+                    {/* Đường ngăn cách có padding 2 bên */}
+                    <div className="border-b border-divider/60 mx-2" />
+
                     {/* Language Selector */}
-                    <div>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-default-500 mb-3">
-                        {t('settings.language.sectionTitle')}
-                      </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="py-1.5 flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
+                      <div className="flex items-center gap-2.5 shrink-0">
+                        <div className="w-8 h-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0">
+                          <Globe className="w-4 h-4" />
+                        </div>
+                        <h4 className="font-bold text-sm text-foreground">
+                          {t('settings.language.sectionTitle')}
+                        </h4>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <button
                           type="button"
                           onClick={() => i18n.changeLanguage('vi')}
-                          className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all ${
+                          className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs transition-all ${
                             i18n.language.startsWith('vi')
-                              ? 'border-2 border-primary bg-primary/10 text-primary'
-                              : 'border-divider bg-content2/40 text-default-600 hover:border-default-400'
+                              ? 'border-primary bg-primary/10 text-primary font-semibold shadow-sm'
+                              : 'border-divider hover:border-default-400 text-default-600 hover:text-foreground bg-transparent'
                           }`}
                         >
-                          <span className="text-2xl">🇻🇳</span>
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-xs font-bold">{t('settings.language.vi')}</span>
-                            <span className="text-[11px] text-default-400">{t('settings.language.defaultTag')}</span>
-                          </div>
+                          <span className="text-base leading-none">🇻🇳</span>
+                          <span>{t('settings.language.vi')}</span>
                         </button>
 
                         <button
                           type="button"
                           onClick={() => i18n.changeLanguage('en')}
-                          className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all ${
+                          className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs transition-all ${
                             i18n.language.startsWith('en')
-                              ? 'border-2 border-primary bg-primary/10 text-primary'
-                              : 'border-divider bg-content2/40 text-default-600 hover:border-default-400'
+                              ? 'border-primary bg-primary/10 text-primary font-semibold shadow-sm'
+                              : 'border-divider hover:border-default-400 text-default-600 hover:text-foreground bg-transparent'
                           }`}
                         >
-                          <span className="text-2xl">🇺🇸</span>
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-xs font-bold">{t('settings.language.en')}</span>
-                            <span className="text-[11px] text-default-400">{t('settings.language.intlTag')}</span>
-                          </div>
+                          <span className="text-base leading-none">🇺🇸</span>
+                          <span>{t('settings.language.en')}</span>
                         </button>
                       </div>
                     </div>
@@ -582,7 +584,7 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                   }
                 >
                   <div className="flex flex-col gap-4 pt-3">
-                    <div className="app-card p-5 bg-content2/40 flex items-center gap-4">
+                    <div className="py-2 flex items-center gap-4">
                       <div className="w-12 h-12 rounded-2xl bg-primary/15 flex items-center justify-center shrink-0">
                         <img src="/logo.svg" alt="Apron Logo" className="w-8 h-8" />
                       </div>
@@ -592,12 +594,15 @@ export function SettingsModal({ isOpen, onOpenChange }: SettingsModalProps) {
                       </div>
                     </div>
 
-                    <div className="text-xs text-default-600 leading-relaxed space-y-2 p-4 rounded-xl bg-content2/20 border border-divider">
+                    {/* Đường ngăn cách có padding 2 bên */}
+                    <div className="border-b border-divider/60 mx-2" />
+
+                    <div className="py-2 text-xs text-default-600 leading-relaxed space-y-2.5">
                       <p>
-                        <strong>{t('settings.about.localFirstTitle')}</strong> {t('settings.about.localFirstDesc')}
+                        <strong className="text-foreground">{t('settings.about.localFirstTitle')}</strong> {t('settings.about.localFirstDesc')}
                       </p>
                       <p>
-                        <strong>{t('settings.about.shortcutsTitle')}</strong> {t('settings.about.shortcutsDesc')}
+                        <strong className="text-foreground">{t('settings.about.shortcutsTitle')}</strong> {t('settings.about.shortcutsDesc')}
                       </p>
                     </div>
                   </div>

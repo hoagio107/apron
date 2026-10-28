@@ -1,5 +1,9 @@
 #[tauri::command]
 fn open_in_folder(path: String) -> Result<(), String> {
+  if !std::path::Path::new(&path).is_dir() {
+    return Err("Path is not a valid directory".into());
+  }
+
   #[cfg(target_os = "windows")]
   {
     use std::process::Command;

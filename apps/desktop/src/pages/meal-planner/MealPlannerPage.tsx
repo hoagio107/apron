@@ -121,9 +121,9 @@ export function MealPlannerPage() {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex flex-col h-full gap-6 w-full pt-6 pb-8 min-w-0">
+      <div className="flex flex-col min-h-full gap-6 w-full pb-8 min-w-0">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
+        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-6 pb-4 -mx-8 px-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0 border-b border-divider/50 shadow-2xs">
           <div className="flex items-center gap-4 shrink-0">
             <div className="w-14 h-14 rounded-2xl shadow-sm bg-primary/10 flex items-center justify-center shrink-0 text-primary">
               <CalendarDays className="w-7 h-7" />

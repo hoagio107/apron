@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
@@ -32,6 +33,12 @@ export function RichTextEditor({ value, onChange, placeholder, isInvalid, errorM
       },
     },
   });
+
+  useEffect(() => {
+    if (editor && value !== undefined && editor.getHTML() !== value) {
+      editor.commands.setContent(value);
+    }
+  }, [value, editor]);
 
   if (!editor) {
     return null;

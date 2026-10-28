@@ -1,6 +1,5 @@
 import { RecipeForm } from '../../components/recipes/form';
 import type { Recipe } from '@apron/core';
-import { RecipeRepository } from '@apron/core';
 import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { useRecipeStore } from '../../store/useRecipeStore';
 import { useEffect, useState } from 'react';
@@ -11,7 +10,7 @@ export function NewRecipePage() {
   const { id: paramId } = useParams();
   const [searchParams] = useSearchParams();
   const editId = searchParams.get('edit') || paramId;
-  const { addRecipe, addBulkRecipes, updateRecipe, recipes, fetchRecipes } = useRecipeStore();
+  const { addRecipe, addBulkRecipes, updateRecipe, recipes, fetchRecipes, fetchRecipeDetail } = useRecipeStore();
   
   const [editRecipe, setEditRecipe] = useState<Recipe | undefined>();
   const [isLoading, setIsLoading] = useState(Boolean(editId));
@@ -22,21 +21,20 @@ export function NewRecipePage() {
 
   useEffect(() => {
     if (editId) {
-      const existing = recipes.find(r => r.id === editId);
-      if (existing) {
-        setEditRecipe(existing);
-        setIsLoading(false);
-      } else {
-        setIsLoading(true);
-        RecipeRepository.getById(editId).then(r => {
+      setIsLoading(true);
+      fetchRecipeDetail(editId)
+        .then((r) => {
           if (r) {
             setEditRecipe(r);
+          } else {
+            const fallback = recipes.find((item) => item.id === editId);
+            if (fallback) setEditRecipe(fallback);
           }
           setIsLoading(false);
-        }).catch(() => {
+        })
+        .catch(() => {
           setIsLoading(false);
         });
-      }
     } else {
       setIsLoading(false);
       const titleParam = searchParams.get('title');
@@ -52,7 +50,7 @@ export function NewRecipePage() {
         } as any);
       }
     }
-  }, [editId, searchParams, recipes]);
+  }, [editId, searchParams, recipes, fetchRecipeDetail]);
 
   const handleSubmit = async (data: any) => {
     if (Array.isArray(data)) {
@@ -85,7 +83,7 @@ export function NewRecipePage() {
   }
 
   return (
-    <div className="min-h-full flex flex-col pt-6 pb-14">
+    <div className="min-h-full flex flex-col pb-14">
       <RecipeForm initialData={editRecipe} onSubmit={handleSubmit} />
     </div>
   );

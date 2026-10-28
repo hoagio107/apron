@@ -121,6 +121,9 @@ export const vi = {
     savedSubtitle: '{{count}} món ăn trong danh sách yêu thích',
     searchPlaceholder: 'Tìm công thức theo tên hoặc nguyên liệu...',
     addRecipe: 'Thêm công thức',
+    rating: 'Đánh giá',
+    min: 'phút',
+    mins: 'phút',
     views: {
       portraitGrid: 'Lưới dọc',
       squareGrid: 'Lưới vuông',

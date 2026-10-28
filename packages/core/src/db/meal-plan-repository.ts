@@ -27,11 +27,9 @@ export class MealPlanRepository {
     try {
       const path = `${MEAL_PLANS_DIR}/${date}.json`;
       if (!(await storage.exists(path))) return null;
-      
-      
+
       const content = await storage.readTextFile(path);
-      const plan = JSON.parse(content) as MealPlan;
-      return plan;
+      return JSON.parse(content) as MealPlan;
     } catch (e) {
       console.error(`Failed to get meal plan for date ${date}`, e);
       return null;
@@ -48,25 +46,31 @@ export class MealPlanRepository {
       if (!(await storage.exists(MEAL_PLANS_DIR))) return mealPlans;
 
       const files = await storage.readDir(MEAL_PLANS_DIR);
-      for (const file of files) {
-        if (!file.isDirectory && file.name.endsWith('.json')) {
-          const dateStr = file.name.replace('.json', '');
-          // Simple string comparison works for YYYY-MM-DD format
-          if (dateStr >= startDate && dateStr <= endDate) {
-            try {
-              const content = await storage.readTextFile(`${MEAL_PLANS_DIR}/${file.name}`);
-              const plan = JSON.parse(content) as MealPlan;
-              mealPlans.push(plan);
-            } catch (e) {
-              console.error(`Failed to parse meal plan ${file.name}`, e);
-            }
+      const matchingFiles = files.filter((file) => {
+        if (file.isDirectory || !file.name.endsWith('.json')) return false;
+        const dateStr = file.name.replace('.json', '');
+        return dateStr >= startDate && dateStr <= endDate;
+      });
+
+      const loaded = await Promise.all(
+        matchingFiles.map(async (file) => {
+          try {
+            const content = await storage.readTextFile(`${MEAL_PLANS_DIR}/${file.name}`);
+            return JSON.parse(content) as MealPlan;
+          } catch (e) {
+            console.error(`Failed to parse meal plan ${file.name}`, e);
+            return null;
           }
-        }
+        })
+      );
+
+      for (const plan of loaded) {
+        if (plan) mealPlans.push(plan);
       }
     } catch (e) {
       console.error('Failed to get meal plans in range', e);
     }
-    
+
     return mealPlans.sort((a, b) => a.date.localeCompare(b.date));
   }
 
@@ -77,7 +81,7 @@ export class MealPlanRepository {
     const storage = getStorageProvider();
     try {
       await this.init();
-      
+
       if (!mealPlan.id) {
         mealPlan.id = crypto.randomUUID();
       }

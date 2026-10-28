@@ -12,17 +12,15 @@ export function getStorageProvider(): StorageProvider {
   if (cachedProvider) return cachedProvider;
 
   // Nếu đang chạy trong môi trường Tauri (Desktop)
-  // Tauri V2 inject window.__TAURI_INTERNALS__ hoặc chúng ta có thể check object window.__TAURI__
-  const isTauri = typeof window !== 'undefined' && (window as any).__TAURI_INTERNALS__ !== undefined;
-  
+  const isTauri = typeof window !== 'undefined' && (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ !== undefined;
+
   if (isTauri) {
     cachedProvider = new TauriStorageProvider();
   } else if (Capacitor.isNativePlatform()) {
     // Nếu đang chạy trên Android / iOS qua Capacitor
     cachedProvider = new CapacitorStorageProvider();
   } else {
-    // Fallback khi code chạy thử trên web browser (dev)
-    console.info('Đang chạy ở môi trường Web thuần, Storage sử dụng BrowserStorageProvider (IndexedDB)');
+    // Fallback khi chạy trên web browser
     cachedProvider = new BrowserStorageProvider();
   }
 

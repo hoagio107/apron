@@ -28,7 +28,7 @@ import {
   Check
 } from 'lucide-react';
 import { useTipStore } from '../../store/useTipStore';
-import { TIP_CATEGORIES, type Tip, TipRepository } from '@apron/core';
+import { TIP_CATEGORIES, type Tip, TipRepository, sanitizeHtml } from '@apron/core';
 import { ImageManager } from '../../lib/image-manager';
 import { format } from 'date-fns';
 import { vi, enUS } from 'date-fns/locale';
@@ -303,7 +303,7 @@ export function TipDetailPage() {
               prose-p:my-3 prose-ul:my-2 prose-ol:my-2 prose-li:my-1.5
               prose-strong:text-foreground prose-strong:font-bold
               prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
-            dangerouslySetInnerHTML={{ __html: tip.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(tip.content) }}
           />
         </div>
 
@@ -445,7 +445,7 @@ export function TipDetailPage() {
               prose-p:my-4 prose-ul:my-3 prose-ol:my-3 prose-li:my-1.5
               prose-strong:text-foreground prose-strong:font-bold
               prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
-            dangerouslySetInnerHTML={{ __html: tip.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(tip.content) }}
           />
         </div>
       </div>

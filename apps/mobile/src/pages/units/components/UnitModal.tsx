@@ -14,7 +14,7 @@ import {
 import { Trash2, Tag, Layers, ArrowRightLeft, UtensilsCrossed } from 'lucide-react';
 import type { Unit } from '@apron/core';
 import { FormField } from '../../../components/shared/form/FormField';
-import { getUnitTheme } from './UnitCard';
+import { getUnitTheme } from '../unitTheme';
 import { UNIT_CATEGORIES, detectUnitCategory } from '@apron/core';
 
 interface UnitModalProps {

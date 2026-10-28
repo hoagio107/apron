@@ -16,11 +16,13 @@ import { ConfirmModal } from '../../components/shared/ConfirmModal';
 import { ImageManager } from '../../lib/image-manager';
 import { CollectionModal } from './components/CollectionModal';
 import type { Collection } from '@apron/core';
+import { useGridColumns } from '../../hooks/useGridColumns';
 
 export function CollectionsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { collections, isLoading, fetchCollections, addCollection, updateCollection, deleteCollection } = useCollectionStore();
+  const { containerRef, columnsCount } = useGridColumns();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,7 +75,7 @@ export function CollectionsPage() {
   };
 
   return (
-    <div className="flex flex-col h-full gap-6 w-full pb-8">
+    <div ref={containerRef} className="flex flex-col min-h-full gap-6 w-full pb-8">
       {/* Sticky Header */}
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-6 pb-4 -mx-8 px-8 border-b border-divider/50 shadow-2xs">
         <PageHeader
@@ -130,7 +132,10 @@ export function CollectionsPage() {
           }
         />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        <div
+          className="grid gap-6"
+          style={{ gridTemplateColumns: `repeat(${columnsCount}, minmax(0, 1fr))` }}
+        >
           {filteredCollections.map(col => {
             const totalDishes = (col.folders || []).reduce((acc, f) => acc + (f.items?.length || 0), 0);
             const totalFolders = col.folders?.length || 0;
@@ -205,21 +210,21 @@ export function CollectionsPage() {
                 </div>
 
                 {/* Bottom Content Area with TipCard-style Action Button */}
-                <div className="relative z-20 flex flex-col justify-end h-full p-3.5 text-white">
-                  <h3 className="font-bold text-sm sm:text-base text-white group-hover:text-primary-300 transition-colors line-clamp-2 leading-snug drop-shadow-md mb-1">
+                <div className="relative z-20 flex flex-col justify-end h-full p-4 text-white">
+                  <h3 className="font-bold text-base sm:text-lg text-white group-hover:text-primary-300 transition-colors line-clamp-2 leading-snug drop-shadow-md mb-1.5">
                     {col.title}
                   </h3>
                   
                   {col.description && (
-                    <p className="text-[11px] text-white/80 line-clamp-1 font-normal drop-shadow-sm mb-2">
+                    <p className="text-xs sm:text-sm text-white/80 line-clamp-2 font-normal drop-shadow-sm mb-3">
                       {col.description}
                     </p>
                   )}
 
                   {/* Button: "Xem chi tiết" matching TipCard style */}
                   <Button 
-                    className="w-full bg-white/95 text-black font-semibold rounded-full hover:bg-white shadow-sm active:scale-98 transition-all text-xs h-7.5 min-h-[30px] px-2"
-                    size="sm"
+                    className="w-full bg-white/95 text-black font-semibold rounded-full hover:bg-white text-sm"
+                    size="md"
                     onPress={() => navigate(`/collections/${col.id}`)}
                   >
                     <span className="truncate">{t('common.actions.viewDetails')}</span>

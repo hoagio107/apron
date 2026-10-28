@@ -11,13 +11,15 @@ export * from './db/collection-repository';
 // Types
 export * from './types/recipe';
 export * from './types/shopping-list';
-export * from './types/pantry';
 export * from './types/tip';
 export * from './types/collection';
 
+// Utilities & Importer
 export * from './utils/ingredientParser';
 export * from './utils/unitNormalizer';
-export * from './data/seedMockData';
+export * from './utils/sanitize';
+export * from './utils/geminiParser';
+export * from './utils/imageUtils';
 export * from './data/purgeMockData';
 export * from './store';
 export * from './i18n';

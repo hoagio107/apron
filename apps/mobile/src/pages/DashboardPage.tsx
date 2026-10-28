@@ -7,9 +7,12 @@ import {
   Lightbulb, ArrowRight, Flame,
   Utensils
 } from 'lucide-react';
-import type { Recipe, MealPlan, Tip, Course } from '@apron/core';
+import type { Recipe, MealPlan } from '@apron/core';
 import { 
-  RecipeRepository, MealPlanRepository, TipRepository, CourseRepository 
+  MealPlanRepository,
+  useRecipeStore,
+  useCourseStore,
+  useTipStore,
 } from '@apron/core';
 import { ImageManager } from '../lib/image-manager';
 import { RecipeCard } from '../components/recipes/list/RecipeCard';
@@ -23,40 +26,26 @@ export function DashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  // State
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
+  const { recipes, fetchRecipes, toggleFavorite, deleteRecipe } = useRecipeStore();
+  const { courses, fetchCourses } = useCourseStore();
+  const { tips, fetchTips } = useTipStore();
+
   const [todayMealPlan, setTodayMealPlan] = useState<MealPlan | null>(null);
-  const [dailyTip, setDailyTip] = useState<Tip | null>(null);
-  const [tipsCount, setTipsCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        
-        // 1. Fetch Recipes
-        const allRecipes = await RecipeRepository.getAll();
-        setRecipes(allRecipes);
-
-        // 2. Fetch Courses
-        const allCourses = await CourseRepository.getAll();
-        setCourses(allCourses);
-
-        // 3. Fetch Today's Meal Plan
         const today = new Date().toISOString().split('T')[0];
-        const plan = await MealPlanRepository.getByDate(today);
+
+        const [, , , plan] = await Promise.all([
+          fetchRecipes(),
+          fetchCourses(),
+          fetchTips(),
+          MealPlanRepository.getByDate(today),
+        ]);
         setTodayMealPlan(plan);
-
-        // 4. Fetch Tips and pick a random one
-        const allTips = await TipRepository.getAll();
-        setTipsCount(allTips.length);
-        if (allTips.length > 0) {
-          const randomIndex = Math.floor(Math.random() * allTips.length);
-          setDailyTip(allTips[randomIndex]);
-        }
-
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
@@ -65,7 +54,14 @@ export function DashboardPage() {
     };
 
     fetchData();
-  }, []);
+  }, [fetchRecipes, fetchCourses, fetchTips]);
+
+  const tipsCount = tips.length;
+  const dailyTip = useMemo(() => {
+    if (tips.length === 0) return null;
+    const dayIndex = new Date().getDate() % tips.length;
+    return tips[dayIndex];
+  }, [tips]);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -98,18 +94,17 @@ export function DashboardPage() {
   const handleRecipeAction = async (action: string, targetRecipe: Recipe) => {
     switch (action) {
       case 'favorite': {
-        const updated = { ...targetRecipe, is_favorite: !targetRecipe.is_favorite };
-        await RecipeRepository.save(updated);
-        setRecipes(prev => prev.map(r => r.id === targetRecipe.id ? updated : r));
+        if (targetRecipe.id) {
+          await toggleFavorite(targetRecipe.id);
+        }
         break;
       }
       case 'edit':
         navigate(`/recipes/${targetRecipe.id}/edit`);
         break;
       case 'delete': {
-        if (window.confirm(`Bạn có chắc chắn muốn xoá công thức "${targetRecipe.title}" không?`)) {
-          await RecipeRepository.delete(targetRecipe.id);
-          setRecipes(prev => prev.filter(r => r.id !== targetRecipe.id));
+        if (targetRecipe.id && window.confirm(`Bạn có chắc chắn muốn xoá công thức "${targetRecipe.title}" không?`)) {
+          await deleteRecipe(targetRecipe.id);
         }
         break;
       }

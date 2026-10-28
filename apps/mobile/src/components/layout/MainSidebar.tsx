@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { 
   Home, Heart, GraduationCap, 
   Lightbulb, PlusCircle, ShoppingCart, Scale, 
-  CalendarDays, FileUp, ChefHat,
+  CalendarDays, ChefHat,
   PanelLeftClose, PanelLeft
 } from 'lucide-react';
 import { Button } from '@/ui';
@@ -37,7 +37,6 @@ export function MainSidebar({ isExpanded, onToggle }: MainSidebarProps) {
     { name: t('nav.mealPlanner'), icon: CalendarDays, path: '/meal-planner' },
     { name: t('nav.kitchenTips'), icon: Lightbulb, path: '/tips' },
     { name: t('nav.units'), icon: Scale, path: '/units' },
-    { name: t('nav.import'), icon: FileUp, path: '/import' },
   ];
 
   return (
@@ -79,13 +78,13 @@ export function MainSidebar({ isExpanded, onToggle }: MainSidebarProps) {
           )}
         </div>
 
-        <nav className={`flex-grow ${isExpanded ? 'px-3' : 'px-2'} py-2 space-y-3 overflow-y-auto custom-scrollbar`}>
+        <nav className={`flex-grow ${isExpanded ? 'pl-3' : 'px-2'} pr-0 !pr-0 py-2 space-y-3 overflow-y-auto no-scrollbar`}>
           <Button 
             as={Link} 
             to="/recipes/new"
             color="primary" 
             variant="solid"
-            className={`w-full font-bold h-11 flex items-center rounded-xl text-white overflow-hidden transition-all duration-200 ${isExpanded ? 'justify-start px-3.5 gap-2.5' : 'justify-center px-0 gap-0 min-w-0'}`}
+            className={`w-full font-bold h-11 flex items-center rounded-xl text-white overflow-hidden transition-all duration-200 ${isExpanded ? 'justify-start pl-3.5 pr-0 gap-2.5' : 'justify-center px-0 gap-0 min-w-0'}`}
             title={!isExpanded ? t('nav.addRecipe') : undefined}
           >
             <PlusCircle className="w-5 h-5 flex-shrink-0 text-white" />

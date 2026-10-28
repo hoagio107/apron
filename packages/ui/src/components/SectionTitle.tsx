@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Button } from '@heroui/react';
+import { Button } from './Button';
 import { ArrowRight } from 'lucide-react';
 
 export interface SectionTitleProps {

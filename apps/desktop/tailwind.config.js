@@ -17,6 +17,11 @@ export default {
       themes: {
         light: {
           colors: {
+            background: "#f3f4f6", // Màu xám nhạt thanh khiết, dịu mắt trên màn hình Desktop (giúp nổi bật các thẻ card trắng #ffffff)
+            content1: {
+              DEFAULT: "#ffffff",
+              foreground: "#111827",
+            },
             primary: {
               50: "#e7f5ef",
               100: "#d0ebdf",

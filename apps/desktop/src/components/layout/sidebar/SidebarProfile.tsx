@@ -1,5 +1,5 @@
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from '@/ui';
-import { Settings, MoreVertical, Database, Archive } from 'lucide-react';
+import { Settings, MoreVertical, FileUp, Archive } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -52,8 +52,8 @@ export function SidebarProfile({ isExpanded = false, onOpenSettings }: SidebarPr
             </DropdownItem>
             <DropdownItem 
               key="import" 
-              startContent={<Database className="w-4 h-4 text-default-500" />}
-              href="/import"
+              startContent={<FileUp className="w-4 h-4 text-default-500" />}
+              onPress={() => window.dispatchEvent(new CustomEvent('open-json-import'))}
             >
               {t('nav.import')}
             </DropdownItem>

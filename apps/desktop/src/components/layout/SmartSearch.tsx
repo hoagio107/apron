@@ -16,9 +16,17 @@ export function SmartSearch() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { recipes } = useRecipeStore();
-  const { tips } = useTipStore();
-  const { courses } = useCourseStore();
+  const { recipes, fetchRecipes } = useRecipeStore();
+  const { tips, fetchTips } = useTipStore();
+  const { courses, fetchCourses } = useCourseStore();
+
+  useEffect(() => {
+    if (isSearchActive) {
+      if (recipes.length === 0) fetchRecipes();
+      if (tips.length === 0) fetchTips();
+      if (courses.length === 0) fetchCourses();
+    }
+  }, [isSearchActive, recipes.length, tips.length, courses.length, fetchRecipes, fetchTips, fetchCourses]);
 
   // Generate a simple breadcrumb from location
   const pathnames = location.pathname.split('/').filter((x) => x);

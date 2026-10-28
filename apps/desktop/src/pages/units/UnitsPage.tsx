@@ -46,7 +46,7 @@ export function UnitsPage() {
   };
 
   return (
-    <div className="flex flex-col h-full pb-8">
+    <div className="flex flex-col min-h-full pb-8">
       {/* Sticky Header */}
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-6 pb-4 -mx-8 px-8 border-b border-divider/50 shadow-2xs">
         <PageHeader
@@ -77,7 +77,7 @@ export function UnitsPage() {
         />
       </div>
       
-      <div className="flex-1 overflow-y-auto mt-4 pb-12">
+      <div className="flex-1 mt-4 pb-12">
         <div className="max-w-2xl mx-auto flex flex-col gap-4">
           {isAdding && (
             <AppCard className="p-4">

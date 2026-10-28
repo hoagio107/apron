@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button } from '@/ui';
+import { Button, toast } from '@/ui';
 import { ArrowLeft, Edit, Trash2, Calendar, Lightbulb } from 'lucide-react';
 import { useTipStore } from '../../store/useTipStore';
-import { TIP_CATEGORIES, type Tip, TipRepository } from '@apron/core';
+import { TIP_CATEGORIES, type Tip, TipRepository, sanitizeHtml } from '@apron/core';
 import { ImageManager } from '../../lib/image-manager';
 import { format } from 'date-fns';
 import { vi, enUS } from 'date-fns/locale';
 import { TipFormModal } from './components/TipFormModal';
+import { ConfirmModal } from '../../components/shared/ConfirmModal';
 
 export function TipDetailPage() {
   const { t, i18n } = useTranslation();
@@ -19,6 +20,7 @@ export function TipDetailPage() {
   const [tip, setTip] = useState<Tip | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -47,16 +49,16 @@ export function TipDetailPage() {
   const category = TIP_CATEGORIES.find(c => c.id === tip.category_id);
 
   const handleDelete = async () => {
-    if (window.confirm(t('tips.confirmDelete'))) {
-      await deleteTip(tip.id!);
-      navigate('/tips');
-    }
+    if (!tip?.id) return;
+    await deleteTip(tip.id);
+    toast.success(t('tips.deletedSuccess', { defaultValue: 'Đã xoá mẹo thành công' }));
+    navigate('/tips');
   };
 
   return (
-    <div className="max-w-4xl mx-auto w-full pb-12">
+    <div className="max-w-4xl mx-auto w-full pb-12 min-h-full">
       {/* Header Actions */}
-      <div className="flex items-center justify-between mb-6 sticky top-0 bg-background/80 backdrop-blur-md z-10 py-4 -mt-4">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-6 pb-4 mb-6 flex items-center justify-between border-b border-divider/50">
         <Button 
           variant="flat" 
           startContent={<ArrowLeft className="w-4 h-4" />}
@@ -76,12 +78,22 @@ export function TipDetailPage() {
             color="danger" 
             variant="flat" 
             isIconOnly
-            onPress={handleDelete}
+            onPress={() => setIsDeleteModalOpen(true)}
           >
             <Trash2 className="w-4 h-4" />
           </Button>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        onConfirm={handleDelete}
+        title={t('tips.deleteModalTitle', { defaultValue: 'Xoá mẹo nhà bếp' })}
+        description={t('tips.confirmDelete')}
+        confirmLabel={t('common.actions.delete', { defaultValue: 'Xoá' })}
+        confirmColor="danger"
+      />
 
       <TipFormModal 
         isOpen={isFormModalOpen}
@@ -136,7 +148,7 @@ export function TipDetailPage() {
         <div className="p-8 md:p-12 flex-1 bg-content1">
           <div 
             className="prose prose-lg prose-primary max-w-4xl mx-auto leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: tip.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(tip.content) }}
           />
         </div>
       </div>

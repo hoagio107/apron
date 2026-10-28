@@ -1,12 +1,14 @@
-import type { StorageProvider, FileInfo } from './types';
+import { sanitizeRelativePath, type StorageProvider, type FileInfo } from './types';
 
 const DB_NAME = 'apron_browser_storage';
 const STORE_NAME = 'keyval';
 const DB_VERSION = 1;
+const IDB_OPEN_TIMEOUT_MS = 4000;
+const IDB_OP_TIMEOUT_MS = 3000;
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 
-// Bộ nhớ đệm trong RAM (In-Memory Cache) giúp truy xuất 0ms, không bao giờ bị nghẽn transaction IDB
+// Bộ nhớ đệm trong RAM (In-Memory Cache) giúp truy xuất 0ms, không bị nghẽn transaction IDB
 const memCache = new Map<string, string>();
 let isInitialized = false;
 
@@ -20,7 +22,7 @@ function getDb(): Promise<IDBDatabase> {
 
     const timeout = setTimeout(() => {
       reject(new Error('IndexedDB open connection timeout'));
-    }, 4000);
+    }, IDB_OPEN_TIMEOUT_MS);
 
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
@@ -62,18 +64,16 @@ function getDb(): Promise<IDBDatabase> {
   return dbPromise;
 }
 
-async function withTimeout<T>(promise: Promise<T>, ms: number = 3000, fallback: T): Promise<T> {
-  let timer: any;
+async function withTimeout<T>(promise: Promise<T>, ms: number = IDB_OP_TIMEOUT_MS, fallback: T): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
   const timeoutPromise = new Promise<T>((resolve) => {
     timer = setTimeout(() => resolve(fallback), ms);
   });
-  return Promise.race([
-    promise.then((val) => {
-      clearTimeout(timer);
-      return val;
-    }),
-    timeoutPromise
-  ]);
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
 }
 
 async function idbGet(key: string): Promise<string | null> {
@@ -102,7 +102,7 @@ async function idbGet(key: string): Promise<string | null> {
     }
   })();
 
-  const val = await withTimeout(readPromise, 3000, null);
+  const val = await withTimeout(readPromise, IDB_OP_TIMEOUT_MS, null);
   if (val !== null) {
     memCache.set(key, val);
     return val;
@@ -153,7 +153,7 @@ async function idbSet(key: string, value: string): Promise<void> {
     }
   })();
 
-  await withTimeout(writePromise, 3000, undefined);
+  await withTimeout(writePromise, IDB_OP_TIMEOUT_MS, undefined);
 }
 
 async function idbDelete(key: string): Promise<void> {
@@ -162,7 +162,9 @@ async function idbDelete(key: string): Promise<void> {
   if (typeof localStorage !== 'undefined') {
     try {
       localStorage.removeItem(key);
-    } catch {}
+    } catch {
+      // Bỏ qua nếu localStorage bị vô hiệu hoá
+    }
   }
 
   const deletePromise = (async (): Promise<void> => {
@@ -186,7 +188,7 @@ async function idbDelete(key: string): Promise<void> {
     }
   })();
 
-  await withTimeout(deletePromise, 3000, undefined);
+  await withTimeout(deletePromise, IDB_OP_TIMEOUT_MS, undefined);
 }
 
 function lsGetAllKeys(): string[] {
@@ -218,24 +220,29 @@ export class BrowserStorageProvider implements StorageProvider {
 
       // 2. Nạp toàn bộ dữ liệu từ IndexedDB vào memCache trong 1 transaction duy nhất
       try {
-        const db = await withTimeout(getDb(), 3000, null);
+        const db = await withTimeout(getDb(), IDB_OP_TIMEOUT_MS, null);
         if (db) {
+          const idbKeys = new Set<string>();
           await new Promise<void>((resolve) => {
             try {
               const tx = db.transaction(STORE_NAME, 'readonly');
               const store = tx.objectStore(STORE_NAME);
               const cursorReq = store.openCursor();
-              
+
               cursorReq.onsuccess = () => {
                 const cursor = cursorReq.result;
                 if (cursor) {
                   const k = String(cursor.key);
                   const v = String(cursor.value);
                   if (k.startsWith('fs:') || k.startsWith('fs_dir:')) {
+                    idbKeys.add(k);
                     memCache.set(k, v);
-                    // Đồng bộ sang localStorage nếu chưa có
                     if (typeof localStorage !== 'undefined' && localStorage.getItem(k) === null) {
-                      try { localStorage.setItem(k, v); } catch {}
+                      try {
+                        localStorage.setItem(k, v);
+                      } catch {
+                        // Bỏ qua lỗi quota của localStorage
+                      }
                     }
                   }
                   cursor.continue();
@@ -251,9 +258,15 @@ export class BrowserStorageProvider implements StorageProvider {
             }
           });
 
-          // Đồng bộ các key mới từ localStorage sang IndexedDB
+          // Chỉ đồng bộ các key có ở localStorage nhưng chưa có trong IndexedDB
+          const missingSyncPromises: Promise<void>[] = [];
           for (const [k, v] of memCache.entries()) {
-            idbSet(k, v).catch(() => {});
+            if (!idbKeys.has(k)) {
+              missingSyncPromises.push(idbSet(k, v));
+            }
+          }
+          if (missingSyncPromises.length > 0) {
+            await Promise.allSettled(missingSyncPromises);
           }
         }
       } catch (e) {
@@ -269,9 +282,10 @@ export class BrowserStorageProvider implements StorageProvider {
     }
   }
 
-  async readTextFile(path: string): Promise<string> {
+  async readTextFile(rawPath: string): Promise<string> {
+    const path = sanitizeRelativePath(rawPath);
     const key = `fs:${path}`;
-    
+
     // 1. Kiểm tra memCache (0ms)
     if (memCache.has(key)) {
       return memCache.get(key)!;
@@ -285,7 +299,9 @@ export class BrowserStorageProvider implements StorageProvider {
           memCache.set(key, data);
           return data;
         }
-      } catch {}
+      } catch {
+        // Bỏ qua lỗi đọc localStorage
+      }
     }
 
     // 3. Kiểm tra IndexedDB
@@ -298,11 +314,12 @@ export class BrowserStorageProvider implements StorageProvider {
     throw new Error(`File not found: ${path}`);
   }
 
-  async writeTextFile(path: string, content: string): Promise<void> {
+  async writeTextFile(rawPath: string, content: string): Promise<void> {
+    const path = sanitizeRelativePath(rawPath);
     const key = `fs:${path}`;
     memCache.set(key, content);
     await idbSet(key, content);
-    
+
     // Đồng thời theo dõi thư mục
     const parts = path.split('/');
     if (parts.length > 1) {
@@ -350,14 +367,14 @@ export class BrowserStorageProvider implements StorageProvider {
 
   /**
    * Quét và trả về toàn bộ tệp tin trong thư mục.
-   * Kiểm tra bộ nhớ cache trong RAM và cả localStorage, bảo đảm 100% không bao giờ bỏ sót tệp nào.
    */
-  async readDir(path: string): Promise<FileInfo[]> {
+  async readDir(rawPath: string): Promise<FileInfo[]> {
+    const path = sanitizeRelativePath(rawPath);
     const dirKey = `fs_dir:${path}`;
     const prefix = `fs:${path}/`;
     const fileSet = new Set<string>();
 
-    // 1. Quét trong memCache (cực nhanh, chính xác tuyệt đối)
+    // 1. Quét trong memCache
     for (const k of memCache.keys()) {
       if (k.startsWith(prefix)) {
         const remainder = k.slice(prefix.length);
@@ -386,16 +403,17 @@ export class BrowserStorageProvider implements StorageProvider {
         if (Array.isArray(parsed)) {
           parsed.forEach(f => fileSet.add(f));
         }
-      } catch {}
+      } catch {
+        // Bỏ qua lỗi parse chỉ mục thư mục
+      }
     }
 
     const fileList = Array.from(fileSet);
 
-    // Tự động cập nhật lại chỉ mục nếu có
     if (fileList.length > 0) {
       const listStr = JSON.stringify(fileList);
       memCache.set(dirKey, listStr);
-      idbSet(dirKey, listStr).catch(() => {});
+      await idbSet(dirKey, listStr);
     }
 
     return fileList.map(name => ({
@@ -405,9 +423,10 @@ export class BrowserStorageProvider implements StorageProvider {
   }
 
   /**
-   * Đọc trực tiếp toàn bộ tệp tin và nội dung trong thư mục một cách tức thời từ cache RAM.
+   * Đọc trực tiếp toàn bộ tệp tin và nội dung trong thư mục từ cache RAM.
    */
-  async readDirFiles(path: string): Promise<{ name: string; content: string }[]> {
+  async readDirFiles(rawPath: string): Promise<{ name: string; content: string }[]> {
+    const path = sanitizeRelativePath(rawPath);
     const prefix = `fs:${path}/`;
     const results: { name: string; content: string }[] = [];
     const seenNames = new Set<string>();
@@ -442,7 +461,8 @@ export class BrowserStorageProvider implements StorageProvider {
     return results;
   }
 
-  async mkdir(path: string): Promise<void> {
+  async mkdir(rawPath: string): Promise<void> {
+    const path = sanitizeRelativePath(rawPath);
     const dirKey = `fs_dir:${path}`;
     if (!memCache.has(dirKey)) {
       memCache.set(dirKey, '[]');
@@ -450,24 +470,22 @@ export class BrowserStorageProvider implements StorageProvider {
     }
   }
 
-  async exists(path: string): Promise<boolean> {
-    if (path.includes('.')) {
-      const key = `fs:${path}`;
-      if (memCache.has(key)) return true;
-      if (typeof localStorage !== 'undefined' && localStorage.getItem(key) !== null) {
-        return true;
-      }
-      const file = await idbGet(key);
-      return file !== null;
-    }
-
+  async exists(rawPath: string): Promise<boolean> {
+    const path = sanitizeRelativePath(rawPath);
+    const fileKey = `fs:${path}`;
     const dirKey = `fs_dir:${path}`;
-    if (memCache.has(dirKey)) return true;
-    if (typeof localStorage !== 'undefined' && localStorage.getItem(dirKey) !== null) {
-      return true;
+
+    if (memCache.has(fileKey) || memCache.has(dirKey)) return true;
+
+    if (typeof localStorage !== 'undefined') {
+      try {
+        if (localStorage.getItem(fileKey) !== null || localStorage.getItem(dirKey) !== null) {
+          return true;
+        }
+      } catch {
+        // Bỏ qua lỗi đọc localStorage
+      }
     }
-    const dir = await idbGet(dirKey);
-    if (dir !== null) return true;
 
     const prefix = `fs:${path}/`;
     for (const k of memCache.keys()) {
@@ -476,14 +494,16 @@ export class BrowserStorageProvider implements StorageProvider {
     const lsKeys = lsGetAllKeys();
     if (lsKeys.some(k => k.startsWith(prefix))) return true;
 
-    return false;
+    const [fileVal, dirVal] = await Promise.all([idbGet(fileKey), idbGet(dirKey)]);
+    return fileVal !== null || dirVal !== null;
   }
 
-  async deleteFile(path: string): Promise<void> {
+  async deleteFile(rawPath: string): Promise<void> {
+    const path = sanitizeRelativePath(rawPath);
     const key = `fs:${path}`;
     memCache.delete(key);
     await idbDelete(key);
-    
+
     const parts = path.split('/');
     if (parts.length > 1) {
       const dirPath = parts.slice(0, -1).join('/');

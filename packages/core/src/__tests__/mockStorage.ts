@@ -8,6 +8,8 @@ export class MockStorageProvider implements StorageProvider {
     this.directories.add('recipes');
     this.directories.add('tips');
     this.directories.add('courses');
+    this.directories.add('collections');
+    this.directories.add('meal_plans');
     this.directories.add('meal-plans');
     this.directories.add('shopping-list');
   }

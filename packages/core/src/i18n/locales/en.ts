@@ -121,6 +121,9 @@ export const en = {
     savedSubtitle: '{{count}} favorite dishes saved',
     searchPlaceholder: 'Search recipes by name or ingredient...',
     addRecipe: 'Add Recipe',
+    rating: 'Rating',
+    min: 'min',
+    mins: 'mins',
     views: {
       portraitGrid: 'Portrait cards',
       squareGrid: 'Square grid',

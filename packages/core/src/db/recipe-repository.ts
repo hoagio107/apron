@@ -3,8 +3,28 @@ import type { Recipe } from '../types/recipe';
 
 const RECIPES_DIR = 'recipes';
 const RECIPES_INDEX_FILE = 'recipes_index.json';
+const BULK_WRITE_CONCURRENCY = 50;
 
 export type RecipeDeleteHook = (recipes: Recipe[]) => Promise<void> | void;
+
+export function slugifyRecipeTitle(title: string | undefined, fallbackId: string): string {
+  if (!title) return fallbackId;
+  return (
+    title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || fallbackId
+  );
+}
+
+function parseTimestamp(dateStr?: string): number {
+  if (!dateStr) return 0;
+  const ts = Date.parse(dateStr);
+  return Number.isNaN(ts) ? 0 : ts;
+}
 
 export class RecipeRepository {
   private static deleteHooks: RecipeDeleteHook[] = [];
@@ -25,7 +45,7 @@ export class RecipeRepository {
    */
   private static sanitizeForIndex(recipe: Recipe): Recipe {
     const sanitizedHistory = recipe.cooking_history?.map(h => {
-      const { recipe_snapshot, ...rest } = h;
+      const { recipe_snapshot: _snapshot, ...rest } = h;
       return rest;
     });
 
@@ -36,16 +56,45 @@ export class RecipeRepository {
   }
 
   /**
-   * Sắp xếp danh sách recipes theo created_at giảm dần
+   * Bảo toàn recipe_snapshot từ file chi tiết trên đĩa nếu bản ghi truyền vào đến từ chỉ mục (đã bị lược bỏ snapshot)
+   */
+  private static async preserveHistorySnapshots(recipe: Recipe): Promise<Recipe> {
+    if (!recipe.id || !recipe.cooking_history?.some((h) => h.recipe_snapshot === undefined)) {
+      return recipe;
+    }
+
+    const existing = await this.getById(recipe.id);
+    if (!existing?.cooking_history || existing.cooking_history.length === 0) {
+      return recipe;
+    }
+
+    const snapshotMap = new Map<string, Omit<Recipe, 'cooking_history'>>();
+    for (const h of existing.cooking_history) {
+      if (h.id && h.recipe_snapshot) {
+        snapshotMap.set(h.id, h.recipe_snapshot);
+      }
+    }
+
+    if (snapshotMap.size === 0) return recipe;
+
+    return {
+      ...recipe,
+      cooking_history: recipe.cooking_history.map((h) =>
+        h.recipe_snapshot === undefined && h.id && snapshotMap.has(h.id)
+          ? { ...h, recipe_snapshot: snapshotMap.get(h.id) }
+          : h
+      ),
+    };
+  }
+
+  /**
+   * Sắp xếp danh sách recipes theo created_at giảm dần (Schwartzian transform tránh cấp phát Date O(n log n) lần)
    */
   static sortRecipes(recipes: Recipe[]): Recipe[] {
-    return [...recipes].sort((a, b) => {
-      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-      const validA = isNaN(dateA) ? 0 : dateA;
-      const validB = isNaN(dateB) ? 0 : dateB;
-      return validB - validA;
-    });
+    return recipes
+      .map((recipe) => ({ recipe, ts: parseTimestamp(recipe.created_at) }))
+      .sort((a, b) => b.ts - a.ts)
+      .map((entry) => entry.recipe);
   }
 
   /**
@@ -115,8 +164,8 @@ export class RecipeRepository {
       const seenIds = new Set<string>();
 
       try {
-        if (typeof (storage as any).readDirFiles === 'function') {
-          const dirFiles = await (storage as any).readDirFiles(RECIPES_DIR);
+        if (typeof storage.readDirFiles === 'function') {
+          const dirFiles = await storage.readDirFiles(RECIPES_DIR);
           for (const file of dirFiles) {
             if (file.name.endsWith('.json') && file.name !== RECIPES_INDEX_FILE) {
               try {
@@ -181,7 +230,7 @@ export class RecipeRepository {
     try {
       const path = `${RECIPES_DIR}/${id}.json`;
       if (!(await storage.exists(path))) return null;
-      
+
       const content = await storage.readTextFile(path);
       const r = JSON.parse(content) as Recipe;
       if (r && !r.id) r.id = id;
@@ -201,27 +250,22 @@ export class RecipeRepository {
     const storage = getStorageProvider();
     try {
       await this.init();
-      
+
       if (!recipe.id) {
         recipe.id = crypto.randomUUID();
       }
       if (!recipe.slug && recipe.title) {
-        recipe.slug = recipe.title
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/đ/g, 'd')
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '') || recipe.id;
+        recipe.slug = slugifyRecipeTitle(recipe.title, recipe.id);
       }
       if (!recipe.created_at) {
         recipe.created_at = new Date().toISOString();
       }
       recipe.updated_at = new Date().toISOString();
 
-      // 1. Lưu file chi tiết độc lập
-      const path = `${RECIPES_DIR}/${recipe.id}.json`;
-      await storage.writeTextFile(path, JSON.stringify(recipe, null, 2));
+      // 1. Bảo toàn recipe_snapshot nếu dữ liệu truyền vào từ chỉ mục, sau đó lưu file chi tiết độc lập
+      const fullRecipe = await this.preserveHistorySnapshots(recipe);
+      const path = `${RECIPES_DIR}/${fullRecipe.id}.json`;
+      await storage.writeTextFile(path, JSON.stringify(fullRecipe, null, 2));
 
       // 2. Cập nhật atomic recipes_index.json
       await this.withIndexLock(async () => {
@@ -236,7 +280,7 @@ export class RecipeRepository {
           }
         }
 
-        const sanitized = this.sanitizeForIndex(recipe);
+        const sanitized = this.sanitizeForIndex(fullRecipe);
         const existingIdx = indexList.findIndex(r => r.id === recipe.id);
         if (existingIdx >= 0) {
           indexList[existingIdx] = sanitized;
@@ -300,7 +344,7 @@ export class RecipeRepository {
 
   /**
    * Lưu nhiều recipe cùng lúc:
-   * - Ghi từng file chi tiết recipes/{id}.json
+   * - Ghi song song các file chi tiết recipes/{id}.json theo batch
    * - Cập nhật recipes_index.json đúng 1 lần cho toàn bộ batch
    */
   static async saveBulk(recipes: Recipe[]): Promise<void> {
@@ -312,27 +356,27 @@ export class RecipeRepository {
     const now = new Date().toISOString();
 
     for (const recipe of recipes) {
-      const r = { ...recipe };
-      if (!r.id) {
-        r.id = crypto.randomUUID();
+      if (!recipe.id) {
+        recipe.id = crypto.randomUUID();
       }
-      if (!r.slug && r.title) {
-        r.slug = r.title
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/đ/g, 'd')
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-+|-+$/g, '') || r.id;
+      if (!recipe.slug && recipe.title) {
+        recipe.slug = slugifyRecipeTitle(recipe.title, recipe.id);
       }
-      if (!r.created_at) {
-        r.created_at = now;
+      if (!recipe.created_at) {
+        recipe.created_at = now;
       }
-      r.updated_at = now;
-      prepared.push(r);
+      recipe.updated_at = now;
+      prepared.push({ ...recipe });
+    }
 
-      const path = `${RECIPES_DIR}/${r.id}.json`;
-      await storage.writeTextFile(path, JSON.stringify(r, null, 2));
+    for (let i = 0; i < prepared.length; i += BULK_WRITE_CONCURRENCY) {
+      const chunk = prepared.slice(i, i + BULK_WRITE_CONCURRENCY);
+      await Promise.all(
+        chunk.map(async (r) => {
+          const fullRecipe = await this.preserveHistorySnapshots(r);
+          await storage.writeTextFile(`${RECIPES_DIR}/${fullRecipe.id}.json`, JSON.stringify(fullRecipe, null, 2));
+        })
+      );
     }
 
     // Cập nhật atomic recipes_index.json 1 lần duy nhất cho toàn bộ batch
@@ -364,7 +408,7 @@ export class RecipeRepository {
 
   /**
    * Xoá nhiều recipe cùng lúc:
-   * - Xoá các file chi tiết recipes/{id}.json
+   * - Xoá song song các file chi tiết recipes/{id}.json
    * - Cập nhật recipes_index.json đúng 1 lần cho toàn bộ batch
    */
   static async deleteBulk(ids: string[]): Promise<void> {
@@ -372,18 +416,20 @@ export class RecipeRepository {
     const storage = getStorageProvider();
     const deletedRecipes: Recipe[] = [];
 
-    for (const id of ids) {
-      try {
-        const existing = await this.getById(id);
-        if (existing) deletedRecipes.push(existing);
-        const path = `${RECIPES_DIR}/${id}.json`;
-        if (await storage.exists(path)) {
-          await storage.deleteFile(path);
+    await Promise.all(
+      ids.map(async (id) => {
+        try {
+          const existing = await this.getById(id);
+          if (existing) deletedRecipes.push(existing);
+          const path = `${RECIPES_DIR}/${id}.json`;
+          if (await storage.exists(path)) {
+            await storage.deleteFile(path);
+          }
+        } catch (e) {
+          console.error(`Failed to delete recipe file ${id}`, e);
         }
-      } catch (e) {
-        console.error(`Failed to delete recipe file ${id}`, e);
-      }
-    }
+      })
+    );
 
     // Cập nhật atomic recipes_index.json 1 lần duy nhất
     const idsSet = new Set(ids);
@@ -413,4 +459,3 @@ export class RecipeRepository {
     }
   }
 }
-

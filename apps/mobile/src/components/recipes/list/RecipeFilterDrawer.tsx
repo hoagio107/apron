@@ -17,7 +17,7 @@ import {
   Layers, 
   ChefHat 
 } from 'lucide-react';
-import { DEFAULT_TAGS } from '@apron/core';
+import { DEFAULT_TAGS_MAP } from '@apron/core';
 
 export interface RecipeFilterState {
   difficulties: string[];
@@ -27,6 +27,7 @@ export interface RecipeFilterState {
   minRating?: number;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const defaultFilterState: RecipeFilterState = {
   difficulties: [],
   maxTime: null,
@@ -301,7 +302,7 @@ export function RecipeFilterDrawer({
                     <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-1">
                       {availableTags.map(tag => {
                         const isSelected = (filters.tags || []).includes(tag);
-                        const matchedTag = DEFAULT_TAGS.find(t => t.id === tag || t.slug === tag || t.name.toLowerCase() === tag.toLowerCase());
+                        const matchedTag = DEFAULT_TAGS_MAP.get(tag) || DEFAULT_TAGS_MAP.get(tag.toLowerCase());
                         const displayTag = matchedTag ? matchedTag.name : tag.replace(/^[a-z]+-/, '').replace(/-/g, ' ');
                         return (
                           <button

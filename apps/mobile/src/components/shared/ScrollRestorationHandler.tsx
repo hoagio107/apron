@@ -3,14 +3,6 @@ import { useLocation, useNavigationType } from 'react-router-dom';
 
 const scrollPositions = new Map<string, number>();
 
-export function getSavedScrollPosition(pathname: string): number {
-  return scrollPositions.get(pathname) || 0;
-}
-
-export function setSavedScrollPosition(pathname: string, pos: number): void {
-  scrollPositions.set(pathname, pos);
-}
-
 interface ScrollRestorationHandlerProps {
   containerSelector?: string;
 }

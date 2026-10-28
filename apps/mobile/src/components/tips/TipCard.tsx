@@ -4,7 +4,7 @@ import { Lightbulb, Edit, Trash2, MoreVertical, Check, Clock } from 'lucide-reac
 import type { Tip } from '@apron/core';
 import { TIP_CATEGORIES } from '@apron/core';
 import { formatDistanceToNow } from 'date-fns';
-import { vi, enUS } from 'date-fns/locale';
+import { vi } from 'date-fns/locale';
 import { ImageManager } from '../../lib/image-manager';
 
 interface TipCardProps {
@@ -28,7 +28,7 @@ export function TipCard({
   selectable,
   viewMode = 'grid'
 }: TipCardProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const isSingle = viewMode === 'single';
 
   const category = TIP_CATEGORIES.find(c => 

@@ -4,6 +4,15 @@ export const Button = extendVariants(HeroButton, {
   variants: {
     weight: {
       semibold: "font-semibold",
+    },
+    variant: {
+      solid: "border-0 border-none !border-none",
+      bordered: "border-0 border-none !border-none",
+      flat: "border-0 border-none !border-none",
+      faded: "border-0 border-none !border-none",
+      light: "border-0 border-none !border-none",
+      ghost: "border-0 border-none !border-none",
+      shadow: "border-0 border-none !border-none",
     }
   },
   compoundVariants: [
@@ -35,6 +44,7 @@ export const Button = extendVariants(HeroButton, {
   ],
   defaultVariants: {
     weight: "semibold",
+    variant: "solid",
   }
 });
 

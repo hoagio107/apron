@@ -9,6 +9,8 @@ export interface Ingredient {
   ingredient_id?: string;
 }
 
+export type RecipeIngredient = Ingredient;
+
 export interface Step {
   instruction: string;
   image_url?: string;
@@ -82,19 +84,6 @@ export interface Recipe {
     carbs?: number;
     fat?: number;
   };
-}
-
-// Shopping List Types
-export interface ExtraItem {
-  id: string;
-  name: string;
-  is_checked: boolean;
-}
-
-export interface ShoppingList {
-  recipe_ids: string[];
-  extra_items: ExtraItem[];
-  checked_ingredients: string[]; // List of ingredient names marked as bought
 }
 
 // Meal Plan Types
@@ -321,37 +310,9 @@ export const DEFAULT_TAGS: Tag[] = [
   { id: 'root-time-difficulty', name: 'Thời gian & Độ khó', slug: 'thoi-gian-do-kho', parent_id: null },
 ];
 
-export interface MenuGroup {
-  id: string;
-  title: string;
-  slug: string;
-  image_url: string;
-  description?: string;
-}
-
-export interface Menu {
-  id: string;
-  title: string;
-  slug: string;
-  group_slug: string;
-  image_url: string;
-  description?: string;
-  recipe_ids: string[];
-  created_at?: string;
-}
-
-export interface CalorieItem {
-  id: string;
-  name: string;
-  calories: number;
-  quantity: number;
-  unit: string;
-  protein?: number;
-  fat?: number;
-  carbs?: number;
-  fiber?: number;
-  notes?: string;
-}
+export const DEFAULT_TAGS_MAP: ReadonlyMap<string, Tag> = new Map(
+  DEFAULT_TAGS.map((t) => [t.id, t])
+);
 
 export interface Unit {
   id: string;
@@ -359,5 +320,3 @@ export interface Unit {
   conversion_rate?: number;
   base_unit?: string;
 }
-
-// Removed tip types

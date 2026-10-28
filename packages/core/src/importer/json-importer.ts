@@ -1,11 +1,11 @@
-import type { Recipe } from '../types/recipe';
+import type { Recipe, RecipeIngredient, Step, Unit } from '../types/recipe';
 import type { Tip } from '../types/tip';
-import type { Unit } from '../types/recipe';
 import { RecipeRepository } from '../db/recipe-repository';
 import { TipRepository } from '../db/tip-repository';
 import { useRecipeStore } from '../store/useRecipeStore';
 import { useTipStore } from '../store/useTipStore';
 import { useUnitStore } from '../store/useUnitStore';
+import { sanitizeHtml } from '../utils/sanitize';
 
 export type ImportItemStatus = 'valid' | 'duplicate' | 'invalid';
 export type ImportItemType = 'recipe' | 'tip' | 'unit';
@@ -20,7 +20,7 @@ export interface ValidatedImportItem {
   statusReason?: string;
   existingId?: string;
   existingItem?: Recipe | Tip | Unit;
-  data: any;
+  data: Recipe | Tip | Unit | unknown;
 }
 
 export interface ParseResult {
@@ -43,6 +43,9 @@ export interface ImportExecutionSummary {
   updatedCount: number;
   skippedCount: number;
   failedCount: number;
+  recipesCount: number;
+  tipsCount: number;
+  unitsCount: number;
 }
 
 function normalizeTitle(title?: string): string {
@@ -54,6 +57,39 @@ function normalizeTitle(title?: string): string {
     .replace(/đ/g, 'd')
     .replace(/[^a-z0-9]/g, '')
     .trim();
+}
+
+function normalizeImportedRecipe(raw: Record<string, unknown>, id: string, title: string): Recipe {
+  const safeIngredients = Array.isArray(raw.ingredients)
+    ? (raw.ingredients as RecipeIngredient[])
+    : [];
+  const safeSteps: Step[] = Array.isArray(raw.steps)
+    ? raw.steps.map((s: unknown) => {
+        const stepObj = (s && typeof s === 'object' ? s : {}) as Partial<Step>;
+        return {
+          ...stepObj,
+          instruction: typeof stepObj.instruction === 'string' ? sanitizeHtml(stepObj.instruction) : '',
+        };
+      })
+    : [];
+
+  return {
+    ...(raw as Partial<Recipe>),
+    id,
+    title,
+    slug: typeof raw.slug === 'string' ? raw.slug : '',
+    image_url: typeof raw.image_url === 'string' ? raw.image_url : '',
+    prep_time: typeof raw.prep_time === 'number' ? raw.prep_time : 0,
+    cook_time: typeof raw.cook_time === 'number' ? raw.cook_time : 0,
+    difficulty: raw.difficulty === 'Dễ' || raw.difficulty === 'Vừa' || raw.difficulty === 'Khó' ? raw.difficulty : 'Dễ',
+    calories: typeof raw.calories === 'number' ? raw.calories : 0,
+    taste_score: typeof raw.taste_score === 'number' ? raw.taste_score : 0,
+    servings: typeof raw.servings === 'number' ? raw.servings : 2,
+    ingredients: safeIngredients,
+    steps: safeSteps,
+    notes: typeof raw.notes === 'string' ? sanitizeHtml(raw.notes) : undefined,
+    author_id: typeof raw.author_id === 'string' ? raw.author_id : 'local',
+  };
 }
 
 /**
@@ -93,22 +129,22 @@ export function parseAndValidateJson(
     if (u.name) existingUnitNameMap.add(u.name.trim().toLowerCase());
   }
 
-  let parsed: any;
+  let parsed: unknown;
   try {
     parsed = JSON.parse(rawJson);
-  } catch (err: any) {
-    throw new Error(`Định dạng tệp JSON không hợp lệ: ${err?.message || 'Lỗi cú pháp'}`);
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : 'Lỗi cú pháp';
+    throw new Error(`Định dạng tệp JSON không hợp lệ: ${errMsg}`);
   }
 
   const items: ValidatedImportItem[] = [];
   let metadata: { version?: string; exported_at?: string } | undefined;
 
-  let rawRecipes: any[] = [];
-  let rawTips: any[] = [];
-  let rawUnits: any[] = [];
+  let rawRecipes: Record<string, unknown>[] = [];
+  let rawTips: Record<string, unknown>[] = [];
+  let rawUnits: Record<string, unknown>[] = [];
 
   if (Array.isArray(parsed)) {
-    // Nếu là một mảng, tự động phân loại từng phần tử
     for (const item of parsed) {
       if (!item || typeof item !== 'object') {
         items.push({
@@ -121,43 +157,42 @@ export function parseAndValidateJson(
         });
         continue;
       }
-      if (Array.isArray(item.ingredients) || item.prep_time !== undefined || item.difficulty !== undefined) {
-        rawRecipes.push(item);
-      } else if (item.content !== undefined && item.title) {
-        rawTips.push(item);
-      } else if (item.symbol !== undefined || item.type === 'volume' || item.type === 'weight') {
-        rawUnits.push(item);
+      const record = item as Record<string, unknown>;
+      if (Array.isArray(record.ingredients) || record.prep_time !== undefined || record.difficulty !== undefined) {
+        rawRecipes.push(record);
+      } else if (record.content !== undefined && record.title) {
+        rawTips.push(record);
+      } else if (record.symbol !== undefined || record.type === 'volume' || record.type === 'weight') {
+        rawUnits.push(record);
       } else {
-        // Mặc định coi là recipe
-        rawRecipes.push(item);
+        rawRecipes.push(record);
       }
     }
   } else if (parsed && typeof parsed === 'object') {
-    // Định dạng sao lưu đầy đủ
-    if (parsed.version || parsed.exported_at) {
+    const parsedObj = parsed as Record<string, unknown>;
+    if (typeof parsedObj.version === 'string' || typeof parsedObj.exported_at === 'string') {
       metadata = {
-        version: parsed.version,
-        exported_at: parsed.exported_at,
+        version: typeof parsedObj.version === 'string' ? parsedObj.version : undefined,
+        exported_at: typeof parsedObj.exported_at === 'string' ? parsedObj.exported_at : undefined,
       };
     }
 
-    if (Array.isArray(parsed.recipes)) {
-      rawRecipes = parsed.recipes;
+    if (Array.isArray(parsedObj.recipes)) {
+      rawRecipes = parsedObj.recipes as Record<string, unknown>[];
     }
-    if (Array.isArray(parsed.tips)) {
-      rawTips = parsed.tips;
+    if (Array.isArray(parsedObj.tips)) {
+      rawTips = parsedObj.tips as Record<string, unknown>[];
     }
-    if (Array.isArray(parsed.units)) {
-      rawUnits = parsed.units;
+    if (Array.isArray(parsedObj.units)) {
+      rawUnits = parsedObj.units as Record<string, unknown>[];
     }
 
-    // Nếu không có các trường mảng trên nhưng có title -> 1 công thức/mẹo đơn lẻ
     if (rawRecipes.length === 0 && rawTips.length === 0 && rawUnits.length === 0) {
-      if (parsed.title || parsed.name) {
-        if (parsed.content && !parsed.ingredients) {
-          rawTips.push(parsed);
+      if (parsedObj.title || parsedObj.name) {
+        if (parsedObj.content && !parsedObj.ingredients) {
+          rawTips.push(parsedObj);
         } else {
-          rawRecipes.push(parsed);
+          rawRecipes.push(parsedObj);
         }
       }
     }
@@ -165,7 +200,8 @@ export function parseAndValidateJson(
 
   // 1. Validate Recipes
   for (const r of rawRecipes) {
-    const id = r.id || crypto.randomUUID();
+    if (!r || typeof r !== 'object') continue;
+    const id = typeof r.id === 'string' && r.id.trim() ? r.id.trim() : crypto.randomUUID();
     const title = typeof r.title === 'string' ? r.title.trim() : '';
 
     if (!title) {
@@ -180,6 +216,7 @@ export function parseAndValidateJson(
       continue;
     }
 
+    const normalizedRecipe = normalizeImportedRecipe(r, id, title);
     const norm = normalizeTitle(title);
     const existing = existingRecipeIdMap.get(id) || (norm ? existingRecipeTitleMap.get(norm) : undefined);
 
@@ -188,30 +225,31 @@ export function parseAndValidateJson(
         id,
         type: 'recipe',
         title,
-        subtitle: `${r.ingredients?.length || 0} nguyên liệu • ${r.difficulty || 'Dễ'}`,
+        subtitle: `${normalizedRecipe.ingredients.length} nguyên liệu • ${normalizedRecipe.difficulty}`,
         status: 'duplicate',
         statusReason: `Đã có công thức trùng: "${existing.title}"`,
         existingId: existing.id,
         existingItem: existing,
-        data: r,
+        data: normalizedRecipe,
       });
     } else {
-      existingRecipeIdMap.set(id, r as Recipe);
-      if (norm) existingRecipeTitleMap.set(norm, r as Recipe);
+      existingRecipeIdMap.set(id, normalizedRecipe);
+      if (norm) existingRecipeTitleMap.set(norm, normalizedRecipe);
       items.push({
         id,
         type: 'recipe',
         title,
-        subtitle: `${r.ingredients?.length || 0} nguyên liệu • ${r.difficulty || 'Dễ'}`,
+        subtitle: `${normalizedRecipe.ingredients.length} nguyên liệu • ${normalizedRecipe.difficulty}`,
         status: 'valid',
-        data: r,
+        data: normalizedRecipe,
       });
     }
   }
 
   // 2. Validate Tips
   for (const t of rawTips) {
-    const id = t.id || crypto.randomUUID();
+    if (!t || typeof t !== 'object') continue;
+    const id = typeof t.id === 'string' && t.id.trim() ? t.id.trim() : crypto.randomUUID();
     const title = typeof t.title === 'string' ? t.title.trim() : '';
 
     if (!title) {
@@ -226,6 +264,16 @@ export function parseAndValidateJson(
       continue;
     }
 
+    const normalizedTip: Tip = {
+      ...(t as Partial<Tip>),
+      id,
+      title,
+      category_id: typeof t.category_id === 'string' ? t.category_id : 'cooking',
+      content: typeof t.content === 'string' ? sanitizeHtml(t.content) : '',
+      created_at: typeof t.created_at === 'string' ? t.created_at : new Date().toISOString(),
+    };
+
+    const tipSubtitle = typeof t.category === 'string' && t.category ? t.category : 'Mẹo nhà bếp';
     const norm = normalizeTitle(title);
     const existing = existingTipIdMap.get(id) || (norm ? existingTipTitleMap.get(norm) : undefined);
 
@@ -234,30 +282,31 @@ export function parseAndValidateJson(
         id,
         type: 'tip',
         title,
-        subtitle: t.category || 'Mẹo nhà bếp',
+        subtitle: tipSubtitle,
         status: 'duplicate',
         statusReason: `Đã có mẹo trùng: "${existing.title}"`,
         existingId: existing.id,
         existingItem: existing,
-        data: t,
+        data: normalizedTip,
       });
     } else {
-      existingTipIdMap.set(id, t as Tip);
-      if (norm) existingTipTitleMap.set(norm, t as Tip);
+      existingTipIdMap.set(id, normalizedTip);
+      if (norm) existingTipTitleMap.set(norm, normalizedTip);
       items.push({
         id,
         type: 'tip',
         title,
-        subtitle: t.category || 'Mẹo nhà bếp',
+        subtitle: tipSubtitle,
         status: 'valid',
-        data: t,
+        data: normalizedTip,
       });
     }
   }
 
   // 3. Validate Units
   for (const u of rawUnits) {
-    const id = u.id || crypto.randomUUID();
+    if (!u || typeof u !== 'object') continue;
+    const id = typeof u.id === 'string' && u.id.trim() ? u.id.trim() : crypto.randomUUID();
     const name = typeof u.name === 'string' ? u.name.trim() : '';
 
     if (!name) {
@@ -274,13 +323,19 @@ export function parseAndValidateJson(
 
     const lowerName = name.toLowerCase();
     const isDup = existingUnitNameMap.has(lowerName);
+    const unitSubtitle =
+      typeof u.symbol === 'string' && u.symbol
+        ? u.symbol
+        : typeof u.type === 'string' && u.type
+          ? u.type
+          : 'Đơn vị đo';
 
     if (isDup) {
       items.push({
         id,
         type: 'unit',
         title: name,
-        subtitle: u.symbol || u.type || 'Đơn vị đo',
+        subtitle: unitSubtitle,
         status: 'duplicate',
         statusReason: `Đã có đơn vị "${name}"`,
         data: u,
@@ -291,20 +346,28 @@ export function parseAndValidateJson(
         id,
         type: 'unit',
         title: name,
-        subtitle: u.symbol || u.type || 'Đơn vị đo',
+        subtitle: unitSubtitle,
         status: 'valid',
         data: u,
       });
     }
   }
 
-  const validCount = items.filter(i => i.status === 'valid').length;
-  const duplicateCount = items.filter(i => i.status === 'duplicate').length;
-  const invalidCount = items.filter(i => i.status === 'invalid').length;
+  let validCount = 0;
+  let duplicateCount = 0;
+  let invalidCount = 0;
+  for (const i of items) {
+    if (i.status === 'valid') validCount++;
+    else if (i.status === 'duplicate') duplicateCount++;
+    else invalidCount++;
+  }
+
+  const fileSizeBytes =
+    typeof TextEncoder !== 'undefined' ? new TextEncoder().encode(rawJson).byteLength : rawJson.length;
 
   return {
     fileName,
-    fileSizeBytes: rawJson.length,
+    fileSizeBytes,
     totalItems: items.length,
     validCount,
     duplicateCount,
@@ -329,9 +392,12 @@ export async function executeImport(
   let updatedCount = 0;
   let skippedCount = 0;
   let failedCount = 0;
+  let recipesCount = 0;
+  let tipsCount = 0;
+  let unitsCount = 0;
 
-  const recipesToSave: Recipe[] = [];
-  const tipsToSave: Tip[] = [];
+  const recipesToSave: { item: Recipe; isUpdate: boolean }[] = [];
+  const tipsToSave: { item: Tip; isUpdate: boolean }[] = [];
   const unitsToSave: Unit[] = [];
 
   let completed = 0;
@@ -346,14 +412,14 @@ export async function executeImport(
     }
 
     if (item.type === 'recipe') {
-      const r = { ...item.data } as Recipe;
+      const r: Recipe = { ...(item.data as Recipe) };
+      let isUpdate = false;
       if (item.status === 'duplicate') {
         if (strategy === 'overwrite') {
-          // Ghi đè: giữ id của item đã có trong máy để cập nhật
           r.id = item.existingId || item.id;
+          isUpdate = true;
           updatedCount++;
         } else if (strategy === 'create_copy') {
-          // Tạo bản sao: sinh UUID mới và thêm hậu tố (Bản sao)
           r.id = crypto.randomUUID();
           r.title = `${r.title} (Bản sao)`;
           r.slug = '';
@@ -363,12 +429,14 @@ export async function executeImport(
         if (!r.id) r.id = crypto.randomUUID();
         importedCount++;
       }
-      recipesToSave.push(r);
+      recipesToSave.push({ item: r, isUpdate });
     } else if (item.type === 'tip') {
-      const t = { ...item.data } as Tip;
+      const t: Tip = { ...(item.data as Tip) };
+      let isUpdate = false;
       if (item.status === 'duplicate') {
         if (strategy === 'overwrite') {
           t.id = item.existingId || item.id;
+          isUpdate = true;
           updatedCount++;
         } else if (strategy === 'create_copy') {
           t.id = crypto.randomUUID();
@@ -379,14 +447,8 @@ export async function executeImport(
         if (!t.id) t.id = crypto.randomUUID();
         importedCount++;
       }
-      tipsToSave.push(t);
+      tipsToSave.push({ item: t, isUpdate });
     } else if (item.type === 'unit') {
-      if (item.status === 'duplicate') {
-        if (strategy === 'skip') {
-          skippedCount++;
-          continue;
-        }
-      }
       unitsToSave.push(item.data as Unit);
       importedCount++;
     }
@@ -395,10 +457,15 @@ export async function executeImport(
   // 1. Lưu hàng loạt Recipes
   if (recipesToSave.length > 0) {
     try {
-      await RecipeRepository.saveBulk(recipesToSave);
+      await RecipeRepository.saveBulk(recipesToSave.map((x) => x.item));
       await useRecipeStore.getState().fetchRecipes(true);
+      recipesCount = recipesToSave.length;
     } catch (e) {
       console.error('Lỗi khi lưu recipes trong import:', e);
+      for (const entry of recipesToSave) {
+        if (entry.isUpdate) updatedCount--;
+        else importedCount--;
+      }
       failedCount += recipesToSave.length;
     }
   }
@@ -406,10 +473,15 @@ export async function executeImport(
   // 2. Lưu hàng loạt Tips
   if (tipsToSave.length > 0) {
     try {
-      await TipRepository.saveBulk(tipsToSave);
-      await useTipStore.getState().fetchTips();
+      await TipRepository.saveBulk(tipsToSave.map((x) => x.item));
+      await useTipStore.getState().fetchTips(true);
+      tipsCount = tipsToSave.length;
     } catch (e) {
       console.error('Lỗi khi lưu tips trong import:', e);
+      for (const entry of tipsToSave) {
+        if (entry.isUpdate) updatedCount--;
+        else importedCount--;
+      }
       failedCount += tipsToSave.length;
     }
   }
@@ -418,8 +490,10 @@ export async function executeImport(
   if (unitsToSave.length > 0) {
     try {
       useUnitStore.getState().bulkAddUnits(unitsToSave);
+      unitsCount = unitsToSave.length;
     } catch (e) {
       console.error('Lỗi khi lưu units trong import:', e);
+      importedCount -= unitsToSave.length;
       failedCount += unitsToSave.length;
     }
   }
@@ -430,5 +504,8 @@ export async function executeImport(
     updatedCount,
     skippedCount,
     failedCount,
+    recipesCount,
+    tipsCount,
+    unitsCount,
   };
 }

@@ -46,6 +46,8 @@ export function CookingRatingModal({ isOpen, onClose, onComplete }: CookingRatin
           origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
         });
       }, 250);
+
+      return () => clearInterval(interval);
     }
   }, [isOpen]);
 

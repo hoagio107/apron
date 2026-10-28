@@ -248,6 +248,15 @@ button:not([data-slot="popover"]):not([data-slot="modal"]):not([data-slot="drawe
 }
 
 /* ==========================================================================
+   Thống nhất triệt để: Loại bỏ toàn bộ viền (border) cho button từ mức component base
+   ========================================================================== */
+button,
+[role="button"],
+[data-slot="button"] {
+  border: none !important;
+}
+
+/* ==========================================================================
    INPUTS, TEXTAREAS & TIPTAP EDITOR DARK MODE CONTRAST STANDARDIZATION
    ========================================================================== */
 
@@ -383,12 +392,32 @@ select,
 }
 
 /* ==========================================================================
-   POPOVER & DROPDOWN FLICKER-FREE HARDWARE ACCELERATED ANIMATION
-   Khử triệt để lỗi giật / nhấp nháy do Framer-Motion layout recalculation
+   POPOVER, DROPDOWN, DRAWER & MODAL FLICKER-FREE HARDWARE ACCELERATED ANIMATION
+   Khử triệt để lỗi giật / nhấp nháy do Framer-Motion LazyMotion layout recalculation
    ========================================================================== */
 div[data-slot="content"][data-open="true"] {
   animation: popover-smooth-appear 0.12s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   will-change: transform, opacity;
+}
+
+section[data-modal="true"][data-open="true"] {
+  animation: popover-smooth-appear 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+section[data-drawer-placement="right"][data-open="true"] {
+  animation: drawer-slide-in-right 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform;
+}
+
+section[data-drawer-placement="left"][data-open="true"] {
+  animation: drawer-slide-in-left 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform;
+}
+
+section[data-drawer-placement="bottom"][data-open="true"] {
+  animation: drawer-slide-in-bottom 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform;
 }
 
 @keyframes popover-smooth-appear {
@@ -399,6 +428,33 @@ div[data-slot="content"][data-open="true"] {
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes drawer-slide-in-right {
+  from {
+    transform: translate3d(100%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes drawer-slide-in-left {
+  from {
+    transform: translate3d(-100%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes drawer-slide-in-bottom {
+  from {
+    transform: translate3d(0, 100%, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -437,11 +493,24 @@ button[data-color="success"]:not([data-variant="flat"]):not([data-variant="light
 }
 
 .no-scrollbar::-webkit-scrollbar {
-  display: none;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 .no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+/* Ẩn thanh cuộn chiếm chỗ ở sidebar nav */
+aside nav {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+aside nav::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 .animation-delay-200 {

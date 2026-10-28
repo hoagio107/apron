@@ -2,16 +2,17 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, ModalContent, Button, Checkbox } from '@/ui';
 import { X, Carrot, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { sanitizeHtml, type Recipe, type RecipeIngredient, type Step } from '@apron/core';
 import { ImageManager } from '../../lib/image-manager';
 
 interface CookingModeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  recipe: any;
-  allSteps: any[];
+  recipe: Recipe;
+  allSteps: Step[];
   checkedIngredients: Set<number>;
   toggleIngredient: (index: number) => void;
-  scaleQuantity: (q: any) => any;
+  scaleQuantity: (q: number | string) => number | string;
   onFinish: () => void;
 }
 
@@ -69,7 +70,7 @@ export function CookingModeModal({
                      {t('recipes.cooking.ingredientsNeeded')}
                    </h3>
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                     {recipe.ingredients?.map((ing: any, idx: number) => (
+                     {recipe.ingredients?.map((ing: RecipeIngredient, idx: number) => (
                        <div 
                          key={idx} 
                          className={`flex items-center justify-between p-4 rounded-xl transition-all cursor-pointer app-card ${
@@ -123,8 +124,8 @@ export function CookingModeModal({
                                 isIconOnly 
                                 size="sm" 
                                 className="rounded-full pointer-events-auto bg-black/50 text-white backdrop-blur-md border-none z-10"
-                                onPress={() => setCurrentImageIndex(Math.min(allSteps[currentCookingStep].images.length - 1, currentImageIndex + 1))}
-                                isDisabled={currentImageIndex === allSteps[currentCookingStep].images.length - 1}
+                                onPress={() => setCurrentImageIndex(Math.min((allSteps[currentCookingStep].images?.length ?? 1) - 1, currentImageIndex + 1))}
+                                isDisabled={currentImageIndex === (allSteps[currentCookingStep].images?.length ?? 1) - 1}
                               >
                                 <ChevronRight className="w-5 h-5" />
                               </Button>
@@ -132,7 +133,7 @@ export function CookingModeModal({
 
                            {/* Pagination Dots */}
                            <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
-                              {allSteps[currentCookingStep].images.map((_: any, idx: number) => (
+                              {allSteps[currentCookingStep].images?.map((_: string, idx: number) => (
                                 <div 
                                   key={idx} 
                                   className={`h-2 rounded-full transition-all ${idx === currentImageIndex ? 'bg-white w-4' : 'bg-white/50 w-2'}`} 
@@ -142,7 +143,7 @@ export function CookingModeModal({
                          </>
                        ) : (
                          <img 
-                           src={ImageManager.getAssetUrl(allSteps[currentCookingStep].images && allSteps[currentCookingStep].images.length === 1 ? allSteps[currentCookingStep].images[0] : allSteps[currentCookingStep].image_url)} 
+                           src={ImageManager.getAssetUrl(allSteps[currentCookingStep].images && allSteps[currentCookingStep].images.length === 1 ? allSteps[currentCookingStep].images[0] : (allSteps[currentCookingStep].image_url || ''))} 
                            alt={`Step ${currentCookingStep + 1} visualization`} 
                            className="w-full h-full object-cover"
                          />
@@ -161,7 +162,7 @@ export function CookingModeModal({
                        </div>
                        <div 
                          className="text-xl md:text-3xl font-medium text-foreground leading-relaxed flex-1 whitespace-pre-wrap prose prose-lg prose-primary max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-p:leading-relaxed"
-                         dangerouslySetInnerHTML={{ __html: allSteps[currentCookingStep].instruction }}
+                         dangerouslySetInnerHTML={{ __html: sanitizeHtml(allSteps[currentCookingStep].instruction) }}
                        />
                      </div>
                    </div>

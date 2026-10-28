@@ -33,6 +33,7 @@ import {
   Timer
 } from 'lucide-react';
 import { type ParseRecipeResult, buildRecipePrompt, parseGeminiResponse } from '../../../lib/gemini';
+import { sanitizeHtml } from '@apron/core';
 import { extractAndNormalizeUnits } from '@apron/core';
 import { useTipStore } from '../../../store/useTipStore';
 import { useUnitStore } from '../../../store/useUnitStore';
@@ -656,7 +657,7 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
                                       </span>
                                       <div
                                         className="flex-1 leading-relaxed text-sm text-foreground pt-0.5 [&>p]:mb-1 [&>p:last-child]:mb-0 [&_strong]:font-semibold [&_b]:font-semibold"
-                                        dangerouslySetInnerHTML={{ __html: step.content }}
+                                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(step.content) }}
                                       />
                                     </div>
                                   ))}
@@ -674,7 +675,7 @@ export function AiAssistModal({ isOpen, onOpenChange, onApply, onApplyBulk }: Ai
                                     </span>
                                     <div
                                       className="text-foreground/90 text-xs sm:text-sm mt-0.5 leading-relaxed [&>p]:mb-1 [&>p:last-child]:mb-0"
-                                      dangerouslySetInnerHTML={{ __html: cur.suggested_tip.content }}
+                                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(cur.suggested_tip.content) }}
                                     />
                                   </div>
                                 </div>

@@ -37,15 +37,25 @@ export function UnitsPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deletingUnit, setDeletingUnit] = useState<Unit | null>(null);
 
-  // Calculate usage count in recipes for each unit
+  // Calculate usage count in recipes for each unit in O(R * I + U)
   const usageMap = useMemo(() => {
+    const unitRecipeCounts = new Map<string, number>();
+    for (const r of recipes) {
+      if (!r.ingredients?.length) continue;
+      const seenInRecipe = new Set<string>();
+      for (const i of r.ingredients) {
+        const norm = i.unit?.toLowerCase().trim();
+        if (norm) seenInRecipe.add(norm);
+      }
+      for (const norm of seenInRecipe) {
+        unitRecipeCounts.set(norm, (unitRecipeCounts.get(norm) || 0) + 1);
+      }
+    }
+
     const map = new Map<string, number>();
     for (const u of units) {
       const norm = u.name.toLowerCase().trim();
-      const count = recipes.filter(r =>
-        r.ingredients?.some(i => i.unit?.toLowerCase().trim() === norm)
-      ).length;
-      map.set(u.id, count);
+      map.set(u.id, unitRecipeCounts.get(norm) || 0);
     }
     return map;
   }, [units, recipes]);
@@ -169,7 +179,7 @@ export function UnitsPage() {
       });
     }
     return list;
-  }, [units.length, usedCount, unusedCount, categoryCounts]);
+  }, [units.length, usedCount, unusedCount, categoryCounts, t]);
 
   const selectedFilterKey = usageFilter !== 'all' ? usageFilter : (selectedCategory || 'all');
 

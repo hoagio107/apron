@@ -18,186 +18,150 @@ interface MealPlanState {
   updateMealSlots: (date: string, slots: MealSlotConfig[]) => Promise<void>;
 }
 
-export const useMealPlanStore = create<MealPlanState>((set, get) => ({
-  mealPlans: [],
-  isLoading: false,
-  error: null,
+export const useMealPlanStore = create<MealPlanState>((set, get) => {
+  const getOrCreatePlan = (date: string): MealPlan => {
+    const existing = get().mealPlans.find((p) => p.date === date);
+    if (existing) return existing;
+    const { defaultSlots } = useSettingsStore.getState();
+    return { id: crypto.randomUUID(), date, slots: [...defaultSlots], meals: [] };
+  };
 
-  fetchMealPlans: async (startDate: string, endDate: string) => {
-    set({ isLoading: true, error: null });
-    try {
-      const data = await MealPlanRepository.getInRange(startDate, endDate);
-      const { defaultSlots } = useSettingsStore.getState();
-      
-      const migratedData = data.map(plan => {
-        if (!plan.slots || plan.slots.length === 0) {
-          return { ...plan, slots: [...defaultSlots] };
-        }
-        return plan;
-      });
+  const upsertPlanInState = async (updatedPlan: MealPlan) => {
+    await MealPlanRepository.save(updatedPlan);
+    set((state) => {
+      const filtered = state.mealPlans.filter((p) => p.date !== updatedPlan.date);
+      return { mealPlans: [...filtered, updatedPlan].sort((a, b) => a.date.localeCompare(b.date)) };
+    });
+  };
 
-      set({ mealPlans: migratedData, isLoading: false });
-    } catch (e: any) {
-      set({ error: e.message || 'Failed to fetch meal plans', isLoading: false });
-    }
-  },
+  return {
+    mealPlans: [],
+    isLoading: false,
+    error: null,
 
-  addMealPlanEntry: async (date: string, entryData: Omit<MealPlanEntry, 'id'>) => {
-    try {
-      const { mealPlans } = get();
-      const existingPlan = mealPlans.find((p) => p.date === date);
-      
-      const newEntry: MealPlanEntry = {
-        ...entryData,
-        id: crypto.randomUUID(),
-      };
-      const { defaultSlots } = useSettingsStore.getState();
-
-      const updatedPlan: MealPlan = existingPlan
-        ? { ...existingPlan, meals: [...existingPlan.meals, newEntry] }
-        : { id: crypto.randomUUID(), date, slots: [...defaultSlots], meals: [newEntry] };
-
-      await MealPlanRepository.save(updatedPlan);
-
-      set((state) => {
-        const filtered = state.mealPlans.filter((p) => p.date !== date);
-        return { mealPlans: [...filtered, updatedPlan].sort((a, b) => a.date.localeCompare(b.date)) };
-      });
-    } catch (e: any) {
-      set({ error: e.message || 'Failed to add meal plan entry' });
-      throw e;
-    }
-  },
-
-  removeMealPlanEntry: async (date: string, entryId: string) => {
-    try {
-      const { mealPlans } = get();
-      const existingPlan = mealPlans.find((p) => p.date === date);
-      
-      if (!existingPlan) return;
-
-      const updatedPlan: MealPlan = {
-        ...existingPlan,
-        meals: existingPlan.meals.filter((m) => m.id !== entryId),
-      };
-
-      await MealPlanRepository.save(updatedPlan);
-      set((state) => ({
-        mealPlans: state.mealPlans.map((p) => (p.date === date ? updatedPlan : p)),
-      }));
-    } catch (e: any) {
-      set({ error: e.message || 'Failed to remove meal plan entry' });
-      throw e;
-    }
-  },
-
-  updateMealPlanEntry: async (date: string, entry: MealPlanEntry) => {
-    try {
-      const { mealPlans } = get();
-      const existingPlan = mealPlans.find((p) => p.date === date);
-      
-      if (!existingPlan) return;
-
-      const updatedPlan: MealPlan = {
-        ...existingPlan,
-        meals: existingPlan.meals.map((m) => (m.id === entry.id ? entry : m)),
-      };
-
-      await MealPlanRepository.save(updatedPlan);
-
-      set((state) => ({
-        mealPlans: state.mealPlans.map((p) => (p.date === date ? updatedPlan : p)),
-      }));
-    } catch (e: any) {
-      set({ error: e.message || 'Failed to update meal plan entry' });
-      throw e;
-    }
-  },
-
-  addMealSlot: async (date: string, slotName: string) => {
-    try {
-      const { mealPlans } = get();
-      let existingPlan = mealPlans.find((p) => p.date === date);
-      if (!existingPlan) {
+    fetchMealPlans: async (startDate: string, endDate: string) => {
+      set({ isLoading: true, error: null });
+      try {
+        const data = await MealPlanRepository.getInRange(startDate, endDate);
         const { defaultSlots } = useSettingsStore.getState();
-        existingPlan = { id: crypto.randomUUID(), date, slots: [...defaultSlots], meals: [] };
+
+        const migratedData = data.map((plan) => {
+          if (!plan.slots || plan.slots.length === 0) {
+            return { ...plan, slots: [...defaultSlots] };
+          }
+          return plan;
+        });
+
+        set({ mealPlans: migratedData, isLoading: false });
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'Failed to fetch meal plans';
+        set({ error: msg, isLoading: false });
       }
+    },
 
-      const newSlot: MealSlotConfig = {
-        id: crypto.randomUUID(),
-        name: slotName,
-      };
-
-      const updatedPlan: MealPlan = {
-        ...existingPlan,
-        slots: [...existingPlan.slots, newSlot],
-      };
-
-      await MealPlanRepository.save(updatedPlan);
-
-      set((state) => {
-        const filtered = state.mealPlans.filter((p) => p.date !== date);
-        return { mealPlans: [...filtered, updatedPlan].sort((a, b) => a.date.localeCompare(b.date)) };
-      });
-    } catch (e: any) {
-      set({ error: e.message || 'Failed to add meal slot' });
-      throw e;
-    }
-  },
-
-  removeMealSlot: async (date: string, slotId: string) => {
-    try {
-      const { mealPlans } = get();
-      let existingPlan = mealPlans.find((p) => p.date === date);
-      if (!existingPlan) {
-        const { defaultSlots } = useSettingsStore.getState();
-        existingPlan = { id: crypto.randomUUID(), date, slots: [...defaultSlots], meals: [] };
+    addMealPlanEntry: async (date: string, entryData: Omit<MealPlanEntry, 'id'>) => {
+      try {
+        const basePlan = getOrCreatePlan(date);
+        const newEntry: MealPlanEntry = {
+          ...entryData,
+          id: crypto.randomUUID(),
+        };
+        const updatedPlan: MealPlan = {
+          ...basePlan,
+          meals: [...basePlan.meals, newEntry],
+        };
+        await upsertPlanInState(updatedPlan);
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'Failed to add meal plan entry';
+        set({ error: msg });
+        throw e;
       }
+    },
 
-      // Don't remove if there are meals in this slot
-      const hasMeals = existingPlan.meals.some(m => m.meal_type === slotId);
-      if (hasMeals) throw new Error('Cannot remove slot with meals');
+    removeMealPlanEntry: async (date: string, entryId: string) => {
+      try {
+        const existingPlan = get().mealPlans.find((p) => p.date === date);
+        if (!existingPlan) return;
 
-      const updatedPlan: MealPlan = {
-        ...existingPlan,
-        slots: existingPlan.slots.filter(s => s.id !== slotId),
-      };
-
-      await MealPlanRepository.save(updatedPlan);
-
-      set((state) => {
-        const filtered = state.mealPlans.filter((p) => p.date !== date);
-        return { mealPlans: [...filtered, updatedPlan].sort((a, b) => a.date.localeCompare(b.date)) };
-      });
-    } catch (e: any) {
-      set({ error: e.message || 'Failed to remove meal slot' });
-      throw e;
-    }
-  },
-
-  updateMealSlots: async (date: string, slots: MealSlotConfig[]) => {
-    try {
-      const { mealPlans } = get();
-      let existingPlan = mealPlans.find((p) => p.date === date);
-      if (!existingPlan) {
-        const { defaultSlots } = useSettingsStore.getState();
-        existingPlan = { id: crypto.randomUUID(), date, slots: [...defaultSlots], meals: [] };
+        const updatedPlan: MealPlan = {
+          ...existingPlan,
+          meals: existingPlan.meals.filter((m) => m.id !== entryId),
+        };
+        await upsertPlanInState(updatedPlan);
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'Failed to remove meal plan entry';
+        set({ error: msg });
+        throw e;
       }
+    },
 
-      const updatedPlan: MealPlan = {
-        ...existingPlan,
-        slots,
-      };
+    updateMealPlanEntry: async (date: string, entry: MealPlanEntry) => {
+      try {
+        const existingPlan = get().mealPlans.find((p) => p.date === date);
+        if (!existingPlan) return;
 
-      await MealPlanRepository.save(updatedPlan);
+        const updatedPlan: MealPlan = {
+          ...existingPlan,
+          meals: existingPlan.meals.map((m) => (m.id === entry.id ? entry : m)),
+        };
+        await upsertPlanInState(updatedPlan);
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'Failed to update meal plan entry';
+        set({ error: msg });
+        throw e;
+      }
+    },
 
-      set((state) => {
-        const filtered = state.mealPlans.filter((p) => p.date !== date);
-        return { mealPlans: [...filtered, updatedPlan].sort((a, b) => a.date.localeCompare(b.date)) };
-      });
-    } catch (e: any) {
-      set({ error: e.message || 'Failed to update meal slots' });
-      throw e;
-    }
-  },
-}));
+    addMealSlot: async (date: string, slotName: string) => {
+      try {
+        const basePlan = getOrCreatePlan(date);
+        const newSlot: MealSlotConfig = {
+          id: crypto.randomUUID(),
+          name: slotName,
+        };
+        const updatedPlan: MealPlan = {
+          ...basePlan,
+          slots: [...basePlan.slots, newSlot],
+        };
+        await upsertPlanInState(updatedPlan);
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'Failed to add meal slot';
+        set({ error: msg });
+        throw e;
+      }
+    },
+
+    removeMealSlot: async (date: string, slotId: string) => {
+      try {
+        const basePlan = getOrCreatePlan(date);
+        const hasMeals = basePlan.meals.some((m) => m.meal_type === slotId);
+        if (hasMeals) throw new Error('Cannot remove slot with meals');
+
+        const updatedPlan: MealPlan = {
+          ...basePlan,
+          slots: basePlan.slots.filter((s) => s.id !== slotId),
+        };
+        await upsertPlanInState(updatedPlan);
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'Failed to remove meal slot';
+        set({ error: msg });
+        throw e;
+      }
+    },
+
+    updateMealSlots: async (date: string, slots: MealSlotConfig[]) => {
+      try {
+        const basePlan = getOrCreatePlan(date);
+        const updatedPlan: MealPlan = {
+          ...basePlan,
+          slots,
+        };
+        await upsertPlanInState(updatedPlan);
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'Failed to update meal slots';
+        set({ error: msg });
+        throw e;
+      }
+    },
+  };
+});

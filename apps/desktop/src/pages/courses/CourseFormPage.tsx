@@ -3,10 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   Input, Button, 
-  Autocomplete, AutocompleteItem, 
   Modal, ModalContent
 } from '@/ui';
-import { Save, Plus, Trash2, ListOrdered, ImagePlus, Type, Info, Gauge, Link as LinkIcon, User, Star, ChevronRight, Video, X, Search, Utensils, Flame, Settings, Clock, Paperclip, StickyNote, BarChart } from 'lucide-react';
+import { Save, Plus, Trash2, ListOrdered, ImagePlus, Type, Info, Gauge, Link as LinkIcon, Star, ChevronRight, Video, X, Settings, Clock, Paperclip, StickyNote } from 'lucide-react';
 import { useCourseStore } from '../../store/useCourseStore';
 import type { Course, Lesson } from '@apron/core';
 import { BlockEditor } from '../../components/shared/BlockEditor';
@@ -19,6 +18,7 @@ import { IconPicker } from '../../components/shared/IconPicker';
 import { RecipeForm } from '../../components/recipes/form/RecipeForm';
 import { useRecipeStore } from '../../store/useRecipeStore';
 import { ImageManager } from '../../lib/image-manager';
+import { LessonRecipeLinker } from './components/LessonRecipeLinker';
 
 const generateId = () => crypto.randomUUID();
 
@@ -26,13 +26,12 @@ export function CourseFormPage() {
   const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
-  const { courses, addCourse, updateCourse } = useCourseStore();
+  const { courses, fetchCourses, addCourse, updateCourse } = useCourseStore();
   const { recipes, addRecipe, fetchRecipes } = useRecipeStore();
   
   const isEditing = Boolean(id);
   const [imageUploadTarget, setImageUploadTarget] = useState<string | null>(null);
   const [isNewRecipeModalOpen, setIsNewRecipeModalOpen] = useState(false);
-  const [recipeSearch, setRecipeSearch] = useState('');
 
   const [formData, setFormData] = useState<Omit<Course, 'id' | 'created_at'>>({
     title: '',
@@ -56,8 +55,11 @@ export function CourseFormPage() {
   const [activeLessonId, setActiveLessonId] = useState<string | null>(formData.modules[0]?.lessons[0]?.id || null);
 
   useEffect(() => {
+    if (courses.length === 0) {
+      fetchCourses();
+    }
     fetchRecipes();
-  }, [fetchRecipes]);
+  }, [courses.length, fetchCourses, fetchRecipes]);
 
   useEffect(() => {
     if (isEditing && courses.length > 0) {
@@ -91,10 +93,34 @@ export function CourseFormPage() {
     }
     
     try {
+      const committedThumbnail = formData.thumbnail_url
+        ? await ImageManager.commitImage(formData.thumbnail_url)
+        : '';
+
+      const committedModules = await Promise.all(
+        formData.modules.map(async (mod) => ({
+          ...mod,
+          lessons: await Promise.all(
+            mod.lessons.map(async (lesson) => ({
+              ...lesson,
+              hero_image_url: lesson.hero_image_url
+                ? await ImageManager.commitImage(lesson.hero_image_url)
+                : undefined,
+            }))
+          ),
+        }))
+      );
+
+      const finalData = {
+        ...formData,
+        thumbnail_url: committedThumbnail,
+        modules: committedModules,
+      };
+
       if (isEditing && id) {
-        await updateCourse({ ...formData, id } as Course);
+        await updateCourse({ ...finalData, id } as Course);
       } else {
-        await addCourse(formData as Course);
+        await addCourse(finalData as Course);
         localStorage.removeItem('course_form_draft');
       }
       navigate('/courses');
@@ -186,13 +212,13 @@ export function CourseFormPage() {
 
   return (
     <>
-      <div className="flex flex-col gap-8 w-full pt-6 pb-14">
-        <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-md py-2 -my-2">
+      <div className="flex flex-col min-h-full gap-8 w-full pb-14">
+        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-6 pb-4 -mx-8 px-8 border-b border-divider/50 shadow-2xs">
         <PageHeader 
           title={isEditing ? t('courses.form.editTitle') : t('courses.form.createTitle')}
           showBackButton
           onBack={() => navigate('/courses')}
-          className="pt-2 pb-2"
+          className="pt-0 pb-0"
           actions={
             <Button 
               color="primary" 
@@ -225,7 +251,7 @@ export function CourseFormPage() {
                   </div>
                 ) : (
                   <div className="w-full aspect-[4/3] bg-default-100 rounded-2xl relative group overflow-hidden flex items-center justify-center shadow-inner cursor-pointer" onClick={() => setImageUploadTarget('course-cover')}>
-                    <img src={formData.thumbnail_url} alt="Thumbnail preview" className="w-full h-full object-cover" />
+                    <img src={ImageManager.getAssetUrl(formData.thumbnail_url)} alt="Thumbnail preview" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <ImagePlus className="w-10 h-10 text-white drop-shadow-md" />
                     </div>
@@ -308,16 +334,6 @@ export function CourseFormPage() {
                   placeholder="VD: YouTube, Udemy..."
                   value={formData.source || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, source: e.target.value }))}
-                  variant="flat"
-                  classNames={{ inputWrapper: "bg-default-100 hover:bg-default-200 border-none shadow-none" }}
-                />
-              </FormField>
-              
-              <FormField label="Giáo viên / Hướng dẫn" icon={User}>
-                <Input
-                  placeholder="Tên giáo viên..."
-                  value={formData.teacher || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, teacher: e.target.value }))}
                   variant="flat"
                   classNames={{ inputWrapper: "bg-default-100 hover:bg-default-200 border-none shadow-none" }}
                 />
@@ -443,7 +459,24 @@ export function CourseFormPage() {
                           }}
                         >
                           {activeLesson.hero_image_url ? (
-                            <img src={activeLesson.hero_image_url} alt="Lesson Hero" className="w-full h-full object-cover" />
+                            <>
+                              <img src={ImageManager.getAssetUrl(activeLesson.hero_image_url)} alt="Lesson Hero" className="w-full h-full object-cover" />
+                              <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                <Button
+                                  size="sm"
+                                  isIconOnly
+                                  color="danger"
+                                  variant="flat"
+                                  className="bg-white/90 backdrop-blur-md shadow-sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    updateLesson(activeModuleIndex, activeLessonIndex, 'hero_image_url', '');
+                                  }}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </>
                           ) : (
                             <div className="flex flex-col items-center gap-2 text-default-400">
                               <ImagePlus className="w-8 h-8" />
@@ -553,92 +586,14 @@ export function CourseFormPage() {
                         </FormField>
 
                         <FormField label="Công thức thực hành">
-                          <Autocomplete
-                            placeholder="Tìm kiếm..."
-                            variant="flat"
-                            inputValue={recipeSearch}
-                            onInputChange={setRecipeSearch}
-                            onSelectionChange={(id) => {
-                              setRecipeSearch('');
-                              if (!id) return;
-                              if (id === 'NEW_RECIPE') {
-                                setIsNewRecipeModalOpen(true);
-                              } else {
-                                const currentIds = activeLesson.attached_recipe_ids || [];
-                                if (!currentIds.includes(id.toString())) {
-                                  updateLesson(activeModuleIndex, activeLessonIndex, 'attached_recipe_ids', [...currentIds, id.toString()]);
-                                }
-                              }
-                            }}
-                            startContent={<Search className="w-4 h-4 text-default-400" />}
-                          >
-                            {[
-                              ...recipes.map(recipe => (
-                                <AutocompleteItem key={recipe.id} textValue={recipe.title}>
-                                  <div className="flex items-center gap-3 py-1">
-                                    <div className="w-10 h-10 shrink-0 rounded bg-default-100 overflow-hidden">
-                                      {recipe.image_url ? (
-                                        <img src={ImageManager.getAssetUrl(recipe.image_url)} alt={recipe.title} className="w-full h-full object-cover" />
-                                      ) : (
-                                        <div className="w-full h-full flex items-center justify-center"><Utensils className="w-4 h-4 text-default-300" /></div>
-                                      )}
-                                    </div>
-                                    <div className="flex flex-col flex-1 min-w-0 pr-2 text-left justify-center">
-                                      <span className="text-sm font-medium line-clamp-1">{recipe.title}</span>
-                                      <div className="flex items-center flex-wrap gap-2 mt-1 text-[10px] text-default-400 font-medium uppercase tracking-wide">
-                                        {recipe.total_time_minutes ? <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-warning" /> {recipe.total_time_minutes}p</span> : null}
-                                        {recipe.difficulty ? <span className="flex items-center gap-1"><BarChart className="w-3 h-3 text-primary" /> {recipe.difficulty}</span> : null}
-                                        {recipe.calories ? <span className="flex items-center gap-1"><Flame className="w-3 h-3 text-danger" /> {recipe.calories} kcal</span> : null}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </AutocompleteItem>
-                              )),
-                              <AutocompleteItem key="NEW_RECIPE" textValue="Tạo mới" className="text-primary">
-                                <div className="flex items-center gap-2 text-primary">
-                                  <Plus className="w-4 h-4" />
-                                  <span className="text-small">Tạo công thức mới</span>
-                                </div>
-                              </AutocompleteItem>
-                            ]}
-                          </Autocomplete>
-                          
-                          {/* Selected recipes list */}
-                          {activeLesson.attached_recipe_ids && activeLesson.attached_recipe_ids.length > 0 && (
-                            <div className="flex flex-col gap-2 mt-3">
-                              {activeLesson.attached_recipe_ids.map(rId => {
-                                const recipe = recipes.find(r => r.id === rId);
-                                if (!recipe) return null;
-                                return (
-                                  <div key={rId} className="flex items-center justify-between p-2 rounded-xl bg-content2">
-                                    <div className="flex items-center gap-3 overflow-hidden flex-1">
-                                      <div className="w-12 h-12 shrink-0 rounded bg-default-100 overflow-hidden">
-                                        {recipe.image_url ? (
-                                          <img src={ImageManager.getAssetUrl(recipe.image_url)} alt={recipe.title} className="w-full h-full object-cover" />
-                                        ) : (
-                                          <div className="w-full h-full flex items-center justify-center"><Utensils className="w-5 h-5 text-default-300" /></div>
-                                        )}
-                                      </div>
-                                      <div className="flex flex-col flex-1 min-w-0 pr-2 text-left justify-center">
-                                        <span className="font-semibold text-sm line-clamp-1">{recipe.title}</span>
-                                        <div className="flex items-center flex-wrap gap-2 mt-1.5 text-[10px] text-default-400 font-medium uppercase tracking-wide">
-                                          {recipe.total_time_minutes ? <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-warning" /> {recipe.total_time_minutes}p</span> : null}
-                                          {recipe.difficulty ? <span className="flex items-center gap-1"><BarChart className="w-3 h-3 text-primary" /> {recipe.difficulty}</span> : null}
-                                          {recipe.calories ? <span className="flex items-center gap-1"><Flame className="w-3 h-3 text-danger" /> {recipe.calories} kcal</span> : null}
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <Button isIconOnly size="sm" variant="light" color="danger" onPress={() => {
-                                      const newIds = activeLesson.attached_recipe_ids?.filter(id => id !== rId) || [];
-                                      updateLesson(activeModuleIndex, activeLessonIndex, 'attached_recipe_ids', newIds);
-                                    }}>
-                                      <X className="w-3 h-3" />
-                                    </Button>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
+                          <LessonRecipeLinker
+                            recipes={recipes}
+                            attachedRecipeIds={activeLesson.attached_recipe_ids || []}
+                            onChange={(nextIds) =>
+                              updateLesson(activeModuleIndex, activeLessonIndex, 'attached_recipe_ids', nextIds)
+                            }
+                            onCreateNewRecipe={() => setIsNewRecipeModalOpen(true)}
+                          />
                         </FormField>
 
                       </div>

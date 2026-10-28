@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/ui';
-import { BookOpen, Star, User, Link as LinkIcon, Trash2, Edit2 } from 'lucide-react';
+import { BookOpen, Star, Link as LinkIcon, Trash2, Edit2 } from 'lucide-react';
 import type { Course } from '@apron/core';
 import { ImageManager } from '../../lib/image-manager';
 
@@ -127,21 +127,13 @@ export function CourseCard({
           </p>
         )}
 
-        {/* Source and Teacher */}
-        {(course.source || course.teacher || course.author_id) && (
+        {/* Source */}
+        {course.source && (
           <div className="flex items-center gap-2 text-xs text-white/90 drop-shadow-sm mb-1.5 font-medium whitespace-nowrap overflow-hidden">
-            {course.source && (
-              <span className="flex items-center gap-1 shrink-0 max-w-28">
-                <LinkIcon className="w-3 h-3 shrink-0 text-white/70" />
-                <span className="truncate">{course.source}</span>
-              </span>
-            )}
-            {(course.teacher || course.author_id) && (
-              <span className="flex items-center gap-1 shrink-0 max-w-32">
-                <User className="w-3 h-3 shrink-0 text-white/70" />
-                <span className="truncate">{course.teacher || course.author_id}</span>
-              </span>
-            )}
+            <span className="flex items-center gap-1 shrink-0 max-w-28">
+              <LinkIcon className="w-3 h-3 shrink-0 text-white/70" />
+              <span className="truncate">{course.source}</span>
+            </span>
           </div>
         )}
 

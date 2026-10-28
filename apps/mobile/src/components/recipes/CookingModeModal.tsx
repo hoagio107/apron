@@ -2,16 +2,17 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter, Button, SectionTitle } from '@/ui';
 import { X, Carrot, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { sanitizeHtml, type Recipe, type RecipeIngredient, type Step } from '@apron/core';
 import { ImageManager } from '../../lib/image-manager';
 
 interface CookingModeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  recipe: any;
-  allSteps: any[];
+  recipe: Recipe;
+  allSteps: Step[];
   checkedIngredients: Set<number>;
   toggleIngredient: (index: number) => void;
-  scaleQuantity: (q: any) => any;
+  scaleQuantity: (q: number | string) => number | string;
   onFinish: () => void;
 }
 
@@ -40,9 +41,9 @@ export function CookingModeModal({
   }, [currentCookingStep]);
 
   return (
-    <Drawer 
-      size="full" 
-      isOpen={isOpen} 
+    <Drawer
+      size="full"
+      isOpen={isOpen}
       onClose={onClose}
       placement="bottom"
       backdrop="blur"
@@ -62,11 +63,11 @@ export function CookingModeModal({
               <div className="w-10 h-1 bg-default-300 dark:bg-default-600 rounded-full mx-auto -mt-1 mb-1" />
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2.5 min-w-0 flex-1 mr-3">
-                  <Button 
-                    isIconOnly 
-                    variant="light" 
-                    size="sm" 
-                    className="w-8 h-8 rounded-full shrink-0 text-default-600 hover:text-foreground" 
+                  <Button
+                    isIconOnly
+                    variant="light"
+                    size="sm"
+                    className="w-8 h-8 rounded-full shrink-0 text-default-600 hover:text-foreground"
                     onPress={onCloseModal}
                     aria-label={t('common.actions.close')}
                   >
@@ -81,14 +82,14 @@ export function CookingModeModal({
                 </div>
               </div>
             </DrawerHeader>
-            
+
             {/* Body */}
             <DrawerBody className="flex-1 overflow-y-auto p-4 sm:p-6 bg-background space-y-4">
               {currentCookingStep === -1 ? (
                 <div className="w-full flex flex-col gap-4">
-                  <SectionTitle 
-                    title={t('recipes.cooking.ingredientsNeeded')} 
-                    icon={<Carrot className="w-5 h-5 text-success" />} 
+                  <SectionTitle
+                    title={t('recipes.cooking.ingredientsNeeded')}
+                    icon={<Carrot className="w-5 h-5 text-success" />}
                     action={
                       <span className="text-xs font-semibold text-default-500 bg-default-100 dark:bg-default-100/70 px-2.5 py-1 rounded-full">
                         {t('common.actions.selectedCount', { count: `${checkedIngredients.size}/${recipe.ingredients?.length || 0}` })}
@@ -97,24 +98,22 @@ export function CookingModeModal({
                   />
 
                   <div className="flex flex-col gap-2 w-full">
-                    {recipe.ingredients?.map((ing: any, idx: number) => {
+                    {recipe.ingredients?.map((ing: RecipeIngredient, idx: number) => {
                       const isChecked = checkedIngredients.has(idx);
                       return (
-                        <div 
-                          key={idx} 
-                          className={`flex items-start justify-between py-2.5 px-3.5 rounded-xl transition-all cursor-pointer border ${
-                            isChecked 
-                              ? 'bg-default-100/40 dark:bg-content2/30 border-divider/40 opacity-60' 
+                        <div
+                          key={idx}
+                          className={`flex items-start justify-between py-2.5 px-3.5 rounded-xl transition-all cursor-pointer border ${isChecked
+                              ? 'bg-default-100/40 dark:bg-content2/30 border-divider/40 opacity-60'
                               : 'bg-content1 dark:bg-content2/60 border-divider/60 shadow-2xs hover:border-primary/40'
-                          }`}
+                            }`}
                           onClick={() => toggleIngredient(idx)}
                         >
                           <div className="flex items-start gap-3 min-w-0 flex-1 mr-2">
-                            <div className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
-                              isChecked 
-                                ? 'bg-primary border-primary text-white' 
+                            <div className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${isChecked
+                                ? 'bg-primary border-primary text-white'
                                 : 'border-default-300 dark:border-default-600'
-                            }`}>
+                              }`}>
                               {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                             </div>
                             <span className={`text-base font-medium leading-snug break-words flex-1 ${isChecked ? 'line-through text-default-400' : 'text-foreground'}`}>
@@ -136,17 +135,17 @@ export function CookingModeModal({
                     <div className="w-full aspect-video sm:h-64 bg-default-100 shrink-0 relative rounded-2xl overflow-hidden shadow-xs border border-divider/40">
                       {allSteps[currentCookingStep].images && allSteps[currentCookingStep].images.length > 1 ? (
                         <>
-                          <img 
-                            src={ImageManager.getAssetUrl(allSteps[currentCookingStep].images[currentImageIndex])} 
-                            alt={`Step ${currentCookingStep + 1} visualization ${currentImageIndex + 1}`} 
+                          <img
+                            src={ImageManager.getAssetUrl(allSteps[currentCookingStep].images[currentImageIndex])}
+                            alt={`Step ${currentCookingStep + 1} visualization ${currentImageIndex + 1}`}
                             className="w-full h-full object-cover"
                           />
-                          
+
                           {/* Navigation Arrows */}
                           <div className="absolute inset-0 flex items-center justify-between p-3 pointer-events-none">
-                            <Button 
-                              isIconOnly 
-                              size="sm" 
+                            <Button
+                              isIconOnly
+                              size="sm"
                               className="rounded-full pointer-events-auto bg-black/60 text-white backdrop-blur-md border-none z-10 w-8 h-8 min-w-0"
                               onPress={() => setCurrentImageIndex(Math.max(0, currentImageIndex - 1))}
                               isDisabled={currentImageIndex === 0}
@@ -154,12 +153,12 @@ export function CookingModeModal({
                             >
                               <ChevronLeft className="w-4 h-4" />
                             </Button>
-                            <Button 
-                              isIconOnly 
-                              size="sm" 
+                            <Button
+                              isIconOnly
+                              size="sm"
                               className="rounded-full pointer-events-auto bg-black/60 text-white backdrop-blur-md border-none z-10 w-8 h-8 min-w-0"
-                              onPress={() => setCurrentImageIndex(Math.min(allSteps[currentCookingStep].images.length - 1, currentImageIndex + 1))}
-                              isDisabled={currentImageIndex === allSteps[currentCookingStep].images.length - 1}
+                              onPress={() => setCurrentImageIndex(Math.min((allSteps[currentCookingStep].images?.length ?? 1) - 1, currentImageIndex + 1))}
+                              isDisabled={currentImageIndex === (allSteps[currentCookingStep].images?.length ?? 1) - 1}
                               aria-label={t('recipes.cooking.nextStep')}
                             >
                               <ChevronRight className="w-4 h-4" />
@@ -168,18 +167,18 @@ export function CookingModeModal({
 
                           {/* Pagination Dots */}
                           <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10">
-                            {allSteps[currentCookingStep].images.map((_: any, idx: number) => (
-                              <div 
-                                key={idx} 
-                                className={`h-1.5 rounded-full transition-all ${idx === currentImageIndex ? 'bg-white w-4' : 'bg-white/50 w-1.5'}`} 
+                            {allSteps[currentCookingStep].images?.map((_: string, idx: number) => (
+                              <div
+                                key={idx}
+                                className={`h-1.5 rounded-full transition-all ${idx === currentImageIndex ? 'bg-white w-4' : 'bg-white/50 w-1.5'}`}
                               />
                             ))}
                           </div>
                         </>
                       ) : (
-                        <img 
-                          src={ImageManager.getAssetUrl(allSteps[currentCookingStep].images && allSteps[currentCookingStep].images.length === 1 ? allSteps[currentCookingStep].images[0] : allSteps[currentCookingStep].image_url)} 
-                          alt={`Step ${currentCookingStep + 1} visualization`} 
+                        <img
+                          src={ImageManager.getAssetUrl(allSteps[currentCookingStep].images && allSteps[currentCookingStep].images.length === 1 ? allSteps[currentCookingStep].images[0] : (allSteps[currentCookingStep].image_url || ''))}
+                          alt={`Step ${currentCookingStep + 1} visualization`}
                           className="w-full h-full object-cover"
                         />
                       )}
@@ -205,31 +204,31 @@ export function CookingModeModal({
 
                   {/* Step Instruction Content */}
                   <div className="p-4 bg-default-100/50 dark:bg-content2/50 rounded-2xl border border-divider/40">
-                    <div 
+                    <div
                       className="text-sm sm:text-base font-normal text-foreground leading-relaxed whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1"
-                      dangerouslySetInnerHTML={{ __html: allSteps[currentCookingStep].instruction }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(allSteps[currentCookingStep].instruction) }}
                     />
                   </div>
                 </div>
               ) : null}
             </DrawerBody>
-            
+
             {/* Footer */}
             <DrawerFooter className="p-4 border-t border-divider bg-content1 flex justify-between items-center pb-safe shrink-0">
-              <Button 
-                size="md" 
-                variant="flat" 
+              <Button
+                size="md"
+                variant="flat"
                 className="rounded-full font-semibold px-4"
                 onPress={() => setCurrentCookingStep(Math.max(-1, currentCookingStep - 1))}
                 isDisabled={currentCookingStep === -1}
-                startContent={<ChevronLeft className="w-4 h-4"/>}
+                startContent={<ChevronLeft className="w-4 h-4" />}
               >
                 Quay lại
               </Button>
-              
-              <Button 
-                size="md" 
-                color="primary" 
+
+              <Button
+                size="md"
+                color="primary"
                 className="rounded-full font-semibold px-6 shadow-md shadow-primary/20"
                 onPress={() => {
                   if (currentCookingStep < allSteps.length - 1) {
@@ -239,7 +238,7 @@ export function CookingModeModal({
                     onFinish();
                   }
                 }}
-                endContent={currentCookingStep < allSteps.length - 1 ? <ChevronRight className="w-4 h-4"/> : <Check className="w-4 h-4 stroke-[2.5]"/>}
+                endContent={currentCookingStep < allSteps.length - 1 ? <ChevronRight className="w-4 h-4" /> : <Check className="w-4 h-4 stroke-[2.5]" />}
               >
                 {currentCookingStep === -1 ? t('recipes.cooking.startCooking') : (currentCookingStep < allSteps.length - 1 ? t('recipes.cooking.nextStep') : t('recipes.cooking.finishCooking'))}
               </Button>

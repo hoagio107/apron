@@ -7,7 +7,7 @@ import { useRecipeStore } from '../../store/useRecipeStore';
 import { useShoppingListStore } from '../../store/useShoppingListStore';
 import { useMealPlanStore } from '../../store/useMealPlanStore';
 import { ImageManager } from '../../lib/image-manager';
-import { DEFAULT_TAGS } from '@apron/core';
+import { DEFAULT_TAGS_MAP, sanitizeHtml, getSafeYoutubeEmbedUrl } from '@apron/core';
 import { exportToPdf, exportToPng, printRecipe } from '../../lib/exportUtils';
 import { CookingModeModal } from '../../components/recipes/CookingModeModal';
 import { CookingRatingModal } from '../../components/recipes/CookingRatingModal';
@@ -22,7 +22,7 @@ export function RecipeDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { recipes, updateRecipe, deleteRecipe, fetchRecipes, isLoading } = useRecipeStore();
+  const { recipes, recipeDetails, updateRecipe, deleteRecipe, fetchRecipes, fetchRecipeDetail, isLoading } = useRecipeStore();
   
   useEffect(() => {
     if (recipes.length === 0) {
@@ -30,10 +30,16 @@ export function RecipeDetailPage() {
     }
   }, [recipes.length, fetchRecipes]);
 
+  useEffect(() => {
+    if (id && fetchRecipeDetail) {
+      fetchRecipeDetail(id);
+    }
+  }, [id, fetchRecipeDetail]);
+
   const recipe = useMemo(() => {
     if (!id) return null;
-    return recipes.find(r => r.id === id) || null;
-  }, [id, recipes]);
+    return recipeDetails[id] || recipes.find(r => r.id === id) || null;
+  }, [id, recipeDetails, recipes]);
 
   const [currentDisplayImage, setCurrentDisplayImage] = useState<string | null>(null);
   const [targetServingsStr, setTargetServingsStr] = useState<string>('');
@@ -516,17 +522,17 @@ export function RecipeDetailPage() {
             <Button size="sm" color="primary" variant="solid" className="font-semibold text-xs shrink-0" startContent={<Play className="w-3.5 h-3.5"/>} onPress={() => setIsCookingModeOpen(true)}>
               {t('recipes.detail.cookMode')}
             </Button>
-            <Button size="sm" variant="flat" className="font-semibold text-xs border border-default-200 shrink-0" startContent={<Calendar className="w-3.5 h-3.5"/>} onPress={() => setIsMealPlannerModalOpen(true)}>
+            <Button size="sm" variant="flat" className="font-semibold text-xs shrink-0" startContent={<Calendar className="w-3.5 h-3.5"/>} onPress={() => setIsMealPlannerModalOpen(true)}>
               {t('recipes.actions.addToMealPlan')}
             </Button>
-            <Button size="sm" variant="flat" className="font-semibold text-xs border border-default-200 shrink-0" startContent={<ShoppingCart className="w-3.5 h-3.5 text-success"/>} onPress={handleAddToShoppingList}>
+            <Button size="sm" variant="flat" className="font-semibold text-xs shrink-0" startContent={<ShoppingCart className="w-3.5 h-3.5 text-success"/>} onPress={handleAddToShoppingList}>
               {t('recipes.detail.addToShopping')}
             </Button>
             <Button 
               size="sm" 
               isIconOnly 
               variant="flat" 
-              className="border border-default-200 text-primary shrink-0" 
+              className="text-primary shrink-0" 
               title={t('common.actions.edit')}
               onPress={() => navigate(`/recipes/new?edit=${recipe.id}`, { state: { from: '/recipes' } })}
             >
@@ -537,7 +543,7 @@ export function RecipeDetailPage() {
               isIconOnly 
               variant="flat" 
               color="danger" 
-              className="border border-danger-200 dark:border-danger-900/50 text-danger shrink-0" 
+              className="text-danger shrink-0" 
               title={t('common.actions.delete')}
               onPress={() => setIsDeleteModalOpen(true)}
             >
@@ -642,7 +648,7 @@ export function RecipeDetailPage() {
                               {i < steps.length - 1 && <div className="w-0.5 flex-1 bg-default-200 dark:bg-divider my-2" />}
                             </div>
                             <div className="flex flex-col gap-3 pb-7 pt-1 flex-1">
-                              <div className="text-foreground text-base sm:text-lg leading-relaxed prose prose-base dark:prose-invert max-w-none prose-p:my-1.5 prose-p:text-base sm:prose-p:text-lg prose-ul:my-1 font-normal" dangerouslySetInnerHTML={{ __html: step.instruction }} />
+                              <div className="text-foreground text-base sm:text-lg leading-relaxed prose prose-base dark:prose-invert max-w-none prose-p:my-1.5 prose-p:text-base sm:prose-p:text-lg prose-ul:my-1 font-normal" dangerouslySetInnerHTML={{ __html: sanitizeHtml(step.instruction) }} />
                               {((step.images && step.images.length > 0) || step.image_url) && (
                                 <div className="mt-1">
                                   {step.images && step.images.length > 0 ? (
@@ -684,7 +690,7 @@ export function RecipeDetailPage() {
                      <h3 className="font-bold text-sm flex items-center gap-2"><Info className="w-4 h-4 text-warning-500" /> {t('recipes.detail.notes')}</h3>
                      <div 
                        className="text-sm leading-relaxed text-amber-950 dark:text-amber-100 bg-amber-500/10 dark:bg-amber-500/15 p-4 rounded-xl border border-amber-500/30 prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 [&_*]:text-amber-950 dark:[&_*]:text-amber-100 [&_strong]:text-amber-950 dark:[&_strong]:text-amber-50 [&_b]:text-amber-950 dark:[&_b]:text-amber-50 [&_li]:text-amber-950/90 dark:[&_li]:text-amber-100/90" 
-                       dangerouslySetInnerHTML={{ __html: recipe.notes }} 
+                       dangerouslySetInnerHTML={{ __html: sanitizeHtml(recipe.notes) }} 
                      />
                   </div>
                 )}
@@ -693,7 +699,7 @@ export function RecipeDetailPage() {
                      <h3 className="font-bold text-sm flex items-center gap-2"><Tag className="w-4 h-4 text-default-500" /> {t('recipes.filter.tags')}</h3>
                      <div className="flex flex-wrap gap-2">
                        {recipe.tags.map(tagId => {
-                          const t = DEFAULT_TAGS.find(x => x.id === tagId || x.slug === tagId);
+                          const t = DEFAULT_TAGS_MAP.get(tagId) || DEFAULT_TAGS_MAP.get(tagId.toLowerCase());
                           const displayName = t ? t.name : tagId.replace(/-/g, ' ');
                           return <span key={tagId} className="px-3 py-1 bg-default-100 dark:bg-default-100/70 border border-default-200/50 dark:border-divider rounded-full text-sm font-medium text-default-700 dark:text-default-300 capitalize">{displayName}</span>;
                        })}
@@ -855,16 +861,16 @@ export function RecipeDetailPage() {
                  <Button color="primary" variant="solid" className="font-semibold px-6" startContent={<Play className="w-4 h-4"/>} onPress={() => setIsCookingModeOpen(true)}>
                    {t('recipes.detail.cookMode')}
                  </Button>
-                 <Button variant="flat" className="font-semibold border border-default-200" startContent={<Calendar className="w-4 h-4"/>} onPress={() => setIsMealPlannerModalOpen(true)}>
+                 <Button variant="flat" className="font-semibold" startContent={<Calendar className="w-4 h-4"/>} onPress={() => setIsMealPlannerModalOpen(true)}>
                    {t('recipes.actions.addToMealPlan')}
                  </Button>
-                 <Button variant="flat" className="font-semibold border border-default-200" startContent={<ShoppingCart className="w-4 h-4 text-success"/>} onPress={handleAddToShoppingList}>
+                 <Button variant="flat" className="font-semibold" startContent={<ShoppingCart className="w-4 h-4 text-success"/>} onPress={handleAddToShoppingList}>
                    {t('recipes.detail.addToShopping')}
                  </Button>
                  
                  <Dropdown>
                    <DropdownTrigger>
-                     <Button isIconOnly variant="flat" className="border border-default-200" isLoading={isExporting}>
+                     <Button isIconOnly variant="flat" isLoading={isExporting}>
                        <Share className="w-4 h-4" />
                      </Button>
                    </DropdownTrigger>
@@ -879,7 +885,7 @@ export function RecipeDetailPage() {
                  <Button 
                     isIconOnly 
                     variant="flat" 
-                    className="border border-default-200 text-primary" 
+                    className="text-primary" 
                     title={t('common.actions.edit')}
                     onPress={() => navigate(`/recipes/new?edit=${recipe.id}`, { state: { from: '/recipes' } })}
                   >
@@ -889,7 +895,7 @@ export function RecipeDetailPage() {
                     isIconOnly 
                     variant="flat" 
                     color="danger" 
-                    className="border border-danger-200 dark:border-danger-900/50 text-danger hover:bg-danger/10 dark:hover:bg-danger/20 dark:hover:bg-danger-900/20" 
+                    className="text-danger hover:bg-danger/10 dark:hover:bg-danger/20 dark:hover:bg-danger-900/20" 
                     title={t('common.actions.delete')}
                     onPress={() => setIsDeleteModalOpen(true)}
                   >
@@ -939,7 +945,7 @@ export function RecipeDetailPage() {
                      <Tag className="w-4 h-4" /> {t('recipes.filter.tags')}:
                    </div>
                    {recipe.tags.map(tag => {
-                      const t = DEFAULT_TAGS.find(x => x.id === tag || x.slug === tag || x.name.toLowerCase() === tag.toLowerCase());
+                      const t = DEFAULT_TAGS_MAP.get(tag) || DEFAULT_TAGS_MAP.get(tag.toLowerCase());
                       const displayName = t ? t.name : tag;
                       return <span key={tag} className="px-3 py-1 bg-default-100 dark:bg-default-100/70 border border-default-200/50 dark:border-divider rounded-full text-sm font-medium text-default-700 dark:text-default-300">{displayName}</span>;
                    })}
@@ -1072,7 +1078,7 @@ export function RecipeDetailPage() {
                            <div className="flex flex-col gap-3 pb-7 pt-1 flex-1">
                              <div 
                                className="text-foreground leading-relaxed prose prose-base dark:prose-invert max-w-none prose-p:my-1.5 prose-p:text-base lg:prose-p:text-lg prose-ul:my-1 prose-ol:my-1 font-normal text-base lg:text-lg"
-                               dangerouslySetInnerHTML={{ __html: step.instruction }}
+                               dangerouslySetInnerHTML={{ __html: sanitizeHtml(step.instruction) }}
                              />
                              
                              {/* Render Images if available */}
@@ -1203,7 +1209,7 @@ export function RecipeDetailPage() {
                        <h3 className="font-bold text-base flex items-center gap-2"><Info className="w-5 h-5 text-warning-500" /> {t('recipes.detail.notes')}</h3>
                        <div 
                          className="text-sm leading-relaxed text-amber-950 dark:text-amber-100 bg-amber-500/10 dark:bg-amber-500/15 p-4 rounded-2xl border border-amber-500/30 prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 [&_*]:text-amber-950 dark:[&_*]:text-amber-100 [&_strong]:text-amber-950 dark:[&_strong]:text-amber-50 [&_b]:text-amber-950 dark:[&_b]:text-amber-50 [&_li]:text-amber-950/90 dark:[&_li]:text-amber-100/90"
-                         dangerouslySetInnerHTML={{ __html: recipe.notes }}
+                         dangerouslySetInnerHTML={{ __html: sanitizeHtml(recipe.notes) }}
                        />
                     </div>
                   )}
@@ -1291,14 +1297,15 @@ export function RecipeDetailPage() {
                {lightboxData?.type === 'video' && (
                  <div className="w-full aspect-video bg-black rounded-xl overflow-hidden">
                     {(() => {
-                      const ytMatch = lightboxData.url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
-                      if (ytMatch && ytMatch[1]) {
+                      const ytEmbedUrl = getSafeYoutubeEmbedUrl(lightboxData.url);
+                      if (ytEmbedUrl) {
                         return (
                           <iframe 
                             className="w-full h-full"
-                            src={`https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`}
+                            src={`${ytEmbedUrl}?autoplay=1`}
                             title="YouTube video player"
                             frameBorder="0"
+                            sandbox="allow-scripts allow-same-origin allow-presentation"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
                           ></iframe>

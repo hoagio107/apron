@@ -2,18 +2,19 @@ import { useTranslation } from 'react-i18next';
 import { useRef } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody } from '@/ui';
 import { Carrot, ChefHat, Timer, Flame, Star, MessageSquare, ChevronLeft, ChevronRight } from 'lucide-react';
+import { sanitizeHtml, type Recipe, type RecipeIngredient, type Step } from '@apron/core';
 import { ImageManager } from '../../lib/image-manager';
 
 interface RecipeSnapshotModalProps {
   isOpen: boolean;
   onClose: () => void;
-  snapshot: any;
+  snapshot?: Partial<Recipe> | null;
   date: string;
   rating?: number;
   notes?: string;
 }
 
-const StepImageCarousel = ({ step }: { step: any }) => {
+const StepImageCarousel = ({ step }: { step: Step }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   
   const scroll = (direction: 'left' | 'right') => {
@@ -23,7 +24,7 @@ const StepImageCarousel = ({ step }: { step: any }) => {
     }
   };
 
-  const images = step.images?.length > 0 ? step.images : (step.image_url ? [step.image_url] : []);
+  const images = (step.images && step.images.length > 0) ? step.images : (step.image_url ? [step.image_url] : []);
   if (images.length === 0) return null;
 
   return (
@@ -156,7 +157,7 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
                     Nguyên liệu ({snapshot.servings} phần)
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {snapshot.ingredients?.map((ing: any, idx: number) => (
+                    {snapshot.ingredients?.map((ing: RecipeIngredient, idx: number) => (
                       <div key={idx} className="flex justify-between items-center p-3 bg-default-50 rounded-xl">
                         <span className="font-medium text-foreground">{ing.name}</span>
                         <span className="text-primary font-bold">{ing.quantity} {ing.unit}</span>
@@ -172,7 +173,7 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
                     Các bước thực hiện
                   </h3>
                   <div className="flex flex-col gap-6">
-                    {snapshot.steps?.map((step: any, idx: number) => (
+                    {snapshot.steps?.map((step: Step, idx: number) => (
                       <div key={idx} className="flex gap-4">
                         <div className="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center shrink-0">
                           {idx + 1}
@@ -180,7 +181,7 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
                         <div className="flex flex-col gap-3 flex-1 pt-2 min-w-0">
                           <div 
                             className="text-foreground leading-relaxed break-words whitespace-pre-wrap prose prose-sm prose-primary max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1"
-                            dangerouslySetInnerHTML={{ __html: step.instruction }}
+                            dangerouslySetInnerHTML={{ __html: sanitizeHtml(step.instruction) }}
                           />
                           
                           <StepImageCarousel step={step} />
@@ -199,7 +200,7 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
                     </h3>
                     <div 
                       className="text-default-700 leading-relaxed whitespace-pre-wrap prose prose-sm prose-warning max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1"
-                      dangerouslySetInnerHTML={{ __html: snapshot.notes }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(snapshot.notes) }}
                     />
                   </div>
                 )}

@@ -33,7 +33,7 @@ export function SidebarNav({ items, isExpanded = false }: SidebarNavProps) {
               title={!isExpanded ? item.name : undefined}
               className={cn(
                 "flex items-center h-11 rounded-xl transition-all duration-200 overflow-hidden",
-                isExpanded ? "justify-start px-3.5 gap-3" : "justify-center px-0 gap-0",
+                isExpanded ? "justify-start pl-3.5 pr-0 gap-3" : "justify-center px-0 gap-0",
                 isActive 
                   ? "bg-primary/10 text-primary font-bold" 
                   : "text-default-600 hover:bg-default-100 hover:text-foreground"

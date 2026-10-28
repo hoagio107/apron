@@ -116,12 +116,27 @@ export const useUnitStore = create<UnitState>()(
     }),
     {
       name: 'apron-unit-storage',
-      version: 2,
-      migrate: (persistedState: any) => {
-        if (persistedState && Array.isArray(persistedState.units)) {
+      version: 3,
+      migrate: (persistedState: unknown) => {
+        const stateObj = persistedState as { units?: Array<{ id?: string | number; name?: string }> } | null;
+        if (stateObj && Array.isArray(stateObj.units)) {
           const legacyIds = new Set(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14']);
-          const cleaned = persistedState.units.filter((u: any) => !legacyIds.has(String(u.id)));
-          return { ...persistedState, units: cleaned };
+          const seen = new Set<string>();
+          const cleaned: Unit[] = [];
+          for (const u of stateObj.units) {
+            if (!u || legacyIds.has(String(u.id))) continue;
+            const normName = normalizeUnit(u.name || '');
+            if (!normName) continue;
+            const lower = normName.toLowerCase();
+            if (!seen.has(lower)) {
+              seen.add(lower);
+              cleaned.push({
+                id: String(u.id || crypto.randomUUID()),
+                name: normName,
+              });
+            }
+          }
+          return { ...stateObj, units: cleaned };
         }
         return persistedState;
       }

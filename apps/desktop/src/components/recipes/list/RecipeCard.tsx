@@ -13,7 +13,9 @@ interface RecipeCardProps {
   selectable?: boolean;
   isSelected?: boolean;
   onSelectChange?: (selected: boolean) => void;
+  onSelectId?: (id: string) => void;
   onClick?: () => void;
+  onCardClick?: (id: string) => void;
   onAction?: (action: string, recipe: Recipe) => void;
   variantCount?: number;
   size?: 'sm' | 'md';
@@ -28,7 +30,9 @@ function RecipeCardComponent({
   selectable = false, 
   isSelected = false,
   onSelectChange,
+  onSelectId,
   onClick,
+  onCardClick,
   onAction,
   variantCount = 0,
   size = 'md',
@@ -41,7 +45,19 @@ function RecipeCardComponent({
   
   const handleSelectClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onSelectChange?.(!isSelected);
+    if (onSelectId && recipe.id) {
+      onSelectId(recipe.id);
+    } else {
+      onSelectChange?.(!isSelected);
+    }
+  };
+
+  const handleRootClick = () => {
+    if (onCardClick && recipe.id) {
+      onCardClick(recipe.id);
+    } else {
+      onClick?.();
+    }
   };
 
   const handleMenuAction = (key: React.Key) => {
@@ -98,7 +114,7 @@ function RecipeCardComponent({
   if (isPortrait) {
     return (
       <div 
-        onClick={onClick}
+        onClick={handleRootClick}
         className={`group w-full aspect-[3/4] sm:aspect-[4/5] relative overflow-hidden transition-all duration-300 rounded-2xl bg-black border-none shadow-none cursor-pointer card-media-root ${isSelected ? 'ring-4 ring-primary' : isMenuOpen ? '' : 'hover:scale-[1.02]'}`}
       >
         {/* Background Image: dừng lại trước 2 góc dưới và fade mask để triệt tiêu hoàn toàn viền trắng subpixel */}
@@ -125,7 +141,10 @@ function RecipeCardComponent({
         <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
           {selectable && (
             <div onClick={handleSelectClick}>
-              <Checkbox isSelected={isSelected} onValueChange={(val) => onSelectChange?.(val)} />
+              <Checkbox isSelected={isSelected} onValueChange={(val) => {
+                if (onSelectId && recipe.id) onSelectId(recipe.id);
+                else onSelectChange?.(val);
+              }} />
             </div>
           )}
           {variantCount > 0 && (
@@ -206,14 +225,17 @@ function RecipeCardComponent({
   // Original grid-square layout
   return (
     <div 
-      onClick={onClick}
+      onClick={handleRootClick}
       className={`group flex flex-col cursor-pointer relative ${size === 'sm' ? 'gap-1.5' : 'gap-3'}`}
     >
       <div className={`relative rounded-xl overflow-hidden bg-primary/10 dark:bg-primary/20 ${viewType === 'grid-landscape' ? 'w-full aspect-[4/3]' : 'w-full aspect-square'}`}>
         <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
           {selectable && (
             <div onClick={handleSelectClick}>
-              <Checkbox isSelected={isSelected} onValueChange={(val) => onSelectChange?.(val)} />
+              <Checkbox isSelected={isSelected} onValueChange={(val) => {
+                if (onSelectId && recipe.id) onSelectId(recipe.id);
+                else onSelectChange?.(val);
+              }} />
             </div>
           )}
           {variantCount > 0 && (

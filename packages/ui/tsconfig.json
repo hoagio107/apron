@@ -4,10 +4,10 @@
     "module": "ESNext",
     "jsx": "react-jsx",
     "strict": true,
-    "declaration": true,
+    "noEmit": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]

@@ -1,4 +1,4 @@
-(import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Input, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
@@ -11,10 +11,12 @@ import { TipDetailPanel } from './components/TipDetailPanel';
 import { TipAiModal } from './components/TipAiModal';
 import { TIP_CATEGORIES } from '@apron/core';
 import type { ParseTipResult } from '../../lib/gemini';
+import { useGridColumns } from '../../hooks/useGridColumns';
 
 export function TipListPage() {
   const { t } = useTranslation();
   const { tips, fetchTips, deleteBulkTips, deleteTip } = useTipStore();
+  const { containerRef, columnsCount } = useGridColumns();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -95,7 +97,7 @@ export function TipListPage() {
   const activeCategory = TIP_CATEGORIES.find(c => c.id === selectedCategoryId);
 
   return (
-    <div className="flex flex-col h-full gap-6 w-full pb-8">
+    <div ref={containerRef} className="flex flex-col min-h-full gap-6 w-full pb-8">
       {/* Header & Toolbar */}
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-6 pb-4 -mx-8 px-8 flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-divider/50 shadow-2xs">
         <div className="flex items-center gap-4 shrink-0">
@@ -219,7 +221,10 @@ export function TipListPage() {
           description={t('tips.emptySearchDesc')}
         />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div
+          className="grid gap-6"
+          style={{ gridTemplateColumns: `repeat(${columnsCount}, minmax(0, 1fr))` }}
+        >
           {filteredTips.map(t => (
             <TipCard
               key={t.id!}

@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Recipe } from '@apron/core';
+import { sanitizeHtml, type Recipe } from '@apron/core';
 import { ChefHat, Clock, Flame, Users, Gauge, Zap, Carrot, Sparkles } from 'lucide-react';
 import { ImageManager } from '../../lib/image-manager';
 
@@ -229,7 +229,7 @@ export const RecipePrintTemplate: React.FC<RecipePrintTemplateProps> = ({
           </div>
           <div
             className="text-xs text-slate-700 leading-relaxed prose prose-xs max-w-none"
-            dangerouslySetInnerHTML={{ __html: recipe.notes }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(recipe.notes) }}
           />
         </div>
       )}

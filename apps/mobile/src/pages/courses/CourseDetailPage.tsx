@@ -40,7 +40,7 @@ import {
 } from 'lucide-react';
 import { useCourseStore } from '../../store/useCourseStore';
 import { useRecipeStore } from '../../store/useRecipeStore';
-import type { Lesson } from '@apron/core';
+import { sanitizeHtml, getSafeYoutubeEmbedUrl, type Lesson } from '@apron/core';
 import { PageLoader } from '../../components/shared/PageLoader';
 import { ImageManager } from '../../lib/image-manager';
 import { IconRenderer } from '../../components/shared/IconPicker';
@@ -239,7 +239,7 @@ export function CourseDetailPage() {
   const activeNotes = activeLesson ? notes.filter(n => n.lessonId === activeLesson.id) : [];
 
   const handleShare = async () => {
-    const shareText = `📚 Khoá học: ${course.title}\n👨‍🍳 Giảng viên: ${course.teacher || 'Apron Academy'}\n${window.location.href}`;
+    const shareText = `📚 Khoá học: ${course.title}\n${window.location.href}`;
     try {
       if (navigator.share) {
         await navigator.share({
@@ -282,7 +282,7 @@ export function CourseDetailPage() {
               {course.title}
             </h1>
             <span className="text-xs text-default-500 font-medium truncate">
-              {course.teacher || 'Khoá học'}
+              {t('courses.studyMode')}
             </span>
           </div>
         </div>
@@ -364,32 +364,29 @@ export function CourseDetailPage() {
       <div className="w-full bg-black relative shrink-0">
         {activeLesson?.video_url ? (
           <div className="w-full aspect-video relative overflow-hidden flex items-center justify-center">
-            {activeLesson.video_url.includes('youtube.com') || activeLesson.video_url.includes('youtu.be') ? (
-              <iframe
-                src={(() => {
-                  try {
-                    const match = activeLesson.video_url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
-                    return match ? `https://www.youtube.com/embed/${match[1]}` : activeLesson.video_url;
-                  } catch {
-                    return activeLesson.video_url;
-                  }
-                })()}
-                className="absolute inset-0 w-full h-full border-none"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                title={activeLesson.title}
-              />
-            ) : (
-              <video
-                src={ImageManager.getAssetUrl(activeLesson.video_url)}
-                controls
-                className="absolute inset-0 w-full h-full object-contain"
-                controlsList="nodownload"
-                poster={activeLesson.hero_image_url ? ImageManager.getAssetUrl(activeLesson.hero_image_url) : undefined}
-              >
-                <track kind="captions" />
-              </video>
-            )}
+            {(() => {
+              const ytEmbedUrl = getSafeYoutubeEmbedUrl(activeLesson.video_url);
+              return ytEmbedUrl ? (
+                <iframe
+                  src={ytEmbedUrl}
+                  className="absolute inset-0 w-full h-full border-none"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  sandbox="allow-scripts allow-same-origin allow-presentation"
+                  allowFullScreen
+                  title={activeLesson.title}
+                />
+              ) : (
+                <video
+                  src={ImageManager.getAssetUrl(activeLesson.video_url)}
+                  controls
+                  className="absolute inset-0 w-full h-full object-contain"
+                  controlsList="nodownload"
+                  poster={activeLesson.hero_image_url ? ImageManager.getAssetUrl(activeLesson.hero_image_url) : undefined}
+                >
+                  <track kind="captions" />
+                </video>
+              );
+            })()}
           </div>
         ) : (
           <div className="w-full aspect-16/10 sm:aspect-video bg-default-100 relative shrink-0 overflow-hidden">
@@ -455,7 +452,7 @@ export function CourseDetailPage() {
                     prose-p:my-3.5 prose-ul:my-2.5 prose-ol:my-2.5 prose-li:my-1.5
                     prose-strong:text-foreground prose-strong:font-bold
                     prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
-                  dangerouslySetInnerHTML={{ __html: activeLesson.content }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(activeLesson.content) }}
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center py-16 text-center text-default-400 gap-3">

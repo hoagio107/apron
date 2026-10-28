@@ -3,30 +3,75 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   Card, CardBody, Button, Accordion, AccordionItem, Divider,
-  Tabs, Tab, Checkbox, Textarea, Tooltip, Progress
+  Tabs, Tab, Checkbox, Textarea, Tooltip, Progress,
+  Modal, ModalContent, ModalHeader, ModalBody, ModalFooter
 } from '@/ui';
-import { BookOpen, ChevronLeft, Clock, PlayCircle, Star, FileText, ChevronRight, Plus, Trash2, ChevronDown, ChevronUp, ChefHat, StickyNote, Flame, BarChart, Edit, Paperclip } from 'lucide-react';
+import { BookOpen, ChevronLeft, Clock, PlayCircle, Star, FileText, ChevronRight, Plus, Trash2, ChevronDown, ChevronUp, ChefHat, StickyNote, Edit, Paperclip, Info, Gauge, Link as LinkIcon } from 'lucide-react';
 import { useCourseStore } from '../../store/useCourseStore';
 import { useRecipeStore } from '../../store/useRecipeStore';
-import type { Lesson } from '@apron/core';
+import { sanitizeHtml, getSafeYoutubeEmbedUrl, type Lesson } from '@apron/core';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { ImageManager } from '../../lib/image-manager';
 import { IconRenderer } from '../../components/shared/IconPicker';
+import { RecipeForm } from '../../components/recipes/form/RecipeForm';
+import { LessonRecipeLinker } from './components/LessonRecipeLinker';
 
 export function CourseDetailPage() {
   const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
-  const { courses, fetchCourses } = useCourseStore();
-  const { recipes, fetchRecipes } = useRecipeStore();
+  const { courses, fetchCourses, updateCourse } = useCourseStore();
+  const { recipes, fetchRecipes, addRecipe } = useRecipeStore();
   
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
-  const [completedLessons, setCompletedLessons] = useState<Record<string, boolean>>({});
-  const [notes, setNotes] = useState<Array<{id: string, lessonId: string, content: string, createdAt: number, expanded: boolean}>>([]);
+  const [completedLessons, setCompletedLessons] = useState<Record<string, boolean>>(() => {
+    if (!id) return {};
+    try {
+      const saved = localStorage.getItem(`course_progress_${id}`);
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+  const [notes, setNotes] = useState<Array<{id: string, lessonId: string, content: string, createdAt: number, expanded: boolean}>>(() => {
+    if (!id) return [];
+    try {
+      const saved = localStorage.getItem(`course_notes_${id}`);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [newNote, setNewNote] = useState('');
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [editingNoteContent, setEditingNoteContent] = useState('');
+  const [isCourseInfoOpen, setIsCourseInfoOpen] = useState(false);
+  const [isNewRecipeModalOpen, setIsNewRecipeModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!id) return;
+    try {
+      const savedProgress = localStorage.getItem(`course_progress_${id}`);
+      setCompletedLessons(savedProgress ? JSON.parse(savedProgress) : {});
+      const savedNotes = localStorage.getItem(`course_notes_${id}`);
+      setNotes(savedNotes ? JSON.parse(savedNotes) : []);
+    } catch {
+      // Ignore parse errors
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      localStorage.setItem(`course_progress_${id}`, JSON.stringify(completedLessons));
+    }
+  }, [id, completedLessons]);
+
+  useEffect(() => {
+    if (id) {
+      localStorage.setItem(`course_notes_${id}`, JSON.stringify(notes));
+    }
+  }, [id, notes]);
 
   useEffect(() => {
     if (courses.length === 0) {
@@ -117,23 +162,50 @@ export function CourseDetailPage() {
 
   const activeNotes = notes.filter(n => n.lessonId === activeLessonId);
 
+  const handleUpdateLessonRecipes = async (nextRecipeIds: string[]) => {
+    if (!course || !activeLesson) return;
+    const nextModules = (course.modules || []).map((mod, mIdx) => {
+      if (mIdx !== activeModuleIndex) return mod;
+      return {
+        ...mod,
+        lessons: (mod.lessons || []).map((les, lIdx) =>
+          lIdx === activeLessonIndex ? { ...les, attached_recipe_ids: nextRecipeIds } : les
+        ),
+      };
+    });
+    await updateCourse({
+      ...course,
+      modules: nextModules,
+    });
+  };
+
   return (
-    <div className="flex flex-col h-full w-full">
-      <div className="-mt-8">
+    <div className="flex flex-col min-h-full w-full">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-6 pb-4 -mx-8 px-8 border-b border-divider/50 shadow-2xs mb-4">
         <PageHeader 
+          className="pt-0 pb-0"
           title={course.title}
           description={t('courses.studyMode')}
           showBackButton
           onBack={() => navigate('/courses')}
           actions={
-            <Button 
-              color="primary"
-              variant="flat"
-              onPress={() => navigate(`/courses/edit/${course.id}`)}
-              startContent={<Edit className="w-4 h-4" />}
-            >
-              Sửa khoá học
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="flat"
+                onPress={() => setIsCourseInfoOpen(true)}
+                startContent={<Info className="w-4 h-4" />}
+              >
+                Thông tin khoá học
+              </Button>
+              <Button 
+                color="primary"
+                variant="flat"
+                onPress={() => navigate(`/courses/edit/${course.id}`)}
+                startContent={<Edit className="w-4 h-4" />}
+              >
+                Sửa khoá học
+              </Button>
+            </div>
           }
         />
       </div>
@@ -142,8 +214,8 @@ export function CourseDetailPage() {
         <div className="lg:grid lg:grid-cols-5 gap-6 h-full min-h-[600px]">
           
           {/* Left: Syllabus Sidebar */}
-          <div className="lg:col-span-1 flex flex-col gap-4 min-w-0 bg-background p-4 rounded-2xl overflow-y-auto h-full custom-scrollbar">
-            <h3 className="font-bold text-base sticky top-0 bg-background py-2 z-10 flex flex-col gap-3">
+          <div className="lg:col-span-1 flex flex-col gap-4 min-w-0 app-card p-4 rounded-2xl overflow-y-auto h-full custom-scrollbar">
+            <h3 className="font-bold text-base sticky top-0 bg-content1 py-2 z-10 flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-primary" />
                 {t('courses.syllabus')}
@@ -251,27 +323,32 @@ export function CourseDetailPage() {
                 {/* Hero / Video at the top */}
                 {activeLesson.video_url ? (
                   <div className="w-full bg-black aspect-video flex items-center justify-center shrink-0 relative overflow-hidden">
-                    {activeLesson.video_url.includes('youtube.com') || activeLesson.video_url.includes('youtu.be') ? (
-                      <iframe 
-                        src={activeLesson.video_url.includes('watch?v=') ? activeLesson.video_url.replace('watch?v=', 'embed/').split('&')[0] : activeLesson.video_url} 
-                        className="absolute inset-0 w-full h-full border-none" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                        allowFullScreen
-                      />
-                    ) : (
-                      <video 
-                        src={ImageManager.getAssetUrl(activeLesson.video_url)} 
-                        controls 
-                        className="absolute inset-0 w-full h-full object-contain"
-                        controlsList="nodownload"
-                      />
-                    )}
+                    {(() => {
+                      const ytEmbedUrl = getSafeYoutubeEmbedUrl(activeLesson.video_url);
+                      return ytEmbedUrl ? (
+                        <iframe 
+                          src={ytEmbedUrl} 
+                          className="absolute inset-0 w-full h-full border-none" 
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                          sandbox="allow-scripts allow-same-origin allow-presentation"
+                          allowFullScreen
+                          title={activeLesson.title}
+                        />
+                      ) : (
+                        <video 
+                          src={ImageManager.getAssetUrl(activeLesson.video_url)} 
+                          controls 
+                          className="absolute inset-0 w-full h-full object-contain"
+                          controlsList="nodownload"
+                        />
+                      );
+                    })()}
                   </div>
-                ) : course.thumbnail_url ? (
-                  <div className="w-full aspect-[21/9] bg-default-100 relative shrink-0">
+                ) : activeLesson.hero_image_url ? (
+                  <div className="w-full aspect-video bg-default-100 relative shrink-0 overflow-hidden">
                     <img 
-                      src={ImageManager.getAssetUrl(course.thumbnail_url)} 
-                      alt={course.title} 
+                      src={ImageManager.getAssetUrl(activeLesson.hero_image_url)} 
+                      alt={activeLesson.title} 
                       className="w-full h-full object-cover" 
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
@@ -308,7 +385,7 @@ export function CourseDetailPage() {
                   {activeLesson.content ? (
                     <div 
                       className="prose prose-sm md:prose-base max-w-none"
-                      dangerouslySetInnerHTML={{ __html: activeLesson.content }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(activeLesson.content) }}
                     />
                   ) : (
                     <div className="flex flex-col items-center justify-center h-40 text-default-400">
@@ -420,55 +497,20 @@ export function CourseDetailPage() {
                         </>
                       )}
 
-                      {activeLesson.attached_recipe_ids && activeLesson.attached_recipe_ids.length > 0 && (
-                        <>
-                          <Divider className="opacity-50" />
-                          <div className="flex flex-col gap-3">
-                            <h4 className="font-semibold text-sm flex items-center gap-2">
-                              <ChefHat className="w-4 h-4 text-primary" />
-                              Công thức thực hành
-                            </h4>
-                            <div className="grid grid-cols-1 gap-3">
-                              {activeLesson.attached_recipe_ids.map((recipeId: string) => {
-                                const recipe = recipes.find(r => r.id === recipeId);
-                                if (!recipe) return null;
-                                return (
-                                  <Card 
-                                    key={recipe.id}
-                                    isPressable 
-                                    onPress={() => navigate(`/recipes/${recipe.id}`)}
-                                    className="app-card app-card-interactive h-auto overflow-hidden"
-                                    classNames={{ body: "p-0" }}
-                                  >
-                                    <div className="flex items-center gap-3 p-2">
-                                      {recipe.thumbnail_url ? (
-                                        <div className="w-16 h-16 shrink-0 rounded bg-default-100 overflow-hidden">
-                                          <img src={ImageManager.getAssetUrl(recipe.thumbnail_url)} alt={recipe.title} className="w-full h-full object-cover" />
-                                        </div>
-                                      ) : (
-                                        <div className="w-16 h-16 shrink-0 rounded bg-default-100 flex items-center justify-center">
-                                          <ChefHat className="w-6 h-6 text-default-300" />
-                                        </div>
-                                      )}
-                                      <div className="flex flex-col flex-1 min-w-0 pr-2 text-left justify-center">
-                                        <span className="font-semibold text-sm line-clamp-1">{recipe.title}</span>
-                                        {recipe.description && (
-                                          <span className="text-xs text-default-500 mt-0.5 line-clamp-1">{recipe.description}</span>
-                                        )}
-                                        <div className="flex items-center flex-wrap gap-2 mt-1.5 text-[10px] text-default-400 font-medium uppercase tracking-wide">
-                                          {recipe.total_time_minutes ? <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-warning" /> {recipe.total_time_minutes}p</span> : null}
-                                          {recipe.difficulty ? <span className="flex items-center gap-1"><BarChart className="w-3 h-3 text-primary" /> {recipe.difficulty}</span> : null}
-                                          {recipe.calories ? <span className="flex items-center gap-1"><Flame className="w-3 h-3 text-danger" /> {recipe.calories} kcal</span> : null}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </Card>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        </>
-                      )}
+                      <Divider className="opacity-50" />
+                      <div className="flex flex-col gap-3">
+                        <h4 className="font-semibold text-sm flex items-center gap-2">
+                          <ChefHat className="w-4 h-4 text-primary" />
+                          Công thức thực hành
+                        </h4>
+                        <LessonRecipeLinker
+                          recipes={recipes}
+                          attachedRecipeIds={activeLesson.attached_recipe_ids || []}
+                          onChange={handleUpdateLessonRecipes}
+                          onCreateNewRecipe={() => setIsNewRecipeModalOpen(true)}
+                          onRecipeClick={(recipeId) => navigate(`/recipes/${recipeId}`)}
+                        />
+                      </div>
                     </>
                   ) : (
                     <div className="text-center text-default-400 text-sm py-4">Chưa chọn bài học</div>
@@ -622,6 +664,130 @@ export function CourseDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal Xem thông tin chung của Khoá học */}
+      <Modal
+        isOpen={isCourseInfoOpen}
+        onOpenChange={setIsCourseInfoOpen}
+        size="2xl"
+        scrollBehavior="inside"
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex items-center gap-2 border-b border-divider">
+                <Info className="w-5 h-5 text-primary" />
+                <span>Thông tin khoá học</span>
+              </ModalHeader>
+              <ModalBody className="py-5 flex flex-col gap-5">
+                {/* Ảnh đại diện khoá học tỷ lệ 4:3 đặt trên tên khoá học */}
+                <div className="w-full aspect-[4/3] rounded-2xl bg-default-100 overflow-hidden shrink-0">
+                  {course.thumbnail_url ? (
+                    <img
+                      src={ImageManager.getAssetUrl(course.thumbnail_url)}
+                      alt={course.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-default-300 gap-2">
+                      <BookOpen className="w-12 h-12" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Tên khoá học & Thông số chung */}
+                <div className="flex flex-col gap-3">
+                  <h2 className="text-2xl font-bold text-foreground leading-snug">
+                    {course.title}
+                  </h2>
+
+                  <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-default-600">
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <Star className="w-4 h-4 text-warning fill-warning" />
+                      {course.rating || 0} {t('recipes.rating')}
+                    </span>
+                    {course.level && (
+                      <span className="flex items-center gap-1.5">
+                        <Gauge className="w-4 h-4 text-primary" />
+                        {course.level}
+                      </span>
+                    )}
+                    <span className="flex items-center gap-1.5">
+                      <BookOpen className="w-4 h-4 text-success" />
+                      {course.modules?.length || 0} chương • {totalLessons} bài học
+                    </span>
+                    {course.source && (
+                      <span className="flex items-center gap-1.5">
+                        <LinkIcon className="w-4 h-4 text-default-400" />
+                        {course.source}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <Divider className="opacity-60" />
+
+                {/* Mô tả khoá học */}
+                <div className="flex flex-col gap-2">
+                  <h4 className="font-semibold text-sm text-default-700">
+                    {t('courses.form.descLabel')}
+                  </h4>
+                  {course.description ? (
+                    <div
+                      className="prose prose-sm max-w-none text-default-700"
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(course.description) }}
+                    />
+                  ) : (
+                    <p className="text-sm text-default-400 italic">
+                      {t('courses.noDescription')}
+                    </p>
+                  )}
+                </div>
+              </ModalBody>
+              <ModalFooter className="border-t border-divider">
+                <Button variant="flat" onPress={onClose}>
+                  {t('common.actions.close')}
+                </Button>
+                <Button
+                  color="primary"
+                  startContent={<Edit className="w-4 h-4" />}
+                  onPress={() => {
+                    onClose();
+                    navigate(`/courses/edit/${course.id}`);
+                  }}
+                >
+                  Sửa khoá học
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+      {/* Modal Tạo công thức mới và gắn nhanh vào bài học */}
+      <Modal
+        isOpen={isNewRecipeModalOpen}
+        onOpenChange={setIsNewRecipeModalOpen}
+        size="5xl"
+        classNames={{ base: 'max-w-[1330px]' }}
+        scrollBehavior="inside"
+      >
+        <ModalContent>
+          {(onClose) => (
+            <div className="p-4 overflow-y-auto max-h-[80vh]">
+              <RecipeForm
+                onSubmit={async (data) => {
+                  await addRecipe(data);
+                  const currentIds = activeLesson?.attached_recipe_ids || [];
+                  if (!currentIds.includes(data.id)) {
+                    await handleUpdateLessonRecipes([...currentIds, data.id]);
+                  }
+                  onClose();
+                }}
+              />
+            </div>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

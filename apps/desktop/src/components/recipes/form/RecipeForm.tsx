@@ -15,7 +15,7 @@ import { StepsSection } from './StepsSection';
 import { AiAssistModal } from './AiAssistModal';
 import { ImageManager } from '../../../lib/image-manager';
 import type { Recipe, Tag } from '@apron/core';
-import { DEFAULT_TAGS, normalizeUnit, extractAndNormalizeUnits } from '@apron/core';
+import { DEFAULT_TAGS_MAP, normalizeUnit, extractAndNormalizeUnits } from '@apron/core';
 import { useUnitStore } from '../../../store/useUnitStore';
 import type { ParseRecipeResult } from '../../../lib/gemini';
 
@@ -130,10 +130,17 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
 
   useEffect(() => {
     if (initialData) return;
+    let timer: ReturnType<typeof setTimeout> | null = null;
     const subscription = methods.watch((value) => {
-      localStorage.setItem('recipe_form_draft', JSON.stringify(value));
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        localStorage.setItem('recipe_form_draft', JSON.stringify(value));
+      }, 500);
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      if (timer) clearTimeout(timer);
+      subscription.unsubscribe();
+    };
   }, [methods, initialData]);
 
   const [dynamicTags, setDynamicTags] = useState<Tag[]>([]);
@@ -174,7 +181,7 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
           newDynamicTags.push(newTag);
           tagIds.push(newId);
         } else {
-          const found = DEFAULT_TAGS.find(t => t.name.toLowerCase() === tagName.toLowerCase()) || 
+          const found = DEFAULT_TAGS_MAP.get(tagName.toLowerCase()) || 
                         dynamicTags.find(t => t.name.toLowerCase() === tagName.toLowerCase());
           if (found) {
             tagIds.push(found.id);
@@ -387,13 +394,13 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
   return (
     <FormProvider {...methods}>
       <form 
-        onSubmit={bulkRecipes ? (e) => { e.preventDefault(); handleBulkSubmit(); } : methods.handleSubmit(handleSingleSubmit, (errors) => console.log('Validation errors:', errors))} 
+        onSubmit={bulkRecipes ? (e) => { e.preventDefault(); handleBulkSubmit(); } : methods.handleSubmit(handleSingleSubmit, () => toast.error('Vui lòng kiểm tra lại các trường thông tin bắt buộc'))} 
         className="flex flex-col gap-8 w-full pb-8"
       >
-        <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-md py-2 -my-2">
+        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-6 pb-4 -mx-8 px-8 border-b border-divider/50 shadow-2xs">
           <PageHeader 
             title={initialData ? t('recipes.form.editTitle') : (bulkRecipes && bulkRecipes.length > 1 ? t('recipes.form.bulkCreateTitle', { count: bulkRecipes.length }) : t('recipes.form.createTitle'))} 
-            className="pt-2 pb-2"
+            className="pt-0 pb-0"
             actions={
               <>
                 <Button

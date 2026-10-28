@@ -50,7 +50,7 @@ function getSlotIcon(slotId: string) {
 }
 
 export function MealPlannerPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState<Date>(() => new Date());
   
@@ -210,6 +210,8 @@ export function MealPlannerPage() {
     }
   };
 
+  const recipeMap = useMemo(() => new Map(recipes.map(r => [r.id, r])), [recipes]);
+
   // Thêm toàn bộ nguyên liệu của ngày đang chọn vào Đi chợ
   const handleAddDayToShopping = async () => {
     if (!activePlan || activePlan.meals.length === 0) {
@@ -220,7 +222,7 @@ export function MealPlannerPage() {
     const itemsToAdd: { name: string; quantity?: number | string; unit?: string }[] = [];
     activePlan.meals.forEach((entry) => {
       if (entry.recipe_id) {
-        const r = recipes.find((rec) => rec.id === entry.recipe_id);
+        const r = recipeMap.get(entry.recipe_id);
         if (r?.ingredients) {
           r.ingredients.forEach((ing) => {
             itemsToAdd.push({
@@ -253,7 +255,7 @@ export function MealPlannerPage() {
     mealPlans.forEach((plan) => {
       plan.meals.forEach((entry) => {
         if (entry.recipe_id) {
-          const r = recipes.find((rec) => rec.id === entry.recipe_id);
+          const r = recipeMap.get(entry.recipe_id);
           if (r?.ingredients) {
             r.ingredients.forEach((ing) => {
               weekItems.push({
@@ -286,9 +288,10 @@ export function MealPlannerPage() {
     let cals = 0;
     activePlan.meals.forEach((m) => {
       if (m.recipe_id) {
-        const r = recipes.find((rec) => rec.id === m.recipe_id);
-        if (r?.nutrition?.calories) {
-          cals += r.nutrition.calories;
+        const r = recipeMap.get(m.recipe_id);
+        const rCals = r?.calories ?? r?.nutrition?.calories;
+        if (rCals) {
+          cals += rCals;
         }
       }
     });
@@ -296,7 +299,7 @@ export function MealPlannerPage() {
       totalMeals: activePlan.meals.length,
       totalCalories: cals,
     };
-  }, [activePlan, recipes]);
+  }, [activePlan, recipeMap]);
 
   // Tên ngày hiển thị đẹp (Vd: Thứ Ba, 21 tháng 10)
   const activeDateFormatted = useMemo(() => {
@@ -542,7 +545,7 @@ export function MealPlannerPage() {
                   <div className="flex flex-col divide-y divide-divider/30">
                     {slotEntries.map((entry) => {
                       const recipe = entry.recipe_id
-                        ? recipes.find((r) => r.id === entry.recipe_id)
+                        ? recipeMap.get(entry.recipe_id) ?? null
                         : null;
 
                       const dishTitle = recipe ? recipe.title : entry.notes ?? t('planner.customDish');

@@ -1,6 +1,6 @@
 {
   "name": "apron-monorepo",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "private": true,
   "packageManager": "pnpm@9.15.9",
   "engines": {
@@ -18,9 +18,7 @@
     "test": "pnpm --filter @apron/core test"
   },
   "devDependencies": {
-    "@types/js-yaml": "^4.0.9",
     "eslint": "^8.57.0",
-    "js-yaml": "^5.5.0",
     "prettier": "^3.0.0",
     "sharp": "^0.35.5",
     "turbo": "^2.0.0",
@@ -30,7 +28,8 @@
     "overrides": {
       "dompurify": "^3.4.17",
       "vite": ">=8.2.4",
-      "prosemirror-view": ">=1.42.3"
+      "prosemirror-view": ">=1.42.3",
+      "brace-expansion": ">=2.0.2"
     }
   }
 }

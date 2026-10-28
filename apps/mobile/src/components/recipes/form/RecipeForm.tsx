@@ -15,7 +15,7 @@ import { StepsSection } from './StepsSection';
 import { AiAssistModal } from './AiAssistModal';
 import { ImageManager } from '../../../lib/image-manager';
 import type { Recipe, Tag } from '@apron/core';
-import { DEFAULT_TAGS, normalizeUnit, extractAndNormalizeUnits } from '@apron/core';
+import { DEFAULT_TAGS_MAP, normalizeUnit, extractAndNormalizeUnits } from '@apron/core';
 import { useUnitStore } from '../../../store/useUnitStore';
 import type { ParseRecipeResult } from '../../../lib/gemini';
 import { BottomActionStepper } from '../../shared/BottomActionStepper';
@@ -154,10 +154,17 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
 
   useEffect(() => {
     if (initialData) return;
+    let timer: ReturnType<typeof setTimeout> | null = null;
     const subscription = methods.watch((value) => {
-      localStorage.setItem('recipe_form_draft', JSON.stringify(value));
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        localStorage.setItem('recipe_form_draft', JSON.stringify(value));
+      }, 500);
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      if (timer) clearTimeout(timer);
+      subscription.unsubscribe();
+    };
   }, [methods, initialData]);
 
   const [dynamicTags, setDynamicTags] = useState<Tag[]>([]);
@@ -198,7 +205,7 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
           newDynamicTags.push(newTag);
           tagIds.push(newId);
         } else {
-          const found = DEFAULT_TAGS.find(t => t.name.toLowerCase() === tagName.toLowerCase()) || 
+          const found = DEFAULT_TAGS_MAP.get(tagName.toLowerCase()) || 
                         dynamicTags.find(t => t.name.toLowerCase() === tagName.toLowerCase());
           if (found) {
             tagIds.push(found.id);
@@ -430,7 +437,6 @@ export function RecipeForm({ initialData, onSubmit }: RecipeFormProps) {
   const hasStepsError = Boolean(errors.stepSections);
 
   const onInvalid = (validationErrors: any) => {
-    console.log('Validation errors:', validationErrors);
     const errorKeys = Object.keys(validationErrors);
     if (errorKeys.length === 0) return;
     

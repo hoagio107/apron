@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Modal, 
@@ -54,9 +54,16 @@ export function JsonImportModal({ isOpen, onOpenChange, onSuccess }: JsonImportM
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { recipes } = useRecipeStore();
-  const { tips } = useTipStore();
+  const { recipes, fetchRecipes } = useRecipeStore();
+  const { tips, fetchTips } = useTipStore();
   const { units } = useUnitStore();
+
+  useEffect(() => {
+    if (isOpen) {
+      if (recipes.length === 0) fetchRecipes();
+      if (tips.length === 0) fetchTips();
+    }
+  }, [isOpen, recipes.length, tips.length, fetchRecipes, fetchTips]);
 
   const [inputTab, setInputTab] = useState<'file' | 'paste'>('file');
   const [pastedJson, setPastedJson] = useState('');
@@ -183,9 +190,9 @@ export function JsonImportModal({ isOpen, onOpenChange, onSuccess }: JsonImportM
       );
       setImportSummary(summary);
       toast.success(t('importJson.successToast', {
-        recipes: summary.importedCount,
-        tips: summary.updatedCount,
-        units: summary.skippedCount,
+        recipes: summary.recipesCount,
+        tips: summary.tipsCount,
+        units: summary.unitsCount,
       }));
       if (onSuccess) onSuccess();
     } catch (e: unknown) {

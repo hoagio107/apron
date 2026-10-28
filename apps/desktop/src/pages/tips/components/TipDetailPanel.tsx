@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Drawer, DrawerContent, DrawerHeader, DrawerBody, Button } from '@/ui';
 import { Calendar, Edit, Trash2 } from 'lucide-react';
 import type { Tip } from '@apron/core';
-import { TIP_CATEGORIES } from '@apron/core';
+import { TIP_CATEGORIES, sanitizeHtml } from '@apron/core';
 import { format } from 'date-fns';
 import { vi, enUS } from 'date-fns/locale';
 import { ImageManager } from '../../../lib/image-manager';
@@ -16,7 +16,7 @@ interface TipDetailPanelProps {
 }
 
 export function TipDetailPanel({ tip, isOpen, onOpenChange, onEdit, onDelete }: TipDetailPanelProps) {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   if (!tip) return null;
 
   const category = TIP_CATEGORIES.find(c => c.id === tip.category_id);
@@ -27,7 +27,7 @@ export function TipDetailPanel({ tip, isOpen, onOpenChange, onEdit, onDelete }: 
         {() => (
           <div className="flex flex-col h-full bg-content1">
             {/* Header / Actions */}
-            <DrawerHeader className="flex justify-between items-center border-b border-divider px-6 py-4 bg-content1/80 backdrop-blur-md z-50 sticky top-0">
+            <DrawerHeader className="flex justify-between items-center border-b border-divider px-6 py-4 bg-content1 z-50 sticky top-0">
               <div className="flex items-center gap-2">
                 <Button 
                   variant="flat" 
@@ -94,7 +94,7 @@ export function TipDetailPanel({ tip, isOpen, onOpenChange, onEdit, onDelete }: 
                 <div className="p-8 flex-1 bg-content1">
                   <div 
                     className="prose prose-primary max-w-none leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: tip.content }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(tip.content) }}
                   />
                 </div>
               </div>

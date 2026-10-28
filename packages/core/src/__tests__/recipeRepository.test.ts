@@ -177,6 +177,15 @@ describe('RecipeRepository', () => {
     const indexRecipes = JSON.parse(indexContent) as Recipe[];
     expect(indexRecipes[0].cooking_history?.[0]?.recipe_snapshot).toBeUndefined();
     expect(indexRecipes[0].cooking_history?.[0]?.rating).toBe(5);
+
+    // Saving the index-loaded recipe (where recipe_snapshot is undefined) must preserve existing snapshots on disk
+    const fromIndex = (await RecipeRepository.getAll())[0];
+    expect(fromIndex.cooking_history?.[0]?.recipe_snapshot).toBeUndefined();
+    await RecipeRepository.save({ ...fromIndex, title: 'Phở Bò Mới Cập Nhật' });
+
+    const afterUpdate = await RecipeRepository.getById('history-r1');
+    expect(afterUpdate?.title).toBe('Phở Bò Mới Cập Nhật');
+    expect(afterUpdate?.cooking_history?.[0]?.recipe_snapshot?.title).toBe('Phở Bò Cũ');
   });
 
   it('handles saveBulk and deleteBulk updating the index file in a single pass', async () => {

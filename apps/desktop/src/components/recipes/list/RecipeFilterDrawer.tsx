@@ -122,7 +122,7 @@ export function RecipeFilterDrawer({
         {(onClose) => (
           <>
             {/* Header */}
-            <DrawerHeader className="flex items-center justify-between px-5 py-3.5 border-b border-divider/50 bg-background/90 backdrop-blur-md sticky top-0 z-30">
+            <DrawerHeader className="flex items-center justify-between px-5 py-3.5 border-b border-divider/50 bg-background sticky top-0 z-30">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-teal-500/10 text-primary flex items-center justify-center border border-primary/20 shadow-xs">
                   <Filter className="w-4 h-4" />
@@ -327,7 +327,7 @@ export function RecipeFilterDrawer({
             </DrawerBody>
 
             {/* Sticky Footer */}
-            <DrawerFooter className="px-5 py-4 border-t border-divider/50 flex items-center gap-3 bg-background/95 backdrop-blur-md sticky bottom-0 z-30">
+            <DrawerFooter className="px-5 py-4 border-t border-divider/50 flex items-center gap-3 bg-background sticky bottom-0 z-30">
               <Button
                 variant="flat"
                 color="default"

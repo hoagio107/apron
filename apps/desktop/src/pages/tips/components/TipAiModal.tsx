@@ -25,7 +25,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { buildTipPrompt, parseTipGeminiResponse, type ParseTipResult } from '../../../lib/gemini';
-import { TIP_CATEGORIES } from '@apron/core';
+import { TIP_CATEGORIES, sanitizeHtml } from '@apron/core';
 
 interface TipAiModalProps {
   isOpen: boolean;
@@ -327,7 +327,7 @@ export function TipAiModal({ isOpen, onOpenChange, initialTopic = '', onApply }:
                         </h4>
                         <div 
                           className="text-xs text-default-600 line-clamp-4 prose dark:prose-invert max-w-none pt-1 border-t border-divider/40"
-                          dangerouslySetInnerHTML={{ __html: parsedData.content }}
+                          dangerouslySetInnerHTML={{ __html: sanitizeHtml(parsedData.content) }}
                         />
                       </div>
                     </div>

@@ -3,6 +3,12 @@ import type { Collection } from '../types/collection';
 
 const COLLECTIONS_DIR = 'collections';
 
+function parseTimestamp(dateStr?: string): number {
+  if (!dateStr) return 0;
+  const ts = Date.parse(dateStr);
+  return Number.isNaN(ts) ? 0 : ts;
+}
+
 export class CollectionRepository {
   /**
    * Khởi tạo thư mục chứa collections nếu chưa có
@@ -28,30 +34,34 @@ export class CollectionRepository {
       if (!(await storage.exists(COLLECTIONS_DIR))) return collections;
 
       const files = await storage.readDir(COLLECTIONS_DIR);
-      for (const file of files) {
-        if (!file.isDirectory && file.name.endsWith('.json')) {
+      const jsonFiles = files.filter((file) => !file.isDirectory && file.name.endsWith('.json'));
+      const loaded = await Promise.all(
+        jsonFiles.map(async (file) => {
           try {
             const content = await storage.readTextFile(`${COLLECTIONS_DIR}/${file.name}`);
             const col = JSON.parse(content) as Collection;
             if (col) {
               if (!col.id) col.id = file.name.replace('.json', '');
-              collections.push(col);
+              return col;
             }
           } catch (e) {
             console.error(`Failed to parse collection ${file.name}`, e);
           }
-        }
+          return null;
+        })
+      );
+      for (const col of loaded) {
+        if (col) collections.push(col);
       }
     } catch (e) {
       console.error('Failed to get all collections', e);
     }
-    
+
     // Sắp xếp theo created_at giảm dần
-    return collections.sort((a, b) => {
-      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-      return dateB - dateA;
-    });
+    return collections
+      .map((col) => ({ col, ts: parseTimestamp(col.created_at) }))
+      .sort((a, b) => b.ts - a.ts)
+      .map((entry) => entry.col);
   }
 
   /**
@@ -62,9 +72,11 @@ export class CollectionRepository {
     try {
       const filePath = `${COLLECTIONS_DIR}/${id}.json`;
       if (!(await storage.exists(filePath))) return null;
-      
+
       const content = await storage.readTextFile(filePath);
-      return JSON.parse(content) as Collection;
+      const col = JSON.parse(content) as Collection;
+      if (col && !col.id) col.id = id;
+      return col;
     } catch (e) {
       console.error(`Failed to get collection ${id}`, e);
       return null;
@@ -80,7 +92,7 @@ export class CollectionRepository {
       if (!collection.id) {
         collection.id = crypto.randomUUID();
       }
-      
+
       const now = new Date().toISOString();
       if (!collection.created_at) collection.created_at = now;
       collection.updated_at = now;
@@ -111,11 +123,9 @@ export class CollectionRepository {
   }
 
   /**
-   * Xoá nhiều collections
+   * Xoá nhiều collections song song
    */
   static async deleteBulk(ids: string[]): Promise<void> {
-    for (const id of ids) {
-      await this.delete(id);
-    }
+    await Promise.all(ids.map((id) => this.delete(id)));
   }
 }

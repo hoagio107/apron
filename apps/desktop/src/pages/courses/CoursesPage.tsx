@@ -1,30 +1,38 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Button, Spinner } from '@/ui';
-import { Plus, BookOpen, Trash2, User, Link as LinkIcon, Star } from 'lucide-react';
+import { Button, Spinner, toast } from '@/ui';
+import { Plus, BookOpen, Trash2, Link as LinkIcon, Star } from 'lucide-react';
+import { sanitizeHtml } from '@apron/core';
 import { useCourseStore } from '../../store/useCourseStore';
 import { EmptyState } from '../../components/shared/EmptyState';
+import { ConfirmModal } from '../../components/shared/ConfirmModal';
 import { ImageManager } from '../../lib/image-manager';
 
 export function CoursesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { courses, isLoading, fetchCourses, deleteCourse } = useCourseStore();
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCourses();
   }, [fetchCourses]);
 
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
+  const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (confirm(t('courses.confirmDelete'))) {
-      await deleteCourse(id);
-    }
+    setDeleteTargetId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTargetId) return;
+    await deleteCourse(deleteTargetId);
+    toast.success(t('common.status.deletedSuccessfully', { defaultValue: 'Đã xoá khoá học thành công' }));
+    setDeleteTargetId(null);
   };
 
   return (
-    <div className="flex flex-col h-full gap-6 w-full pb-8">
+    <div className="flex flex-col min-h-full gap-6 w-full pb-8">
       {/* Header */}
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-6 pb-4 -mx-8 px-8 flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-divider/50 shadow-2xs mb-2">
         <div className="flex items-center gap-4 shrink-0">
@@ -132,27 +140,19 @@ export function CoursesPage() {
                   {course.description ? (
                     <div 
                       className="text-sm text-white/80 line-clamp-2 text-left mb-4 [&>p]:m-0 [&>ul]:m-0"
-                      dangerouslySetInnerHTML={{ __html: course.description }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(course.description) }}
                     />
                   ) : (
                     <p className="text-sm text-white/80 mb-4">{t('courses.noDescription')}</p>
                   )}
                   
-                  {/* Source and Teacher */}
-                  {(course.source || course.teacher || course.author_id) && (
+                  {/* Source */}
+                  {course.source && (
                     <div className="flex flex-wrap items-center gap-3 text-sm text-white drop-shadow-md mb-3">
-                      {course.source && (
-                        <span className="flex items-center gap-1.5 max-w-[150px]">
-                          <LinkIcon className="w-4 h-4 shrink-0 text-white/80" />
-                          <span className="truncate">{course.source}</span>
-                        </span>
-                      )}
-                      {(course.teacher || course.author_id) && (
-                        <span className="flex items-center gap-1.5 max-w-[150px]">
-                          <User className="w-4 h-4 shrink-0 text-white/80" />
-                          <span className="truncate">{course.teacher || course.author_id}</span>
-                        </span>
-                      )}
+                      <span className="flex items-center gap-1.5 max-w-[150px]">
+                        <LinkIcon className="w-4 h-4 shrink-0 text-white/80" />
+                        <span className="truncate">{course.source}</span>
+                      </span>
                     </div>
                   )}
 
@@ -211,6 +211,18 @@ export function CoursesPage() {
             ))}
           </div>
         )}
+
+      <ConfirmModal
+        isOpen={Boolean(deleteTargetId)}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTargetId(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title={t('courses.deleteModalTitle', { defaultValue: 'Xoá khoá học' })}
+        description={t('courses.deleteModalDesc', { defaultValue: t('courses.confirmDelete') })}
+        confirmLabel={t('common.actions.delete', { defaultValue: 'Xoá' })}
+        confirmColor="danger"
+      />
     </div>
   );
 }

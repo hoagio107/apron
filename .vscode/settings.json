@@ -4,6 +4,13 @@
   "java.gradle.buildServer.enabled": "off",
   "java.import.gradle.enabled": false,
   "java.autobuild.enabled": false,
+  "files.autoSave": "off",
+  "files.autoSaveDelay": 1000,
+  "workbench.editor.enablePreview": false,
+  "workbench.editor.enablePreviewFromQuickOpen": false,
+  "explorer.autoReveal": false,
+  "antigravity.agent.openFilesOnEdit": false,
+  "antigravity.openFilesOnEdit": false,
   "files.watcherExclude": {
     "**/.git/objects/**": true,
     "**/.git/subtree-cache/**": true,

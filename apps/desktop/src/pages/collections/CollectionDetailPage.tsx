@@ -646,39 +646,42 @@ export function CollectionDetailPage() {
   };
 
   return (
-    <div className="flex flex-col h-full gap-6 w-full pb-8">
+    <div className="flex flex-col min-h-full gap-6 w-full pb-8">
       {/* Standard PageHeader */}
-      <PageHeader
-        title={collection.title}
-        description={t('collections.itemCount', { folders: collection.folders?.length || 0, items: totalAllItems })}
-        showBackButton
-        onBack={() => navigate('/collections')}
-        actions={
-          <div className="flex items-center gap-2.5">
-            <Button
-              variant="flat"
-              startContent={<Edit2 className="w-4 h-4 text-default-500" />}
-              onPress={() => setIsCollectionModalOpen(true)}
-            >
-              {t('collections.editCollection')}
-            </Button>
-            <Button
-              variant="flat"
-              startContent={<FolderPlus className="w-4 h-4 text-primary" />}
-              onPress={handleOpenAddFolder}
-            >
-              {t('collections.addFolder')}
-            </Button>
-            <Button
-              color="primary"
-              startContent={<Plus className="w-4 h-4" />}
-              onPress={handleOpenAddItem}
-            >
-              {t('collections.addItem')}
-            </Button>
-          </div>
-        }
-      />
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-6 pb-4 -mx-8 px-8 border-b border-divider/50 shadow-2xs">
+        <PageHeader
+          className="pt-0 pb-0"
+          title={collection.title}
+          description={t('collections.itemCount', { folders: collection.folders?.length || 0, items: totalAllItems })}
+          showBackButton
+          onBack={() => navigate('/collections')}
+          actions={
+            <div className="flex items-center gap-2.5">
+              <Button
+                variant="flat"
+                startContent={<Edit2 className="w-4 h-4 text-default-500" />}
+                onPress={() => setIsCollectionModalOpen(true)}
+              >
+                {t('collections.editCollection')}
+              </Button>
+              <Button
+                variant="flat"
+                startContent={<FolderPlus className="w-4 h-4 text-primary" />}
+                onPress={handleOpenAddFolder}
+              >
+                {t('collections.addFolder')}
+              </Button>
+              <Button
+                color="primary"
+                startContent={<Plus className="w-4 h-4" />}
+                onPress={handleOpenAddItem}
+              >
+                {t('collections.addItem')}
+              </Button>
+            </div>
+          }
+        />
+      </div>
 
       {/* Main Workspace */}
       <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">

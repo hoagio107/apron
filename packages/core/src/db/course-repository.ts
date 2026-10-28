@@ -3,6 +3,12 @@ import type { Course } from '../types/recipe';
 
 const COURSES_DIR = 'courses';
 
+function parseTimestamp(dateStr?: string): number {
+  if (!dateStr) return 0;
+  const ts = Date.parse(dateStr);
+  return Number.isNaN(ts) ? 0 : ts;
+}
+
 export class CourseRepository {
   /**
    * Khởi tạo thư mục chứa courses nếu chưa có
@@ -28,27 +34,33 @@ export class CourseRepository {
       if (!(await storage.exists(COURSES_DIR))) return courses;
 
       const files = await storage.readDir(COURSES_DIR);
-      for (const file of files) {
-        if (!file.isDirectory && file.name.endsWith('.json')) {
+      const jsonFiles = files.filter((file) => !file.isDirectory && file.name.endsWith('.json'));
+      const loaded = await Promise.all(
+        jsonFiles.map(async (file) => {
           try {
             const content = await storage.readTextFile(`${COURSES_DIR}/${file.name}`);
             const course = JSON.parse(content) as Course;
-            courses.push(course);
+            if (course) {
+              if (!course.id) course.id = file.name.replace('.json', '');
+              return course;
+            }
           } catch (e) {
             console.error(`Failed to parse course ${file.name}`, e);
           }
-        }
+          return null;
+        })
+      );
+      for (const course of loaded) {
+        if (course) courses.push(course);
       }
     } catch (e) {
       console.error('Failed to get all courses', e);
     }
-    
-    // Sort by created_at descending by default
-    return courses.sort((a, b) => {
-      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-      return dateB - dateA;
-    });
+
+    return courses
+      .map((course) => ({ course, ts: parseTimestamp(course.created_at) }))
+      .sort((a, b) => b.ts - a.ts)
+      .map((entry) => entry.course);
   }
 
   /**
@@ -59,9 +71,11 @@ export class CourseRepository {
     try {
       const filePath = `${COURSES_DIR}/${id}.json`;
       if (!(await storage.exists(filePath))) return null;
-      
+
       const content = await storage.readTextFile(filePath);
-      return JSON.parse(content) as Course;
+      const course = JSON.parse(content) as Course;
+      if (course && !course.id) course.id = id;
+      return course;
     } catch (e) {
       console.error(`Failed to get course ${id}`, e);
       return null;
@@ -77,10 +91,9 @@ export class CourseRepository {
       if (!course.id) {
         course.id = crypto.randomUUID();
       }
-      
+
       const now = new Date().toISOString();
       if (!course.created_at) course.created_at = now;
-      // course.updated_at = now; // Course model may not have updated_at
 
       await this.init();
       const filePath = `${COURSES_DIR}/${course.id}.json`;
@@ -108,17 +121,11 @@ export class CourseRepository {
   }
 
   /**
-   * Xóa nhiều course
+   * Xóa nhiều course song song
    */
   static async deleteBulk(ids: string[]): Promise<void> {
-    const storage = getStorageProvider();
     try {
-      for (const id of ids) {
-        const filePath = `${COURSES_DIR}/${id}.json`;
-        if (await storage.exists(filePath)) {
-          await storage.deleteFile(filePath);
-        }
-      }
+      await Promise.all(ids.map((id) => this.delete(id)));
     } catch (e) {
       console.error('Failed to delete bulk courses', e);
       throw e;

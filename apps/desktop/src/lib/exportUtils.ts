@@ -1,5 +1,7 @@
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
+const IMAGE_LOAD_TIMEOUT_MS = 3000;
+const PNG_EXPORT_SCALE = 2.5;
+const PDF_EXPORT_SCALE = 2.0;
+const PDF_JPEG_QUALITY = 0.95;
 
 /**
  * Đợi tất cả hình ảnh trong container tải xong trước khi render canvas
@@ -12,15 +14,16 @@ async function waitForImages(container: HTMLElement): Promise<void> {
     images.map((img) => {
       if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
       return new Promise<void>((resolve) => {
+        let timer: ReturnType<typeof setTimeout> | undefined;
         const onDone = () => {
+          if (timer !== undefined) clearTimeout(timer);
           img.removeEventListener('load', onDone);
           img.removeEventListener('error', onDone);
           resolve();
         };
         img.addEventListener('load', onDone);
         img.addEventListener('error', onDone);
-        // Timeout an toàn 3s nếu ảnh hỏng hoặc mạng chậm
-        setTimeout(onDone, 3000);
+        timer = setTimeout(onDone, IMAGE_LOAD_TIMEOUT_MS);
       });
     })
   );
@@ -34,10 +37,13 @@ export async function exportToPng(elementId: string, filename: string = 'recipe.
   if (!element) throw new Error(`Không tìm thấy phần tử xuất: ${elementId}`);
 
   try {
-    await waitForImages(element);
+    const [{ default: html2canvas }] = await Promise.all([
+      import('html2canvas'),
+      waitForImages(element),
+    ]);
 
     const canvas = await html2canvas(element, {
-      scale: 2.5,
+      scale: PNG_EXPORT_SCALE,
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
@@ -64,17 +70,21 @@ export async function exportToPdf(elementId: string, filename: string = 'recipe.
   if (!element) throw new Error(`Không tìm thấy phần tử xuất: ${elementId}`);
 
   try {
-    await waitForImages(element);
+    const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+      import('html2canvas'),
+      import('jspdf'),
+      waitForImages(element),
+    ]);
 
     const canvas = await html2canvas(element, {
-      scale: 2.0,
+      scale: PDF_EXPORT_SCALE,
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
       logging: false,
     });
 
-    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const imgData = canvas.toDataURL('image/jpeg', PDF_JPEG_QUALITY);
 
     // Kích thước chuẩn khổ A4 tính theo mm (210mm x 297mm)
     const pdf = new jsPDF('p', 'mm', 'a4');

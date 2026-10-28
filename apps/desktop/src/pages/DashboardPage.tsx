@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, AppCard, StatCard, SectionTitle, EmptyState } from '@/ui';
 import { 
@@ -9,9 +9,12 @@ import {
   Utensils, Sunrise, Sun, Moon,
   ArrowRight
 } from 'lucide-react';
-import type { Recipe, MealPlan, Tip, Course } from '@apron/core';
+import type { MealPlan } from '@apron/core';
 import { 
-  RecipeRepository, MealPlanRepository, TipRepository, CourseRepository 
+  MealPlanRepository,
+  useRecipeStore,
+  useCourseStore,
+  useTipStore,
 } from '@apron/core';
 import { ImageManager } from '../lib/image-manager';
 import { RecipeCard } from '../components/recipes/list/RecipeCard';
@@ -20,38 +23,26 @@ export function DashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  // State
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
+  const { recipes, fetchRecipes } = useRecipeStore();
+  const { courses, fetchCourses } = useCourseStore();
+  const { tips, fetchTips } = useTipStore();
+
   const [todayMealPlan, setTodayMealPlan] = useState<MealPlan | null>(null);
-  const [dailyTip, setDailyTip] = useState<Tip | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        
-        // 1. Fetch Recipes
-        const allRecipes = await RecipeRepository.getAll();
-        setRecipes(allRecipes);
-
-        // 2. Fetch Courses
-        const allCourses = await CourseRepository.getAll();
-        setCourses(allCourses);
-
-        // 3. Fetch Today's Meal Plan
         const today = new Date().toISOString().split('T')[0];
-        const plan = await MealPlanRepository.getByDate(today);
+
+        const [, , , plan] = await Promise.all([
+          fetchRecipes(),
+          fetchCourses(),
+          fetchTips(),
+          MealPlanRepository.getByDate(today),
+        ]);
         setTodayMealPlan(plan);
-
-        // 4. Fetch Tips and pick a random one
-        const allTips = await TipRepository.getAll();
-        if (allTips.length > 0) {
-          const randomIndex = Math.floor(Math.random() * allTips.length);
-          setDailyTip(allTips[randomIndex]);
-        }
-
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {
@@ -60,7 +51,13 @@ export function DashboardPage() {
     };
 
     fetchData();
-  }, []);
+  }, [fetchRecipes, fetchCourses, fetchTips]);
+
+  const dailyTip = useMemo(() => {
+    if (tips.length === 0) return null;
+    const dayIndex = new Date().getDate() % tips.length;
+    return tips[dayIndex];
+  }, [tips]);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -137,7 +134,7 @@ export function DashboardPage() {
           layout="vertical"
           icon={<Lightbulb className="w-5 h-5 sm:w-6 sm:h-6" />}
           label={t('tips.title')}
-          value={dailyTip ? t('common.status.loading').replace('...', '') : '-'}
+          value={tips.length}
           color="warning"
           onClick={() => navigate('/tips')}
         />

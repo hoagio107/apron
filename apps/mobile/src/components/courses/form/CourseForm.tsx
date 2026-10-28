@@ -22,7 +22,6 @@ import {
   Info, 
   Gauge, 
   Link as LinkIcon, 
-  User, 
   Star, 
   Trash2, 
   Plus, 
@@ -507,32 +506,18 @@ export function CourseForm({
               </div>
             </FormField>
 
-            {/* Nguồn & Giảng viên */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField label="Nguồn khoá học" icon={LinkIcon}>
-                <Input
-                  placeholder="VD: YouTube, Udemy, Coursera..."
-                  value={formData.source || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, source: e.target.value }))}
-                  variant="flat"
-                  classNames={{
-                    inputWrapper: 'bg-default-100 hover:bg-default-200 border-none shadow-none min-h-12 rounded-xl'
-                  }}
-                />
-              </FormField>
-
-              <FormField label="Giảng viên / Hướng dẫn" icon={User}>
-                <Input
-                  placeholder="Tên giảng viên..."
-                  value={formData.teacher || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, teacher: e.target.value }))}
-                  variant="flat"
-                  classNames={{
-                    inputWrapper: 'bg-default-100 hover:bg-default-200 border-none shadow-none min-h-12 rounded-xl'
-                  }}
-                />
-              </FormField>
-            </div>
+            {/* Nguồn khoá học */}
+            <FormField label="Nguồn khoá học" icon={LinkIcon}>
+              <Input
+                placeholder="VD: YouTube, Udemy, Coursera..."
+                value={formData.source || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, source: e.target.value }))}
+                variant="flat"
+                classNames={{
+                  inputWrapper: 'bg-default-100 hover:bg-default-200 border-none shadow-none min-h-12 rounded-xl'
+                }}
+              />
+            </FormField>
 
             {/* Đánh giá */}
             <FormField label="Đánh giá chất lượng khoá học" icon={Star}>
@@ -703,6 +688,7 @@ export function CourseForm({
                       <Autocomplete
                         placeholder="Tìm kiếm công thức để gắn vào bài học..."
                         variant="flat"
+                        isVirtualized={false}
                         inputValue={recipeSearch}
                         onInputChange={setRecipeSearch}
                         onSelectionChange={(id) => {

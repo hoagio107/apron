@@ -1,13 +1,13 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import { Button, Modal, ModalContent, ModalBody, useDisclosure, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tabs, Tab, Chip, EmptyState, toast } from '@/ui';
-import { ArrowLeft, Edit, Clock, Star, Flame, Play, Info, Share, Check, Image as ImageIcon, Plus, Gauge, Timer, Minus, Carrot, ChefHat, Link as LinkIcon, Video, Tag, X, Calendar, ShoppingCart, Printer, Download, ImageDown, ChevronDown, ChevronUp, GitFork, Layers, ArrowRight, Trash2 } from 'lucide-react';
+import { Button, Modal, ModalContent, ModalBody, useDisclosure, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tabs, Tab, EmptyState, toast } from '@/ui';
+import { ArrowLeft, Edit, Clock, Star, Flame, Play, Info, Share, Check, Image as ImageIcon, Plus, Gauge, Timer, Minus, Carrot, ChefHat, Link as LinkIcon, Video, Tag, X, Calendar, ShoppingCart, Printer, Download, ImageDown, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 import { useRecipeStore } from '../../store/useRecipeStore';
 import { useShoppingListStore } from '../../store/useShoppingListStore';
 import { useMealPlanStore } from '../../store/useMealPlanStore';
 import { ImageManager } from '../../lib/image-manager';
-import { DEFAULT_TAGS } from '@apron/core';
+import { DEFAULT_TAGS_MAP, sanitizeHtml, getSafeYoutubeEmbedUrl } from '@apron/core';
 import { exportToPdf, exportToPng, printRecipe } from '../../lib/exportUtils';
 import { CookingModeModal } from '../../components/recipes/CookingModeModal';
 import { CookingRatingModal } from '../../components/recipes/CookingRatingModal';
@@ -22,7 +22,7 @@ export function RecipeDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { recipes, updateRecipe, deleteRecipe, fetchRecipes } = useRecipeStore();
+  const { recipes, recipeDetails, updateRecipe, deleteRecipe, fetchRecipes, fetchRecipeDetail } = useRecipeStore();
   
   useEffect(() => {
     if (recipes.length === 0 && fetchRecipes) {
@@ -30,10 +30,16 @@ export function RecipeDetailPage() {
     }
   }, [recipes.length, fetchRecipes]);
 
+  useEffect(() => {
+    if (id && fetchRecipeDetail) {
+      fetchRecipeDetail(id);
+    }
+  }, [id, fetchRecipeDetail]);
+
   const recipe = useMemo(() => {
     if (!id) return null;
-    return recipes.find(r => r.id === id) || null;
-  }, [id, recipes]);
+    return recipeDetails[id] || recipes.find(r => r.id === id) || null;
+  }, [id, recipeDetails, recipes]);
 
   const [currentDisplayImage, setCurrentDisplayImage] = useState<string | null>(null);
   const [targetServingsStr, setTargetServingsStr] = useState<string>('');
@@ -80,10 +86,10 @@ export function RecipeDetailPage() {
     }));
     try {
       await addItems(items);
-      alert(t('recipes.detail.addedToShoppingSuccess'));
+      toast.success(t('recipes.detail.addedToShoppingSuccess'));
     } catch (e) {
       console.error(e);
-      alert(t('common.status.errorOccurred'));
+      toast.error(t('common.status.errorOccurred'));
     }
   };
 
@@ -105,10 +111,10 @@ export function RecipeDetailPage() {
     }
     try {
       await navigator.clipboard.writeText(text);
-      alert(t('recipes.detail.copiedRecipeSuccess'));
+      toast.success(t('recipes.detail.copiedRecipeSuccess'));
     } catch (e) {
       console.error(e);
-      alert(t('common.status.errorOccurred'));
+      toast.error(t('common.status.errorOccurred'));
     }
   };
 
@@ -119,9 +125,10 @@ export function RecipeDetailPage() {
     try {
       setIsExporting(true);
       await exportToPng('recipe-print-template', `${recipe.title}.png`);
+      toast.success('Đã xuất ảnh công thức!');
     } catch (err) {
       console.error(err);
-      alert('Không thể xuất ảnh công thức. Vui lòng thử lại.');
+      toast.error('Không thể xuất ảnh công thức. Vui lòng thử lại.');
     } finally {
       setIsExporting(false);
     }
@@ -132,9 +139,10 @@ export function RecipeDetailPage() {
     try {
       setIsExporting(true);
       await exportToPdf('recipe-print-template', `${recipe.title}.pdf`);
+      toast.success('Đã xuất PDF công thức!');
     } catch (err) {
       console.error(err);
-      alert('Không thể xuất PDF công thức. Vui lòng thử lại.');
+      toast.error('Không thể xuất PDF công thức. Vui lòng thử lại.');
     } finally {
       setIsExporting(false);
     }
@@ -151,10 +159,10 @@ export function RecipeDetailPage() {
         recipe_id: recipe.id!,
         meal_type: slotId,
       });
-      alert(t('recipes.detail.addedToMealPlanSuccess'));
+      toast.success(t('recipes.detail.addedToMealPlanSuccess'));
     } catch (e) {
       console.error(e);
-      alert(t('common.status.errorOccurred'));
+      toast.error(t('common.status.errorOccurred'));
     }
   };
 
@@ -278,18 +286,6 @@ export function RecipeDetailPage() {
     }
   }, [recipe, recipes]);
 
-  const parentRecipe = useMemo(() => {
-    if (!recipe?.parent_id) return null;
-    return recipes.find(r => r.id === recipe.parent_id) || null;
-  }, [recipe?.parent_id, recipes]);
-
-  const isVariant = !!recipe?.parent_id;
-
-  const childVariants = useMemo(() => {
-    if (!recipe) return [];
-    return recipes.filter(r => r.parent_id === recipe.id);
-  }, [recipe, recipes]);
-
   if (!recipe) {
     return (
       <div className="flex flex-col items-center justify-center h-full">
@@ -386,31 +382,6 @@ export function RecipeDetailPage() {
                    {t('common.actions.back')}
                  </div>
 
-
-                 <div className="flex items-center gap-2 flex-wrap">
-                   {isVariant ? (
-                     <Chip 
-                       size="sm" 
-                       variant="flat" 
-                       color="secondary" 
-                       startContent={<GitFork className="w-3.5 h-3.5 ml-1" />}
-                       className="font-semibold text-xs"
-                     >
-                       {t('recipes.detail.variants')}
-                     </Chip>
-                   ) : childVariants.length > 0 ? (
-                     <Chip 
-                       size="sm" 
-                       variant="flat" 
-                       color="primary" 
-                       startContent={<Layers className="w-3.5 h-3.5 ml-1" />}
-                       className="font-semibold text-xs"
-                     >
-                       {t('recipes.actions.variantsCount', { count: childVariants.length })}
-                     </Chip>
-                   ) : null}
-                 </div>
-
                  <h1 className="text-3xl lg:text-4xl font-extrabold leading-tight text-foreground">{recipe.title}</h1>
                </div>
                
@@ -431,16 +402,16 @@ export function RecipeDetailPage() {
                  <Button color="primary" variant="solid" className="font-semibold px-6" startContent={<Play className="w-4 h-4"/>} onPress={() => setIsCookingModeOpen(true)}>
                    {t('recipes.detail.cookMode')}
                  </Button>
-                 <Button variant="flat" className="font-semibold border border-default-200" startContent={<Calendar className="w-4 h-4"/>} onPress={() => setIsMealPlannerModalOpen(true)}>
+                 <Button variant="flat" className="font-semibold" startContent={<Calendar className="w-4 h-4"/>} onPress={() => setIsMealPlannerModalOpen(true)}>
                    {t('recipes.actions.addToMealPlan')}
                  </Button>
-                 <Button variant="flat" className="font-semibold border border-default-200" startContent={<ShoppingCart className="w-4 h-4 text-success"/>} onPress={handleAddToShoppingList}>
+                 <Button variant="flat" className="font-semibold" startContent={<ShoppingCart className="w-4 h-4 text-success"/>} onPress={handleAddToShoppingList}>
                    {t('recipes.detail.addToShopping')}
                  </Button>
                  
                  <Dropdown>
                    <DropdownTrigger>
-                     <Button isIconOnly variant="flat" className="border border-default-200" isLoading={isExporting}>
+                     <Button isIconOnly variant="flat" isLoading={isExporting}>
                        <Share className="w-4 h-4" />
                      </Button>
                    </DropdownTrigger>
@@ -455,7 +426,7 @@ export function RecipeDetailPage() {
                  <Button 
                    isIconOnly 
                    variant="flat" 
-                   className="border border-default-200 text-primary" 
+                   className="text-primary" 
                    title={t('common.actions.edit')}
                    onPress={() => navigate(`/recipes/new?edit=${recipe.id}`, { state: { from: '/recipes' } })}
                  >
@@ -466,7 +437,7 @@ export function RecipeDetailPage() {
                    isIconOnly 
                    variant="flat" 
                    color="danger" 
-                   className="border border-danger-200 dark:border-danger-900/50 text-danger hover:bg-danger/10 dark:hover:bg-danger/20 dark:hover:bg-danger-900/20" 
+                   className="text-danger hover:bg-danger/10 dark:hover:bg-danger/20 dark:hover:bg-danger-900/20" 
                    title={t('common.actions.delete')}
                    onPress={() => setIsDeleteModalOpen(true)}
                  >
@@ -516,7 +487,7 @@ export function RecipeDetailPage() {
                      <Tag className="w-4 h-4" /> {t('recipes.filter.tags')}:
                    </div>
                    {recipe.tags.map(tag => {
-                      const tTag = DEFAULT_TAGS.find(x => x.id === tag || x.slug === tag || x.name.toLowerCase() === tag.toLowerCase());
+                      const tTag = DEFAULT_TAGS_MAP.get(tag) || DEFAULT_TAGS_MAP.get(tag.toLowerCase());
                       const displayName = tTag ? tTag.name : tag;
                       return <span key={tag} className="px-3 py-1 bg-default-100 rounded-full text-xs font-medium text-default-700">{displayName}</span>;
                    })}
@@ -642,7 +613,7 @@ export function RecipeDetailPage() {
                            <div className="flex flex-col gap-3 pb-6 pt-1">
                              <div 
                                className="text-default-700 leading-relaxed prose prose-sm prose-primary max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1"
-                               dangerouslySetInnerHTML={{ __html: step.instruction }}
+                               dangerouslySetInnerHTML={{ __html: sanitizeHtml(step.instruction) }}
                              />
                              
                              {/* Render Images if available */}
@@ -773,7 +744,7 @@ export function RecipeDetailPage() {
                        <h3 className="font-bold text-base flex items-center gap-2"><Info className="w-5 h-5 text-warning-500" /> {t('recipes.detail.notes')}</h3>
                        <div 
                          className="text-sm leading-relaxed text-amber-950 dark:text-amber-100 bg-amber-500/10 dark:bg-amber-500/15 p-4 rounded-2xl border border-amber-500/30 prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 [&_*]:text-amber-950 dark:[&_*]:text-amber-100 [&_strong]:text-amber-950 dark:[&_strong]:text-amber-50 [&_b]:text-amber-950 dark:[&_b]:text-amber-50 [&_li]:text-amber-950/90 dark:[&_li]:text-amber-100/90"
-                         dangerouslySetInnerHTML={{ __html: recipe.notes }}
+                         dangerouslySetInnerHTML={{ __html: sanitizeHtml(recipe.notes) }}
                        />
                     </div>
                   )}
@@ -871,14 +842,15 @@ export function RecipeDetailPage() {
                {lightboxData?.type === 'video' && (
                  <div className="w-full aspect-video bg-black rounded-xl overflow-hidden">
                     {(() => {
-                      const ytMatch = lightboxData.url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
-                      if (ytMatch && ytMatch[1]) {
+                      const ytEmbedUrl = getSafeYoutubeEmbedUrl(lightboxData.url);
+                      if (ytEmbedUrl) {
                         return (
                           <iframe 
                             className="w-full h-full"
-                            src={`https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`}
+                            src={`${ytEmbedUrl}?autoplay=1`}
                             title="YouTube video player"
                             frameBorder="0"
+                            sandbox="allow-scripts allow-same-origin allow-presentation"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
                           ></iframe>

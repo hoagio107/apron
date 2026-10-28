@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Spinner } from '@/ui';
+import { Button, Spinner, toast } from '@/ui';
 import { Plus, Search, Trash2, CalendarDays, Tags, Link as LinkIcon, Image as ImageIcon } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { EmptyState } from '../../components/shared/EmptyState';
@@ -100,6 +100,10 @@ export function RecipeListPage() {
     return Array.from(tags).sort();
   }, [recipes]);
 
+  const rootRecipes = useMemo(() => {
+    return recipes.filter(r => !r.parent_id);
+  }, [recipes]);
+
   const activeFilterCount = (filters.difficulties.length > 0 ? 1 : 0) + 
     (filters.maxTime !== null ? 1 : 0) + 
     ((filters.tags?.length || 0) > 0 ? 1 : 0) + 
@@ -107,7 +111,8 @@ export function RecipeListPage() {
     (filters.minRating ? 1 : 0);
 
   const filteredAndSortedRecipes = useMemo(() => {
-    let result = [...recipes];
+    // Chỉ hiển thị các món gốc / không phải biến thể ở sổ tay công thức
+    let result = recipes.filter(r => !r.parent_id);
 
     // Tìm kiếm theo từ khóa an toàn
     if (searchQuery.trim()) {
@@ -206,11 +211,13 @@ export function RecipeListPage() {
   useEffect(() => {
     const updateWidth = () => {
       if (containerRef.current && containerRef.current.clientWidth > 0) {
-        setContainerWidth(containerRef.current.clientWidth);
+        const nextWidth = containerRef.current.clientWidth;
+        setContainerWidth(prev => (prev !== nextWidth ? nextWidth : prev));
       } else if (typeof window !== 'undefined') {
         const isSidebarPinned = localStorage.getItem('apron_desktop_sidebar_pinned') === 'true';
         const sidebarWidth = isSidebarPinned ? 256 : 80;
-        setContainerWidth(Math.max(600, window.innerWidth - sidebarWidth - 64));
+        const nextWidth = Math.max(600, window.innerWidth - sidebarWidth - 64);
+        setContainerWidth(prev => (prev !== nextWidth ? nextWidth : prev));
       }
     };
 
@@ -292,6 +299,7 @@ export function RecipeListPage() {
 
   useEffect(() => {
     rowVirtualizer.measure();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnsCount, viewType, containerWidth, filteredAndSortedRecipes.length, filters]);
 
   // Lưu vị trí cuộn khi người dùng cuộn danh sách
@@ -330,7 +338,7 @@ export function RecipeListPage() {
         clearTimeout(t2);
       };
     }
-  }, [rows.length]);
+  }, [rows.length, rowVirtualizer]);
 
 
   const toggleSelect = useCallback((id: string) => {
@@ -372,24 +380,24 @@ export function RecipeListPage() {
     }
   }, [isSelectMode, navigate, toggleSelect]);
 
-  const handleRecipeAction = async (action: string, recipe: Recipe) => {
+  const handleRecipeAction = useCallback(async (action: string, recipe: Recipe) => {
     switch (action) {
       case 'favorite':
         await updateRecipe({ ...recipe, is_favorite: !recipe.is_favorite });
         break;
       case 'edit':
-        navigate(`/recipes/${recipe.id}/edit`); // Hoặc trang sửa nếu có
+        navigate(`/recipes/${recipe.id}/edit`);
         break;
-        case 'delete':
-          if (window.confirm(t('recipes.actions.deleteConfirm', { title: recipe.title }))) {
-            await deleteRecipe(recipe.id!);
-          }
-          break;
-        case 'meal_plan':
-          navigate('/meal-planner');
-          break;
-      }
-    };
+      case 'delete':
+        if (window.confirm(t('recipes.actions.deleteConfirm', { title: recipe.title }))) {
+          await deleteRecipe(recipe.id!);
+        }
+        break;
+      case 'meal_plan':
+        navigate('/meal-planner');
+        break;
+    }
+  }, [updateRecipe, navigate, t, deleteRecipe]);
 
     const handleBulkDelete = async () => {
       if (window.confirm(t('recipes.actions.bulkDeleteConfirm', { count: selectedIds.size }))) {
@@ -401,77 +409,86 @@ export function RecipeListPage() {
 
     const handleBulkAddToMealPlan = async (date: string, slotId: string) => {
       try {
-        for (const id of Array.from(selectedIds)) {
-          await addMealPlanEntry(date, { recipe_id: id, meal_type: slotId });
-        }
-        alert(t('recipes.detail.addedToMealPlanSuccess'));
+        await Promise.all(
+          Array.from(selectedIds).map(id => addMealPlanEntry(date, { recipe_id: id, meal_type: slotId }))
+        );
+        toast.success(t('recipes.detail.addedToMealPlanSuccess'));
         toggleSelectMode();
       } catch (e) {
         console.error(e);
-        alert(t('common.status.errorOccurred'));
+        toast.error(t('common.status.errorOccurred'));
       }
     };
 
     const handleBulkAddTags = async (tags: string[]) => {
       try {
-        for (const id of Array.from(selectedIds)) {
-          const recipe = recipes.find(r => r.id === id);
-          if (recipe) {
-            const currentTags = recipe.tags || [];
-            const newTags = Array.from(new Set([...currentTags, ...tags]));
-            await updateRecipe({ ...recipe, tags: newTags });
-          }
-        }
-        alert(t('common.status.updatedSuccessfully'));
+        const recipeMap = new Map(recipes.map(r => [r.id, r]));
+        await Promise.all(
+          Array.from(selectedIds).map(async id => {
+            const recipe = recipeMap.get(id);
+            if (recipe) {
+              const currentTags = recipe.tags || [];
+              const newTags = Array.from(new Set([...currentTags, ...tags]));
+              await updateRecipe({ ...recipe, tags: newTags });
+            }
+          })
+        );
+        toast.success(t('common.status.updatedSuccessfully'));
         toggleSelectMode();
       } catch (e) {
         console.error(e);
-        alert(t('common.status.errorOccurred'));
+        toast.error(t('common.status.errorOccurred'));
       }
     };
 
     const handleBulkSetParent = async (parentId: string) => {
       try {
-        for (const id of Array.from(selectedIds)) {
-          if (id !== parentId) {
-            const recipe = recipes.find(r => r.id === id);
-            if (recipe) {
-              await updateRecipe({ ...recipe, parent_id: parentId });
+        const recipeMap = new Map(recipes.map(r => [r.id, r]));
+        await Promise.all(
+          Array.from(selectedIds).map(async id => {
+            if (id !== parentId) {
+              const recipe = recipeMap.get(id);
+              if (recipe) {
+                await updateRecipe({ ...recipe, parent_id: parentId });
+              }
             }
-          }
-        }
-        alert(t('common.status.updatedSuccessfully'));
+          })
+        );
+        toast.success(t('common.status.updatedSuccessfully'));
         toggleSelectMode();
       } catch (e) {
         console.error(e);
-        alert(t('common.status.errorOccurred'));
+        toast.error(t('common.status.errorOccurred'));
       }
     };
 
     const handleBulkAddImages = async (images: string[], _videos: string[]) => {
       try {
-        for (const id of Array.from(selectedIds)) {
-          const recipe = recipes.find(r => r.id === id);
-          if (recipe) {
-            const currentImages = recipe.images || (recipe.image_url ? [recipe.image_url] : []);
-            const newImages = [...currentImages, ...images];
-            const updates: Partial<Recipe> = { images: newImages };
-            if (!recipe.image_url && newImages.length > 0) {
-              updates.image_url = newImages[0];
+        const recipeMap = new Map(recipes.map(r => [r.id, r]));
+        await Promise.all(
+          Array.from(selectedIds).map(async id => {
+            const recipe = recipeMap.get(id);
+            if (recipe) {
+              const currentImages = recipe.images || (recipe.image_url ? [recipe.image_url] : []);
+              const newImages = [...currentImages, ...images];
+              const updates: Partial<Recipe> = { images: newImages };
+              if (!recipe.image_url && newImages.length > 0) {
+                updates.image_url = newImages[0];
+              }
+              await updateRecipe({ ...recipe, ...updates });
             }
-            await updateRecipe({ ...recipe, ...updates });
-          }
-        }
-        alert(t('common.status.updatedSuccessfully'));
+          })
+        );
+        toast.success(t('common.status.updatedSuccessfully'));
         toggleSelectMode();
       } catch (e) {
         console.error(e);
-        alert(t('common.status.errorOccurred'));
+        toast.error(t('common.status.errorOccurred'));
       }
     };
 
     return (
-      <div ref={containerRef} className="flex flex-col h-full gap-6 w-full pb-8">
+      <div ref={containerRef} className="flex flex-col min-h-full gap-6 w-full pb-8">
         {/* Header & Toolbar */}
         <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-6 pb-4 -mx-8 px-8 flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-divider/50 shadow-2xs">
           {/* Left side: Add New + Title */}
@@ -487,9 +504,9 @@ export function RecipeListPage() {
             <div>
               <h1 className="app-page-title leading-tight">{t('recipes.title')}</h1>
               <p className="app-page-subtitle">
-                {filteredAndSortedRecipes.length === recipes.length
-                  ? t('recipes.subtitle', { count: recipes.length })
-                  : `${filteredAndSortedRecipes.length} / ${recipes.length}`}
+                {filteredAndSortedRecipes.length === rootRecipes.length
+                  ? t('recipes.subtitle', { count: rootRecipes.length })
+                  : `${filteredAndSortedRecipes.length} / ${rootRecipes.length}`}
               </p>
             </div>
           </div>
@@ -593,8 +610,8 @@ export function RecipeListPage() {
                     viewType={viewType}
                     selectable={isSelectMode}
                     isSelected={selectedIds.has(r.id!)}
-                    onSelectChange={() => toggleSelect(r.id!)}
-                    onClick={() => handleCardClick(r.id!)}
+                    onSelectId={toggleSelect}
+                    onCardClick={handleCardClick}
                     onAction={handleRecipeAction}
                     variantCount={variantCountsMap.get(r.id!) || 0}
                   />

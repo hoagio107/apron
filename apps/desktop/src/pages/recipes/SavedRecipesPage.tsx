@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/ui';
 import { Trash2, CalendarDays, Tags, Search, Heart } from 'lucide-react';
@@ -11,10 +11,12 @@ import { useRecipeStore } from '../../store/useRecipeStore';
 import type { Recipe } from '@apron/core';
 import { EmptyState } from '../../components/shared/EmptyState';
 import { useTranslation } from 'react-i18next';
+import { useGridColumns } from '../../hooks/useGridColumns';
 
 export function SavedRecipesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { containerRef, columnsCount } = useGridColumns();
   const [searchQuery, setSearchQuery] = useState('');
   const [viewType, setViewType] = useState<RecipeViewType>('grid-portrait');
   const [sortOption, setSortOption] = useState('newest');
@@ -109,15 +111,17 @@ export function SavedRecipesPage() {
     return result;
   }, [recipes, searchQuery, sortOption, filters]);
 
-  const toggleSelect = (id: string) => {
-    const newSelected = new Set(selectedIds);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setSelectedIds(newSelected);
-  };
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds(prev => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(id)) {
+        newSelected.delete(id);
+      } else {
+        newSelected.add(id);
+      }
+      return newSelected;
+    });
+  }, []);
 
   const selectAll = () => {
     if (selectedIds.size === filteredAndSortedRecipes.length) {
@@ -134,15 +138,15 @@ export function SavedRecipesPage() {
     setIsSelectMode(!isSelectMode);
   };
 
-  const handleCardClick = (id: string) => {
+  const handleCardClick = useCallback((id: string) => {
     if (isSelectMode) {
       toggleSelect(id);
     } else {
       navigate(`/recipes/${id}`);
     }
-  };
+  }, [isSelectMode, navigate, toggleSelect]);
 
-  const handleRecipeAction = async (action: string, recipe: Recipe) => {
+  const handleRecipeAction = useCallback(async (action: string, recipe: Recipe) => {
     switch (action) {
       case 'favorite':
         await updateRecipe({ ...recipe, is_favorite: !recipe.is_favorite });
@@ -159,7 +163,7 @@ export function SavedRecipesPage() {
         navigate('/meal-planner');
         break;
     }
-  };
+  }, [updateRecipe, navigate, t, deleteRecipe]);
 
   const handleBulkUnsave = async () => {
     if (window.confirm(t('recipes.actions.bulkDeleteConfirm', { count: selectedIds.size }))) {
@@ -174,7 +178,7 @@ export function SavedRecipesPage() {
   };
 
   return (
-    <div className="flex flex-col h-full gap-6 w-full pb-8">
+    <div ref={containerRef} className="flex flex-col min-h-full gap-6 w-full pb-8">
       {/* Header & Toolbar */}
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md pt-6 pb-4 -mx-8 px-8 flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-divider/50 shadow-2xs">
         {/* Left side: Add New + Title */}
@@ -256,10 +260,10 @@ export function SavedRecipesPage() {
             : t('recipes.savedEmpty.description')}
         />
       ) : (
-        <div className={`
-          ${viewType === 'grid-portrait' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6' : ''}
-          ${viewType === 'grid-square' ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6' : ''}
-        `}>
+        <div
+          className="grid gap-6"
+          style={{ gridTemplateColumns: `repeat(${columnsCount}, minmax(0, 1fr))` }}
+        >
           {filteredAndSortedRecipes.map(r => {
             const variantCount = recipes.filter(child => child.parent_id === r.id).length;
             return (
@@ -269,8 +273,8 @@ export function SavedRecipesPage() {
                 viewType={viewType}
                 selectable={isSelectMode}
                 isSelected={selectedIds.has(r.id!)}
-                onSelectChange={() => toggleSelect(r.id!)}
-                onClick={() => handleCardClick(r.id!)}
+                onSelectId={toggleSelect}
+                onCardClick={handleCardClick}
                 onAction={handleRecipeAction}
                 variantCount={variantCount}
               />

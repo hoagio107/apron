@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { 
   Home, Heart, GraduationCap, 
   Lightbulb, PlusCircle, ShoppingCart, Scale, 
-  CalendarDays, FileUp, ChefHat, FolderHeart
+  CalendarDays, ChefHat, FolderHeart
 } from 'lucide-react';
 import { Button } from '@/ui';
 import { useTranslation } from 'react-i18next';
@@ -73,11 +73,6 @@ export function MainSidebar({ isPinned = false }: MainSidebarProps) {
     { name: t('nav.mealPlanner'), icon: CalendarDays, path: '/meal-planner' },
     { name: t('nav.kitchenTips'), icon: Lightbulb, path: '/tips' },
     { name: t('nav.units'), icon: Scale, path: '/units' },
-    { 
-      name: t('nav.import'), 
-      icon: FileUp, 
-      onClick: () => setIsImportOpen(true) 
-    },
   ];
 
   const isExpanded = isPinned || isHovered || isSettingsOpen || isImportOpen;
@@ -91,7 +86,7 @@ export function MainSidebar({ isPinned = false }: MainSidebarProps) {
           isExpanded ? 'w-64 z-40 shadow-xl' : 'w-20 z-30 shadow-none'
         }`}
       >
-        <nav className={`flex-grow ${isExpanded ? 'px-3' : 'px-0'} pt-4 pb-2 space-y-3 overflow-y-auto custom-scrollbar flex flex-col ${!isExpanded ? 'items-center' : ''}`}>
+        <nav className={`flex-grow ${isExpanded ? 'px-3' : 'px-0'} pt-4 pb-2 space-y-3 overflow-y-auto no-scrollbar flex flex-col ${!isExpanded ? 'items-center' : ''}`}>
           <div className={isExpanded ? 'w-full' : 'flex justify-center w-full'}>
             <Button 
               as={Link} 

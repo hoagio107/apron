@@ -2,18 +2,19 @@ import { useTranslation } from 'react-i18next';
 import { useRef } from 'react';
 import { Drawer, DrawerContent, DrawerHeader, DrawerBody, SectionTitle } from '@/ui';
 import { Carrot, ChefHat, Timer, Flame, Star, Info, ChevronLeft, ChevronRight } from 'lucide-react';
+import { sanitizeHtml, type Recipe, type RecipeIngredient, type Step } from '@apron/core';
 import { ImageManager } from '../../lib/image-manager';
 
 interface RecipeSnapshotModalProps {
   isOpen: boolean;
   onClose: () => void;
-  snapshot: any;
+  snapshot?: Partial<Recipe> | null;
   date: string;
   rating?: number;
   notes?: string;
 }
 
-const StepImageCarousel = ({ step }: { step: any }) => {
+const StepImageCarousel = ({ step }: { step: Step }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   
   const scroll = (direction: 'left' | 'right') => {
@@ -23,7 +24,7 @@ const StepImageCarousel = ({ step }: { step: any }) => {
     }
   };
 
-  const images = step.images?.length > 0 ? step.images : (step.image_url ? [step.image_url] : []);
+  const images = (step.images && step.images.length > 0) ? step.images : (step.image_url ? [step.image_url] : []);
   if (images.length === 0) return null;
 
   return (
@@ -190,7 +191,7 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
                     <div className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider mb-1 flex items-center gap-1.5">
                       <Info className="w-3.5 h-3.5" /> Ghi chú công thức
                     </div>
-                    <div dangerouslySetInnerHTML={{ __html: snapshot.notes }} />
+                    <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(snapshot.notes) }} />
                   </div>
                 )}
               </div>
@@ -202,7 +203,7 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
                   icon={<Carrot className="w-5 h-5 text-success" />} 
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {snapshot.ingredients?.map((ing: any, idx: number) => (
+                  {snapshot.ingredients?.map((ing: RecipeIngredient, idx: number) => (
                     <div key={idx} className="flex justify-between items-center py-2.5 px-3.5 bg-default-100/60 dark:bg-content2/60 rounded-xl border border-divider/30">
                       <span className="font-medium text-sm text-foreground">{ing.name}</span>
                       <span className="text-primary font-bold text-sm shrink-0 ml-2">{ing.quantity} {ing.unit}</span>
@@ -221,7 +222,7 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
                   icon={<ChefHat className="w-5 h-5 text-primary" />} 
                 />
                 <div className="flex flex-col gap-4">
-                  {snapshot.steps?.map((step: any, idx: number) => (
+                  {snapshot.steps?.map((step: Step, idx: number) => (
                     <div key={idx} className="flex gap-3">
                       <div className="w-7 h-7 rounded-full bg-primary/15 dark:bg-primary/25 text-primary dark:text-primary-300 border border-primary/20 font-bold flex items-center justify-center shrink-0 text-xs shadow-2xs mt-0.5">
                         {idx + 1}
@@ -229,7 +230,7 @@ export function RecipeSnapshotModal({ isOpen, onClose, snapshot, date, rating, n
                       <div className="flex flex-col gap-2 flex-1 min-w-0">
                         <div 
                           className="text-foreground text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-0.5"
-                          dangerouslySetInnerHTML={{ __html: step.instruction }}
+                          dangerouslySetInnerHTML={{ __html: sanitizeHtml(step.instruction) }}
                         />
                         <StepImageCarousel step={step} />
                       </div>

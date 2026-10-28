@@ -17,12 +17,15 @@ import { RecipeCard } from '../list/RecipeCard';
 import { useRecipeStore } from '../../../store/useRecipeStore';
 import { useTipStore } from '../../../store/useTipStore';
 
+const EMPTY_RELATED: NonNullable<FormValues['related_recipes']> = [];
+const EMPTY_TIPS: NonNullable<FormValues['linked_tips']> = [];
+
 export function RelatedRecipesSection() {
   const { watch, setValue } = useFormContext<FormValues>();
   const { recipes, fetchRecipes } = useRecipeStore();
   const { tips, fetchTips } = useTipStore();
-  const relatedRecipes = watch('related_recipes') || [];
-  const linkedTips = watch('linked_tips') || [];
+  const relatedRecipes = watch('related_recipes') ?? EMPTY_RELATED;
+  const linkedTips = watch('linked_tips') ?? EMPTY_TIPS;
 
   const [searchValue, setSearchValue] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'recipes' | 'tips'>('all');

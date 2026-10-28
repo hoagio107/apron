@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { Button } from '@/ui';
-import { useTranslation } from 'react-i18next';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@/ui';
 import { Lightbulb, Edit, Trash2, MoreVertical } from 'lucide-react';
 import type { Tip } from '@apron/core';
-import { TIP_CATEGORIES } from '@apron/core';
+import { TIP_CATEGORIES, sanitizeHtml } from '@apron/core';
 import { formatDistanceToNow } from 'date-fns';
-import { vi, enUS } from 'date-fns/locale';
+import { vi } from 'date-fns/locale';
 import { ImageManager } from '../../lib/image-manager';
 
 interface TipCardProps {
@@ -20,7 +19,6 @@ interface TipCardProps {
 }
 
 export function TipCard({ tip, onClick, onEdit, onDelete, isSelected, onSelect, selectable }: TipCardProps) {
-  const { t, i18n } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const category = TIP_CATEGORIES.find(c => c.id === tip.category_id);
   
@@ -110,34 +108,34 @@ export function TipCard({ tip, onClick, onEdit, onDelete, isSelected, onSelect, 
       </div>
 
       {/* Content Area */}
-      <div className="relative z-10 flex flex-col justify-end h-full p-5 text-white">
+      <div className="relative z-10 flex flex-col justify-end h-full p-4 text-white">
         
-        <h3 className="font-bold text-xl text-left line-clamp-2 leading-tight mb-2 drop-shadow-md">
+        <h3 className="font-bold text-base sm:text-lg text-left line-clamp-2 leading-snug mb-1.5 drop-shadow-md">
           {tip.title}
         </h3>
         
         {/* WYSIWYG Preview */}
         <div 
-          className="text-sm text-white/80 line-clamp-2 text-left mb-4 prose prose-invert prose-sm max-w-none prose-p:my-0 prose-headings:my-0"
-          dangerouslySetInnerHTML={{ __html: tip.content }}
+          className="text-xs sm:text-sm text-white/80 line-clamp-2 text-left mb-3 prose prose-invert prose-sm max-w-none prose-p:my-0 prose-headings:my-0"
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(tip.content) }}
         />
 
         {/* Badges */}
-        <div className="flex flex-wrap items-center gap-2 mb-5">
+        <div className="flex flex-wrap items-center gap-1.5 mb-3.5">
           {category && (
-            <span className="text-[10px] font-medium tracking-wide px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/10 flex items-center gap-1.5">
+            <span className="text-[10px] font-medium tracking-wide px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/10 flex items-center gap-1.5">
               <span className={`w-1.5 h-1.5 rounded-full ${category.color.replace('bg-', 'bg-').replace('text-', 'bg-')}`}></span>
               {category.name}
             </span>
           )}
           
-          <span className="text-[10px] font-medium tracking-wide px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/10">
+          <span className="text-[10px] font-medium tracking-wide px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/10">
             {tip.created_at ? formatDistanceToNow(new Date(tip.created_at), { addSuffix: true, locale: vi }) : ''}
           </span>
         </div>
         
         <Button 
-          className="w-full bg-white/95 text-black font-semibold rounded-full hover:bg-white"
+          className="w-full bg-white/95 text-black font-semibold rounded-full hover:bg-white text-sm"
           size="md"
           onPress={handleClick}
         >

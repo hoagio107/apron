@@ -27,12 +27,7 @@ export function FileUploader({ value = [], onChange, label = "Kéo thả file v�
       const pendingId = newPending[i].id;
       
       try {
-        // Simulate progress for UI feedback
-        for (let p = 10; p <= 90; p += 20) {
-          setPendingUploads(prev => prev.map(u => u.id === pendingId ? { ...u, progress: p } : u));
-          await new Promise(r => setTimeout(r, 100));
-        }
-
+        setPendingUploads(prev => prev.map(u => u.id === pendingId ? { ...u, progress: 50 } : u));
         const path = await FileManager.saveAttachment(file);
         currentUrls = [...currentUrls, path];
         
